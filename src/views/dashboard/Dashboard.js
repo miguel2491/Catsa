@@ -1,4 +1,4 @@
-import React from 'react'
+import React, {useRef, useState, useEffect} from 'react'
 import classNames from 'classnames'
 
 import {
@@ -18,6 +18,7 @@ import {
   CTableHead,
   CTableHeaderCell,
   CTableRow,
+  
 } from '@coreui/react'
 import CIcon from '@coreui/icons-react'
 import {
@@ -55,6 +56,7 @@ import WidgetsDropdown from '../widgets/WidgetsDropdown'
 import MainChart from './MainChart'
 
 const Dashboard = () => {
+ 
   const progressExample = [
     { title: 'Visits', value: '29.703 Users', percent: 40, color: 'success' },
     { title: 'Unique', value: '24.093 Users', percent: 20, color: 'info' },
@@ -175,7 +177,7 @@ const Dashboard = () => {
       activity: 'Last week',
     },
   ]
-
+  
   return (
     <>
       <WidgetsDropdown className="mb-4" />
