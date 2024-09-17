@@ -91,7 +91,7 @@ const Login = () => {
     }else{
 
       try{
-        let postData = 
+        const postData = 
         {
           usuario:username,
           pass:password
@@ -106,8 +106,9 @@ const Login = () => {
           }
         }
         //--------------------------------------------------
-        await axios.post(baseUrl+'Login/GetUsuario', postData,confi_ax)
+        await axios.post(baseUrl+'Login/GetUsuario', JSON.stringify({usuario:username, pass:password}),confi_ax)
         .then(response=>{
+          console.log(response);
           return response.data;
         }).then(response=>{
           console.log(response);
@@ -122,12 +123,25 @@ const Login = () => {
             //const json = ({"token":cookies.get('token'),"usuario":response.correo}) as AuthResponse;
             navigate('/panel');
           }else{    
-            setErrorResponse(json.body.error);
+            //setErrorResponse(json.body.error);
             addToast(exampleToast)
           }
         })
-        .catch(error=>{
-          console.log(error);
+        .catch(err=>{
+          if (err.response) {
+            // El servidor respondió con un código de estado fuera del rango de 2xx
+            console.error('Error de Respuesta:', err.response.data);
+            addToast(exampleToast)
+            //setError(`Error: ${err.response.status} - ${err.response.data.message || err.response.statusText}`);
+          } else if (err.request) {
+            // La solicitud fue realizada pero no se recibió respuesta
+            console.error('Error de Solicitud:', err.request);
+            //setError('Error: No se recibió respuesta del servidor.');
+          } else {
+            // Algo sucedió al configurar la solicitud
+            console.error('Error:', err.message);
+            //setError(`Error: ${err.message}`);
+          }
           //cookies.remove('token', {path: '/'});
         })    
       } catch(error){
