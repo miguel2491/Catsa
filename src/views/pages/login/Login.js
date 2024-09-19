@@ -33,6 +33,7 @@ const Login = () => {
   const cookies = new Cookies();
   const navigate = useNavigate();
   const baseUrl="http://apicatsa.catsaconcretos.mx:2543/api/";
+  const baseUrl2="http://localhost:2548/api/";
   useEffect(()=>{
     if(cookies.get('token') != undefined && cookies.get('idUsuario') != undefined)
     {
@@ -62,7 +63,6 @@ const Login = () => {
         return response.data;
       }).then(response=>{
         cookies.set('token', response, {path: '/'});
-        console.log(response);
       })
       .catch(error=>{
         console.log(error);
@@ -117,10 +117,7 @@ const Login = () => {
             obj = JSON.parse(obj);
             console.log(obj);
             cookies.set('idUsuario', response.id, {path: '/'});
-            //cookies.set('nombre', nombre, {path: '/'});
-            //cookies.set('usuario', response.correo, {path: '/'});
-            //cookies.set('rol', response.id_rol, {path: '/'});
-            //const json = ({"token":cookies.get('token'),"usuario":response.correo}) as AuthResponse;
+            getInfoUser(response.id);
             navigate('/panel');
           }else{    
             //setErrorResponse(json.body.error);
@@ -147,9 +144,45 @@ const Login = () => {
       } catch(error){
         console.log(error);
       }
-      
     }
     
+  }
+  async function getInfoUser(id) {
+    try{
+      let confi_ax = 
+      {
+        headers:
+        {
+          'Cache-Control': 'no-cache',
+          'Content-Type': 'application/json',
+          "Authorization": "Bearer "+cookies.get('token'),
+        }
+      }
+      //--------------------------------------------------
+      await axios.get(baseUrl+'Login/GetUserRol/'+id,confi_ax)
+      .then(response=>{
+        return response.data;
+      }).then(response=>{
+        cookies.set('roles', JSON.stringify(response), {path: '/'});
+        navigate('/panel');
+      })
+      .catch(err=>{
+        if (err.response) {
+          // El servidor respondió con un código de estado fuera del rango de 2xx
+          console.error('Error de Respuesta:', err.response.data);
+          //setError(`Error: ${err.response.status} - ${err.response.data.message || err.response.statusText}`);
+        } else if (err.request) {
+          // La solicitud fue realizada pero no se recibió respuesta
+          //setError('Error: No se recibió respuesta del servidor.');
+        } else {
+          // Algo sucedió al configurar la solicitud
+          console.error('Error:', err.message);
+          //setError(`Error: ${err.message}`);
+        }
+      })    
+    } catch(error){
+      console.log(error);
+    }
   }
   const exampleToast = (
     <CToast title="CoreUI for React.js">
