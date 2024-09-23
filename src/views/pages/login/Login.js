@@ -117,6 +117,7 @@ const Login = () => {
             obj = JSON.parse(obj);
             console.log(obj);
             cookies.set('idUsuario', response.id, {path: '/'});
+            cookies.set('Usuario', username, {path: '/'});
             getInfoUser(response.id);
             navigate('/panel');
           }else{    

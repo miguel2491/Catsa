@@ -21,10 +21,23 @@ import {
   cilUser,
 } from '@coreui/icons'
 import CIcon from '@coreui/icons-react'
-
+import Cookies from 'universal-cookie';
+import { Navigate, useNavigate } from "react-router-dom";
 import avatar8 from './../../assets/images/avatars/logo.png'
 
 const AppHeaderDropdown = () => {
+  const cookies = new Cookies();
+const navigate = useNavigate();
+
+function cerrarSesion(){
+  cookies.remove('idUsuario');
+  cookies.remove('menus');
+  cookies.remove('roles');
+  cookies.remove('SubMenus');
+  cookies.remove('token');
+  cookies.remove('Usuario');
+  navigate('/login');
+}
   return (
     <CDropdown variant="nav-item">
       <CDropdownToggle placement="bottom-end" className="py-0 pe-0" caret={false}>
@@ -55,7 +68,7 @@ const AppHeaderDropdown = () => {
           </CBadge>
         </CDropdownItem>
         <CDropdownDivider />
-        <CDropdownItem href="/login/cerrarSesion">
+        <CDropdownItem onClick={cerrarSesion}>
           <CIcon icon={cilLockLocked} className="me-2" />
           Cerrar Sesión
         </CDropdownItem>
