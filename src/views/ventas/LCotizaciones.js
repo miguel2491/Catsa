@@ -36,11 +36,11 @@ async function GetCotizaciones(){
       //=======================================================
       await axios.get(baseUrl+'Ventas/GetCotizaciones',confi_ax)
       .then(response=>{
-        console.log(response.data);
+        //console.log(response.data);
         //cookies.set('menus', JSON.stringify(response), {path: '/'});
         return response.data;
       }).then(response=>{
-        console.log("=>");
+        //console.log("=>");
       })
       .catch(err=>{
         if (err.response) {
@@ -66,6 +66,10 @@ const LCotizacion = () => {
   const [plantasSel , setPlantas] = useState('');
   const [vFechaI, setFechaIni] = useState(null);
   const [vFcaF, setFechaFin] = useState(null);
+  const [posts, setPosts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
   const opcionesFca = {
     year: 'numeric', // '2-digit' para el año en dos dígitos
     month: '2-digit',   // 'numeric', '2-digit', 'short', 'long', 'narrow'
@@ -73,7 +77,8 @@ const LCotizacion = () => {
   };
 
   useEffect(()=>{    
-        console.log(plantasSel, vFechaI, vFcaF);
+    console.log(plantasSel, vFechaI, vFcaF);
+  
   });
   const mCambio = (event) => {
     setPlantas(event.target.value);
@@ -85,6 +90,7 @@ const LCotizacion = () => {
   const mFcaF = (fcaF) => {
     setFechaFin(fcaF.toLocaleDateString('en-US',opcionesFca));
   };
+  
   function GetCotizaciones()
   {
     try{
@@ -101,22 +107,16 @@ const LCotizacion = () => {
       let auxFcaI = fcaIni[2]+"-"+fcaIni[0]+"-"+fcaIni[1];
       const fcaFin = vFcaF.split('/');
       let auxFcaF = fcaFin[2]+"-"+fcaFin[0]+"-"+fcaFin[1];
-      console.log(auxFcaF);
       //--------------------------------------------------
       axios.get(baseUrl+'Comercial/GetCotizaciones/'+auxFcaI+","+auxFcaF+","+cookies.get('Usuario')+","+plantasSel,confi_ax)
       .then(response=>{
-        console.log(response);
+        setPosts(response)
         return response.data;
       }).then(response=>{
-        console.log(response);
         var obj = JSON.stringify(response);
         if(obj.length>0){
           obj = JSON.parse(obj);
-          console.log(obj);
-          cookies.set('idUsuario', response.id, {path: '/'});
-          cookies.set('Usuario', username, {path: '/'});
-          getInfoUser(response.id);
-          navigate('/panel');
+          setPosts(response)
         }else{    
           //setErrorResponse(json.body.error);
           addToast(exampleToast)
@@ -166,7 +166,7 @@ const LCotizacion = () => {
         </CCol>
       </CRow>
     </CContainer>
-    <TabulatorP titulo={'Cotizaciones'} />
+    <TabulatorP titulo={'Cotizaciones'} posts={posts} />
     </>
   )
 }

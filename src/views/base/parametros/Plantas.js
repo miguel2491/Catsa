@@ -18,7 +18,7 @@ const Plantas = ({plantasSel, mCambio}) => {
         if(cookies.get('plantas') != null)
             {
                 var obj = cookies.get('plantas');
-                obj = obj.data;
+                obj = obj;
                 if(ap.length <= 0)
                 {
                     for(var x = 0; x < obj.length; x++)
@@ -48,9 +48,10 @@ const Plantas = ({plantasSel, mCambio}) => {
                             }
                           }
                           //=======================================================
-                          axios.get(baseUrl2+'Administracion/GetPlantas/'+cookies.get('Usuario'),confi_ax)
+                          axios.get(baseUrl+'Administracion/GetPlantas/'+cookies.get('Usuario'),confi_ax)
                           .then(response=>{
-                            cookies.set('plantas', JSON.stringify(response), {path: '/'});
+                            console.log(response.data);
+                            cookies.set('plantas', JSON.stringify(response.data), {path: '/'});
                             return response.data;
                           }).then(response=>{
                             console.log("=>");
