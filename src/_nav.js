@@ -42,7 +42,7 @@ async function Menus(){
         cookies.set('menus', JSON.stringify(response), {path: '/'});
         return response.data;
       }).then(response=>{
-        console.log("=>");
+        //console.log("=>");
       })
       .catch(err=>{
         if (err.response) {
@@ -74,7 +74,6 @@ async function setMenus(){
       })
       await SubMenus(obj.data[x].mnuId);
     }
-    console.log(nav_);
 }
 async function SubMenus(idMnu){
   try{
