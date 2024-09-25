@@ -34,6 +34,14 @@ const LPreCotizacion = () => {
     month: '2-digit',   // 'numeric', '2-digit', 'short', 'long', 'narrow'
     day: '2-digit'   // 'numeric', '2-digit'
   };
+  useEffect(()=>{    
+    if(plantasSel.length >0 && vFechaI.length > 0 && vFcaF.length > 0 && posts.length == 0)
+    {
+      console.log(plantasSel, vFechaI, vFcaF, posts);
+      GetPreCotizaciones();
+    }
+    
+  });
   const mCambio = (event) => {
     setPlantas(event.target.value);
     
@@ -44,7 +52,65 @@ const LPreCotizacion = () => {
   const mFcaF = (fcaF) => {
     setFechaFin(fcaF.toLocaleDateString('en-US',opcionesFca));
   };
-  
+  async function GetPreCotizaciones()
+  {
+    try{
+      let confi_ax = 
+      {
+        headers:
+        {
+          'Cache-Control': 'no-cache',
+          'Content-Type': 'application/json',
+          "Authorization": "Bearer "+cookies.get('token'),
+        }
+      }
+      const fcaIni = vFechaI.split('/');
+      let auxFcaI = fcaIni[2]+"-"+fcaIni[0]+"-"+fcaIni[1];
+      const fcaFin = vFcaF.split('/');
+      let auxFcaF = fcaFin[2]+"-"+fcaFin[0]+"-"+fcaFin[1];
+      if(plantasSel.length > 0){
+      //--------------------------------------------------
+        axios.get(baseUrl+'Comercial/GetPreCotizaciones/'+auxFcaI+","+auxFcaF+","+cookies.get('Usuario')+","+plantasSel,confi_ax)
+        .then(response=>{
+          setPosts(response)
+          return response.data;
+        }).then(response=>{
+          var obj = JSON.stringify(response);
+          if(obj.length>0){
+            obj = JSON.parse(obj);
+            const filteredData = obj.filter(item =>
+              item.IdPlanta.includes(plantasSel)
+            );
+            console.log(filteredData)
+            setPosts(filteredData)
+          }else{    
+            //setErrorResponse(json.body.error);
+            addToast(exampleToast)
+          }
+        })
+        .catch(err=>{
+          if (err.response) {
+            // El servidor respondió con un código de estado fuera del rango de 2xx
+            console.error('Error de Respuesta:', err.response.data);
+            addToast(exampleToast)
+            //setError(`Error: ${err.response.status} - ${err.response.data.message || err.response.statusText}`);
+          } else if (err.request) {
+            // La solicitud fue realizada pero no se recibió respuesta
+            console.error('Error de Solicitud:', err.request);
+            //setError('Error: No se recibió respuesta del servidor.');
+          } else {
+            // Algo sucedió al configurar la solicitud
+            console.error('Error:', err.message);
+            //setError(`Error: ${err.message}`);
+          }
+          //cookies.remove('token', {path: '/'});
+        })
+      }
+      //=============================================================================================================================  
+    } catch(error){
+      console.log(error);
+    }
+  }
   return (
     <>
       <CModal titulo={"MENSAJE"} />
