@@ -179,6 +179,7 @@ const LCotizacion = () => {
     <>
     <CToaster ref={toaster} push={toast} placement="top-end" />
     <CContainer fluid>
+      <h1>Cotizaciones</h1>
       <CRow>
         <CCol sm="auto">
           <Plantas  

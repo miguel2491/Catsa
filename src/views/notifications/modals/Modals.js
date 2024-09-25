@@ -17,12 +17,12 @@ import {
 } from '@coreui/react'
 import { DocsExample } from 'src/components'
 
-const LiveDemo = () => {
+const LiveDemo = ({titulo}) => {
   const [visible, setVisible] = useState(false)
   return (
     <>
       <CButton color="primary" onClick={() => setVisible(!visible)}>
-        Launch demo modal
+        {titulo}
       </CButton>
       <CModal visible={visible} onClose={() => setVisible(false)}>
         <CModalHeader>

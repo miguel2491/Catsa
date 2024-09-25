@@ -6,23 +6,36 @@ import { ReactTabulator } from 'react-tabulator';
 
 const TabulatorP = ({titulo, posts}) => {
     const [data, setData] = useState([]);
-    const columnas = [
-      { title: "Planta", field: "Planta", width: 100, headerFilter:"input" },
-      { title: "No. Cotización", field: "IdCotizacion", width: 100, headerFilter:"input" },
-      { title: "Descargar", field: "IdCotizacion", width: 50 },
-      { title: "Estatus", field: "Estatus", width: 100, headerFilter:"input" },
-      { title: "Vendedor", field: "Vendedor", width: 200, headerFilter:"input" },
-      { title: "Cliente", field: "Cliente", width: 100, headerFilter:"input" },
-      { title: "Obra", field: "Obra", width: 100, headerFilter:"input" },
-      { title: "Dirección", field: "Direccion", width: 100 },
-      { title: "Contacto", field: "Contacto", width: 100 },
-      { title: "Fin Vigencia", field: "FinVigencia", width: 100 },
-      { title: "Seguimiento", field: "IdCotizacion", width: 100 },
-      { title: "Creo", field: "Creo", width: 100, headerFilter:"input" },
-      { title: "Actualizo", field: "Estatus", width: 100 },
-      { title: "Motivo", field: "Motivo", width: 100 },
-      { title: "Observación", field: "Observaciones", width: 300 }
-    ];
+    var columnas = [];
+    if(titulo == "PreCotizaciones"){
+      columnas = [
+        { title: "Planta", field: "Planta", width: 100, headerFilter:"input" },
+        { title: "No. Cotización", field: "IdCotizacion", width: 100, headerFilter:"input" },
+        { title: "Descargar", field: "IdCotizacion", width: 50 },
+        { title: "Estatus", field: "Estatus", width: 100, headerFilter:"input" },
+        { title: "Vendedor", field: "Vendedor", width: 200, headerFilter:"input" },
+        { title: "Cliente", field: "Cliente", width: 100, headerFilter:"input" },
+      ];
+    }else{
+      columnas = [
+        { title: "Planta", field: "Planta", width: 100, headerFilter:"input" },
+        { title: "No. Cotización", field: "IdCotizacion", width: 100, headerFilter:"input" },
+        { title: "Descargar", field: "IdCotizacion", width: 50 },
+        { title: "Estatus", field: "Estatus", width: 100, headerFilter:"input" },
+        { title: "Vendedor", field: "Vendedor", width: 200, headerFilter:"input" },
+        { title: "Cliente", field: "Cliente", width: 100, headerFilter:"input" },
+        { title: "Obra", field: "Obra", width: 100, headerFilter:"input" },
+        { title: "Dirección", field: "Direccion", width: 100 },
+        { title: "Contacto", field: "Contacto", width: 100 },
+        { title: "Fin Vigencia", field: "FinVigencia", width: 100 },
+        { title: "Seguimiento", field: "IdCotizacion", width: 100 },
+        { title: "Creo", field: "Creo", width: 100, headerFilter:"input" },
+        { title: "Actualizo", field: "Estatus", width: 100 },
+        { title: "Motivo", field: "Motivo", width: 100 },
+        { title: "Observación", field: "Observaciones", width: 300 }
+      ];
+    }
+    
     
     useEffect(()=>{
       const fetchData = () => {
@@ -56,7 +69,7 @@ const TabulatorP = ({titulo, posts}) => {
     }
     return (
       <div>
-        <p>{titulo}</p>
+        <br />
         <ReactTabulator 
           columns={columnas}
           layout={"fitData"}
