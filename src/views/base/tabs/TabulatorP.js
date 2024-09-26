@@ -1,17 +1,12 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, forwardRef } from 'react';
 import 'react-tabulator/lib/styles.css';
 import 'react-tabulator/lib/css/tabulator.min.css';
 import { ReactTabulator } from 'react-tabulator';
-
-// Componente de contenedor para ReactTabulator
-const TabulatorContainer = React.forwardRef((props, ref) => (
-  <ReactTabulator ref={ref} {...props} />
-));
+import * as XLSX from 'xlsx';
 
 const TabulatorP = ({ titulo, posts }) => {
   const [data, setData] = useState([]);
   const [totalRecords, setTotalRecords] = useState(0);
-  const tableRef = useRef(null);
 
   const columnas = titulo === "PreCotizaciones"
     ? [
@@ -58,20 +53,20 @@ const TabulatorP = ({ titulo, posts }) => {
   };
 
   const handleDownload = () => {
-    const table = tableRef.current?.getTable();
-    if (table) {
-      table.download("csv", "data.csv");
-    } else {
-      console.error("La tabla no está disponible.");
-    }
+    console.log(data);
+    const ws = XLSX.utils.json_to_sheet(data); // Convertir a hoja de Excel
+    const wb = XLSX.utils.book_new(); // Crear un nuevo libro
+    XLSX.utils.book_append_sheet(wb, ws, "Datos"); // Añadir la hoja al libro
+
+    // Generar el archivo Excel
+    XLSX.writeFile(wb, titulo+".xlsx");
   };
 
   return (
     <div>
       <br />
-      <button onClick={handleDownload}>Descargar CSV</button>
-      <TabulatorContainer
-        ref={tableRef}
+      <button onClick={handleDownload}>Descargar</button>
+      <ReactTabulator
         columns={columnas}
         data={data}
         options={options}

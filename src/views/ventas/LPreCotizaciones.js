@@ -8,10 +8,6 @@ import {
   CCol,
   CModal
 } from '@coreui/react'
-import CIcon from '@coreui/icons-react'
-import {
-  cibCcAmex,
-} from '@coreui/icons'
 
 import TabulatorG from '../base/tabs/TabulatorP'
 import Plantas from '../base/parametros/Plantas'
@@ -81,7 +77,6 @@ const LPreCotizacion = () => {
             const filteredData = obj.filter(item =>
               item.IdPlanta.includes(plantasSel)
             );
-            console.log(filteredData)
             setPosts(filteredData)
           }else{    
             //setErrorResponse(json.body.error);

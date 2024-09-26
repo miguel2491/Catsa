@@ -126,7 +126,10 @@ const LCotizacion = () => {
           var obj = JSON.stringify(response);
           if(obj.length>0){
             obj = JSON.parse(obj);
-            setPosts(response)
+            const filteredData = obj.filter(item =>
+              item.IdPlanta.includes(plantasSel)
+            );
+            setPosts(filteredData)
           }else{    
             //setErrorResponse(json.body.error);
             addToast(exampleToast)
