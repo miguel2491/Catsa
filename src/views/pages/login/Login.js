@@ -23,18 +23,32 @@ import CIcon from '@coreui/icons-react'
 import { cilLockLocked, cilUser } from '@coreui/icons'
 import Cookies from 'universal-cookie';
 import axios from 'axios';
+import Modal from 'react-modal'
+import './login.css'
+import log from 'src/assets/images/avatars/logo.png'
+
+Modal.setAppElement('#root');
 
 const Login = () => {
 //export default function Login(){
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");  
   const [toast, addToast] = useState(0)
+  const [modalIsOpen, setModalIsOpen] = useState(false);
+  const [isSpinning, setIsSpinning] = useState(false);
   const toaster = useRef()
   const cookies = new Cookies();
   const navigate = useNavigate();
   const baseUrl="http://apicatsa.catsaconcretos.mx:2543/api/";
   const baseUrl2="http://localhost:2548/api/";
+
+  const handleClick = () => {
+    setIsSpinning(!isSpinning);
+  };
+
   useEffect(()=>{
+    handleClick();
+    openModal();
     if(cookies.get('token') != undefined && cookies.get('idUsuario') != undefined)
     {
       navigate('/panel');
@@ -119,7 +133,8 @@ const Login = () => {
             cookies.set('idUsuario', response.id, {path: '/'});
             cookies.set('Usuario', username, {path: '/'});
             getInfoUser(response.id);
-            navigate('/panel');
+            //navigate('/panel');
+            openModal();
           }else{    
             //setErrorResponse(json.body.error);
             addToast(exampleToast)
@@ -165,7 +180,7 @@ const Login = () => {
         return response.data;
       }).then(response=>{
         cookies.set('roles', JSON.stringify(response), {path: '/'});
-        navigate('/panel');
+        //navigate('/panel');
       })
       .catch(err=>{
         if (err.response) {
@@ -205,8 +220,10 @@ const Login = () => {
       <CToastBody>Hello, world! This is a toast message.</CToastBody>
     </CToast>
   )
+  const openModal = () => setModalIsOpen(true);
+  const closeModal = () => setModalIsOpen(false);
   return (
-    <div className="bg-body-tertiary min-vh-100 d-flex flex-row align-items-center">
+    <div className="bg-body-tertiary min-vh-100 d-flex flex-row align-items-center" style={styles.container}>
        <CToaster ref={toaster} push={toast} placement="top-end" />
       <CContainer>
         <CRow className="justify-content-center">
@@ -278,8 +295,38 @@ const Login = () => {
           </CCol>
         </CRow>
       </CContainer>
+      <Modal
+        isOpen={modalIsOpen}
+        onRequestClose={closeModal}
+        contentLabel="Ejemplo de Modal"
+        style={customStyles}
+      >
+        <img src={log} width={80} className={`imgLoad ${isSpinning ? 'spin' : ''}`} />
+        CARGANDO...</Modal>
     </div>
+    
   )
 }
+
+const styles = {
+  container: {
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    height: '10vh',
+  },
+};
+
+const customStyles = {
+  content: {
+    top: '50%',
+    left: '50%',
+    right: 'auto',
+    bottom: 'auto',
+    marginRight: '-20%',
+    transform: 'translate(-50%, -50%)',
+    color:'black'
+  },
+};
 
 export default Login

@@ -1,0 +1,10 @@
+
+.imgLoad{
+    width: 200px; /* Ajusta el tamaño según sea necesario */
+    height: 200px;
+    transition: transform 1s;
+}
+
+.spin {
+    transform: rotate(360deg); /* Giro de 360 grados */
+  }
