@@ -7,24 +7,24 @@ import {
   CContainer,
   CRow,
   CCol,
-  CModal
+  CButton
 } from '@coreui/react'
 
 import TabulatorG from '../base/tabs/TabulatorP'
 import Plantas from '../base/parametros/Plantas'
 import FechaI from '../base/parametros/FechaInicio'
 import FechaF from '../base/parametros/FechaFinal'
+import {CIcon} from '@coreui/icons-react'
+import { cilSearch } from '@coreui/icons';
 
 const cookies = new Cookies();
 const baseUrl="http://apicatsa.catsaconcretos.mx:2543/api/";
 const baseUrl2="http://localhost:2548/api/";
 
-const LPreCotizacion = () => {
+const LPedidos = () => {
   const [plantasSel , setPlantas] = useState('');
   const [vFechaI, setFechaIni] = useState(null);
   const [vFcaF, setFechaFin] = useState(null);
-  const [toast, addToast] = useState(0)
-  const toaster = useRef()
   const [posts, setPosts] = useState([]);
   const opcionesFca = {
     year: 'numeric', // '2-digit' para el año en dos dígitos
@@ -32,17 +32,14 @@ const LPreCotizacion = () => {
     day: '2-digit'   // 'numeric', '2-digit'
   };
   useEffect(()=>{    
-    console.log(vFechaI, vFcaF);
-    if(vFechaI===null)
+    if(vFechaI!=null)
       {
         //Swal.fire("INFO!", "Buen Trabajo!", "danger");
-      }else{
         if(plantasSel.length >0 && vFechaI.length > 0 && vFcaF.length > 0 && posts.length == 0)
-          {
-            console.log(plantasSel, vFechaI, vFcaF, posts);
-            GetPreCotizaciones();
-          }
-      }
+            {
+              GetPedidos();
+            }
+        }
   });
   const mCambio = (event) => {
     setPlantas(event.target.value);
@@ -54,7 +51,11 @@ const LPreCotizacion = () => {
   const mFcaF = (fcaF) => {
     setFechaFin(fcaF.toLocaleDateString('en-US',opcionesFca));
   };
-  async function GetPreCotizaciones()
+  const sendGetPedidos = () =>{
+    console.log(plantasSel, vFechaI, vFcaF)
+    GetPedidos(plantasSel, vFechaI, vFcaF)
+}
+  async function GetPedidos(planta, fechaI, fechaF)
   {
     if(vFechaI != "" && vFcaF != "")
     {
@@ -74,7 +75,7 @@ const LPreCotizacion = () => {
         let auxFcaF = fcaFin[2]+"-"+fcaFin[0]+"-"+fcaFin[1];
         if(plantasSel.length > 0){
         //--------------------------------------------------
-          axios.get(baseUrl+'Comercial/GetPreCotizaciones/'+auxFcaI+","+auxFcaF+","+cookies.get('Usuario')+","+plantasSel,confi_ax)
+          axios.get(baseUrl2+'Logistica/GetPedidos/'+plantasSel+','+auxFcaI+","+auxFcaF+","+cookies.get('Usuario'),confi_ax)
           .then(response=>{
             setPosts(response)
             return response.data;
@@ -82,13 +83,17 @@ const LPreCotizacion = () => {
             var obj = JSON.stringify(response);
             if(obj.length>0){
               obj = JSON.parse(obj);
-              const filteredData = obj.filter(item =>
-                item.IdPlanta.includes(plantasSel)
-              );
-              setPosts(filteredData)
+              console.log(obj)
+              setPosts(obj)
             }else{    
               //setErrorResponse(json.body.error);
-              addToast(exampleToast)
+              //Swal.fire("ERROR", json.body.error, "danger");
+              Swal.fire({
+                icon: "error",
+                title: "Oops...",
+                text: "Something went wrong!",
+                footer: '<a href="#">Why do I have this issue?</a>'
+              });
             }
           })
           .catch(err=>{
@@ -118,9 +123,8 @@ const LPreCotizacion = () => {
   }
   return (
     <>
-      <CModal titulo={"MENSAJE"} />
       <CContainer fluid>
-        <h1>PreCotizaciones</h1>
+        <h1>Pedidos</h1>
         <CRow>
           <CCol sm="auto">
             <FechaI 
@@ -140,11 +144,17 @@ const LPreCotizacion = () => {
               plantasSel={plantasSel}
             />
           </CCol>
+          <CCol sm="auto" className='mt-3'>
+            <CButton color='primary' onClick={sendGetPedidos}>
+                <CIcon icon={cilSearch} className="me-2" />
+                Realizar
+            </CButton>
+            </CCol>
         </CRow>
       </CContainer>
-      <TabulatorG titulo={'PreCotizaciones'} posts={posts} />
+      <TabulatorG titulo={'Pedidos'} posts={posts} />
     </>
   )
 }
 
-export default LPreCotizacion
+export default LPedidos

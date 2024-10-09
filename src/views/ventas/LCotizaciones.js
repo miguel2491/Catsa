@@ -82,12 +82,13 @@ const LCotizacion = () => {
   };
 
   useEffect(()=>{    
-    if(plantasSel.length >0 && vFechaI.length > 0 && vFcaF.length > 0 && posts.length == 0)
-    {
-      console.log(plantasSel, vFechaI, vFcaF, posts);
-      GetCotizaciones();
+    if(vFechaI!=null){
+      if(plantasSel.length >0 && vFechaI.length > 0 && vFcaF.length > 0 && posts.length == 0)
+        {
+          console.log(plantasSel, vFechaI, vFcaF, posts);
+          GetCotizaciones();
+        }
     }
-    
   });
   const mCambio = (event) => {
     setPlantas(event.target.value);
@@ -185,12 +186,6 @@ const LCotizacion = () => {
       <h1>Cotizaciones</h1>
       <CRow>
         <CCol sm="auto">
-          <Plantas  
-            mCambio={mCambio}
-            plantasSel={plantasSel}
-          />
-        </CCol>
-        <CCol sm="auto">
           <FechaI 
             vFechaI={vFechaI} 
             cFechaI={cFechaI} 
@@ -199,6 +194,12 @@ const LCotizacion = () => {
           <FechaF 
             vFcaF={vFcaF} 
             mFcaF={mFcaF}
+          />
+        </CCol>
+        <CCol sm="auto">
+          <Plantas  
+            mCambio={mCambio}
+            plantasSel={plantasSel}
           />
         </CCol>
       </CRow>

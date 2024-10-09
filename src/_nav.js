@@ -10,6 +10,7 @@ import {
   cilCalculator,
   cilCalendar,
   cilCheck,
+  cilGlobeAlt
 } from '@coreui/icons'
 import { CNavGroup, CNavItem, CNavTitle } from '@coreui/react'
 import axios from 'axios';
@@ -164,8 +165,14 @@ async function SubMenus(idMnu){
         {
           component: CNavItem,
           name: 'Ver Pedidos',
-          to: '/base/accordion',
+          to: '/logistica/LPedidos',
           icon: <CIcon icon={cilCheck} customClassName="nav-icon" />,
+        },
+        {
+          component: CNavItem,
+          name: 'Pedidos en línea',
+          to: '/logistica/PLinea',
+          icon: <CIcon icon={cilGlobeAlt} customClassName="nav-icon" />,
         }
       ]
     },
@@ -188,16 +195,33 @@ async function SubMenus(idMnu){
     },
     {
       component: CNavGroup,
-      name: 'Buttons',
-      to: '/buttons',
+      name: 'Extras',
+      to: '/utils',
       icon: <CIcon icon={cilCursor} customClassName="nav-icon" />,
       items: [
         {
           component: CNavItem,
-          name: 'Buttons',
-          to: '/icons/coreui-icons',
+          name: 'PreCierres',
+          to: '/utils/PreCierres',
         }
       ],
-    }
+    },
+    {
+      component: CNavTitle,
+      name: 'REPORTES',
+    },
+    {
+      component: CNavGroup,
+      name: 'Calidad',
+      to: '/Calidad',
+      icon: <CIcon icon={cilUser} customClassName="nav-icon" />,
+      items: [
+        {
+          component: CNavItem,
+          name: 'Costos Productos',
+          to: '/reportes/CostosProductos',
+        }
+      ],
+    },
   ]
 export default _nav;

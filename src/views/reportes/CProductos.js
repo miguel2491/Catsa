@@ -7,24 +7,20 @@ import {
   CContainer,
   CRow,
   CCol,
-  CModal
+  CButton
 } from '@coreui/react'
 
 import TabulatorG from '../base/tabs/TabulatorP'
-import Plantas from '../base/parametros/Plantas'
-import FechaI from '../base/parametros/FechaInicio'
 import FechaF from '../base/parametros/FechaFinal'
+import {CIcon} from '@coreui/icons-react'
+import { cilSearch } from '@coreui/icons';
 
 const cookies = new Cookies();
 const baseUrl="http://apicatsa.catsaconcretos.mx:2543/api/";
 const baseUrl2="http://localhost:2548/api/";
 
-const LPreCotizacion = () => {
-  const [plantasSel , setPlantas] = useState('');
-  const [vFechaI, setFechaIni] = useState(null);
+const CProductos = () => {
   const [vFcaF, setFechaFin] = useState(null);
-  const [toast, addToast] = useState(0)
-  const toaster = useRef()
   const [posts, setPosts] = useState([]);
   const opcionesFca = {
     year: 'numeric', // '2-digit' para el año en dos dígitos
@@ -32,31 +28,24 @@ const LPreCotizacion = () => {
     day: '2-digit'   // 'numeric', '2-digit'
   };
   useEffect(()=>{    
-    console.log(vFechaI, vFcaF);
-    if(vFechaI===null)
+    if(vFcaF!=null)
       {
         //Swal.fire("INFO!", "Buen Trabajo!", "danger");
-      }else{
-        if(plantasSel.length >0 && vFechaI.length > 0 && vFcaF.length > 0 && posts.length == 0)
-          {
-            console.log(plantasSel, vFechaI, vFcaF, posts);
-            GetPreCotizaciones();
-          }
-      }
+        if(vFcaF.length > 0 && posts.length == 0)
+            {
+              GetRCProductos();
+            }
+        }
   });
-  const mCambio = (event) => {
-    setPlantas(event.target.value);
-    
-  };
-  const cFechaI = (fecha) => {
-    setFechaIni(fecha.toLocaleDateString('en-US',opcionesFca));
-  };
   const mFcaF = (fcaF) => {
     setFechaFin(fcaF.toLocaleDateString('en-US',opcionesFca));
   };
-  async function GetPreCotizaciones()
+  const sendGetRCP = () =>{
+    GetRCProductos(vFcaF)
+}
+  async function GetRCProductos(fechaF)
   {
-    if(vFechaI != "" && vFcaF != "")
+    if(vFcaF != "")
     {
       try{
         let confi_ax = 
@@ -68,28 +57,14 @@ const LPreCotizacion = () => {
             "Authorization": "Bearer "+cookies.get('token'),
           }
         }
-        const fcaIni = vFechaI.split('/');
-        let auxFcaI = fcaIni[2]+"-"+fcaIni[0]+"-"+fcaIni[1];
         const fcaFin = vFcaF.split('/');
         let auxFcaF = fcaFin[2]+"-"+fcaFin[0]+"-"+fcaFin[1];
-        if(plantasSel.length > 0){
         //--------------------------------------------------
-          axios.get(baseUrl+'Comercial/GetPreCotizaciones/'+auxFcaI+","+auxFcaF+","+cookies.get('Usuario')+","+plantasSel,confi_ax)
+          axios.get(baseUrl2+'Reportes/GetCostoProducto/'+auxFcaF,confi_ax)
           .then(response=>{
-            setPosts(response)
+            setPosts(response.data)
+            console.log(response.data);
             return response.data;
-          }).then(response=>{
-            var obj = JSON.stringify(response);
-            if(obj.length>0){
-              obj = JSON.parse(obj);
-              const filteredData = obj.filter(item =>
-                item.IdPlanta.includes(plantasSel)
-              );
-              setPosts(filteredData)
-            }else{    
-              //setErrorResponse(json.body.error);
-              addToast(exampleToast)
-            }
           })
           .catch(err=>{
             if (err.response) {
@@ -108,7 +83,7 @@ const LPreCotizacion = () => {
             }
             //cookies.remove('token', {path: '/'});
           })
-        }
+        
         //=============================================================================================================================  
       } catch(error){
         console.log(error);
@@ -118,33 +93,26 @@ const LPreCotizacion = () => {
   }
   return (
     <>
-      <CModal titulo={"MENSAJE"} />
       <CContainer fluid>
-        <h1>PreCotizaciones</h1>
+        <h1>Reporte Costos Productos</h1>
         <CRow>
-          <CCol sm="auto">
-            <FechaI 
-              vFechaI={vFechaI} 
-              cFechaI={cFechaI} 
-            />
-          </CCol>
           <CCol sm="auto">
             <FechaF 
               vFcaF={vFcaF} 
               mFcaF={mFcaF}
             />
           </CCol>
-          <CCol sm="auto">
-            <Plantas  
-              mCambio={mCambio}
-              plantasSel={plantasSel}
-            />
-          </CCol>
+          <CCol sm="auto" className='mt-3'>
+            <CButton color='primary' onClick={sendGetRCP}>
+                <CIcon icon={cilSearch} className="me-2" />
+                Realizar
+            </CButton>
+            </CCol>
         </CRow>
       </CContainer>
-      <TabulatorG titulo={'PreCotizaciones'} posts={posts} />
+      <TabulatorG titulo={'RCP'} posts={posts} />
     </>
   )
 }
 
-export default LPreCotizacion
+export default CProductos

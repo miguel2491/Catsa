@@ -8,6 +8,15 @@ const Typography = React.lazy(() => import('./views/theme/typography/Typography'
 const LCotizaciones = React.lazy(() => import('./views/ventas/LCotizaciones'))
 const LPreCotizaciones = React.lazy(() => import('./views/ventas/LPreCotizaciones'))
 const Cotizador = React.lazy(() => import('./views/ventas/Cotizador'))
+//LOGISTICA
+const LPedidos = React.lazy(() => import('./views/logistica/LPedidos'))
+const PLinea = React.lazy(() => import('./views/logistica/PLinea'))
+//REPORTES
+const CostosProductos = React.lazy(() => import('./views/reportes/CProductos'))
+
+// EXTRAS
+const PreCierre = React.lazy(() => import('./views/utils/PreCierre'))
+//==================================================================================================================================
 // Base
 const Accordion = React.lazy(() => import('./views/base/accordion/Accordion'))
 const Breadcrumbs = React.lazy(() => import('./views/base/breadcrumbs/Breadcrumbs'))
@@ -63,6 +72,9 @@ const routes = [
   { path: '/ventas/LCotizacion', name: 'Cotizaciones', element:LCotizaciones },
   { path: '/ventas/LPreCotizacion', name: 'PreCotizaciones', element:LPreCotizaciones },
   { path: '/ventas/Cotizador', name: 'Cotizador', element:Cotizador },
+  //LOGISTICA
+  { path: '/logistica/LPedidos', name: 'Pedidos', element:LPedidos },
+  { path: '/logistica/PLinea', name: 'Pedidos Linea', element:PLinea },
   // { path: '/panel', name: 'Panel', element: Dashboard },
   // { path: '/theme', name: 'Theme', element: Colors, exact: true },
   // { path: '/theme/colors', name: 'Colors', element: Colors },
@@ -82,10 +94,10 @@ const routes = [
   // { path: '/base/spinners', name: 'Spinners', element: Spinners },
   // { path: '/base/tabs', name: 'Tabs', element: Tabs },
   // { path: '/base/tooltips', name: 'Tooltips', element: Tooltips },
-  // { path: '/buttons', name: 'Buttons', element: Buttons, exact: true },
-  // { path: '/buttons/buttons', name: 'Buttons', element: Buttons },
-  // { path: '/buttons/dropdowns', name: 'Dropdowns', element: Dropdowns },
-  // { path: '/buttons/button-groups', name: 'Button Groups', element: ButtonGroups },
+  { path: '/buttons', name: 'Buttons', element: Buttons, exact: true },
+  { path: '/buttons/buttons', name: 'Buttons', element: Buttons },
+  { path: '/buttons/dropdowns', name: 'Dropdowns', element: Dropdowns },
+  { path: '/buttons/button-groups', name: 'Button Groups', element: ButtonGroups },
   // { path: '/charts', name: 'Charts', element: Charts },
    { path: '/forms', name: 'Forms', element: FormControl, exact: true },
    { path: '/forms/form-control', name: 'Form Control', element: FormControl },
@@ -106,6 +118,8 @@ const routes = [
   // { path: '/notifications/modals', name: 'Modals', element: Modals },
   // { path: '/notifications/toasts', name: 'Toasts', element: Toasts },
   // { path: '/widgets', name: 'Widgets', element: Widgets },
+  { path: '/reportes/CostosProductos', name: 'CostosProductos', element: CostosProductos },
+  { path: '/utils/PreCierres', name: 'PreCierres', element: PreCierre },
 ]
 
 export default routes

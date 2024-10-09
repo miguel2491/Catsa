@@ -133,7 +133,7 @@ const Login = () => {
             cookies.set('idUsuario', response.id, {path: '/'});
             cookies.set('Usuario', username, {path: '/'});
             getInfoUser(response.id);
-            //navigate('/panel');
+            navigate('/panel');
             openModal();
           }else{    
             //setErrorResponse(json.body.error);
