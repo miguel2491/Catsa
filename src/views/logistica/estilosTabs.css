@@ -1,0 +1,16 @@
+.warning{
+    background: red;
+    color:white;
+    border-color: red;
+    --cui-table-bg:darkred;
+}
+.success{
+    background: lightblue;
+    color:black !important;
+    border-color: lightblue;
+    --cui-table-bg:lightblue;
+}
+.table .success{
+    color:black !important
+}
+
