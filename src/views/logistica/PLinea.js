@@ -111,7 +111,7 @@ const PLinea = () => {
             let auxFcaI = fcaIni[2]+"-"+fcaIni[0]+"-"+fcaIni[1];
             if(plantasSel.length > 0){
                 //--------------------------------------------------
-                axios.get(baseUrl2+'Logistica/GetPLinea/'+plantasSel+','+auxFcaI,confi_ax)
+                axios.get(baseUrl+'Logistica/GetPLinea/'+plantasSel+','+auxFcaI,confi_ax)
                 .then(response=>{
                     var obj = response.data;//JSON.stringify(response.data);
                     if(obj.length>0){
@@ -168,7 +168,7 @@ const PLinea = () => {
                 let auxFcaI = fcaIni[2]+"-"+fcaIni[0]+"-"+fcaIni[1];
                 if(plantasSel.length > 0){
                     //--------------------------------------------------
-                    axios.get(baseUrl2+'Logistica/GetPLineaR/'+plantasSel+','+auxFcaI,confi_ax)
+                    axios.get(baseUrl+'Logistica/GetPLineaR/'+plantasSel+','+auxFcaI,confi_ax)
                     .then(response=>{
                         var obj = JSON.stringify(response.data);
                         if(obj.length>0){

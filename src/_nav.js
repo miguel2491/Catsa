@@ -203,6 +203,11 @@ async function SubMenus(idMnu){
           component: CNavItem,
           name: 'PreCierres',
           to: '/utils/PreCierres',
+        },
+        {
+          component: CNavItem,
+          name: 'INTERFAZ INTELISIS',
+          to: '/utils/InterfazIntelisis',
         }
       ],
     },
