@@ -17,6 +17,9 @@ const CostosProductos = React.lazy(() => import('./views/reportes/CProductos'))
 // EXTRAS
 const PreCierre = React.lazy(() => import('./views/utils/PreCierre'))
 const InterfazInt = React.lazy(() => import('./views/utils/InterfazInt'))
+const UpdateProd = React.lazy(() => import('./views/utils/UpdateProd'))
+const UpdateMB = React.lazy(() => import('./views/utils/UpdateMB'))
+
 //==================================================================================================================================
 // Base
 const Accordion = React.lazy(() => import('./views/base/accordion/Accordion'))
@@ -122,6 +125,8 @@ const routes = [
   { path: '/reportes/CostosProductos', name: 'CostosProductos', element: CostosProductos },
   { path: '/utils/PreCierres', name: 'PreCierres', element: PreCierre },
   { path: '/utils/InterfazInt', name: 'InterfazInt', element: InterfazInt },
+  { path: '/utils/UpdateProd', name: 'UpdateProd', element: UpdateProd },
+  { path: '/utils/UpdateMB', name: 'UpdateMB', element: UpdateMB },  
 ]
 
 export default routes

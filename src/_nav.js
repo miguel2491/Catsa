@@ -208,6 +208,16 @@ async function SubMenus(idMnu){
           component: CNavItem,
           name: 'INTERFAZ INTELISIS',
           to: '/utils/InterfazIntelisis',
+        },
+        {
+          component: CNavItem,
+          name: 'Actualizar Producción',
+          to: '/utils/UpdateProd',
+        },
+        {
+          component: CNavItem,
+          name: 'Actualizar MB',
+          to: '/utils/UpdateMB',
         }
       ],
     },

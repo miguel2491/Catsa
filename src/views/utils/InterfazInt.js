@@ -76,7 +76,7 @@ const InterfazInt = () => {
                     }
                 }
                 //------------------------------------------------------------------------------------------------------------------------------------------------------
-                await axios.get(baseUrl2+'Operaciones/SetPreCierreMensual/'+planta+','+mes+','+periodo, confi_ax)
+                await axios.get(baseUrl+'Operaciones/SetPreCierreMensual/'+planta+','+mes+','+periodo, confi_ax)
                 .then(response=>{
                     // console.log(response.data);
                     // var obj = response.data;

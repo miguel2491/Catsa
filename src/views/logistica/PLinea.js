@@ -52,7 +52,6 @@ const PLinea = () => {
     useEffect(()=>{    
         if(dPRemisiones.length > 0)
             {
-                console.log(dPRemisiones);
                 // Función para agrupar los datos
                 const sEnvios = () => {
                     const aux = [];
@@ -115,7 +114,6 @@ const PLinea = () => {
                 .then(response=>{
                     var obj = response.data;//JSON.stringify(response.data);
                     if(obj.length>0){
-                        console.log(response.data);
                         setPedidos(obj)
                         GetPRemisiones();
                     }else{    
@@ -168,7 +166,7 @@ const PLinea = () => {
                 let auxFcaI = fcaIni[2]+"-"+fcaIni[0]+"-"+fcaIni[1];
                 if(plantasSel.length > 0){
                     //--------------------------------------------------
-                    axios.get(baseUrl+'Logistica/GetPLineaR/'+plantasSel+','+auxFcaI,confi_ax)
+                    axios.get(baseUrl2+'Logistica/GetPLineaR/'+plantasSel+','+auxFcaI,confi_ax)
                     .then(response=>{
                         var obj = JSON.stringify(response.data);
                         if(obj.length>0){
@@ -205,10 +203,12 @@ const PLinea = () => {
         }
     }
     const getRPedido = (param, Tr, Dkm) =>{
+        console.log(dPRemisiones)
         const resultado_ = dPRemisiones.filter(item => item.IdPedido === param);
         setTr(Tr)
         setKm(Dkm)
         setPRSol(resultado_)
+        console.log(resultado_)
     }
     const formatDate = (dateString) => {
         const date = new Date(dateString);
@@ -242,11 +242,9 @@ const PLinea = () => {
     }, 0);
     const getHraSalida = (hraSalida) =>{
         const [horas, minutos] = hraSalida.split(":").map(Number);
-        console.log(horas, minutos);
         const totalMin = horas * 60 + minutos + 15;
         const n_hrs = Math.floor(totalMin / 60) % 24;
         const n_min = totalMin % 60;
-        console.log(totalMin);
         return `${String(n_hrs).padStart(2, '0')}:${String(n_min).padStart(2, '0')}`;
     }
     return (

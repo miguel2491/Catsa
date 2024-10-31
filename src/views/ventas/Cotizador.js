@@ -14,6 +14,7 @@ import {
   CFormSelect,
   CButton,
   CFormInput,
+  CInputGroup, 
   CFormCheck,
   CTable,
   CTableHead,
@@ -27,6 +28,8 @@ import {
   CModalBody,
   CModalFooter
 } from '@coreui/react'
+import {CIcon} from '@coreui/icons-react'
+import { cilSad, cilSearch } from '@coreui/icons'
 
 const cookies = new Cookies();
 const baseUrl="http://apicatsa.catsaconcretos.mx:2543/api/";
@@ -37,9 +40,62 @@ const animatedComponents = makeAnimated();
 const Step1 = ({ nextStep }) => {
   const [plantasSel , setPlantas] = useState('');
   const [vFechaI, setFechaIni] = useState(null);
+  const opcionesFca = {
+    year: 'numeric', // '2-digit' para el año en dos dígitos
+    month: '2-digit',   // 'numeric', '2-digit', 'short', 'long', 'narrow'
+    day: '2-digit'   // 'numeric', '2-digit'
+  };
   const mCambio = (event) => {
     setPlantas(event.target.value);
+    getPrecios(event.target.value);
   };
+  // APIS Usar
+  // GetPreciosCot
+  // GetCotizacion
+  // SetCotizacion
+  // GetCliente
+  // GetObra
+  // ?? GetProducto
+  async function getPrecios(planta)
+  {
+    console.log(planta);
+    try
+        {
+            let confi_ax = 
+                {
+                headers:
+                {
+                    'Cache-Control': 'no-cache',
+                    'Content-Type': 'application/json',
+                    "Authorization": "Bearer "+cookies.get('token'),
+                }
+            }
+            //------------------------------------------------------------------------------------------------------------------------------------------------------
+            await axios.get(baseUrl+'Administracion/GetCotizacionPrecios/'+planta, confi_ax)
+            .then(response=>{
+                console.log(response.data);
+                //Swal.fire("CORRECTO", "PARTE1", "success");
+                //return response.data;
+            })
+            .catch(err=>{
+                if (err.response) {
+                    // El servidor respondió con un código de estado fuera del rango de 2xx
+                    console.error('Error de Respuesta:', err.response.data);
+                } else if (err.request) {
+                    // La solicitud fue realizada pero no se recibió respuesta
+                    console.error('Error de Solicitud:', err.request);
+                } else {
+                    // Algo sucedió al configurar la solicitud
+                    console.error('Error:', err.message);
+                }
+            })    
+            //------------------------------------------------------------------------------------------------------------------------------------------------------
+        }
+        catch(error)
+        {
+            console.error(error);
+        }
+  }
   const cFechaI = (fecha) => {
     setFechaIni(fecha.toLocaleDateString('en-US',opcionesFca));
   };
@@ -47,16 +103,22 @@ const Step1 = ({ nextStep }) => {
     <div>
       <h2>Paso 1</h2>
       <CRow className='mt-2'>
-        <CCol xs={3}>
-          <label>N. Cotización</label>
+        <CCol xs={12} md={2} lg={2}>
+          <label>No. Cotización</label>
+          <CInputGroup className="mb-3">
+          <CFormInput placeholder="" aria-label="Example text with two button addons"/>
+            <CButton type="button" color="success" variant="outline">
+              <CIcon icon={cilSearch} className="me-2" />
+            </CButton>
+          </CInputGroup>
         </CCol>
-        <CCol xs={3}>
+        <CCol xs={12} md={4} lg={4}>
           <Plantas  
             mCambio={mCambio}
             plantasSel={plantasSel}
           />
         </CCol>
-        <CCol xs={3}>
+        <CCol xs={12} md={4} lg={4}>
           <FechaI 
               vFechaI={vFechaI} 
               cFechaI={cFechaI} 
@@ -64,24 +126,25 @@ const Step1 = ({ nextStep }) => {
         </CCol>
       </CRow>
       <CRow className='mt-2'>
-        <CCol xs={2}>
+        <CCol xs={4} md={2} lg={2}>
           <label>Datos</label>
           <p>Opción 1</p>
         </CCol>
-        <CCol xs={2}>
+        <CCol xs={4} md={2} lg={2}>
           <label>Fijos</label>
         
         </CCol>
-        <CCol xs={2}>
+        <CCol xs={4} md={2} lg={2}>
           <label>Corporativo</label>
         </CCol>
-        <CCol xs={2}>
+        <CCol xs={4} md={2} lg={2}>
           <label>MOP</label>
         </CCol>
-        <CCol xs={2}>
+        <CCol xs={4} md={4} lg={4}>
           <label>Costo de Diesel / Tiempo de Ciclo</label>
         </CCol>
       </CRow>
+      <hr />
       <CRow className='mt-2'>
         <CCol xs={2}>
           <label>Cliente</label>
