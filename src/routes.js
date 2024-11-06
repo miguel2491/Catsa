@@ -8,6 +8,8 @@ const Typography = React.lazy(() => import('./views/theme/typography/Typography'
 const LCotizaciones = React.lazy(() => import('./views/ventas/LCotizaciones'))
 const LPreCotizaciones = React.lazy(() => import('./views/ventas/LPreCotizaciones'))
 const Cotizador = React.lazy(() => import('./views/ventas/Cotizador'))
+//PRODUCCION
+const RCicat = React.lazy(() => import('./views/cicat/Resumen/Resumen'))
 //LOGISTICA
 const LPedidos = React.lazy(() => import('./views/logistica/LPedidos'))
 const PLinea = React.lazy(() => import('./views/logistica/PLinea'))
@@ -76,6 +78,8 @@ const routes = [
   { path: '/ventas/LCotizacion', name: 'Cotizaciones', element:LCotizaciones },
   { path: '/ventas/LPreCotizacion', name: 'PreCotizaciones', element:LPreCotizaciones },
   { path: '/ventas/Cotizador', name: 'Cotizador', element:Cotizador },
+  //PRODUCCION
+  { path: '/Cicat/Resumen', name: 'Resumen', element:RCicat },
   //LOGISTICA
   { path: '/logistica/LPedidos', name: 'Pedidos', element:LPedidos },
   { path: '/logistica/PLinea', name: 'Pedidos Linea', element:PLinea },
