@@ -40,6 +40,12 @@ const animatedComponents = makeAnimated();
 const Step1 = ({ nextStep }) => {
   const [plantasSel , setPlantas] = useState('');
   const [vFechaI, setFechaIni] = useState(null);
+  const [datosPla, setDatosPla] = useState([]);
+  const [datosMop, setDatosMop] = useState([]);
+  const [dFuente, setDFuente] = useState([]);
+  const [dSegmento, setDSegmento] = useState([]);
+  const [dTipoCli, setTC] = useState([]);
+  
   const opcionesFca = {
     year: 'numeric', // '2-digit' para el año en dos dígitos
     month: '2-digit',   // 'numeric', '2-digit', 'short', 'long', 'narrow'
@@ -71,9 +77,20 @@ const Step1 = ({ nextStep }) => {
                 }
             }
             //------------------------------------------------------------------------------------------------------------------------------------------------------
-            await axios.get(baseUrl+'Administracion/GetCotizacionPrecios/'+planta, confi_ax)
+            await axios.get(baseUrl2+'Comercial/GetPreciosPla/'+'C,ti,'+planta+',2024-10-31,1932.65', confi_ax)
             .then(response=>{
-                console.log(response.data);
+              var obj = response.data;
+              var tOne = obj[0].Rows;
+              var tTwo = obj[1].Rows;
+              var tThree = obj[2].Rows;
+              var tFour = obj[3].Rows;
+              var tFive = obj[4].Rows;
+              var tSix = obj[5].Rows;
+                console.log(obj);
+                setDatosPla(tOne)
+                setDatosMop(tTwo);
+                setDFuente(tFour);
+                setTC(tSix);
                 //Swal.fire("CORRECTO", "PARTE1", "success");
                 //return response.data;
             })
@@ -98,6 +115,13 @@ const Step1 = ({ nextStep }) => {
   }
   const cFechaI = (fecha) => {
     setFechaIni(fecha.toLocaleDateString('en-US',opcionesFca));
+  };
+  // Función para formatear el número a formato de dinero
+  const formatCurrency = (value) => {
+    return new Intl.NumberFormat('es-MX', {
+      style: 'currency',
+      currency: 'MXN', // Cambia a la moneda que necesites
+    }).format(value);
   };
   return(
     <div>
@@ -132,16 +156,19 @@ const Step1 = ({ nextStep }) => {
         </CCol>
         <CCol xs={4} md={2} lg={2}>
           <label>Fijos</label>
-        
+          <p><b>{datosPla.length > 0 ? formatCurrency(datosPla[0].FIJOS):'Cargando...'}</b></p>
         </CCol>
         <CCol xs={4} md={2} lg={2}>
           <label>Corporativo</label>
+          <p><b>{datosPla.length > 0 ? formatCurrency(datosPla[0].CORPORATIVO):'Cargando...'}</b></p>
         </CCol>
         <CCol xs={4} md={2} lg={2}>
           <label>MOP</label>
+          <p><b>{datosPla.length > 0 ? formatCurrency(datosPla[0].MOP):'Cargando...'}</b></p>
         </CCol>
         <CCol xs={4} md={4} lg={4}>
           <label>Costo de Diesel / Tiempo de Ciclo</label>
+          <p><b>{datosPla.length > 0 ? formatCurrency(datosPla[0].DISEL):'Cargando...'}</b></p>
         </CCol>
       </CRow>
       <hr />

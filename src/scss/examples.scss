@@ -107,10 +107,12 @@ $enable-deprecation-messages: false; /* stylelint-disable-line scss/dollar-varia
   }
 }
 
+
+
 @if $enable-dark-mode {
   @include color-mode(dark) {
     .example .tab-content {
-      background-color: var(--#{$prefix}secondary-bg) !important;
+      background-color: #1f234a !important;
     }
   }
 }

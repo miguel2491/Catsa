@@ -178,6 +178,23 @@ async function SubMenus(idMnu){
     },
     {
       component: CNavTitle,
+      name: 'Produccion',
+    },
+    {
+      component: CNavGroup,
+      name: 'Inventarios',
+      to: '/Inventario',
+      icon: <CIcon icon={cilUser} customClassName="nav-icon" />,
+      items: [
+        {
+          component: CNavItem,
+          name: 'CICAT Resumen',
+          to: '/Cicat/Resumen',
+        }
+      ],
+    },
+    {
+      component: CNavTitle,
       name: 'Administración',
     },
     {

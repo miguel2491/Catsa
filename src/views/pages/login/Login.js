@@ -1,205 +1,88 @@
-import React, {useState, useEffect, useRef} from 'react'
-import { Link } from 'react-router-dom'
-import { Navigate, useNavigate } from "react-router-dom";
+import React, { useState, useEffect, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 import {
-  CButton,
-  CCard,
-  CCardBody,
-  CCardGroup,
-  CCol,
-  CContainer,
-  CForm,
-  CFormInput,
-  CInputGroup,
-  CInputGroupText,
-  CRow,
   CToast,
   CToastBody,
   CToastClose,
   CToastHeader,
   CToaster
-} from '@coreui/react'
-import CIcon from '@coreui/icons-react'
-import { cilLockLocked, cilUser } from '@coreui/icons'
-import Cookies from 'universal-cookie';
-import axios from 'axios';
-import Modal from 'react-modal'
-import './login.css'
-import log from 'src/assets/images/avatars/logo.png'
-
-Modal.setAppElement('#root');
+} from '@coreui/react';
+import Cookies from "universal-cookie";
+import axios from "axios";
+import cn from "classnames";
+import "./login.css";
 
 const Login = () => {
-//export default function Login(){
+  const [switched, setSwitched] = useState(false);
   const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");  
-  const [toast, addToast] = useState(0)
-  const [modalIsOpen, setModalIsOpen] = useState(false);
-  const [isSpinning, setIsSpinning] = useState(false);
-  const toaster = useRef()
+  const [password, setPassword] = useState("");
+  const [toast, addToast] = useState(0);
   const cookies = new Cookies();
   const navigate = useNavigate();
-  const baseUrl="http://apicatsa.catsaconcretos.mx:2543/api/";
-  const baseUrl2="http://localhost:2548/api/";
+  const toaster = useRef();
 
-  const handleClick = () => {
-    setIsSpinning(!isSpinning);
-  };
+  const baseUrl = "http://apicatsa.catsaconcretos.mx:2543/api/";
 
-  useEffect(()=>{
-    handleClick();
-    openModal();
-    if(cookies.get('token') != undefined && cookies.get('idUsuario') != undefined)
-    {
-      navigate('/panel');
-    }else{
+  useEffect(() => {
+    if (cookies.get("token") && cookies.get("idUsuario")) {
+      navigate("/panel");
+    } else {
       GetToken();
     }
-    
-  },[]);
-  function GetToken(){
-    try{
-      var postData = 
-      {
-        UserName:'ProCatsa',
-        Password:'ProCatsa2024$.'
-      };
-      let confi_ax = 
-      {
-        headers:
-        {
-          'Content-Type': 'application/json;charset=UTF-8',
-          "Access-Control-Allow-Origin": "*",
-        }
-      }
-      axios.post(baseUrl+'Login/Login',postData,confi_ax)
-      .then(response=>{
-        return response.data;
-      }).then(response=>{
-        cookies.set('token', response, {path: '/'});
-      })
-      .catch(error=>{
-        console.log(error);
-        addToast(exampleToast)
-      })    
-    }catch(error){
-      console.log(error);
-    }
-  }
-  
-  const handleChange = (e) =>
-  {
-    const { name, value } = e.target;
-    if (name === "username") {
-      setUsername(value);
-    }
-    if (name === "password") {
-      setPassword(value);
-    }
-  };
-  async function Sesion(){
-    
-    if(username == ""|| password == "")
-    {
-      addToast(exampleToast)
-    }else{
+  }, []);
 
-      try{
-        const postData = 
-        {
-          usuario:username,
-          pass:password
-        }
-        let confi_ax = 
-        {
-          headers:
-          {
-            'Cache-Control': 'no-cache',
-            'Content-Type': 'application/json',
-            "Authorization": "Bearer "+cookies.get('token'),
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    if (name === "username") setUsername(value);
+    if (name === "password") setPassword(value);
+  };
+
+  async function Sesion() {
+    if (username === "" || password === "") {
+      addToast(exampleToast);
+    } else {
+      try {
+        const postData = { usuario: username, pass: password };
+        const confi_ax = {
+          headers: {
+            "Cache-Control": "no-cache",
+            "Content-Type": "application/json",
+            Authorization: "Bearer " + cookies.get("token")
           }
-        }
-        //--------------------------------------------------
-        await axios.post(baseUrl+'Login/GetUsuario', JSON.stringify({usuario:username, pass:password}),confi_ax)
-        .then(response=>{
-          console.log(response);
-          return response.data;
-        }).then(response=>{
-          console.log(response);
-          var obj = JSON.stringify(response);
-          if(obj.length>0){
-            obj = JSON.parse(obj);
-            console.log(obj);
-            cookies.set('idUsuario', response.id, {path: '/'});
-            cookies.set('Usuario', username, {path: '/'});
-            getInfoUser(response.id);
-            navigate('/panel');
-            openModal();
-          }else{    
-            //setErrorResponse(json.body.error);
-            addToast(exampleToast)
-          }
-        })
-        .catch(err=>{
-          if (err.response) {
-            // El servidor respondió con un código de estado fuera del rango de 2xx
-            console.error('Error de Respuesta:', err.response.data);
-            addToast(exampleToast)
-            //setError(`Error: ${err.response.status} - ${err.response.data.message || err.response.statusText}`);
-          } else if (err.request) {
-            // La solicitud fue realizada pero no se recibió respuesta
-            console.error('Error de Solicitud:', err.request);
-            //setError('Error: No se recibió respuesta del servidor.');
-          } else {
-            // Algo sucedió al configurar la solicitud
-            console.error('Error:', err.message);
-            //setError(`Error: ${err.message}`);
-          }
-          //cookies.remove('token', {path: '/'});
-        })    
-      } catch(error){
-        console.log(error);
+        };
+        const response = await axios.post(
+          baseUrl + "Login/GetUsuario",
+          postData,
+          confi_ax
+        );
+        const userInfo = response.data;
+        cookies.set("idUsuario", userInfo.id, { path: "/" });
+        cookies.set("Usuario", username, { path: "/" });
+        navigate("/panel");
+      } catch (error) {
+        console.error(error);
+        addToast(exampleToast);
       }
     }
-    
   }
-  async function getInfoUser(id) {
-    try{
-      let confi_ax = 
-      {
-        headers:
-        {
-          'Cache-Control': 'no-cache',
-          'Content-Type': 'application/json',
-          "Authorization": "Bearer "+cookies.get('token'),
-        }
+
+  async function GetToken() {
+    const postData = { UserName: "ProCatsa", Password: "ProCatsa2024$." };
+    const confi_ax = {
+      headers: {
+        "Content-Type": "application/json;charset=UTF-8",
+        "Access-Control-Allow-Origin": "*"
       }
-      //--------------------------------------------------
-      await axios.get(baseUrl+'Login/GetUserRol/'+id,confi_ax)
-      .then(response=>{
-        return response.data;
-      }).then(response=>{
-        cookies.set('roles', JSON.stringify(response), {path: '/'});
-        //navigate('/panel');
-      })
-      .catch(err=>{
-        if (err.response) {
-          // El servidor respondió con un código de estado fuera del rango de 2xx
-          console.error('Error de Respuesta:', err.response.data);
-          //setError(`Error: ${err.response.status} - ${err.response.data.message || err.response.statusText}`);
-        } else if (err.request) {
-          // La solicitud fue realizada pero no se recibió respuesta
-          //setError('Error: No se recibió respuesta del servidor.');
-        } else {
-          // Algo sucedió al configurar la solicitud
-          console.error('Error:', err.message);
-          //setError(`Error: ${err.message}`);
-        }
-      })    
-    } catch(error){
-      console.log(error);
+    };
+    try {
+      const response = await axios.post(baseUrl + "Login/Login", postData, confi_ax);
+      cookies.set("token", response.data, { path: "/" });
+    } catch (error) {
+      console.error(error);
+      addToast(exampleToast);
     }
   }
+
   const exampleToast = (
     <CToast title="CoreUI for React.js">
       <CToastHeader closeButton>
@@ -217,116 +100,97 @@ const Login = () => {
         <strong className="me-auto">CoreUI for React.js</strong>
         <small>7 min ago</small>
       </CToastHeader>
-      <CToastBody>Hello, world! This is a toast message.</CToastBody>
+      <CToastBody>¡Credenciales incorrectas!</CToastBody>
     </CToast>
-  )
-  const openModal = () => setModalIsOpen(true);
-  const closeModal = () => setModalIsOpen(false);
+  );
+
   return (
-    <div className="bg-body-tertiary min-vh-100 d-flex flex-row align-items-center" style={styles.container}>
-       <CToaster ref={toaster} push={toast} placement="top-end" />
-      <CContainer>
-        <CRow className="justify-content-center">
-          <CCol md={8}>
-            <CCardGroup>
-              <CCard className="p-4">
-                <CCardBody>
-                  <CForm>
-                    <h1>Catsa</h1>
-                    <p className="text-body-secondary">Ingresa tus credenciales</p>
-                    <CInputGroup className="mb-3">
-                      <CInputGroupText>
-                        <CIcon icon={cilUser} />
-                      </CInputGroupText>
-                      <CFormInput 
-                        id="usuario"
-                        name="username"
-                        type="text"
-                        onChange={handleChange}
-                        value={username}
-                        placeholder="Usuario"
-                        autoComplete="username" />
-                    </CInputGroup>
-                    <CInputGroup className="mb-4">
-                      <CInputGroupText>
-                        <CIcon icon={cilLockLocked} />
-                      </CInputGroupText>
-                      <CFormInput
-                        id="password"
-                        name="password"
-                        type="password"
-                        placeholder="Password"
-                        aria-label="Password"
-                        aria-describedby="basic-addon1"
-                        onChange={handleChange}
-                        value={password}
-                      />
-                    </CInputGroup>
-                    <CRow>
-                      <CCol xs={6}>
-                        <CButton color="primary" className="px-4" onClick={Sesion}>
-                          Ingresar
-                        </CButton>
-                      </CCol>
-                      <CCol xs={6} className="text-right">
-                      <Link to="/home">
-                        <CButton color="link" className="px-0">
-                          Olvide mi contraseña
-                        </CButton>
-                      </Link>
-                      </CCol>
-                    </CRow>
-                  </CForm>
-                </CCardBody>
-              </CCard>
-              <CCard className="text-white bg-primary py-5" style={{ width: '44%' }}>
-                <CCardBody className="text-center">
+    <div className="local-container">
+      <CToaster ref={toaster} push={toast} placement="top-end" />
+      <div className={cn("demo", { "s--switched": switched })}>
+        <div className="demo__inner">
+          <div className="demo__forms">
+            <div className="demo__form">
+              <div className="demo__form-content">
+                <form className="form" onSubmit={(e) => { e.preventDefault(); Sesion(); }}>
+                  <div className="form__heading">Bienvenido</div>
+                  <label className="form__field">
+                    <span className="form__field-label">Usuario</span>
+                    <input
+                      className="form__field-input"
+                      name="username"
+                      type="text"
+                      onChange={handleChange}
+                      value={username}
+                      autoComplete="username"
+                      placeholder="Usuario"
+                    />
+                  </label>
+                  <label className="form__field">
+                    <span className="form__field-label">Contraseña</span>
+                    <input
+                      className="form__field-input"
+                      name="password"
+                      type="password"
+                      onChange={handleChange}
+                      value={password}
+                      autoComplete="current-password"
+                      placeholder="Contraseña"
+                    />
+                  </label>
+                  <button type="submit" className="form__submit">
+                    Iniciar sesión
+                  </button>
+                </form>
+              </div>
+            </div>
+            <div className="demo__form">
+              <div className="demo__form-content">
+                <form className="form" onSubmit={(e) => e.preventDefault()}>
+                  <div className="form__heading">Siéntete como en casa</div>
+                  {["Usuario", "Correo", "Contraseña", "Repite tu contraseña"].map((field) => (
+                    <label className="form__field" key={field}>
+                      <span className="form__field-label">{field}</span>
+                      <input className="form__field-input" type="text" placeholder={field} />
+                    </label>
+                  ))}
+                  <button type="submit" className="form__submit">
+                    Registrarse
+                  </button>
+                </form>
+              </div>
+            </div>
+          </div>
+          <div className="demo__switcher">
+            <div className="demo__switcher-inner">
+              <div className="demo__switcher-content">
+                <div className="demo__switcher-text">
                   <div>
-                    <img src='../../logo.jpg' />
-                    <Link to="/register">
-                      <CButton color="primary" className="mt-3" active tabIndex={-1}>
-                        Registrarme
-                      </CButton>
-                    </Link>
+                    <h3>¿Eres nuevo?</h3>
+                    <p>Regístrate para obtener todos los recursos disponibles.</p>
                   </div>
-                </CCardBody>
-              </CCard>
-            </CCardGroup>
-          </CCol>
-        </CRow>
-      </CContainer>
-      <Modal
-        isOpen={modalIsOpen}
-        onRequestClose={closeModal}
-        contentLabel="Ejemplo de Modal"
-        style={customStyles}
-      >
-        <img src={log} width={80} className={`imgLoad ${isSpinning ? 'spin' : ''}`} />
-        CARGANDO...</Modal>
+                  <div>
+                    <h3>¿Ya eres parte?</h3>
+                    <p>Inicia sesión y maneja todos los recursos disponibles a tu gusto.</p>
+                  </div>
+                </div>
+                <button
+                  className="demo__switcher-btn"
+                  onClick={() => setSwitched(!switched)}
+                >
+                  <span className="animated-border" />
+                  <span className="demo__switcher-btn-inner">
+                    <span>Registro</span>
+                    <span>Iniciar</span>
+                  </span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
-    
-  )
-}
-
-const styles = {
-  container: {
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'center',
-    height: '10vh',
-  },
+  );
 };
 
-const customStyles = {
-  content: {
-    top: '50%',
-    left: '50%',
-    right: 'auto',
-    bottom: 'auto',
-    marginRight: '-20%',
-    transform: 'translate(-50%, -50%)',
-    color:'black'
-  },
-};
-
-export default Login
+export default Login;
