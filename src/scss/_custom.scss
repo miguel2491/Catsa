@@ -1,1 +1,103 @@
 // Here you can add other styles
+:root, [data-coreiu-theme=dark]{
+
+    --cui-highlight-color: rgba(255, 255, 255, 0.87);
+    //--cui-body-bg: #263a67;
+
+    .sidebar {
+        --cui-sidebar-bg: #e62a43;
+    }
+
+    .footer {
+        background: #1f234a;
+    }
+
+    .border-bottom {
+        border-bottom: var(--cui-border-width) var(--cui-border-style) #1f234a ;
+    }
+
+    .header {
+        --cui-header-bg: linear-gradient(90deg, rgba(230,42,67,1) 0%, rgba(31,35,74,1) 29%);
+    }
+
+    .sidebar-nav .nav-title {
+        color: rgb(255 255 255);
+    }
+
+    .sidebar-nav .nav-link:hover {
+        background: #1f234a;
+    }
+
+    .sidebar-nav .nav-link.active {
+        background: #1f234a;
+    } 
+}
+
+
+:root, [data-coreui-theme=light] {
+    --cui-blue: #0d6efd;
+    --cui-indigo: #6610f2;
+    --cui-purple: #6f42c1;
+    --cui-pink: #d63384;
+    --cui-red: #dc3545;
+    --cui-orange: #fd7e14;
+    --cui-yellow: #ffc107;
+    --cui-green: #198754;
+    --cui-teal: #20c997;
+    --cui-cyan: #0dcaf0;
+    --cui-black: #080a0c;
+    --cui-white: #fff;
+    --cui-gray: #6d7d9c;
+    --cui-gray-dark: #323a49;
+    --cui-gray-100: #f3f4f7;
+    --cui-gray-200: #e7eaee;
+    --cui-gray-300: #dbdfe6;
+    --cui-gray-400: #cfd4de;
+    --cui-gray-500: #aab3c5;
+    --cui-gray-600: #6d7d9c;
+    --cui-gray-700: #4a566d;
+    --cui-gray-800: #323a49;
+    --cui-gray-900: #212631;
+    --cui-primary: #5856d6;
+    --cui-secondary: #6b7785;
+    --cui-success: #1b9e3e;
+    --cui-info: #39f;
+    --cui-warning: #f9b115;
+    --cui-danger: #e55353;
+    --cui-light: #f3f4f7;
+    --cui-dark: #212631;
+    --cui-primary-rgb: 88, 86, 214;
+    --cui-secondary-rgb: 107, 119, 133;
+    --cui-success-rgb: 27, 158, 62;
+    --cui-info-rgb: 51, 153, 255;
+    --cui-warning-rgb: 249, 177, 21;
+    --cui-danger-rgb: 229, 83, 83;
+    --cui-light-rgb: 243, 244, 247;
+    --cui-dark-rgb: 33, 38, 49;
+    --cui-primary-text-emphasis: #3634a3;
+    --cui-secondary-text-emphasis: #212233;
+    --cui-success-text-emphasis: #0f5722;
+    --cui-info-text-emphasis: #184c77;
+    --cui-warning-text-emphasis: #764705;
+    --cui-danger-text-emphasis: #671414;
+    --cui-light-text-emphasis: #4a566d;
+    --cui-dark-text-emphasis: #323a49;
+    --cui-primary-bg-subtle: #cfc7f3;
+    --cui-secondary-bg-subtle: #ced2d8;
+    --cui-success-bg-subtle: #cbedd6;
+}
+
+
+.header-nav .nav-link {
+    color: rgb(255 255 255 / 65%) !important;
+}
+
+
+.dropdown-menu {
+    //--cui-dropdown-bg: #1f234a;
+    --cui-dropdown-link-active-bg: #e62a43;
+    --cui-dropdown-link-hover-bg: rgb(47 51 107);
+}
+.nav-item{
+    color: white;
+}
