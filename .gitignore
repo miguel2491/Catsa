@@ -25,3 +25,5 @@ yarn-debug.log*
 yarn-error.log*
 
 src/views/base/tabs/TabulatorP.js
+
+src/views/cicat/Resumen/ResDiario.js
