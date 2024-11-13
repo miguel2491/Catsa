@@ -14,10 +14,11 @@ import FechaF from '../../base/parametros/FechaFinal'
 import {FormatoFca} from '../../../Utilidades/Tools.js'
 import { format } from 'date-fns';
 
+
 import {
   CForm,
   CFormSelect,
-  CFormInput,
+  CWidgetStatsF,
   CContainer,
   CButton,
   CRow,
@@ -35,7 +36,7 @@ import {
 } from '@coreui/react'
 
 import {CIcon} from '@coreui/icons-react'
-import { cilCloudDownload, cilSearch } from '@coreui/icons'
+import { cilCloudDownload, cilSearch, cilChartPie } from '@coreui/icons'
 
 const cookies = new Cookies();
 const baseUrl="http://apicatsa.catsaconcretos.mx:2543/api/";
@@ -50,7 +51,9 @@ const Resumen = () => {
     const [btn1, setDisabled] = useState(false);
     const [loading, setLoading] = useState(false);
     const [percentage, setPercentage] = useState(0);
-    const [visible, setVisible] = useState(false)
+    const [visible, setVisible] = useState(false);
+    //Arrays
+    const [dMov, setMov] = useState([]);
     const hijoRef = useRef(); 
     const entradasRf = useRef();
     const salidasRf = useRef();
@@ -121,8 +124,9 @@ const Resumen = () => {
             const fcaI = FormatoFca(vFechaI);
             const fcaF = FormatoFca(vFcaF);
             //------------------------------------------------------------------------------------------------------------------------------------------------------
-            const response = await axios.get(baseUrl2+'Operaciones/GetResumen/'+plantasSel+','+fcaI+','+fcaF+',M', confi_ax);
+            const response = await axios.get(baseUrl+'Operaciones/GetResumen/'+plantasSel+','+fcaI+','+fcaF+',M', confi_ax);
             var obj = response.data[0].Rows;
+            setMov(obj);
             //console.log(obj);
         } 
         catch(error)
@@ -202,6 +206,23 @@ return (
                         ]}
                     />
                 </CCol>
+            </CRow>
+            <CRow>
+                {
+                    dMov.length === 0 ? (
+                        <p></p>
+                    ):(
+                        dMov.map((itemd,index) => (
+                            <CCol xs={2} key={itemd.Mov || index}>
+                                <CWidgetStatsF
+                                    className="mb-3"
+                                    color="primary"
+                                    title={itemd.Mov}
+                                />
+                            </CCol>
+                        ))
+                    )
+                }
             </CRow>
             <br />
             <CTabs activeItemKey={1}>

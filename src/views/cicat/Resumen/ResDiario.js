@@ -3,8 +3,9 @@ import Cookies from 'universal-cookie'
 import axios from 'axios'
 import Swal from "sweetalert2";
 import ProgressBar from "@ramonak/react-progress-bar";
-import {FormatoFca} from '../../../Utilidades/Tools.js'
-
+import {FormatoFca, Fnum} from '../../../Utilidades/Tools.js'
+import { format } from 'date-fns';
+import './cicat.css'
 import {
     CForm,
     CTable,
@@ -67,7 +68,7 @@ const ResDiario = forwardRef((props, ref) => {
             const fcaI = FormatoFca(FI);
             const fcaF = FormatoFca(FF);
             //------------------------------------------------------------------------------------------------------------------------------------------------------
-            const response = await axios.get(baseUrl2+'Operaciones/GetResumen/'+planta+','+fcaI+','+fcaF+',R', confi_ax);
+            const response = await axios.get(baseUrl+'Operaciones/GetResumen/'+planta+','+fcaI+','+fcaF+',R', confi_ax);
             var obj = response.data[0].Rows;
             //console.log(obj);
             if(obj.length > 0)
@@ -121,16 +122,16 @@ const ResDiario = forwardRef((props, ref) => {
                                         <CTableDataCell>-</CTableDataCell>
                                         <CTableDataCell>{itemd.Material}</CTableDataCell>
                                         <CTableDataCell>{itemd.Unidad}</CTableDataCell>
-                                        <CTableDataCell>{itemd.FechaInv}</CTableDataCell>
-                                        <CTableDataCell>{itemd.InvFisicoS}</CTableDataCell>
-                                        <CTableDataCell>{itemd.InicioERPSP}</CTableDataCell>
-                                        <CTableDataCell>{itemd.InicioCBSP}</CTableDataCell>
-                                        <CTableDataCell>{itemd.EntradasERP}</CTableDataCell>
-                                        <CTableDataCell>{itemd.EntradasCB}</CTableDataCell>
-                                        <CTableDataCell>{itemd.SalidasERP}</CTableDataCell>
-                                        <CTableDataCell>{itemd.SalidasCB}</CTableDataCell>
-                                        <CTableDataCell>{itemd.InicioERP + 5}</CTableDataCell>
-                                        <CTableDataCell>{itemd.InicioCB + 10}</CTableDataCell>
+                                        <CTableDataCell>{format(itemd.FechaSem, 'yyyy/MM/dd')}</CTableDataCell>
+                                        <CTableDataCell>{Fnum(itemd.InvFisicoS)}</CTableDataCell>
+                                        <CTableDataCell className="colERP">{Fnum(itemd.InicioERPSP)}</CTableDataCell>
+                                        <CTableDataCell className="colCB">{Fnum(itemd.InicioCBSP)}</CTableDataCell>
+                                        <CTableDataCell className="colERP">{Fnum(itemd.EntradasERP)}</CTableDataCell>
+                                        <CTableDataCell className="colCB">{Fnum(itemd.EntradasCB)}</CTableDataCell>
+                                        <CTableDataCell className="colERP">{Fnum(itemd.SalidasERP)}</CTableDataCell>
+                                        <CTableDataCell className="colCB">{Fnum(itemd.SalidasCB)}</CTableDataCell>
+                                        <CTableDataCell className="colERP">{Fnum(itemd.InicioERP)}</CTableDataCell>
+                                        <CTableDataCell className="colCB">{Fnum(itemd.InicioCB)}</CTableDataCell>
                                     </CTableRow>
                                 ))
                             )
