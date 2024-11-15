@@ -1,31 +1,35 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import {
-  CToast,
-  CToastBody,
-  CToastClose,
-  CToastHeader,
-  CToaster
+  CModal,
+  CModalHeader,
+  CModalTitle,
+  CModalBody,
+  CModalFooter,
+  CRow
 } from '@coreui/react';
 import Cookies from "universal-cookie";
 import axios from "axios";
 import cn from "classnames";
+import Swal from "sweetalert2";
 import "./login.css";
+import load from '../../../../public/loading.gif'
 
 const Login = () => {
   const [switched, setSwitched] = useState(false);
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const [toast, addToast] = useState(0);
+  const [visible, setVisible] = useState(false);
   const cookies = new Cookies();
   const navigate = useNavigate();
   const toaster = useRef();
 
   const baseUrl = "http://apicatsa.catsaconcretos.mx:2543/api/";
-
+  
   useEffect(() => {
+    //setVisible(!visible)
     if (cookies.get("token") && cookies.get("idUsuario")) {
-      navigate("/panel");
+      navigate("/dashboard");
     } else {
       GetToken();
     }
@@ -38,8 +42,10 @@ const Login = () => {
   };
 
   async function Sesion() {
+    setVisible(!visible)
     if (username === "" || password === "") {
-      addToast(exampleToast);
+      Swal.fire("Error", "Revise Usuario/Contraseña y vuelva a intentar", "error");
+      setVisible(visible)
     } else {
       try {
         const postData = { usuario: username, pass: password };
@@ -58,10 +64,10 @@ const Login = () => {
         const userInfo = response.data;
         cookies.set("idUsuario", userInfo.id, { path: "/" });
         cookies.set("Usuario", username, { path: "/" });
-        navigate("/panel");
+        setTimeout(() => { navigate("/dashboard"); },3000)
+        
       } catch (error) {
         console.error(error);
-        addToast(exampleToast);
       }
     }
   }
@@ -83,30 +89,25 @@ const Login = () => {
     }
   }
 
-  const exampleToast = (
-    <CToast title="CoreUI for React.js">
-      <CToastHeader closeButton>
-        <svg
-          className="rounded me-2"
-          width="20"
-          height="20"
-          xmlns="http://www.w3.org/2000/svg"
-          preserveAspectRatio="xMidYMid slice"
-          focusable="false"
-          role="img"
-        >
-          <rect width="100%" height="100%" fill="#007aff"></rect>
-        </svg>
-        <strong className="me-auto">CoreUI for React.js</strong>
-        <small>7 min ago</small>
-      </CToastHeader>
-      <CToastBody>¡Credenciales incorrectas!</CToastBody>
-    </CToast>
-  );
-
   return (
     <div className="local-container">
-      <CToaster ref={toaster} push={toast} placement="top-end" />
+      <CModal
+      className="mLogin"
+      backdrop="static"
+      visible={visible}
+      onClose={() => setVisible(false)}
+      aria-labelledby="StaticBackdropExampleLabel"
+    >
+      <CModalHeader>
+        <br />
+      </CModalHeader>
+      <CModalBody className="centered-content">
+          <img src={load} alt="Cargando" width={60} />
+          <p>Cargando...</p>
+      </CModalBody>
+      <CModalFooter>                        
+      </CModalFooter>
+    </CModal>
       <div className={cn("demo", { "s--switched": switched })}>
         <div className="demo__inner">
           <div className="demo__forms">

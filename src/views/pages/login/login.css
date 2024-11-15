@@ -366,4 +366,14 @@
     width: 100%;
     background: #e62a43;
   }
-  
+  .centered-content {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    height: 100%; /* Asegura que el contenedor tenga suficiente altura */
+  }
+  .mLogin{
+    margin-top:10%
+  }

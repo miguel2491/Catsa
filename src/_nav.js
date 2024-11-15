@@ -10,7 +10,8 @@ import {
   cilCalculator,
   cilCalendar,
   cilCheck,
-  cilGlobeAlt
+  cilGlobeAlt,
+  cilGraph
 } from '@coreui/icons'
 import { CNavGroup, CNavItem, CNavTitle } from '@coreui/react'
 import axios from 'axios';
@@ -244,6 +245,19 @@ async function SubMenus(idMnu){
     },
     {
       component: CNavGroup,
+      name: 'Logistica',
+      to: '/Logistica',
+      icon: <CIcon icon={cilGraph} customClassName="nav-icon" />,
+      items: [
+        {
+          component: CNavItem,
+          name: 'Pedidos',
+          to: '/reportes/PedidosMetraje',
+        },
+      ],
+    },
+    {
+      component: CNavGroup,
       name: 'Calidad',
       to: '/Calidad',
       icon: <CIcon icon={cilUser} customClassName="nav-icon" />,
@@ -252,7 +266,7 @@ async function SubMenus(idMnu){
           component: CNavItem,
           name: 'Costos Productos',
           to: '/reportes/CostosProductos',
-        }
+        },
       ],
     },
   ]

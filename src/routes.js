@@ -15,7 +15,7 @@ const LPedidos = React.lazy(() => import('./views/logistica/LPedidos'))
 const PLinea = React.lazy(() => import('./views/logistica/PLinea'))
 //REPORTES
 const CostosProductos = React.lazy(() => import('./views/reportes/CProductos'))
-
+const RPedidos = React.lazy(() => import('./views/reportes/PedidosMetraje'))
 // EXTRAS
 const PreCierre = React.lazy(() => import('./views/utils/PreCierre'))
 const InterfazInt = React.lazy(() => import('./views/utils/InterfazInt'))
@@ -102,11 +102,11 @@ const routes = [
   // { path: '/base/spinners', name: 'Spinners', element: Spinners },
   // { path: '/base/tabs', name: 'Tabs', element: Tabs },
   // { path: '/base/tooltips', name: 'Tooltips', element: Tooltips },
-  { path: '/buttons', name: 'Buttons', element: Buttons, exact: true },
-  { path: '/buttons/buttons', name: 'Buttons', element: Buttons },
-  { path: '/buttons/dropdowns', name: 'Dropdowns', element: Dropdowns },
-  { path: '/buttons/button-groups', name: 'Button Groups', element: ButtonGroups },
-  // { path: '/charts', name: 'Charts', element: Charts },
+  // { path: '/buttons', name: 'Buttons', element: Buttons, exact: true },
+  // { path: '/buttons/buttons', name: 'Buttons', element: Buttons },
+  // { path: '/buttons/dropdowns', name: 'Dropdowns', element: Dropdowns },
+  // { path: '/buttons/button-groups', name: 'Button Groups', element: ButtonGroups },
+  { path: '/charts', name: 'Charts', element: Charts },
    { path: '/forms', name: 'Forms', element: FormControl, exact: true },
    { path: '/forms/form-control', name: 'Form Control', element: FormControl },
   // { path: '/forms/select', name: 'Select', element: Select },
@@ -127,6 +127,7 @@ const routes = [
   // { path: '/notifications/toasts', name: 'Toasts', element: Toasts },
   // { path: '/widgets', name: 'Widgets', element: Widgets },
   { path: '/reportes/CostosProductos', name: 'CostosProductos', element: CostosProductos },
+  { path: '/reportes/PedidosMetraje', name: 'PedidosMetraje', element: RPedidos },
   { path: '/utils/PreCierres', name: 'PreCierres', element: PreCierre },
   { path: '/utils/InterfazInt', name: 'InterfazInt', element: InterfazInt },
   { path: '/utils/UpdateProd', name: 'UpdateProd', element: UpdateProd },

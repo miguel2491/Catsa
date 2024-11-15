@@ -1,6 +1,6 @@
 import React, {useRef, useState, useEffect} from 'react'
 import classNames from 'classnames'
-
+import { CChart, CChartPolarArea } from '@coreui/react-chartjs'
 import {
   CAvatar,
   CButton,
@@ -20,6 +20,12 @@ import {
   CTableRow,
   
 } from '@coreui/react'
+import Cookies from 'universal-cookie'
+import axios from 'axios'
+import Swal from "sweetalert2";
+import ProgressBar from "@ramonak/react-progress-bar";
+import {FormatoFca, Fnum} from '../../Utilidades/Tools.js'
+import { format } from 'date-fns';
 import CIcon from '@coreui/icons-react'
 import {
   cibCcAmex,
@@ -55,8 +61,49 @@ import WidgetsBrand from '../widgets/WidgetsBrand'
 import WidgetsDropdown from '../widgets/WidgetsDropdown'
 import MainChart from './MainChart'
 
+const cookies = new Cookies();
+const baseUrl="http://apicatsa.catsaconcretos.mx:2543/api/";
+const baseUrl2="http://localhost:2548/api/";
+const currentDate = new Date();
+
 const Dashboard = () => {
- 
+  const [aPedidosD, setPedidosD] = useState([]);
+  //Diario
+  const[fDiaria, setfDiara] = useState(currentDate);
+  const[rPSemana, setPSemana] = useState('-');
+  const[rPSemanaP, setPSemanaP] = useState('-');
+  //Diario
+  const [chartDataD, setChartDataD] = useState({
+    labels: [],
+    datasets: [
+      {
+        label: 'Pedidos',
+        data: [],
+        backgroundColor: ['#FF6384', '#4BC0C0', '#FFCE56', '#E7E9ED', '#36A2EB'],
+      },
+    ],
+  });
+  //Semana
+  const [chartDataS, setChartDataS] = useState({
+    labels: [],
+    datasets: [
+      {
+        label: 'Total de Pedidos',
+        data: [],
+        backgroundColor: ['#FF6384', '#4BC0C0', '#FFCE56', '#E7E9ED', '#36A2EB'],
+      },
+    ],
+  });
+  //ProximaSemanal
+  const [chartDataPS, setChartDataPS] = useState({
+    labels: [],
+    datasets: [
+      {
+        data: [],
+        backgroundColor: ['#FF6384', '#4BC0C0', '#FFCE56', '#E7E9ED', '#36A2EB'],
+      },
+    ],
+  });
   const progressExample = [
     { title: 'Visits', value: '29.703 Users', percent: 40, color: 'success' },
     { title: 'Unique', value: '24.093 Users', percent: 20, color: 'info' },
@@ -177,13 +224,176 @@ const Dashboard = () => {
       activity: 'Last week',
     },
   ]
-  
+
+  useEffect(() => {
+    getPedidosD();
+    getPedidosS();
+    getPedidosPS();
+  }, []);
+  async function getPedidosD()
+  {
+    try
+    {
+      let confi_ax = {
+        headers:
+        {
+            'Cache-Control': 'no-cache',
+            'Content-Type': 'application/json',
+            "Authorization": "Bearer "+cookies.get('token'),
+        },
+      };
+      //------------------------------------------------------------------------------------------------------------------------------------------------------
+      const response = await axios.get(baseUrl+'Operaciones/GetPedidosD', confi_ax);
+      const obj = response.data[0].Rows;
+      const labels = [];
+      const dataSet = [];
+      obj.forEach(item => {
+        labels.push(item.Planta);
+        dataSet.push(item.TotalPedidos);
+      });
+      // Actualiza el estado con los nuevos datos
+      setChartDataD({
+        labels: labels,
+        datasets: [
+          {
+            label: 'Total de Pedidos',
+            data: dataSet,
+            backgroundColor: ['#FF6384', '#4BC0C0', '#FFCE56', '#E7E9ED', '#36A2EB'],
+          },
+        ],
+      });
+      console.log(obj)
+    }
+    catch(error)
+    {
+      Swal.fire("Error", "Ocurrio un error, vuelva a intentarlo", "error");
+    }finally{
+
+    }
+  }
+  async function getPedidosS()
+  {
+    try
+    {
+      let confi_ax = {
+        headers:
+        {
+            'Cache-Control': 'no-cache',
+            'Content-Type': 'application/json',
+            "Authorization": "Bearer "+cookies.get('token'),
+        },
+      };
+      //------------------------------------------------------------------------------------------------------------------------------------------------------
+      const response = await axios.get(baseUrl+'Operaciones/GetPedidosPD', confi_ax);
+      const obj = response.data[0].Rows;
+      const rango = format(obj[0].FcaIni, 'yyyy/MM/dd')+"-"+format(obj[0].FcaFin, 'yyyy/MM/dd');
+      setPSemana(rango);
+      const labels = [];
+      const dataSet = [];
+      obj.forEach(item => {
+        labels.push(item.Planta);
+        dataSet.push(item.TotalPedidos);
+      });
+      // Actualiza el estado con los nuevos datos
+      setChartDataS({
+        labels: labels,
+        datasets: [
+          {
+            label: 'Total de Pedidos',
+            data: dataSet,
+            backgroundColor: ['#FF6384', '#4BC0C0', '#FFCE56', '#E7E9ED', '#36A2EB'],
+          },
+        ],
+      });
+    }
+    catch(error)
+    {
+      Swal.fire("Error", "Ocurrio un error, vuelva a intentarlo", "error");
+    }finally{
+
+    }
+  }
+
+  async function getPedidosPS()
+  {
+    try
+    {
+      let confi_ax = {
+        headers:
+        {
+            'Cache-Control': 'no-cache',
+            'Content-Type': 'application/json',
+            "Authorization": "Bearer "+cookies.get('token'),
+        },
+      };
+      //------------------------------------------------------------------------------------------------------------------------------------------------------
+      const response = await axios.get(baseUrl+'Operaciones/GetPedidosPS', confi_ax);
+      const obj = response.data[0].Rows;
+      const labels = [];
+      const dataSet = [];
+      const rango = format(obj[0].FcaIni, 'yyyy/MM/dd')+"-"+format(obj[0].FcaFin, 'yyyy/MM/dd');
+      setPSemanaP(rango);
+      obj.forEach(item => {
+        labels.push(item.Planta);
+        dataSet.push(item.TotalPedidos);
+      });
+      // Actualiza el estado con los nuevos datos
+      setChartDataPS({
+        labels: labels,
+        datasets: [
+          {
+            data: dataSet,
+            backgroundColor: ['#FF6384', '#4BC0C0', '#FFCE56', '#E7E9ED', '#36A2EB'],
+          },
+        ],
+      });
+    }
+    catch(error)
+    {
+      Swal.fire("Error", "Ocurrio un error, vuelva a intentarlo", "error");
+    }finally{
+
+    } 
+  }
+
   return (
     <>
       <WidgetsDropdown className="mb-4" />
       
-      <WidgetsBrand className="mb-4" withCharts />
-      
+      <CRow>
+        <CCol xs={12} md={6}>
+          <CCard className="mb-4">
+            <CCardHeader>Pedidos Por Día <b>{format(fDiaria, 'yyyy/MM/dd')}</b></CCardHeader>
+            <CCardBody>
+              <CChart
+              type='line'
+                data={chartDataD}
+              />
+            </CCardBody>
+          </CCard>
+        </CCol>
+        <CCol xs={12} md={6}>
+          <CCard className="mb-4">
+            <CCardHeader>Proyección por Semana <b>{rPSemana}</b></CCardHeader>
+            <CCardBody>
+              <CChart
+                type='bar'
+                data={chartDataS}
+              />
+            </CCardBody>
+          </CCard>
+        </CCol>
+        <CCol xs={12} md={6}>
+          <CCard className="mb-4">
+            <CCardHeader>Proyección por Semana Proxima <b>{rPSemanaP}</b></CCardHeader>
+            <CCardBody>
+              <CChartPolarArea
+                data={chartDataPS}
+              />
+            </CCardBody>
+          </CCard>
+        </CCol>
+      </CRow>
     </>
   )
 }
