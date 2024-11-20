@@ -14,10 +14,13 @@ import { getStyle } from '@coreui/utils'
 import { CChartBar, CChartLine, CChartPolarArea } from '@coreui/react-chartjs'
 import CIcon from '@coreui/icons-react'
 import { cilArrowBottom, cilArrowTop, cilOptions } from '@coreui/icons'
+import Cookies from "universal-cookie";
+
 
 const WidgetsDropdown = (props) => {
   const widgetChartRef1 = useRef(null)
   const widgetChartRef2 = useRef(null)
+  const cookies = new Cookies();
 
   useEffect(() => {
     document.documentElement.addEventListener('ColorSchemeChange', () => {
@@ -35,49 +38,48 @@ const WidgetsDropdown = (props) => {
         })
       }
     })
-    getCotizaciones();
+    //getCotizaciones();
   }, [widgetChartRef1, widgetChartRef2])
 
-  async function getCotizaciones()
-  {
-    try
-    {
-      let confi_ax = {
-        headers:
-        {
-            'Cache-Control': 'no-cache',
-            'Content-Type': 'application/json',
-            "Authorization": "Bearer "+cookies.get('token'),
-        },
-      };
-      //------------------------------------------------------------------------------------------------------------------------------------------------------
-      const response = await axios.get(baseUrl2+'Operaciones/GetCotizaciones', confi_ax);
-      const obj = response.data[0].Rows;
-      const labels = [];
-      const dataSet = [];
-      obj.forEach(item => {
-        labels.push(item.Planta);
-        dataSet.push(item.TotalPedidos);
-      });
-      // Actualiza el estado con los nuevos datos
-      setChartDataD({
-        labels: labels,
-        datasets: [
-          {
-            data: dataSet,
-            backgroundColor: ['#FF6384', '#4BC0C0', '#FFCE56', '#E7E9ED', '#36A2EB'],
-          },
-        ],
-      });
-      console.log(obj)
-    }
-    catch(error)
-    {
-      Swal.fire("Error", "Ocurrio un error, vuelva a intentarlo", "error");
-    }finally{
+  // async function getCotizaciones()
+  // {
+  //   try
+  //   {
+  //     let confi_ax = {
+  //       headers:
+  //       {
+  //           'Cache-Control': 'no-cache',
+  //           'Content-Type': 'application/json',
+  //           "Authorization": "Bearer "+cookies.get('token'),
+  //       },
+  //     };
+  //     //------------------------------------------------------------------------------------------------------------------------------------------------------
+  //     const response = await axios.get(baseUrl2+'Operaciones/GetCotizaciones', confi_ax);
+  //     const obj = response.data[0].Rows;
+  //     const labels = [];
+  //     const dataSet = [];
+  //     obj.forEach(item => {
+  //       labels.push(item.Planta);
+  //       dataSet.push(item.TotalPedidos);
+  //     });
+  //     // Actualiza el estado con los nuevos datos
+  //     setChartDataD({
+  //       labels: labels,
+  //       datasets: [
+  //         {
+  //           data: dataSet,
+  //           backgroundColor: ['#FF6384', '#4BC0C0', '#FFCE56', '#E7E9ED', '#36A2EB'],
+  //         },
+  //       ],
+  //     });
+  //   }
+  //   catch(error)
+  //   {
+  //     console.log(error);
+  //   }finally{
 
-    }
-  }
+  //   }
+  // }
 
   return (
     <CRow className={props.className} xs={{ gutter: 4 }}>

@@ -21,13 +21,13 @@ const cookies = new Cookies();
 const baseUrl="http://apicatsa.catsaconcretos.mx:2543/api/";
 const baseUrl2="http://localhost:2548/api/";
 const nav_ = [];
-if(cookies.get('menus') != undefined)
-  {
-    setMenus();
-  }else{
-    Menus();
-  }
-async function Menus(){
+
+if(cookies.get('rol') == undefined)
+{
+  //getRol();
+}
+async function getRol()
+{
   try{
     let confi_ax = 
       {
@@ -37,47 +37,21 @@ async function Menus(){
           'Content-Type': 'application/json',
           "Authorization": "Bearer "+cookies.get('token'),
         }
-      }
-      //=======================================================
-      await axios.get(baseUrl+'Login/GetMenus',confi_ax)
-      .then(response=>{
-        cookies.set('menus', JSON.stringify(response), {path: '/'});
-        return response.data;
-      }).then(response=>{
-        //console.log("=>");
-      })
-      .catch(err=>{
-        if (err.response) {
-          // El servidor respondió con un código de estado fuera del rango de 2xx
-          console.error('Error de Respuesta:', err.response.data);
-          //setError(`Error: ${err.response.status} - ${err.response.data.message || err.response.statusText}`);
-        } else if (err.request) {
-          // La solicitud fue realizada pero no se recibió respuesta
-          //setError('Error: No se recibió respuesta del servidor.');
-        } else {
-          // Algo sucedió al configurar la solicitud
-          console.error('Error:', err.message);
-          //setError(`Error: ${err.message}`);
-        }
-      })
-      //=======================================================
-  }catch(error){
-
-  }
-}
-
-async function setMenus(){
-  var obj = cookies.get('menus');
-  for(var x = 0; x < obj.data.length; x++)
-    {
-      nav_.push({
-        component: CNavTitle,
-        name:obj.data[x].descripcion,
-      })
-      await SubMenus(obj.data[x].mnuId);
     }
+    const response = await axios.get(baseUrl+'Login/GetUserRol/'+cookies.get('idUsuario'), confi_ax);
+    cookies.set('roles', JSON.stringify(response), {path: '/'});
+    console.log(response.data);
+    getPermisos();
+  }
+  catch(error)
+  {
+    console.log(error);
+  }finally{
+
+  }
 }
-async function SubMenus(idMnu){
+async function getPermisos()
+{
   try{
     let confi_ax = 
       {
@@ -87,41 +61,16 @@ async function SubMenus(idMnu){
           'Content-Type': 'application/json',
           "Authorization": "Bearer "+cookies.get('token'),
         }
-      }
-      //=======================================================
-      await axios.get(baseUrl+'Login/GetSubMenus/'+idMnu,confi_ax)
-      .then(response=>{
-        
-        cookies.set('SubMenus', JSON.stringify(response.data), {path: '/'});
-        var obj = response.data;
-        for(var z = 0; z < obj.length;z++)
-        {
-          nav_.push({
-            component: CNavItem,
-            name: 'Admin',
-            to: '/Ventas/admin',
-            icon: <CIcon icon={cilDrop} customClassName="nav-icon" />,
-          })
-        }
-      }).then(response=>{
-        
-      })
-      .catch(err=>{
-        if (err.response) {
-          // El servidor respondió con un código de estado fuera del rango de 2xx
-          console.error('Error de Respuesta:', err.response.data);
-          //setError(`Error: ${err.response.status} - ${err.response.data.message || err.response.statusText}`);
-        } else if (err.request) {
-          // La solicitud fue realizada pero no se recibió respuesta
-          //setError('Error: No se recibió respuesta del servidor.');
-        } else {
-          // Algo sucedió al configurar la solicitud
-          console.error('Error:', err.message);
-          //setError(`Error: ${err.message}`);
-        }
-      })
-      //=======================================================
-  }catch(error){
+    }
+    const response = await axios.get(baseUrl+'Login/GetUserRol/'+cookies.get('idUsuario'), confi_ax);
+    cookies.set('roles', JSON.stringify(response), {path: '/'});
+    console.log(response.data);
+    getPermisos();
+  }
+  catch(error)
+  {
+    console.log(error);
+  }finally{
 
   }
 }
@@ -251,8 +200,13 @@ async function SubMenus(idMnu){
       items: [
         {
           component: CNavItem,
-          name: 'Pedidos',
-          to: '/reportes/PedidosMetraje',
+          name: 'Pedidos Ventas',
+          to: '/reportes/PedidosVenta',
+        },
+        {
+          component: CNavItem,
+          name: 'Pedidos Por Metro',
+          to: '/reportes/PedidosMetro',
         },
       ],
     },

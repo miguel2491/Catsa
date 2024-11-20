@@ -72,6 +72,7 @@ const Dashboard = () => {
   const[fDiaria, setfDiara] = useState(currentDate);
   const[rPSemana, setPSemana] = useState('-');
   const[rPSemanaP, setPSemanaP] = useState('-');
+  const[rPMes, setPMes] = useState('-');
   //Diario
   const [chartDataD, setChartDataD] = useState({
     labels: [],
@@ -104,6 +105,17 @@ const Dashboard = () => {
       },
     ],
   });
+  //Mes
+  const [chartDataM, setChartDataM] = useState({
+    labels: [],
+    datasets: [
+      {
+        data: [],
+        backgroundColor: ['#FF6384', '#4BC0C0', '#FFCE56', '#E7E9ED', '#36A2EB'],
+      },
+    ],
+  });
+  
   const progressExample = [
     { title: 'Visits', value: '29.703 Users', percent: 40, color: 'success' },
     { title: 'Unique', value: '24.093 Users', percent: 20, color: 'info' },
@@ -229,6 +241,7 @@ const Dashboard = () => {
     getPedidosD();
     getPedidosS();
     getPedidosPS();
+    getPedidosM();
   }, []);
   async function getPedidosD()
   {
@@ -247,7 +260,9 @@ const Dashboard = () => {
       const obj = response.data[0].Rows;
       const labels = [];
       const dataSet = [];
+      var totalP = 0;
       obj.forEach(item => {
+        totalP += item.TotalPedidos;
         labels.push(item.Planta);
         dataSet.push(item.TotalPedidos);
       });
@@ -256,13 +271,12 @@ const Dashboard = () => {
         labels: labels,
         datasets: [
           {
-            label: 'Total de Pedidos',
+            label: 'Total de Pedidos: '+totalP,
             data: dataSet,
             backgroundColor: ['#FF6384', '#4BC0C0', '#FFCE56', '#E7E9ED', '#36A2EB'],
           },
         ],
       });
-      console.log(obj)
     }
     catch(error)
     {
@@ -290,7 +304,9 @@ const Dashboard = () => {
       setPSemana(rango);
       const labels = [];
       const dataSet = [];
+      var totalP = 0;
       obj.forEach(item => {
+        totalP += item.TotalPedidos;
         labels.push(item.Planta);
         dataSet.push(item.TotalPedidos);
       });
@@ -299,7 +315,7 @@ const Dashboard = () => {
         labels: labels,
         datasets: [
           {
-            label: 'Total de Pedidos',
+            label: 'Total de Pedidos:'+totalP,
             data: dataSet,
             backgroundColor: ['#FF6384', '#4BC0C0', '#FFCE56', '#E7E9ED', '#36A2EB'],
           },
@@ -313,7 +329,6 @@ const Dashboard = () => {
 
     }
   }
-
   async function getPedidosPS()
   {
     try
@@ -333,7 +348,9 @@ const Dashboard = () => {
       const dataSet = [];
       const rango = format(obj[0].FcaIni, 'yyyy/MM/dd')+"-"+format(obj[0].FcaFin, 'yyyy/MM/dd');
       setPSemanaP(rango);
+      var totalP = 0;
       obj.forEach(item => {
+        totalP += item.TotalPedidos;
         labels.push(item.Planta);
         dataSet.push(item.TotalPedidos);
       });
@@ -342,6 +359,7 @@ const Dashboard = () => {
         labels: labels,
         datasets: [
           {
+            label:'Total de Pedidos: '+totalP,
             data: dataSet,
             backgroundColor: ['#FF6384', '#4BC0C0', '#FFCE56', '#E7E9ED', '#36A2EB'],
           },
@@ -355,7 +373,51 @@ const Dashboard = () => {
 
     } 
   }
+  async function getPedidosM()
+  {
+    try
+    {
+      let confi_ax = {
+        headers:
+        {
+            'Cache-Control': 'no-cache',
+            'Content-Type': 'application/json',
+            "Authorization": "Bearer "+cookies.get('token'),
+        },
+      };
+      //------------------------------------------------------------------------------------------------------------------------------------------------------
+      const response = await axios.get(baseUrl2+'Operaciones/GetPedidosM', confi_ax);
+      const obj = response.data[0].Rows;
+      const labels = [];
+      const dataSet = [];
+      console.log(obj)
+      const rango = format(obj[0].FI, 'yyyy/MM/dd')+"-"+format(obj[0].FF, 'yyyy/MM/dd');
+      setPMes(rango);
+      var totalP = 0;
+      obj.forEach(item => {
+        totalP += item.TotalPedidos;
+        labels.push(item.Planta);
+        dataSet.push(item.TotalPedidos);
+      });
+      // Actualiza el estado con los nuevos datos
+      setChartDataM({
+        labels: labels,
+        datasets: [
+          {
+            label: 'Total de Pedidos: '+totalP,
+            data: dataSet,
+            backgroundColor: ['#FF6384', '#4BC0C0', '#FFCE56', '#E7E9ED', '#36A2EB'],
+          },
+        ],
+      });
+    }
+    catch(error)
+    {
+      Swal.fire("Error", "Ocurrio un error, vuelva a intentarlo", "error");
+    }finally{
 
+    } 
+  }
   return (
     <>
       <WidgetsDropdown className="mb-4" />
@@ -366,7 +428,7 @@ const Dashboard = () => {
             <CCardHeader>Pedidos Por Día <b>{format(fDiaria, 'yyyy/MM/dd')}</b></CCardHeader>
             <CCardBody>
               <CChart
-              type='line'
+                type="bar"
                 data={chartDataD}
               />
             </CCardBody>
@@ -387,8 +449,20 @@ const Dashboard = () => {
           <CCard className="mb-4">
             <CCardHeader>Proyección por Semana Proxima <b>{rPSemanaP}</b></CCardHeader>
             <CCardBody>
-              <CChartPolarArea
+              <CChart
+                type="bar"
                 data={chartDataPS}
+              />
+            </CCardBody>
+          </CCard>
+        </CCol>
+        <CCol xs={12} md={6}>
+          <CCard className="mb-4">
+            <CCardHeader>Proyección por Mes <b>{rPMes}</b></CCardHeader>
+            <CCardBody>
+              <CChart
+                type="bar"
+                data={chartDataM}
               />
             </CCardBody>
           </CCard>

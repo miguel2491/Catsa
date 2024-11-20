@@ -15,7 +15,8 @@ const LPedidos = React.lazy(() => import('./views/logistica/LPedidos'))
 const PLinea = React.lazy(() => import('./views/logistica/PLinea'))
 //REPORTES
 const CostosProductos = React.lazy(() => import('./views/reportes/CProductos'))
-const RPedidos = React.lazy(() => import('./views/reportes/PedidosMetraje'))
+const RPedidosVenta = React.lazy(() => import('./views/reportes/PedidosVenta'))
+const RPedidosMetro = React.lazy(() => import('./views/reportes/PedidosMetro'))
 // EXTRAS
 const PreCierre = React.lazy(() => import('./views/utils/PreCierre'))
 const InterfazInt = React.lazy(() => import('./views/utils/InterfazInt'))
@@ -127,7 +128,8 @@ const routes = [
   // { path: '/notifications/toasts', name: 'Toasts', element: Toasts },
   // { path: '/widgets', name: 'Widgets', element: Widgets },
   { path: '/reportes/CostosProductos', name: 'CostosProductos', element: CostosProductos },
-  { path: '/reportes/PedidosMetraje', name: 'PedidosMetraje', element: RPedidos },
+  { path: '/reportes/PedidosMetro', name: 'PedidosMetro', element: RPedidosMetro },
+  { path: '/reportes/PedidosVenta', name: 'PedidosVenta', element: RPedidosVenta },
   { path: '/utils/PreCierres', name: 'PreCierres', element: PreCierre },
   { path: '/utils/InterfazInt', name: 'InterfazInt', element: InterfazInt },
   { path: '/utils/UpdateProd', name: 'UpdateProd', element: UpdateProd },
