@@ -79,6 +79,7 @@ const Login = () => {
           confi_ax
         );
         const userInfo = response.data;
+        console.log(response.data);
         cookies.set("idUsuario", userInfo.id, { path: "/" });
         cookies.set("Usuario", username, { path: "/" });
         setTimeout(() => { navigate("/dashboard"); },3000)

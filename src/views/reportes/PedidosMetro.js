@@ -32,7 +32,7 @@ const baseUrl2="http://localhost:2548/api/";
 
 const currentDate = new Date();
 
-const PedidosMetraje = () => {
+const PedidosMetro = () => {
   const [loading, setLoading] = useState(false);
   const [percentage, setPercentage] = useState(0);
   const [visible, setVisible] = useState(false)
@@ -141,7 +141,7 @@ const PedidosMetraje = () => {
   return (
     <>
       <CContainer fluid>
-        <h1>Reporte Pedidos</h1>
+        <h1>Reporte Pedidos Metro</h1>
         <CRow>
           <CCol sm="auto">
             <FechaF 
@@ -220,4 +220,4 @@ const PedidosMetraje = () => {
   )
 }
 
-export default PedidosMetraje
+export default PedidosMetro

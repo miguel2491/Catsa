@@ -2,6 +2,7 @@ import React, { useEffect, useRef } from 'react'
 import { NavLink } from 'react-router-dom'
 import { useSelector, useDispatch } from 'react-redux'
 import Cookies from 'universal-cookie'
+import { useNavigate } from 'react-router-dom';
 
 import {
   CContainer,
@@ -21,6 +22,7 @@ import {
   cilBell,
   cilContrast,
   cilEnvelopeOpen,
+  cilHome,
   cilList,
   cilMenu,
   cilMoon,
@@ -36,6 +38,7 @@ const AppHeader = () => {
   const cookies = new Cookies();
   const dispatch = useDispatch()
   const sidebarShow = useSelector((state) => state.sidebarShow)
+  const navigate = useNavigate();
 
   useEffect(() => {
     document.addEventListener('scroll', () => {
@@ -43,6 +46,10 @@ const AppHeader = () => {
         headerRef.current.classList.toggle('shadow-sm', document.documentElement.scrollTop > 0)
     })
   }, [])
+
+  const navDash = () => {
+    navigate('/dashboard');
+  }
 
   return (
     <CHeader position="sticky" className="mb-4 p-0" ref={headerRef}>
@@ -68,7 +75,12 @@ const AppHeader = () => {
         </CHeaderNav> */}
         <CHeaderNav className="ms-auto">
           <CNavItem>
-          <div className="h-300 text-opacity-75">Bienvenido: <b>{cookies.get('Usuario')}</b></div>
+            <CNavLink href="#">
+              <CIcon icon={cilHome} size="lg" onClick={navDash} />
+            </CNavLink>
+          </CNavItem>
+          <CNavItem>
+            <div className="h-300 text-opacity-75">Bienvenido: <b>{cookies.get('Usuario')}</b></div>
           </CNavItem>
           <CNavItem>
             <CNavLink href="#">
