@@ -21,13 +21,15 @@ const cookies = new Cookies();
 const baseUrl="http://apicatsa.catsaconcretos.mx:2543/api/";
 const baseUrl2="http://localhost:2548/api/";
 const nav_ = [];
-const userIsAdmin = Rol('Administrador'); 
-const userIsVentas = Rol('CyC'); 
-const userIsProduccion = Rol('CyC');
-const permisoIsAP = Rol('CyC');
-const permisoIsPC = Rol('CyC');
-const permisoIsII = Rol('CyC');
-const permisoIsUMB = Rol('CyC');
+var userIsAdmin = false; 
+var userIsVentas = false;
+if(cookies.get('roles') != undefined)
+{
+  console.log(cookies.get('roles'))
+  userIsAdmin = Rol('Admin'); 
+  userIsVentas = Rol('AdminCICAT');
+}
+ 
 //=============================================================================
 
 const _nav = [
@@ -82,7 +84,7 @@ const _nav = [
       }
     ]
   }]:[]),
-  ...(userIsVentas ? [
+  ...(userIsAdmin ? [
   {
     component: CNavTitle,
     name: 'Produccion',
@@ -100,12 +102,12 @@ const _nav = [
       }
     ],
   }]:[]),
-  ...(userIsAdmin || userIsProduccion ? [
+  ...(userIsAdmin || userIsAdmin ? [
   {
     component: CNavTitle,
     name: 'Administración',
   },
-  ...(permisoIsPC ? [{
+  ...(userIsAdmin ? [{
     component: CNavGroup,
     name: 'Usuarios',
     to: '/base',
@@ -124,24 +126,24 @@ const _nav = [
     to: '/utils',
     icon: <CIcon icon={cilCursor} customClassName="nav-icon" />,
     items: [
-      ...(permisoIsPC ? [
+      ...(userIsAdmin ? [
       {
         component: CNavItem,
         name: 'PreCierres',
         to: '/utils/PreCierres',
       }]:[]),
-      ...(permisoIsII ? [{
+      ...(userIsAdmin ? [{
         component: CNavItem,
         name: 'INTERFAZ INTELISIS',
         to: '/utils/InterfazIntelisis',
       }]:[]),
-      ...(permisoIsAP ? [
+      ...(userIsAdmin ? [
       {
         component: CNavItem,
         name: 'Actualizar Producción',
         to: '/utils/UpdateProd',
       }]:[]),
-      ...(permisoIsUMB ? [{
+      ...(userIsAdmin ? [{
         component: CNavItem,
         name: 'Actualizar MB',
         to: '/utils/UpdateMB',
