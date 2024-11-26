@@ -23,17 +23,22 @@ const baseUrl2="http://localhost:2548/api/";
 const nav_ = [];
 var userIsAdmin = false; 
 var userIsVentas = false;
+var userIsOperacion = false;
+var userIsGerenteP = false;
 if(cookies.get('roles') != undefined)
 {
   console.log(cookies.get('roles'))
   userIsAdmin = Rol('Admin'); 
   userIsVentas = Rol('AdminCICAT');
+  userIsOperacion = Rol('Operaciones');
+  userIsGerenteP = Rol('GerentePlanta');
+
 }
  
 //=============================================================================
 
 const _nav = [
-  ...(userIsVentas ? [
+  ...((userIsVentas || userIsAdmin) ? [
   {
     component: CNavTitle,
     name: 'Ventas',
@@ -84,10 +89,10 @@ const _nav = [
       }
     ]
   }]:[]),
-  ...(userIsAdmin ? [
+  ...((userIsAdmin || userIsOperacion || userIsGerenteP) ? [
   {
     component: CNavTitle,
-    name: 'Produccion',
+    name: 'Operaciones',
   },
   {
     component: CNavGroup,
@@ -102,7 +107,7 @@ const _nav = [
       }
     ],
   }]:[]),
-  ...(userIsAdmin || userIsAdmin ? [
+  ...((userIsAdmin || userIsOperacion || userIsGerenteP) ? [
   {
     component: CNavTitle,
     name: 'Administración',
@@ -126,7 +131,7 @@ const _nav = [
     to: '/utils',
     icon: <CIcon icon={cilCursor} customClassName="nav-icon" />,
     items: [
-      ...(userIsAdmin ? [
+      ...((userIsAdmin || userIsOperacion || userIsGerenteP) ? [
       {
         component: CNavItem,
         name: 'PreCierres',
@@ -137,7 +142,7 @@ const _nav = [
         name: 'INTERFAZ INTELISIS',
         to: '/utils/InterfazIntelisis',
       }]:[]),
-      ...(userIsAdmin ? [
+      ...((userIsAdmin || userIsOperacion || userIsGerenteP) ? [
       {
         component: CNavItem,
         name: 'Actualizar Producción',

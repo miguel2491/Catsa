@@ -132,7 +132,7 @@ const Resumen = () => {
         catch(error)
         {
             console.log(error);
-            Swal.fire("Error", "Ocurrio un error, vuelva a intentarlo", "error");
+            Swal.fire("Error", "Ocurrio un error al cargar Movimientos, vuelva a intentarlo", "error");
         }finally{
             clearInterval(interval); // Limpiar el intervalo
             setLoading(false);

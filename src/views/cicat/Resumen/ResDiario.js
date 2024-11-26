@@ -70,7 +70,7 @@ const ResDiario = forwardRef((props, ref) => {
             //------------------------------------------------------------------------------------------------------------------------------------------------------
             const response = await axios.get(baseUrl+'Operaciones/GetResumen/'+planta+','+fcaI+','+fcaF+',R', confi_ax);
             var obj = response.data[0].Rows;
-            //console.log(obj);
+            console.log(obj);
             if(obj.length > 0)
             {
                 setResumen(obj);
@@ -79,7 +79,7 @@ const ResDiario = forwardRef((props, ref) => {
         } 
         catch(error)
         {
-            Swal.fire("Error", "Ocurrio un error, vuelva a intentarlo", "error");
+            Swal.fire("Error", "Ocurrio un error Resumen, vuelva a intentarlo", "error");
         }finally{
             clearInterval(interval); // Limpiar el intervalo
             setLoading(false);
