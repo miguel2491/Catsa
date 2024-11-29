@@ -61,6 +61,7 @@ const ResSalidas = forwardRef((props, ref) => {
             //------------------------------------------------------------------------------------------------------------------------------------------------------
             const response = await axios.get(baseUrl+'Operaciones/GetResumen/'+planta+','+fcaI+','+fcaF+',DS', confi_ax);
             var obj =  response.data[0].Rows;
+            console.log(obj)
             putSalidas(obj);
             putHeaders(Object.keys(obj[0]));
             //console.log(obj);
@@ -102,7 +103,7 @@ const ResSalidas = forwardRef((props, ref) => {
                                     </CTableRow>
                                 ):(
                                     dSalidas.map((itemd,index) =>(
-                                        <CTableRow key={itemd.Fecha_Salida || index}>
+                                        <CTableRow key={index}>
                                             <CTableDataCell>{format(itemd.Fecha_Salida, 'yyyy/MM/dd')}</CTableDataCell>
                                             <CTableDataCell>{itemd.Mov}</CTableDataCell>
                                             {

@@ -23,8 +23,6 @@ import {
 import Cookies from 'universal-cookie'
 import axios from 'axios'
 import Swal from "sweetalert2";
-import ProgressBar from "@ramonak/react-progress-bar";
-import {FormatoFca, Fnum} from '../../Utilidades/Tools.js'
 import { format } from 'date-fns';
 import CIcon from '@coreui/icons-react'
 import {
@@ -50,22 +48,13 @@ import {
   cilUserFemale,
 } from '@coreui/icons'
 
-import avatar1 from 'src/assets/images/avatars/1.jpg'
-import avatar2 from 'src/assets/images/avatars/2.jpg'
-import avatar3 from 'src/assets/images/avatars/3.jpg'
-import avatar4 from 'src/assets/images/avatars/4.jpg'
-import avatar5 from 'src/assets/images/avatars/5.jpg'
-import avatar6 from 'src/assets/images/avatars/6.jpg'
-
 import WidgetsBrand from '../widgets/WidgetsBrand'
 import WidgetsDropdown from '../widgets/WidgetsDropdown'
 import MainChart from './MainChart'
 
 const cookies = new Cookies();
 const baseUrl="http://apicatsa.catsaconcretos.mx:2543/api/";
-const baseUrl2="http://localhost:2548/api/";
 const currentDate = new Date();
-
 
 const Dashboard = () => {
   const userIsA = true;

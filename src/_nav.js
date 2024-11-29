@@ -14,25 +14,23 @@ import {
   cilGraph
 } from '@coreui/icons'
 import { CNavGroup, CNavItem, CNavTitle } from '@coreui/react'
-import axios from 'axios';
 import {Rol} from './Utilidades/Roles'
 
 const cookies = new Cookies();
-const baseUrl="http://apicatsa.catsaconcretos.mx:2543/api/";
-const baseUrl2="http://localhost:2548/api/";
 const nav_ = [];
 var userIsAdmin = false; 
 var userIsVentas = false;
 var userIsOperacion = false;
 var userIsGerenteP = false;
+//console.log(cookies.get('roles'));
 if(cookies.get('roles') != undefined)
 {
-  console.log(cookies.get('roles'))
   userIsAdmin = Rol('Admin'); 
   userIsVentas = Rol('AdminCICAT');
   userIsOperacion = Rol('Operaciones');
   userIsGerenteP = Rol('GerentePlanta');
-
+}else{
+  //window.location.reload();
 }
  
 //=============================================================================

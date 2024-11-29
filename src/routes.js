@@ -17,6 +17,7 @@ const PLinea = React.lazy(() => import('./views/logistica/PLinea'))
 const CostosProductos = React.lazy(() => import('./views/reportes/CProductos'))
 const RPedidosVenta = React.lazy(() => import('./views/reportes/PedidosVenta'))
 const RCotizaciones = React.lazy(() => import('./views/reportes/RCotizaciones'))
+const RBPedido = React.lazy(() => import('./views/reportes/RBPedido'))
 // EXTRAS
 const PreCierre = React.lazy(() => import('./views/utils/PreCierre'))
 const InterfazInt = React.lazy(() => import('./views/utils/InterfazInt'))
@@ -130,6 +131,7 @@ const routes = [
   { path: '/reportes/CostosProductos', name: 'CostosProductos', element: CostosProductos },
   { path: '/reportes/RCotizaciones', name: 'RCotizaciones', element: RCotizaciones },
   { path: '/reportes/PedidosVenta', name: 'PedidosVenta', element: RPedidosVenta },
+  { path: '/reportes/RBPedido', name: 'BuscarPedido', element: RBPedido },
   { path: '/utils/PreCierres', name: 'PreCierres', element: PreCierre },
   { path: '/utils/InterfazInt', name: 'InterfazInt', element: InterfazInt },
   { path: '/utils/UpdateProd', name: 'UpdateProd', element: UpdateProd },
