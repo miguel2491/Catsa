@@ -3,10 +3,8 @@ import { useNavigate } from "react-router-dom";
 import {
   CModal,
   CModalHeader,
-  CModalTitle,
   CModalBody,
-  CModalFooter,
-  CRow
+  CModalFooter
 } from '@coreui/react';
 import Cookies from "universal-cookie";
 import axios from "axios";
@@ -14,6 +12,7 @@ import cn from "classnames";
 import Swal from "sweetalert2";
 import "./login.css";
 import load from '../../../../public/loading.gif'
+import {getRol} from '../../../Utilidades/Funciones'
 
 const Login = () => {
   const [switched, setSwitched] = useState(false);
@@ -22,7 +21,6 @@ const Login = () => {
   const [visible, setVisible] = useState(false);
   const cookies = new Cookies();
   const navigate = useNavigate();
-  const toaster = useRef();
 
   const baseUrl = "http://apicatsa.catsaconcretos.mx:2543/api/";
   
@@ -79,13 +77,15 @@ const Login = () => {
           confi_ax
         );
         const userInfo = response.data;
-        console.log(response.data);
         cookies.set("idUsuario", userInfo.id, { path: "/" });
         cookies.set("Usuario", username, { path: "/" });
-        setTimeout(() => { navigate("/dashboard"); },3000)
+        getRol();
+        setTimeout(() => { navigate("/dashboard"); },2000)
         
       } catch (error) {
         console.error(error);
+        Swal.fire("Error", "Usuario/Contraseña incorrecta, vuelve a intentar", "error");
+        setVisible(visible)
       }
     }
   }

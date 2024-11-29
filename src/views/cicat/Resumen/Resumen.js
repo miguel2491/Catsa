@@ -167,25 +167,25 @@ return (
         </CModal>
             <h3>Control de Inventarios</h3>
             <CRow>
-                <CCol xs={2}>
+                <CCol xs={6} md={2}>
                     <FechaI 
                         vFechaI={vFechaI} 
                         cFechaI={cFechaI} 
                     />
                 </CCol>
-                <CCol xs={2}>
+                <CCol xs={6} md={2}>
                     <FechaF 
                         vFcaF={vFcaF} 
                         mFcaF={mFcaF}
                     />
                 </CCol>
-                <CCol xs={2}>
+                <CCol xs={6} md={2}>
                     <Plantas  
                         mCambio={mCambio}
                         plantasSel={plantasSel}
                     />
                 </CCol>
-                <CCol xs={3} className='mt-3'>
+                <CCol xs={6} md={3} className='mt-3'>
                     <CButton color='primary' onClick={getDatos}>
                       <CIcon icon={cilSearch} className="me-2" />
                        Buscar
@@ -196,7 +196,7 @@ return (
                     </CButton>
                 </CCol>
                 
-                <CCol xs={2}>
+                <CCol xs={6} md={2}>
                     <label>Medida</label>
                     <CFormSelect 
                         options={[
@@ -213,7 +213,7 @@ return (
                         <p></p>
                     ):(
                         dMov.map((itemd,index) => (
-                            <CCol xs={2} key={itemd.Mov || index}>
+                            <CCol xs={6} md={2} key={itemd.Mov || index}>
                                 <CWidgetStatsF
                                     className="mb-3"
                                     color="primary"
