@@ -15,4 +15,17 @@ export function Fnum(num)
       });
 }
 
+export function TiempoT(seconds)
+{
+     // Calcula las horas, minutos y segundos
+    const hours = Math.floor(seconds / 3600); // Dividir por 3600 para obtener las horas
+    const minutes = Math.floor((seconds % 3600) / 60); // Restar las horas y luego dividir por 60 para los minutos
+    const secs = seconds % 60; // Obtener el resto para los segundos
+
+    // Asegúrate de que siempre tenga 2 dígitos (por ejemplo, "05" en lugar de "5")
+    const formattedTime = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+
+    return formattedTime;
+}
+
 

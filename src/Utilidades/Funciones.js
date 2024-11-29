@@ -139,3 +139,28 @@ export async function getPedidoInd(npedido) {
         console.log(error);
     }
 }
+export async function getObraInd(obra, planta) {
+    try
+    {
+        let confi_ax = {
+            headers:
+            {
+                'Cache-Control': 'no-cache',
+                'Content-Type': 'application/json',
+                "Authorization": "Bearer "+cookies.get('token'),
+            },
+        };
+        //------------------------------------------------------------------------------------------------------------------------------------------------------
+        const response = await axios.get(baseUrl+'Logistica/GetObra/'+obra+","+planta, confi_ax);
+        var obj = response.data[0]?.Rows;
+        if(obj && obj.length > 0)
+        {
+            return obj
+        }else{return false}
+    } 
+    catch(error)
+    {
+        return false;
+        console.log(error);
+    }
+}
