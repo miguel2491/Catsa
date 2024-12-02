@@ -23,6 +23,7 @@ const PreCierre = React.lazy(() => import('./views/utils/PreCierre'))
 const InterfazInt = React.lazy(() => import('./views/utils/InterfazInt'))
 const UpdateProd = React.lazy(() => import('./views/utils/UpdateProd'))
 const UpdateMB = React.lazy(() => import('./views/utils/UpdateMB'))
+const QR = React.lazy(() => import('./views/utils/QR'))
 
 //==================================================================================================================================
 // Base
@@ -136,6 +137,7 @@ const routes = [
   { path: '/utils/InterfazInt', name: 'InterfazInt', element: InterfazInt },
   { path: '/utils/UpdateProd', name: 'UpdateProd', element: UpdateProd },
   { path: '/utils/UpdateMB', name: 'UpdateMB', element: UpdateMB },  
+  { path: '/utils/QR', name: 'QR', element: QR },
 ]
 
 export default routes
