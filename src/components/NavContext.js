@@ -152,6 +152,11 @@ const NavProvider = ({ children }) => {
                   component: CNavItem,
                   name: 'Actualizar MB',
                   to: '/utils/UpdateMB',
+                }]:[]),
+                ...(userIsAdmin ? [{
+                  component: CNavItem,
+                  name: 'QR',
+                  to: '/utils/QR',
                 }]:[])
               ],
             }]:[]),
