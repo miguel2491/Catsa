@@ -3,7 +3,7 @@ import Cookies from 'universal-cookie';
 import { Rol } from '../Utilidades/Roles'; // Asegúrate de tener este archivo
 import {
     cilCursor,
-    cilDrop,
+    cilFilter,
     cilCalendarCheck,
     cilWallet,
     cilUser,
@@ -12,7 +12,10 @@ import {
     cilCheck,
     cilGlobeAlt,
     cilGraph,
-    cilSearch
+    cilSearch,
+    cilCode,
+    cilStar,
+    cilClipboard
   } from '@coreui/icons'
 import { CNavGroup, CNavItem, CNavTitle } from '@coreui/react'
 import CIcon from '@coreui/icons-react'
@@ -36,13 +39,15 @@ const NavProvider = ({ children }) => {
     const userIsVentas = Rol('AdminCICAT');
     const userIsOperacion = Rol('Operaciones');
     const userIsGerenteP = Rol('GerentePlanta');
-
+    const userIsFinanzas = Rol('Finanzas');
+    const userIsDirector = Rol('Direccion');
     nav = [
-        ...((userIsVentas || userIsAdmin) ? [
+          ...((userIsVentas || userIsAdmin || userIsDirector || userIsFinanzas || userIsGerenteP) ? [
             {
               component: CNavTitle,
               name: 'Ventas',
             },
+            ...((userIsVentas || userIsAdmin || userIsDirector) ? [
             {
               component: CNavGroup,
               name: 'Cotizaciones',
@@ -68,27 +73,65 @@ const NavProvider = ({ children }) => {
                   icon: <CIcon icon={cilCalculator} customClassName="nav-icon" />,
                 }
               ]
-            },
+            }]:[]),
+            ...((userIsVentas || userIsAdmin || userIsDirector || userIsFinanzas || userIsGerenteP) ? [
             {
               component: CNavGroup,
               name: 'Pedidos',
               to: '/theme/admin',
               icon: <CIcon icon={cilCalendarCheck} customClassName="nav-icon" />,
               items:[
+                ...((userIsVentas || userIsAdmin || userIsGerenteP || userIsFinanzas || userIsDirector) ? [
                 {
                   component: CNavItem,
                   name: 'Ver Pedidos',
                   to: '/logistica/LPedidos',
                   icon: <CIcon icon={cilCheck} customClassName="nav-icon" />,
-                },
+                }]:[]),
+                ...((userIsVentas || userIsAdmin || userIsGerenteP || userIsFinanzas || userIsDirector) ? [
+                {
+                  component: CNavItem,
+                  name: 'Calendario',
+                  to: '/logistica/Pedidos/PedidosC',
+                  icon: <CIcon icon={cilCalendar} customClassName="nav-icon" />,
+                }]:[]),
+                ...((userIsVentas || userIsAdmin || userIsDirector) ? [
                 {
                   component: CNavItem,
                   name: 'Pedidos en línea',
                   to: '/logistica/PLinea',
                   icon: <CIcon icon={cilGlobeAlt} customClassName="nav-icon" />,
-                }
+                }]:[])
               ]
             }]:[]),
+            ...((userIsVentas || userIsAdmin || userIsDirector || userIsFinanzas || userIsGerenteP) ? [
+              {
+                component: CNavGroup,
+                name: 'Reporte Ventas',
+                to: '/theme/admin',
+                icon: <CIcon icon={cilFilter} customClassName="nav-icon" />,
+                items:[
+                  {
+                    component: CNavItem,
+                    name: 'Comisiones',
+                    to: '/reportes/RComision',
+                    icon: <CIcon icon={cilClipboard} customClassName="nav-icon" />,
+                  },
+                  {
+                    component: CNavItem,
+                    name: 'Proyección',
+                    to: '/reportes/RProyeccion',
+                    icon: <CIcon icon={cilGraph} customClassName="nav-icon" />,
+                  },//]:[]),
+                  {
+                    component: CNavItem,
+                    name: 'Cartera',
+                    to: '/ventas/Cartera',
+                    icon: <CIcon icon={cilWallet} customClassName="nav-icon" />,
+                  }
+                ]
+              }]:[]),
+          ]:[]),
             ...((userIsAdmin || userIsOperacion || userIsGerenteP) ? [
             {
               component: CNavTitle,
@@ -157,6 +200,22 @@ const NavProvider = ({ children }) => {
                   component: CNavItem,
                   name: 'QR',
                   to: '/utils/QR',
+                }]:[])
+              ],
+            }]:[]),
+            ...((userIsAdmin) ? [
+            {
+              component: CNavGroup,
+              name: 'Interfaz',
+              to: '/interfaz',
+              icon: <CIcon icon={cilCode} customClassName="nav-icon" />,
+              items: [
+                ...((userIsAdmin) ? [
+                {
+                  component: CNavItem,
+                  name: 'Productos',
+                  icon: <CIcon icon={cilStar} customClassName="nav-icon" />,
+                  to: '/interfaz/Interfaz',
                 }]:[])
               ],
             }]:[]),

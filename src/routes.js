@@ -8,16 +8,23 @@ const Typography = React.lazy(() => import('./views/theme/typography/Typography'
 const LCotizaciones = React.lazy(() => import('./views/ventas/LCotizaciones'))
 const LPreCotizaciones = React.lazy(() => import('./views/ventas/LPreCotizaciones'))
 const Cotizador = React.lazy(() => import('./views/ventas/Cotizador'))
+const RCartera = React.lazy(() => import('./views/ventas/Cartera'))
+
 //PRODUCCION
 const RCicat = React.lazy(() => import('./views/cicat/Resumen/Resumen'))
 //LOGISTICA
 const LPedidos = React.lazy(() => import('./views/logistica/LPedidos'))
 const PLinea = React.lazy(() => import('./views/logistica/PLinea'))
+const PedidosC = React.lazy(() => import('./views/logistica/Pedidos/PedidosC'))
+//INTERFAZ
+const IProducto = React.lazy(() => import('./views/interfaz/Interfaz'))
 //REPORTES
 const CostosProductos = React.lazy(() => import('./views/reportes/CProductos'))
 const RPedidosVenta = React.lazy(() => import('./views/reportes/PedidosVenta'))
 const RCotizaciones = React.lazy(() => import('./views/reportes/RCotizaciones'))
 const RBPedido = React.lazy(() => import('./views/reportes/RBPedido'))
+const RComision = React.lazy(() => import('./views/reportes/RComision'))
+const RProyeccion = React.lazy(() => import('./views/reportes/RProyeccion'))
 // EXTRAS
 const PreCierre = React.lazy(() => import('./views/utils/PreCierre'))
 const InterfazInt = React.lazy(() => import('./views/utils/InterfazInt'))
@@ -81,11 +88,17 @@ const routes = [
   { path: '/ventas/LCotizacion', name: 'Cotizaciones', element:LCotizaciones },
   { path: '/ventas/LPreCotizacion', name: 'PreCotizaciones', element:LPreCotizaciones },
   { path: '/ventas/Cotizador', name: 'Cotizador', element:Cotizador },
+  { path: '/reportes/RComision', name: 'Comisiones', element:RComision },
+  { path: '/ventas/RCartera', name: 'Cartera', element:RCartera },
+  { path: '/reportes/RProyeccion', name: 'Proyeccion', element:RProyeccion },
   //PRODUCCION
   { path: '/Cicat/Resumen', name: 'Resumen', element:RCicat },
   //LOGISTICA
   { path: '/logistica/LPedidos', name: 'Pedidos', element:LPedidos },
   { path: '/logistica/PLinea', name: 'Pedidos Linea', element:PLinea },
+  { path: '/logistica/Pedidos/PedidosC', name: 'PedidosC', element:PedidosC },
+  // INTERFAZ
+  { path: '/interfaz/Interfaz', name: 'IProducto', element:IProducto },
   // { path: '/panel', name: 'Panel', element: Dashboard },
   // { path: '/theme', name: 'Theme', element: Colors, exact: true },
   // { path: '/theme/colors', name: 'Colors', element: Colors },

@@ -2,11 +2,17 @@ import React,{useEffect, useState, useRef} from 'react'
 import Cookies from 'universal-cookie'
 import axios from 'axios'
 import Swal from "sweetalert2";
+import ProgressBar from "@ramonak/react-progress-bar";
 
 import {
   CContainer,
   CRow,
   CCol,
+  CModal,
+    CModalHeader,
+    CModalTitle,
+    CModalBody,
+    CModalFooter,
   CButton
 } from '@coreui/react'
 
@@ -17,9 +23,11 @@ import { cilSearch } from '@coreui/icons';
 
 const cookies = new Cookies();
 const baseUrl="http://apicatsa.catsaconcretos.mx:2543/api/";
-const baseUrl2="http://localhost:2548/api/";
 
 const CProductos = () => {
+  const [loading, setLoading] = useState(false);
+  const [percentage, setPercentage] = useState(0);
+  const [visible, setVisible] = useState(false);// Modal Cargando
   const [vFcaF, setFechaFin] = useState(null);
   const [posts, setPosts] = useState([]);
   const opcionesFca = {
@@ -41,10 +49,20 @@ const CProductos = () => {
     setFechaFin(fcaF.toLocaleDateString('en-US',opcionesFca));
   };
   const sendGetRCP = () =>{
-    GetRCProductos(vFcaF)
+    setLoading(true);
+    setVisible(true);
+    setPercentage(0);
+    GetRCProductos(vFcaF);
+
 }
   async function GetRCProductos(fechaF)
   {
+    const interval = setInterval(() => {
+      setPercentage(prev => {
+      if (prev < 90) return prev + 10;
+      return prev;
+      });
+    }, 5000);
     if(vFcaF != "")
     {
       try{
@@ -60,13 +78,19 @@ const CProductos = () => {
         const fcaFin = vFcaF.split('/');
         let auxFcaF = fcaFin[2]+"-"+fcaFin[0]+"-"+fcaFin[1];
         //--------------------------------------------------
-          axios.get(baseUrl2+'Reportes/GetCostoProducto/'+auxFcaF,confi_ax)
+          axios.get(baseUrl+'Reportes/GetCostoProducto/'+auxFcaF,confi_ax)
           .then(response=>{
             setPosts(response.data)
             console.log(response.data);
+            setPercentage(100);
+            clearInterval(interval); // Limpiar el intervalo
+            setLoading(false);
+            setVisible(false);
             return response.data;
           })
           .catch(err=>{
+            setLoading(false);
+            setVisible(false);
             if (err.response) {
               // El servidor respondió con un código de estado fuera del rango de 2xx
               console.error('Error de Respuesta:', err.response.data);
@@ -87,9 +111,10 @@ const CProductos = () => {
         //=============================================================================================================================  
       } catch(error){
         console.log(error);
+        setLoading(false);
+        setVisible(false);
       }
     }
-    
   }
   return (
     <>
@@ -111,6 +136,25 @@ const CProductos = () => {
         </CRow>
       </CContainer>
       <TabulatorG titulo={'RCP'} posts={posts} />
+      <CModal
+          backdrop="static"
+          visible={visible}
+          onClose={() => setVisible(false)}
+          aria-labelledby="StaticBackdropExampleLabel"
+      >
+          <CModalHeader>
+              <CModalTitle id="StaticBackdropExampleLabel">Cargando...</CModalTitle>
+          </CModalHeader>
+          <CModalBody>
+              {loading && (
+                  <CRow className="mt-3">
+                      <ProgressBar completed={percentage} />
+                      <p>Cargando: {percentage}%</p>
+                  </CRow>
+              )}
+          </CModalBody>
+          <CModalFooter />
+      </CModal>
     </>
   )
 }
