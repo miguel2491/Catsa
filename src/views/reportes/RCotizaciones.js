@@ -361,7 +361,7 @@ const PedidosMetro = () => {
                     <CCardHeader>Mes en Curso <b>{rPMes}</b></CCardHeader>
                     <CCardBody>
                         <CChart
-                          type='pie'
+                          type='line'
                           data={chartDataM}
                         />
                     </CCardBody>
