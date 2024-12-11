@@ -34,4 +34,11 @@ h3, label{
 	max-width: 90%;
 }
 
+.oculto {
+	display: none;
+  }
+  
+  .visible {
+	display: block;
+  }
 

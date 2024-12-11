@@ -78,7 +78,8 @@ const RComision = () => {
             if (dcomisiones) {
                 setVisibleD(true)
                 console.log(dcomisiones);
-                setDataD(dcomisiones); 
+                setDataD(dcomisiones);
+                 
             } else {
                 Swal.fire("Error", "Ocurrió un error, vuelve a intentar", "error");
             }

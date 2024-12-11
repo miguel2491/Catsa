@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import ProgressBar from "@ramonak/react-progress-bar";
 import {
     CContainer,
@@ -46,6 +46,7 @@ const RProyeccion = () => {
     const [vAsesores, setAsesores] = useState([]);
     const [selectedAsesor, setSelectedAsesor] = useState('');
     const [newArray, setNewArray] = useState({});
+    const [objDiario, setObjDiario] = useState(0);
       //Diario
     const [chartDataD, setChartDataD] = useState({
         labels: [],
@@ -56,6 +57,8 @@ const RProyeccion = () => {
         },
         ],
     });
+    //Estilo
+    const [isDetalle, setIsDetalle] = useState(false);    
     
     const cFechaI = (fecha) => {
         const formattedDate = format(fecha, 'yyyy/MM/dd');
@@ -69,6 +72,12 @@ const RProyeccion = () => {
         setPlantas(event.target.value);
     };
 
+    useEffect(() => {
+        console.log('El valor actualizado de objDiario es:', objDiario);
+        // Aquí puedes realizar cualquier acción que dependa de `objDiario` actualizado
+      }, [objDiario]);  // Dependencia de `objDiario`
+    
+
     const getProyeccionAsesores = async () => {
         setLoading(true);
         setVisible(true); // Muestra el modal de carga
@@ -80,7 +89,8 @@ const RProyeccion = () => {
                 const objAsesores = proyecciones.asesores.data;
                 putHeaders(Object.keys(objAsesores[0]));
                 setData(objAsesores); 
-                setAsesores(objAsesores)
+                setAsesores(objAsesores);
+                setIsDetalle(true);
             } else {
                 Swal.fire("Error", "Ocurrió un error, vuelve a intentar", "error");
             }
@@ -122,7 +132,8 @@ const RProyeccion = () => {
         // Obtener el valor de "CAMPO 1"
         if (item.Asesor === selectedAsesor) {
             const campo1 = item["Asesor"];
-
+            const cOD = item["ObjDiario"];
+            setObjDiario(cOD);
         // Filtrar las fechas (todo lo que no sea "CAMPO 1", "CAMPO 2", o "CAMPO 3")
             const dates = Object.keys(item).filter(key => 
                 key !== 'Asesor' && 
@@ -143,7 +154,7 @@ const RProyeccion = () => {
                 [date]: item[date], // La fecha es la clave real, no "FechaX"
               }));        
         // Asociar "CAMPO 1" con los valores de las fechas
-            acc[campo1] = dateValues;
+            acc[campo1] = {dateValues,cOD};
         }
       return acc;
     }, {});
@@ -155,12 +166,46 @@ const RProyeccion = () => {
     
         // Ejecutar la extracción de datos cuando cambie el valor seleccionado
         if (value) {
-            console.log(vAsesores)
-          const result = extractDatesData(vAsesores, value);
-          console.log(result);
-          setNewArray(result); // Guardamos el resultado en el estado
+            const result = extractDatesData(vAsesores, value);
+            console.log(result);
+            const labels = [];
+            const dataSet = [];
+            const dataSetR = [];
+            // Iterar sobre todas las claves de result (los nombres dinámicos)
+            Object.keys(result).forEach(person => {
+                const { dateValues, cOD } = result[person];
+                dateValues.forEach(item => {
+                const date = Object.keys(item)[0]; // Obtener la fecha (clave)
+                const value = item[date]; // Obtener el valor asociado (número)
+                
+                // Verificar que el valor sea numérico antes de agregarlo
+                if (typeof value === 'number') {
+                    labels.push(date);
+                    dataSet.push(value);
+                    console.log(cOD);
+                    dataSetR.push(cOD);
+                }
+                });
+            });
+            
+            setChartDataD({
+                labels: labels,
+                datasets: [
+                  {
+                    label:"Volumen",
+                    data: dataSet,
+                    backgroundColor:['#FF6384', '#4BC0C0', '#FFCE56', '#E7E9ED', '#36A2EB','#005C53','#9FC131','#D6D58E'],
+                  },{
+                    label:"Objetivo Diario",
+                    data:dataSetR,
+                    type:'bar',
+                    borderWidth:1
+                  }
+                ],
+            });
+            setNewArray(result); // Guardamos el resultado en el estado
         } else {
-          setNewArray({}); // Si no hay selección, limpiar el resultado
+            setNewArray({}); // Si no hay selección, limpiar el resultado
         }
       };
 
@@ -238,7 +283,7 @@ const RProyeccion = () => {
             </CRow>
             <CRow className='mb-1 mt-2'>
                 <CCol xs={12} md={12}>
-                <CCard className="mb-2">
+                <CCard className={isDetalle ? 'visible' : 'oculto'}>
                     <CCardHeader>Asesor: <b>
                         <CFormSelect aria-label="Default select example" 
                             value={selectedAsesor}
@@ -258,30 +303,10 @@ const RProyeccion = () => {
                             )}
                         </CFormSelect>
                     </b></CCardHeader>
-                    <CCardBody>
+                    <CCardBody style={{background:'white'}}>
                             <CChart
                                 type='line'
-                                data={{
-                                labels: ["January", "February", "March", "April", "May", "June", "July"],
-                                datasets: [
-                                  {
-                                    label: "My First dataset",
-                                    backgroundColor: "rgba(220, 220, 220, 0.2)",
-                                    borderColor: "rgba(220, 220, 220, 1)",
-                                    pointBackgroundColor: "rgba(220, 220, 220, 1)",
-                                    pointBorderColor: "#fff",
-                                    data: [40, 20, 12, 39, 10, 40, 39, 80, 40]
-                                  },
-                                  {
-                                    label: "My Second dataset",
-                                    backgroundColor: "rgba(151, 187, 205, 0.2)",
-                                    borderColor: "rgba(151, 187, 205, 1)",
-                                    pointBackgroundColor: "rgba(151, 187, 205, 1)",
-                                    pointBorderColor: "#fff",
-                                    data: [50, 12, 28, 29, 7, 25, 12, 70, 60]
-                                  },
-                                ],
-                            }}
+                                data={chartDataD}
                             />
                     </CCardBody>
                 </CCard>
