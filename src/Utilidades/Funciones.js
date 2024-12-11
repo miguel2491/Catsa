@@ -156,6 +156,29 @@ export async function getProyeccion(FI, FF, planta, Tipo) {
         return false
     }
 }
+export async function getAllVendedores() {
+    try
+    {
+        let confi_ax = {
+            headers:
+            {
+                'Cache-Control': 'no-cache',
+                'Content-Type': 'application/json',
+                "Authorization": "Bearer "+cookies.get('token'),
+            },
+        };
+        //------------------------------------------------------------------------------------------------------------------------------------------------------
+        const response = await axios.get(baseUrl+'Usuarios/GetVendedores', confi_ax);
+        if (response.data.length > 0) {
+            return response.data;
+        }else{return false}
+    } 
+    catch(error)
+    {
+        console.log(error);
+        return false
+    }
+}
 // INTERFAZ
   // 
 export async function getProductoIF(planta, FI)

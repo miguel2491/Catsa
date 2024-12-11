@@ -89,7 +89,7 @@ const routes = [
   { path: '/ventas/LPreCotizacion', name: 'PreCotizaciones', element:LPreCotizaciones },
   { path: '/ventas/Cotizador', name: 'Cotizador', element:Cotizador },
   { path: '/reportes/RComision', name: 'Comisiones', element:RComision },
-  { path: '/ventas/RCartera', name: 'Cartera', element:RCartera },
+  { path: '/ventas/Cartera', name: 'Cartera', element:RCartera },
   { path: '/reportes/RProyeccion', name: 'Proyeccion', element:RProyeccion },
   //PRODUCCION
   { path: '/Cicat/Resumen', name: 'Resumen', element:RCicat },
