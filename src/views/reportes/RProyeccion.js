@@ -44,6 +44,8 @@ const RProyeccion = () => {
     const [vFcaF, setFechaFin] = useState(null);
     const [dHeaders, putHeaders] = useState([]);
     const [vAsesores, setAsesores] = useState([]);
+    const [selectedAsesor, setSelectedAsesor] = useState('');
+    const [newArray, setNewArray] = useState({});
       //Diario
     const [chartDataD, setChartDataD] = useState({
         labels: [],
@@ -113,6 +115,54 @@ const RProyeccion = () => {
         link.setAttribute('download', filename);
         link.click();
     };
+
+     // Función para extraer fechas y asociarlas con "CAMPO 1"
+    const extractDatesData = (data, selectedAsesor) => {
+        return data.reduce((acc, item) => {
+        // Obtener el valor de "CAMPO 1"
+        if (item.Asesor === selectedAsesor) {
+            const campo1 = item["Asesor"];
+
+        // Filtrar las fechas (todo lo que no sea "CAMPO 1", "CAMPO 2", o "CAMPO 3")
+            const dates = Object.keys(item).filter(key => 
+                key !== 'Asesor' && 
+                key !== 'Categoria' && 
+                key !== 'Porcentaje' && 
+                key !== 'Objetivo_ac' && 
+                key !== 'VolMin_Diario' && 
+                key !== 'ObjMensual' && 
+                key !== 'ObjDiario' && 
+                key !== 'AvanceReal' && 
+                key !== 'Promedio' && 
+                key !== 'Proyeccion' && 
+                key !== 'PorcAvance');
+  
+        // Obtener los valores de las fechas
+            //const dateValues = dates.map(date => item[date]);
+            const dateValues = dates.map((date) => ({
+                [date]: item[date], // La fecha es la clave real, no "FechaX"
+              }));        
+        // Asociar "CAMPO 1" con los valores de las fechas
+            acc[campo1] = dateValues;
+        }
+      return acc;
+    }, {});
+    };
+
+    const handleChange = (event) => {
+        const value = event.target.value;
+        setSelectedAsesor(value);
+    
+        // Ejecutar la extracción de datos cuando cambie el valor seleccionado
+        if (value) {
+            console.log(vAsesores)
+          const result = extractDatesData(vAsesores, value);
+          console.log(result);
+          setNewArray(result); // Guardamos el resultado en el estado
+        } else {
+          setNewArray({}); // Si no hay selección, limpiar el resultado
+        }
+      };
 
     return (
         <CContainer fluid>
@@ -190,8 +240,10 @@ const RProyeccion = () => {
                 <CCol xs={12} md={12}>
                 <CCard className="mb-2">
                     <CCardHeader>Asesor: <b>
-                        <CFormSelect aria-label="Default select example">
-                            <option selected>Seleccione...</option>
+                        <CFormSelect aria-label="Default select example" 
+                            value={selectedAsesor}
+                            onChange={handleChange}>
+                            <option value="">Seleccione...</option>
                             {vAsesores.length > 0 ? (
                                 vAsesores.map((itemd, index) => {
                                 const value = itemd.Asesor; // Suponiendo que 'Asesor' es el campo que deseas mostrar
