@@ -1,0 +1,261 @@
+import React, { useState } from 'react';
+import ProgressBar from "@ramonak/react-progress-bar";
+import {
+    CContainer,
+    CButton,
+    CRow,
+    CCol,
+    CTable,
+    CTableBody,
+    CTableHead,
+    CTableRow,
+    CTableHeaderCell,
+    CTableDataCell,
+    CModal,
+    CModalHeader,
+    CModalTitle,
+    CModalBody,
+    CModalFooter,
+    CCard,
+    CCardHeader,
+    CCardBody,
+    CFormSelect
+} from '@coreui/react';
+import '../../estilos.css';
+import Plantas from '../base/parametros/Plantas'
+import FechaI from '../base/parametros/FechaInicio'
+import FechaF from '../base/parametros/FechaFinal'
+import { CChart, CChartPolarArea, CChartRadar } from '@coreui/react-chartjs'
+import { CIcon } from '@coreui/icons-react';
+import { cilXCircle, cilSearch, cilX, cilCloudDownload,cilCameraControl, cilCheckCircle } from '@coreui/icons';
+import { getProyeccion } from '../../Utilidades/Funciones';
+import Swal from 'sweetalert2';
+import {FormatoFca, Fnum} from '../../Utilidades/Tools'
+import { format } from 'date-fns';
+
+const RProyeccion = () => {
+    const [loading, setLoading] = useState(false);
+    const [percentage, setPercentage] = useState(0);
+    const [visible, setVisible] = useState(false);// Modal Cargando
+    const [visibleD, setVisibleD] = useState(false);// Modal Detalle
+    const [data, setData] = useState([]); // Estado para almacenar los datos de la tabla
+    const [plantasSel , setPlantas] = useState('');
+    const [vFechaI, setFechaIni] = useState(null);
+    const [vFcaF, setFechaFin] = useState(null);
+    const [dHeaders, putHeaders] = useState([]);
+    const [vAsesores, setAsesores] = useState([]);
+      //Diario
+    const [chartDataD, setChartDataD] = useState({
+        labels: [],
+        datasets: [
+        {
+            data: [],
+            backgroundColor: ['#FF6384', '#4BC0C0', '#FFCE56', '#E7E9ED', '#36A2EB','#005C53','#9FC131','#D6D58E'],
+        },
+        ],
+    });
+    
+    const cFechaI = (fecha) => {
+        const formattedDate = format(fecha, 'yyyy/MM/dd');
+        setFechaIni(formattedDate);
+    };
+    const mFcaF = (fcaF) => {
+        const auxFca = format(fcaF, 'yyyy/MM/dd');
+        setFechaFin(auxFca);
+      };
+    const mCambio = (event) => {
+        setPlantas(event.target.value);
+    };
+
+    const getProyeccionAsesores = async () => {
+        setLoading(true);
+        setVisible(true); // Muestra el modal de carga
+
+        try {
+            const proyecciones = await getProyeccion(vFechaI,vFcaF,plantasSel,'0');
+            console.log(proyecciones);
+            if (proyecciones) {
+                const objAsesores = proyecciones.asesores.data;
+                putHeaders(Object.keys(objAsesores[0]));
+                setData(objAsesores); 
+                setAsesores(objAsesores)
+            } else {
+                Swal.fire("Error", "Ocurrió un error, vuelve a intentar", "error");
+            }
+        } catch (error) {
+            Swal.fire("Error", "No se pudo obtener la información", "error");
+        } finally {
+            setLoading(false);
+            setVisible(false); // Oculta el modal de carga
+        }
+    };
+
+    // Función para convertir a CSV
+    const convertArrayOfObjectsToCSV = (array) => {
+        if (!array || !array.length) return null;
+        const header = Object.keys(array[0]).join(','); // Extrae las claves como cabeceras
+        const rows = array.map(obj => Object.values(obj).join(',')); // Mapea los valores en cada fila
+        return [header, ...rows].join('\n'); // Une todo en una cadena CSV
+    };
+
+    const downloadCSV = (e) => {
+        const link = document.createElement('a');
+        let csv = convertArrayOfObjectsToCSV(filteredData);
+        if (csv == null) return;
+    
+        const filename = 'export.csv';
+    
+        if (!csv.match(/^data:text\/csv/i)) {
+            csv = `data:text/csv;charset=utf-8,${csv}`;
+        }
+    
+        link.setAttribute('href', encodeURI(csv));
+        link.setAttribute('download', filename);
+        link.click();
+    };
+
+    return (
+        <CContainer fluid>
+            <h2 style={{ textAlign: 'center' }}>Proyecciones</h2>
+            <CRow className='mb-2'>
+                <CCol xs={6} md={2}>
+                    <FechaI 
+                        vFechaI={vFechaI} 
+                        cFechaI={cFechaI} 
+                    />
+                </CCol>
+                <CCol xs={6} md={2}>
+                    <FechaF 
+                        vFcaF={vFcaF} 
+                        mFcaF={mFcaF}
+                    />
+                </CCol>
+                <CCol xs={6} md={2}>
+                    <Plantas  
+                        mCambio={mCambio}
+                        plantasSel={plantasSel}
+                    />
+                </CCol>
+                <CCol xs={6} md={2} lg={2}>
+                    <CButton color='primary' className='mt-3' onClick={getProyeccionAsesores}>
+                        <CIcon icon={cilSearch} className="me-2" />
+                        Buscar
+                    </CButton>
+                </CCol>
+            </CRow>
+            <CRow className='mb-1 mt-2'>
+                <CTable responsive style={{fontSize:'10px'}}>
+                        <CTableHead>
+                            <CTableRow>
+                                {
+                                    dHeaders.map((itemd,index) => {
+                                        return(
+                                            <CTableHeaderCell key={itemd || index} scope="col">{itemd}</CTableHeaderCell>
+                                        )
+                                    })
+                                }
+                            </CTableRow>
+                        </CTableHead>
+                        <CTableBody>
+                            {
+                                data.length === 0 ?(
+                                    <CTableRow>
+                                        <CTableDataCell colSpan={data.length}>Sin datos</CTableDataCell>
+                                    </CTableRow>
+                                ):(
+                                    data.map((itemd,index) => (
+                                        <CTableRow key={itemd.Entrada || index}>
+                                            {
+                                                dHeaders.map((item, index_) => {
+                                                    // Accedemos al valor de 'item' en 'itemd', y si es undefined, mostramos 'Valor no disponible'
+                                                    const value = itemd[item];
+                                                    const renderableValue = value != null ? value : 'Valor no disponible';
+                                                    const valueToDisplay = typeof renderableValue === 'object' ? Fnum(0) : Fnum(renderableValue);
+                                                    // Si el valor es nulo o indefinido, se coloca un texto alternativo
+                                                    return (
+                                                    <CTableDataCell key={item || index_}>
+                                                        {valueToDisplay}
+                                                    </CTableDataCell>
+                                                    );
+                                                })
+                                            }
+                                        </CTableRow>
+                                    ))
+                                )
+                            }
+                        </CTableBody>
+                </CTable>
+            </CRow>
+            <CRow className='mb-1 mt-2'>
+                <CCol xs={12} md={12}>
+                <CCard className="mb-2">
+                    <CCardHeader>Asesor: <b>
+                        <CFormSelect aria-label="Default select example">
+                            <option selected>Seleccione...</option>
+                            {vAsesores.length > 0 ? (
+                                vAsesores.map((itemd, index) => {
+                                const value = itemd.Asesor; // Suponiendo que 'Asesor' es el campo que deseas mostrar
+                                return (
+                                    <option key={index} value={value}>
+                                    {value}
+                                    </option>
+                                );
+                                })
+                            ) : (
+                                <option disabled>No hay asesores disponibles</option>
+                            )}
+                        </CFormSelect>
+                    </b></CCardHeader>
+                    <CCardBody>
+                            <CChart
+                                type='line'
+                                data={{
+                                labels: ["January", "February", "March", "April", "May", "June", "July"],
+                                datasets: [
+                                  {
+                                    label: "My First dataset",
+                                    backgroundColor: "rgba(220, 220, 220, 0.2)",
+                                    borderColor: "rgba(220, 220, 220, 1)",
+                                    pointBackgroundColor: "rgba(220, 220, 220, 1)",
+                                    pointBorderColor: "#fff",
+                                    data: [40, 20, 12, 39, 10, 40, 39, 80, 40]
+                                  },
+                                  {
+                                    label: "My Second dataset",
+                                    backgroundColor: "rgba(151, 187, 205, 0.2)",
+                                    borderColor: "rgba(151, 187, 205, 1)",
+                                    pointBackgroundColor: "rgba(151, 187, 205, 1)",
+                                    pointBorderColor: "#fff",
+                                    data: [50, 12, 28, 29, 7, 25, 12, 70, 60]
+                                  },
+                                ],
+                            }}
+                            />
+                    </CCardBody>
+                </CCard>
+                </CCol>
+            </CRow>
+            <CModal
+                backdrop="static"
+                visible={visible}
+                onClose={() => setVisible(false)}
+                aria-labelledby="StaticBackdropExampleLabel"
+            >
+                <CModalHeader>
+                    <CModalTitle id="StaticBackdropExampleLabel">Cargando...</CModalTitle>
+                </CModalHeader>
+                <CModalBody>
+                    {loading && (
+                        <CRow className="mt-3">
+                            <ProgressBar completed={percentage} />
+                            <p>Cargando: {percentage}%</p>
+                        </CRow>
+                    )}
+                </CModalBody>
+                <CModalFooter />
+            </CModal>
+        </CContainer>
+    );
+};
+
+export default RProyeccion;

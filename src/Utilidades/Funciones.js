@@ -116,6 +116,46 @@ export async function getResInv(material, FI, FF, planta) {
         return false
     }
 }
+// VENTAS
+export async function getProyeccion(FI, FF, planta, Tipo) {
+    try
+    {
+        let confi_ax = {
+            headers:
+            {
+                'Cache-Control': 'no-cache',
+                'Content-Type': 'application/json',
+                "Authorization": "Bearer "+cookies.get('token'),
+            },
+        };
+        const fcaI = FormatoFca(FI);
+        const fcaF = FormatoFca(FF);
+        //------------------------------------------------------------------------------------------------------------------------------------------------------
+        const response = await axios.get(baseUrl+'Comercial/GetAsesores/'+fcaI+','+fcaF+','+planta+',0', confi_ax);
+        if (response.data && response.data.length > 0 && response.data[0].Rows) {
+            const objPlanta = response.data[0].Rows;
+            const objAsesores = response.data[1].Rows;
+            if(objPlanta.length > 0 && objAsesores.length > 0)
+            {
+                return {
+                    planta: {
+                        data: objPlanta,
+                        totalCount: objPlanta.length
+                    },
+                    asesores: {
+                        data: objAsesores,
+                        totalCount: objAsesores.length
+                    }
+                };
+            }else{return false}
+        }else{return false}
+    } 
+    catch(error)
+    {
+        console.log(error);
+        return false
+    }
+}
 // INTERFAZ
   // 
 export async function getProductoIF(planta, FI)
@@ -276,3 +316,5 @@ export async function getDetalleComR(mes, periodo, usuario) {
         console.log(error);
     }
 }
+
+
