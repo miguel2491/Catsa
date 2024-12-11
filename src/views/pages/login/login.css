@@ -164,8 +164,6 @@
     transition: var(--transition-opacity);
   }
   
-  .demo__form:first-child {
-  }
   
   .demo.s--switched .demo__form:first-child {
     opacity: 0;

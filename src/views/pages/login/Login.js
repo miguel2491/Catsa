@@ -26,11 +26,29 @@ const Login = () => {
   useEffect(() => {
     if (cookies.get("token") && cookies.get("idUsuario")) {
       navigate("/panel");
+      GetMenus();
     } else {
       GetToken();
     }
   }, []);
 
+  async function GetMenus() {
+    try {
+      const confi_ax = {
+        headers: {
+          "Cache-Control": "no-cache",
+          "Content-Type": "application/json",
+          Authorization: "Bearer " + cookies.get("token")
+        }
+      };
+      const response = await axios.get(baseUrl + "Login/GetMenus", confi_ax);
+      cookies.set("menus", JSON.stringify(response.data), { path: "/" });
+    } catch (error) {
+      console.error("Error fetching menus:", error);
+    }
+  }
+
+  
   const handleChange = (e) => {
     const { name, value } = e.target;
     if (name === "username") setUsername(value);

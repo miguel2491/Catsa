@@ -1,0 +1,88 @@
+/* Encapsulamos los estilos dentro de la clase .app-container */
+
+.app-container h2 {
+    color: #a7a3a4;
+    text-align: center;
+    margin-bottom: 20px;
+  }
+  
+  .app-container .container {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    gap: 20px;
+    flex-wrap: wrap;
+  }
+  
+  .app-container .drop-zone {
+    min-height: 100px;
+    width: 300px; /* Ancho ajustado para más permisos */
+    max-height: 500px; /* Limitar la altura máxima */
+    background-color: gainsboro;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    padding: 10px;
+    overflow-y: auto; /* Scroll para manejar muchos permisos */
+    transition: height 0.3s ease;
+  }
+  
+  .app-container .drop-zone h3 {
+    color: #a7a3a4;
+    margin-bottom: 10px;
+  }
+  
+  .app-container .draggable-item {
+    width: 100%; /* Los permisos ocupan todo el ancho del panel */
+    padding: 10px;
+    margin: 5px;
+    background-color: #007bff;
+    color: white;
+    text-align: center;
+    border-radius: 5px;
+    cursor: grab;
+    font-size: 14px;
+    font-weight: bold;
+  }
+  
+  .app-container .draggable-item:active {
+    cursor: grabbing;
+  }
+  
+  /* Responsivo */
+  @media (max-width: 768px) {
+    .app-container .drop-zone {
+      width: 200px;
+    }
+  
+    .app-container .draggable-item {
+      font-size: 12px;
+      padding: 8px;
+    }
+  
+    .app-container .drop-zone h3 {
+      font-size: 18px;
+    }
+  }
+  
+  @media (max-width: 480px) {
+    .app-container .container {
+      flex-direction: column;
+      align-items: center;
+    }
+  
+    .app-container .drop-zone {
+      width: 90%;
+    }
+  
+    .app-container .draggable-item {
+      font-size: 10px;
+      padding: 6px;
+    }
+  
+    .app-container .drop-zone h3 {
+      font-size: 16px;
+    }
+  }
+  
