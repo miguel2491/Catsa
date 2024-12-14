@@ -132,9 +132,11 @@ export async function getProyeccion(FI, FF, planta, Tipo) {
         const fcaF = FormatoFca(FF);
         //------------------------------------------------------------------------------------------------------------------------------------------------------
         const response = await axios.get(baseUrl+'Comercial/GetAsesores/'+fcaI+','+fcaF+','+planta+',0', confi_ax);
+        console.log(response.data);
         if (response.data && response.data.length > 0 && response.data[0].Rows) {
             const objPlanta = response.data[0].Rows;
             const objAsesores = response.data[1].Rows;
+            console.log(objPlanta, objAsesores);
             if(objPlanta.length > 0 && objAsesores.length > 0)
             {
                 return {
@@ -179,6 +181,30 @@ export async function getAllVendedores() {
         return false
     }
 }
+export async function getClientesAsesor(codigoV) {
+    try
+    {
+        let confi_ax = {
+            headers:
+            {
+                'Cache-Control': 'no-cache',
+                'Content-Type': 'application/json',
+                "Authorization": "Bearer "+cookies.get('token'),
+            },
+        };
+        //------------------------------------------------------------------------------------------------------------------------------------------------------
+        const response = await axios.get(baseUrl+'Comercial/GetCartera/'+codigoV, confi_ax);
+        if (response.data && response.data.length > 0) {
+            return response.data;
+        }else{return false}
+    } 
+    catch(error)
+    {
+        console.log(error);
+        return false
+    }
+}
+
 // INTERFAZ
   // 
 export async function getProductoIF(planta, FI)

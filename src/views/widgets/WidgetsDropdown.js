@@ -26,6 +26,10 @@ const WidgetsDropdown = (props) => {
   const [tCotizacionA, setTotalA] = useState(0);
   const [tCotizacionCA, setTotalCA] = useState(0);
   const [tCotizacionP, setTotalCP] = useState(0);
+  const [tCotizacionPRO, setTotalCPRO] = useState(0);
+  const [tCotizacionPER, setTotalCPER] = useState(0);
+  const [tCotizacionNEG, setTotalCNEG] = useState(0);
+
 
   //ChartDataD
   const [chartDataD, setChartDataD] = useState({
@@ -77,17 +81,27 @@ const WidgetsDropdown = (props) => {
       const dataSet = [];
       var totalA = 0;
       var totalCA = 0;
+      var totalP = 0;// TOTAL PEDIDOS
       var totalP = 0;
+      var totalPROS = 0;
+      var totalN = 0;
+      var totalPR = 0;
       obj.forEach(item => {
         totalA += item.TA;
         totalCA+=item.TCA;
         totalP += item.TC;
+        totalPROS += item.TP;
+        totalN += item.TN;
+        totalPR += item.TPRD;
         labels.push(item.Planta);
         dataSet.push(item.TC);
       });
       setTotalA(totalA);
       setTotalCA(totalCA);
       setTotalCP(totalP);
+      setTotalCPRO(totalPROS);
+      setTotalCPER(totalPR);
+      setTotalCNEG(totalN);
       // Actualiza el estado con los nuevos datos
       setChartDataD({
         labels: labels,
@@ -113,7 +127,7 @@ const WidgetsDropdown = (props) => {
 
   return (
     <CRow className={props.className} xs={{ gutter: 4 }}>
-      <CCol sm={6} xl={12} xxl={6}>
+      <CCol sm={12} xl={12} xxl={12}>
         <CWidgetStatsA
           onClick={navVCot}
           color="primary"
@@ -125,6 +139,15 @@ const WidgetsDropdown = (props) => {
               </span>
               <span className="fs-6 fw-normal">
                 ({tCotizacionCA} Canceladas <CIcon icon={cilArrowBottom} />)
+              </span>
+              <span className="fs-6 fw-normal">
+                ({tCotizacionPRO} Prospectos <CIcon icon={cilArrowBottom} />)
+              </span>
+              <span className="fs-6 fw-normal">
+                ({tCotizacionPER} Perdidas <CIcon icon={cilArrowBottom} />)
+              </span>
+              <span className="fs-6 fw-normal">
+                ({tCotizacionNEG} Negociando <CIcon icon={cilArrowBottom} />)
               </span>
             </>
           }
