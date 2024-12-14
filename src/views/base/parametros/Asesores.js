@@ -1,5 +1,6 @@
 import React,{useEffect, useState, useRef} from 'react';
 import { getAllVendedores } from '../../../Utilidades/Funciones';
+import { CFormSelect } from '@coreui/react';
 
 const ap = [];
 const Asesores = ({asesoresSel, mAsesor}) => {
@@ -16,15 +17,16 @@ const Asesores = ({asesoresSel, mAsesor}) => {
     const getAsesoresArr = async () => {
         try {
             const asesores_ = await getAllVendedores();
-            console.log(asesores_);
             var obj = asesores_;
               for(var x = 0; x < obj.length; x++)
               {
                   ap.push({
+                      "ID":x,
                       "UserName":obj[x].UserName,
                       "UserId":obj[x].UserId,
                       "Asesor":obj[x].Asesor,
-                      "Planta":obj[x].Planta
+                      "Planta":obj[x].Planta,
+                      "CodigoV":obj[x].CodigoVendedor
                   });
               }
               setAsesor_(ap);
@@ -37,12 +39,14 @@ const Asesores = ({asesoresSel, mAsesor}) => {
       <div>
         <label>Asesor</label>
         <div>
-        <select id="cmbAsesor" value={asesoresSel} onChange={mAsesor}>
-            <option value="" >Selecciona...</option>
-            {asesor_.map(asesor =>(
-                <option value={asesor.UserId} key={asesor.UserName}>{asesor.Asesor} ({asesor.Planta})</option>
+        <CFormSelect id="cmbAsesor"  size="md" value={asesoresSel} onChange={mAsesor}>
+            <option value="0" >Selecciona...</option>
+            {asesor_.map((asesor, index) =>(
+                <option value={asesor.CodigoV} key={`${index}`}>
+                    {asesor.Asesor} ({asesor.Planta})
+                </option>
             ))}
-            </select>
+            </CFormSelect>
             {/* {selectedOption && (
                 <p>Has seleccionado: {selectedOption}</p>
             )} */}
