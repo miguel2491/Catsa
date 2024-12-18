@@ -133,12 +133,15 @@ const Dashboard = () => {
       const dataSetR = [];
       var totalP = 0;
       var totalPR = 0;
+      console.log(obj);
       obj.forEach(item => {
-        totalP += item.P_TotalPedidos;
-        totalPR += item.TPA;
-        labels.push(item.Planta);
-        dataSet.push(item.P_TotalPedidos);
-        dataSetR.push(item.TPA);
+        if (item.TPA !== null && !(typeof item.TPA === 'object' && Object.keys(item.TPA).length === 0)) {
+          totalP += item.P_TotalPedidos;
+          totalPR += item.TPA;
+          labels.push(item.Planta);
+          dataSet.push(item.P_TotalPedidos);
+          dataSetR.push(item.TPA);
+        }
       });
       // Actualiza el estado con los nuevos datos
       setChartDataD({
@@ -189,11 +192,13 @@ const Dashboard = () => {
       var totalP = 0;
       var totalPR = 0;
       obj.forEach(item => {
-        totalP += item.P_TotalPedidos;
-        totalPR += item.TPA;
-        labels.push(item.Planta);
-        dataSet.push(item.P_TotalPedidos);
-        dataSetR.push(item.TPA);
+        if (item.TPA !== null && !(typeof item.TPA === 'object' && Object.keys(item.TPA).length === 0)) {
+          totalP += item.P_TotalPedidos;
+          totalPR += item.TPA;
+          labels.push(item.Planta);
+          dataSet.push(item.P_TotalPedidos);
+          dataSetR.push(item.TPA);
+        }
       });
       // Actualiza el estado con los nuevos datos
       setChartDataS({
@@ -242,9 +247,11 @@ const Dashboard = () => {
       setPSemanaP(rango);
       var totalP = 0;
       obj.forEach(item => {
-        totalP += item.P_TotalPedidos;
-        labels.push(item.Planta);
-        dataSet.push(item.P_TotalPedidos);
+        if (item.P_TotalPedidos !== null && !(typeof item.P_TotalPedidos === 'object' && Object.keys(item.P_TotalPedidos).length === 0)) {
+          totalP += item.P_TotalPedidos;
+          labels.push(item.Planta);
+          dataSet.push(item.P_TotalPedidos);
+        }
       });
       // Actualiza el estado con los nuevos datos
       setChartDataPS({
@@ -288,11 +295,13 @@ const Dashboard = () => {
       var totalP = 0;
       var totalPR = 0;
       obj.forEach(item => {
-        totalP += item.P_TotalPedidos;
-        totalPR += item.TPA;
-        labels.push(item.Planta);
-        dataSet.push(item.P_TotalPedidos);
-        dataSetR.push(item.TPA);
+        if (item.P_TotalPedidos !== null && !(typeof item.P_TotalPedidos === 'object' && Object.keys(item.P_TotalPedidos).length === 0)) {
+          totalP += item.P_TotalPedidos;
+          totalPR += item.TPA;
+          labels.push(item.Planta);
+          dataSet.push(item.P_TotalPedidos);
+          dataSetR.push(item.TPA);
+        }
       });
       // Actualiza el estado con los nuevos datos
       setChartDataM({

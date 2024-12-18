@@ -42,3 +42,55 @@ h3, label{
 	display: block;
   }
 
+/* AUTOCOMPLETE */
+/* Contenedor principal */
+.sStyle{
+	color: #000;
+}
+.autocomplete-container {
+	max-width: 400px;
+	margin: 50px auto;
+	padding: 20px;
+	background-color: #fff;
+	border-radius: 8px;
+	box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+	font-family: Arial, sans-serif;
+	color:black;
+  }
+  
+  .autocomplete-container h3 {
+	font-size: 18px;
+	margin-bottom: 15px;
+	text-align: center;
+  }
+  
+  /* Estilo del input de texto */
+  .autocomplete-container input {
+	padding: 10px;
+	width: 100%;
+	font-size: 16px;
+	border: 1px solid #000;
+	border-radius: 5px;
+	outline: none;
+	transition: all 0.3s ease;
+	color:black;
+  }
+  
+  .autocomplete-container input:focus {
+	border-color: #4a90e2;  /* Color de borde cuando el campo está en foco */
+	color:black;
+  }
+  
+  /* Lista de sugerencias */
+  .autocomplete-container .react-autosuggest__suggestions-list {
+	list-style-type: none;
+	padding: 0;
+	margin: 0;
+	max-height: 200px;
+	overflow-y: auto;
+	border: 1px solid #ccc;
+	border-top: none;
+	background-color: #fff;
+	box-shadow: 0 2px 4px rgba;
+	color:black;
+  }	
