@@ -117,6 +117,59 @@ export async function getResInv(material, FI, FF, planta) {
     }
 }
 // VENTAS
+    //---COTIZADOR
+export  async function getPrecios(planta)
+  {
+    console.log(planta);
+    try
+        {
+            let confi_ax = 
+                {
+                headers:
+                {
+                    'Cache-Control': 'no-cache',
+                    'Content-Type': 'application/json',
+                    "Authorization": "Bearer "+cookies.get('token'),
+                }
+            }
+            //------------------------------------------------------------------------------------------------------------------------------------------------------
+            await axios.get(baseUrl2+'Comercial/GetPreciosPla/'+'C,ti,'+planta+',2024-10-31,1932.65', confi_ax)
+            .then(response=>{
+              var obj = response.data;
+              var tOne = obj[0].Rows;
+              var tTwo = obj[1].Rows;
+              var tThree = obj[2].Rows;
+              var tFour = obj[3].Rows;
+              var tFive = obj[4].Rows;
+              var tSix = obj[5].Rows;
+                console.log(obj);
+                setDatosPla(tOne)
+                setDatosMop(tTwo);
+                setDFuente(tFour);
+                setTC(tSix);
+                //Swal.fire("CORRECTO", "PARTE1", "success");
+                //return response.data;
+            })
+            .catch(err=>{
+                if (err.response) {
+                    // El servidor respondió con un código de estado fuera del rango de 2xx
+                    console.error('Error de Respuesta:', err.response.data);
+                } else if (err.request) {
+                    // La solicitud fue realizada pero no se recibió respuesta
+                    console.error('Error de Solicitud:', err.request);
+                } else {
+                    // Algo sucedió al configurar la solicitud
+                    console.error('Error:', err.message);
+                }
+            })    
+            //------------------------------------------------------------------------------------------------------------------------------------------------------
+        }
+        catch(error)
+        {
+            console.error(error);
+        }
+}
+//--
 export async function getProyeccion(FI, FF, planta, Tipo) {
     try
     {
@@ -204,7 +257,87 @@ export async function getClientesAsesor(codigoV) {
         return false
     }
 }
-
+export async function getCostoP(planta) {
+    try
+    {
+        let confi_ax = {
+            headers:
+            {
+                'Cache-Control': 'no-cache',
+                'Content-Type': 'application/json',
+                "Authorization": "Bearer "+cookies.get('token'),
+            },
+        };
+        //------------------------------------------------------------------------------------------------------------------------------------------------------
+        const response = await axios.get(baseUrl2+'Comercial/GetPreProPla/'+planta, confi_ax);
+        if (response.data && response.data.length > 0) {
+            return response.data;
+        }else{return false}
+    } 
+    catch(error)
+    {
+        console.log(error);
+        return false
+    }
+}
+export async function getDatosPlanta(planta, fecha, cpc)
+{
+    try
+    {
+        let confi_ax = {
+            headers:
+            {
+                'Cache-Control': 'no-cache',
+                'Content-Type': 'application/json',
+                "Authorization": "Bearer "+cookies.get('token'),
+            },
+        };
+        //------------------------------------------------------------------------------------------------------------------------------------------------------
+        const response = await axios.get(baseUrl2+'Comercial/GetDatosPlanta/C,'+planta+','+cookies.get('Usuario')+','+fecha+','+cpc, confi_ax);
+        if (response.data && response.data.length > 0)
+        {
+            const objAutoriza = response.data[0].Rows;
+            const objCostoExtra = response.data[1].Rows;
+            const objComisiones = response.data[2].Rows;
+            const objOrigen = response.data[3].Rows;
+            const objSegmento = response.data[4].Rows;
+            const objCanal = response.data[5].Rows;
+            return {
+                autoriza: {
+                    data: objAutoriza,
+                    totalCount: objAutoriza.length
+                },
+                costo_extra: {
+                    data: objCostoExtra,
+                    totalCount: objCostoExtra.length
+                },
+                comisiones: {
+                    data: objComisiones,
+                    totalCount: objComisiones.length
+                },
+                origen: {
+                    data: objOrigen,
+                    totalCount: objOrigen.length
+                },
+                segmento: {
+                    data: objSegmento,
+                    totalCount: objSegmento.length
+                },
+                canal: {
+                    data: objCanal,
+                    totalCount: objCanal.length
+                }
+            };
+        }else{
+            return false
+        }
+    } 
+    catch(error)
+    {
+        console.log(error);
+        return false
+    }
+}
 // INTERFAZ
   // 
 export async function getProductoIF(planta, FI)
@@ -365,5 +498,12 @@ export async function getDetalleComR(mes, periodo, usuario) {
         console.log(error);
     }
 }
-
+//UTILITIES
+// Función para formatear el número a formato de dinero
+export const formatCurrency = (value) => {
+  return new Intl.NumberFormat('es-MX', {
+    style: 'currency',
+    currency: 'MXN', // Cambia a la moneda que necesites
+  }).format(value);
+};
 
