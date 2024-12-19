@@ -5,9 +5,10 @@ import makeAnimated from 'react-select/animated';
 import Swal from 'sweetalert2';
 import DataTable from 'react-data-table-component';
 import StepWizard from "react-step-wizard";
+import { GoogleMap, LoadScript, Marker } from '@react-google-maps/api';
 import Plantas from '../base/parametros/Plantas'
 import FechaI from '../base/parametros/FechaInicio'
-import { formatCurrency, getCostoP, getDatosPlanta } from '../../Utilidades/Funciones';
+import { formatCurrency, getCostoP, getDatosPlanta, getClientesCot, getObrasCot, getProspectos_ } from '../../Utilidades/Funciones';
 import {
   CContainer,
   CRow,
@@ -39,7 +40,94 @@ import '../../estilos.css'
 
 const animatedComponents = makeAnimated();
 
+const containerStyle = {
+  width: '100%',
+  height: '500px'
+};
 
+const MyMap = () => {
+  const [map, setMap] = useState(null);
+  const [locationO, setLocationO] = useState({
+    latitude: null,
+    longitude: null,
+    error: null
+  });
+  const [location, setLocation] = useState({
+    latitude: null,
+    longitude: null,
+    error: null
+  });
+  const [markerPosition, setMarkerPosition] = useState({
+    lat: null,
+    lng: null,
+  });
+  useEffect(() => {
+    if ("geolocation" in navigator) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          setLocationO({
+            latitude: position.coords.latitude,
+            longitude: position.coords.longitude,
+            error: null
+          });
+          setLocation({
+            latitude: position.coords.latitude,
+            longitude: position.coords.longitude,
+            error: null
+          });
+        },
+        (error) => {
+          setLocation({
+            latitude: null,
+            longitude: null,
+            error: error.message
+          });
+        }
+      );
+    } else {
+      setLocation({
+        latitude: null,
+        longitude: null,
+        error: "Geolocation is not supported by this browser."
+      });
+    }
+  }, []);
+
+  if (location.error) {
+    return <p>Error: {location.error}</p>;
+  }
+  const onMarkerDragEnd = (e) => {
+    // Actualizar las coordenadas del marcador cuando se haya dejado de arrastrar
+    const lat = e.latLng.lat();
+    const lng = e.latLng.lng();
+    setMarkerPosition({ lat, lng });
+    setLocation({
+      latitude: lat,
+      longitude: lng,
+      error: null
+    });
+    //console.log("Nuevo marcador en:", lat, lng);
+    //console.log(locationO);
+  };
+  //AIzaSyCmR8S151uu3BTA7Mgtpl6-TBA3_U8HjGQ
+  if (location.latitude && location.longitude) {
+    return (
+      <LoadScript googleMapsApiKey="AIzaSyCxaRbEHBInFto-cnzDgPzqZuaVmllksOE">
+        <GoogleMap
+          mapContainerStyle={{ width: '100%', height: '400px' }}
+          center={{ lat: location.latitude, lng: location.longitude }}
+          zoom={14}
+        >
+          <Marker 
+            position={{ lat: location.latitude, lng: location.longitude }} 
+            draggable={true}  // Hacer que el marcador sea arrastrable
+            onDragEnd={onMarkerDragEnd} />
+        </GoogleMap>
+      </LoadScript>
+    );
+  }
+  return <p>Loading...</p>;
+};
 const Cotizador = () => {
   const [plantasSel , setPlantas] = useState('');
   const [vFechaI, setFechaIni] = useState(new Date());
@@ -77,7 +165,6 @@ const Cotizador = () => {
     try {
       const comisiones = await getCostoP(planta);
       setProducto(comisiones)
-      console.log(comisiones);
       if (comisiones) {
           //setDFijos(comisiones);
           //setData(comisiones);
@@ -93,6 +180,7 @@ const Cotizador = () => {
           setFuente(datosPla.origen.data);
           setSegmento(datosPla.segmento.data);
           setTC(datosPla.canal.data);
+          setPlantas(planta);
       } else {
           Swal.fire("Error", "Ocurrió un error, vuelve a intentar", "error");
       }
@@ -140,7 +228,7 @@ const Cotizador = () => {
         </CCol>
       </CRow>
       <StepWizard>
-        <Step1 fijos={dFijos} corpo={dCorpo} mop={dMop} cdiesel={dDiesel} />
+        <Step1 fijos={dFijos} corpo={dCorpo} mop={dMop} cdiesel={dDiesel} sucursal={plantasSel} />
         <Step2 fuente={aFuente} segmento={aSegmento} canal={aTC} productos={aProducto} />
         <Step3 />
       </StepWizard>
@@ -167,32 +255,20 @@ const Cotizador = () => {
   )  
 }
 //STEPS
-const Step1 = ({ nextStep, fijos, corpo, mop, cdiesel }) => {
-  const [datosPla, setDatosPla] = useState([]);
-  const cityOptions = [
-    { value: 'new_york', label: 'New York' },
-    { value: 'los_angeles', label: 'Los Angeles' },
-    { value: 'chicago', label: 'Chicago' },
-    { value: 'houston', label: 'Houston' },
-    { value: 'phoenix', label: 'Phoenix' },
-    { value: 'philadelphia', label: 'Philadelphia' },
-  ];
-  // APIS Usar
-  // GetPreciosCot
-  // GetCotizacion
-  // SetCotizacion
-  // GetCliente
-  // GetObra
-  // ?? GetProducto
-  const [loading, setLoading] = useState(false);
-  const [percentage, setPercentage] = useState(0);
+const Step1 = ({ nextStep, fijos, corpo, mop, cdiesel, sucursal }) => {
   const [visible, setVisible] = useState(false);// Modal Cargando
-  const [selectedCity, setSelectedCity] = useState(null);
-  
+  const [vProspecto, setVProspecto] = useState(false);// Modal Cargando
   const [noCliente, setNoCliente] = useState('');
   const [cliente, setCliente] = useState('');
+  const [municipio, setMunicipio] = useState('');
+  const [contacto, setContacto] = useState('');
   const [noObra, setNoObra] = useState('');
   const [obra_, setObra] = useState('');
+  const [oDir, setObraDir] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [swValue, setswValue] = useState(false);
+  const [dProspecto, setProspectoD] = useState([]);
+  const [fText, setFText] = useState(''); // Estado para el filtro de búsqueda
 
   const handleChange = selectedOption => {
     setSelectedCity(selectedOption);
@@ -200,12 +276,24 @@ const Step1 = ({ nextStep, fijos, corpo, mop, cdiesel }) => {
   const verCliente = async() =>{
     setLoading(true);
     setVisible(true); // Muestra el modal de carga
+
   }
   const vCliente = async() =>{
     setLoading(true);
-    setVisible(true); // Muestra el modal de carga
-    console.log(noCliente);
-    console.log(noObra);
+    setVisible(true); // Muestra el modal
+    try {
+      const cliente = await getClientesCot(sucursal, noCliente);
+      if (cliente) {
+        const objCliente = cliente;
+        setCliente(objCliente[0].Nombre);
+        setMunicipio(objCliente[0].Municipio);
+        
+      } else {
+          Swal.fire("Error", "Sin datos", "error");
+      }
+    } catch (error) {
+        Swal.fire("Error", "No se pudo obtener la información", "error");
+    }
   }
   
   const onFindCliente = (e) => {
@@ -214,13 +302,126 @@ const Step1 = ({ nextStep, fijos, corpo, mop, cdiesel }) => {
   const vObra = async() =>{
     setLoading(true);
     setVisible(true); // Muestra el modal de carga
-    console.log(noObra);
-    console.log(noCliente);
+    try {
+      const obra = await getObrasCot(sucursal, noObra);
+      if (obra) {
+        const objObra = obra;
+        setObra(objObra[0].Obra);
+        setObraDir(objObra[0].Direccion);
+      } else {
+          Swal.fire("Error", "Sin datos", "error");
+      }
+    } catch (error) {
+        Swal.fire("Error", "No se pudo obtener la información", "error");
+    }
   }
 
   const onFindObra = (e) => {
     setNoObra(e.target.value); // Actualiza el texto del filtro
   };
+  const onHandlerContacto = (e) => {
+    setContacto(e.target.value);
+  };
+  const handleSwitchChange = (e) => {
+    setswValue(e.target.checked);
+    if(e.target.checked){
+      setVProspecto(true);
+      gainPro();
+    }
+  }
+  const gainPro = async() =>{
+    try {
+        const dProspectos = await getProspectos_();
+        if (dProspectos) { 
+          setProspectoD(dProspectos);
+        } else {
+            Swal.fire("Error", "Sin Datos", "error");
+        }
+    } catch (error) {
+        Swal.fire("Error", "No se pudo obtener la información", "error");
+    }
+  }
+
+  const setProspecto = (nom, obra) => {
+    setVProspecto(false);
+    setCliente(nom)
+    setObra(obra)
+  }
+  const columnsPro = [
+    {
+        name: 'Acciones',
+        selector: row => row.id,
+        width:"80px",
+        cell: (row) => (
+            <div>
+                <CButton
+                    color="primary"
+                    onClick={() => setProspecto(row.Cliente, row.Obra)}
+                    size="sm"
+                    className="me-2"
+                    title="Detalle"
+                >
+                    <CIcon icon={cilPlus} />
+                </CButton>
+            </div>
+        ),
+    },{
+        name: 'Id',
+        selector: row => row.id,
+        width:"80px",
+    },{
+        name: 'ID Prospecto',
+        selector: row => row.tkProspecto,
+        sortable: true,
+        grow: 1,
+        width:"150px",
+    },
+    {
+      name: 'Número Cliente',
+      width:"150px",
+      selector: row => row.NCliente,
+    },
+    {
+        name: 'Número Obra',
+        width:"150px",
+        selector: row => row.NObra,
+    },
+    {
+      name: 'Nombre Prospecto',
+      width:"150px",
+      selector: row => row.Cliente,
+    },
+    {
+      name: 'Obra',
+      width:"150px",
+      selector: row => row.Obra,
+    },
+    {
+      name: 'Municipio',
+      width:"150px",
+      selector: row => row.Municipio,
+    },
+  ];
+  const getProspectos = async () => {
+    try {
+        const prospectos = await getProspectos_();
+        if (prospectos) {
+            setProspectoD(prospectos); 
+        } else {
+            Swal.fire("Error", "Ocurrió un error, vuelve a intentar", "error");
+        }
+    } catch (error) {
+        Swal.fire("Error", "No se pudo obtener la información", "error");
+    }
+  };
+  // Filtrar datos en función del texto de búsqueda
+  const filteredData = dProspecto.filter(item => {
+    return item.Cliente.toLowerCase().includes(fText.toLowerCase()) || item.Obra.includes(fText);
+  });
+  // Lógica de filtro
+  const onFilter = (e) => {
+    setFText(e.target.value); // Actualiza el texto del filtro
+};
   return(
     <div>
       <CCard>
@@ -250,36 +451,52 @@ const Step1 = ({ nextStep, fijos, corpo, mop, cdiesel }) => {
         </CRow>
         <hr />
         <CRow className='mt-2 mb-2'>
-          <CCol xs={12} md={6} lg={6}>
-            <label>Cliente</label>
-            <CInputGroup className="mb-3">
-            <CFormInput placeholder="" value={noCliente} onChange={onFindCliente} aria-label="Example text with two button addons"/>
-              <CButton type="button" color="success" className='btn-primary' onClick={vCliente} style={{'color':'white'}} variant="outline">
-                <CIcon icon={cilSearch} className="me-2" />
-              </CButton>
-            </CInputGroup>    
-          </CCol>
-        </CRow>
-        <CRow className='mt-2 mb-2'>
-          <CCol xs={12} md={6} lg={6}>
-            <label>Obra</label>
-            <CInputGroup className="mb-3">
-            <CFormInput placeholder="" value={noObra} onChange={onFindObra} aria-label="Example text with two button addons"/>
-              <CButton type="button" color="success" className='btn-primary' onClick={vObra} style={{'color':'white'}} variant="outline">
-                <CIcon icon={cilSearch} className="me-2" />
-              </CButton>
-            </CInputGroup>
-          </CCol>
-          <CCol xs={12} md={6} lg={6}>
-            <label id='lblObra'></label>
-          </CCol>
+            <CCol xs={12} md={6} lg={6}>
+              <CRow>
+                <CCol xs={6} md={6} lg={6}>
+                  <label>Cliente</label>
+                  <CInputGroup className="mb-3">
+                  <CFormInput placeholder="" value={noCliente} onChange={onFindCliente} aria-label="Example text with two button addons"/>
+                    <CButton type="button" color="success" className='btn-primary' onClick={vCliente} style={{'color':'white'}} variant="outline">
+                      <CIcon icon={cilSearch} className="me-2" />
+                    </CButton>
+                  </CInputGroup>    
+                </CCol>
+                <CCol xs={6} md={4} lg={4}>
+                  <label>Obra</label>
+                  <CInputGroup className="mb-3">
+                  <CFormInput placeholder="" value={noObra} onChange={onFindObra} aria-label="Example text with two button addons"/>
+                    <CButton type="button" color="success" className='btn-primary' onClick={vObra} style={{'color':'white'}} variant="outline">
+                      <CIcon icon={cilSearch} className="me-2" />
+                    </CButton>
+                  </CInputGroup>
+                </CCol>
+              </CRow>
+            </CCol>
+            <CCol xs={6} md={6} lg={6}>
+              <CRow>
+                <CCol xs={6} md={6} lg={6}>
+                  <label>Cliente</label><br />
+                  <label id='lblCliente'>{cliente}</label>
+                </CCol>
+                <CCol xs={6} md={6} lg={6}>
+                  <label>Obra</label><br />
+                  <label id='lblObra'>{obra_}</label>
+                </CCol>
+              </CRow>
+            </CCol>
         </CRow>
         <CRow className='mt-2 mb-2'>
           <CCol xs={6} md={6} lg={6}>
-              <CFormSwitch size="xl" label="Prospecto" id="cmbProspecto"/>
+              <CFormSwitch size="xl" label="Prospecto" id="cmbProspecto" checked={swValue} onChange={handleSwitchChange} />
           </CCol>
           <CCol xs={6} md={6} lg={6}>
               <CButton className='btn btn-sm btn-success' style={{'color':'white'}} onClick={verCliente}> VER CLIENTE <CIcon icon={cilSearch} className='me-2' /></CButton>
+          </CCol>
+        </CRow>
+        <CRow className='mt-2 mb-2'>
+          <CCol>
+            <MyMap />
           </CCol>
         </CRow>
         <CModal
@@ -294,13 +511,13 @@ const Step1 = ({ nextStep, fijos, corpo, mop, cdiesel }) => {
                 <CModalBody>
                     <CRow>
                       <CCol xs={12} md={12} className='mt-2 mb-2'>
-                        <CFormInput type="text" placeholder="Nombre" aria-label="Nombree"/>
+                        <CFormInput type="text" placeholder="Nombre" value={cliente} aria-label="Nombree"/>
                       </CCol>
                       <CCol xs={12} md={12} className='mt-2 mb-2'>
-                        <CFormInput type="text" placeholder="Municipio" aria-label="Nombree"/>
+                        <CFormInput type="text" placeholder="Municipio" value={municipio} aria-label="Nombree"/>
                       </CCol>
                       <CCol xs={12} md={12} className='mt-2 mb-2'>
-                        <CFormInput type="text" placeholder="Contacto" aria-label="Nombree"/>
+                        <CFormInput type="text" placeholder="Contacto" value={contacto} onChange={onHandlerContacto} aria-label="Nombree"/>
                       </CCol>
                     </CRow>
                     <CRow>
@@ -308,10 +525,10 @@ const Step1 = ({ nextStep, fijos, corpo, mop, cdiesel }) => {
                         <h3>Datos de la Obra</h3>
                       </CCol>
                       <CCol xs={12} md={12} className='mt-2 mb-2'>
-                        <CFormInput type="text" placeholder="Nombre" aria-label="Nombree"/>
+                        <CFormInput type="text" placeholder="Nombre" value={obra_} aria-label="Nombree"/>
                       </CCol>
                       <CCol xs={12} md={12} className='mt-2 mb-2'>
-                        <CFormInput type="text" placeholder="Dirección" aria-label="Nombree"/>
+                        <CFormInput type="text" placeholder="Dirección" value={oDir} aria-label="Nombree"/>
                       </CCol>
                     </CRow>
                 </CModalBody>
@@ -325,6 +542,50 @@ const Step1 = ({ nextStep, fijos, corpo, mop, cdiesel }) => {
                     </CCol>
                   </CRow>
                 </CModalFooter>
+        </CModal>
+        <CModal
+            backdrop="static"
+            visible={vProspecto}
+            onClose={() => setVProspecto(false)}
+            aria-labelledby="sb"
+            className='c-modal'
+        >
+          <CModalHeader>
+              <CModalTitle id="stitle">Datos Prospecto</CModalTitle>
+          </CModalHeader>
+          <CModalBody>
+              <CRow>
+                <CCol xs={12} md={12} className='mt-2 mb-2'>
+                  <CCol xs={6} md={4} lg={4}>
+                    <CInputGroup className="mb-3 mt-3">
+                        <CFormInput 
+                            id='search'
+                            type='text'
+                            placeholder='Buscar'
+                            aria-label='Buscar...'
+                            value={fText}
+                            onChange={onFilter}  
+                        />
+                        <CButton type="button" color="primary" id="button-addon1">Buscar</CButton>
+                    </CInputGroup>
+                </CCol>
+                  <DataTable
+                  columns={columnsPro}
+                  data={filteredData}  // Usamos los datos filtrados
+                  pagination
+                  persistTableHead
+                  subHeader
+                  />
+                </CCol>
+              </CRow>
+          </CModalBody>
+          <CModalFooter>
+            <CRow className='w-100'>
+              <CCol xs={6} md={6}>
+                <CButton className='btn btn-danger' onClick={() => setVProspecto(false)} style={{'color':'white'}}>Cerrar <CIcon icon={cilX} className='me-2' /></CButton>
+              </CCol>
+            </CRow>
+          </CModalFooter>
         </CModal>
         </CCardBody>
         <CCardFooter>
@@ -350,7 +611,7 @@ const Step2 = ({ nextStep, previousStep, fuente, segmento, canal, productos }) =
                   <div>
                       <CButton
                           color="primary"
-                          onClick={() => getDetalle(row.UsuarioCreo)}
+                          onClick={() => getDetalle(1)}
                           size="sm"
                           className="me-2"
                           title="Detalle"
@@ -480,7 +741,7 @@ const Step2 = ({ nextStep, previousStep, fuente, segmento, canal, productos }) =
   {
     const productoBuscado = productos.filter(producto => producto.Producto === pro);
     console.log(productoBuscado)
-    setDataD(prevData => [...prevData, productoBuscado[0]])
+    setDataD(productoBuscado)
   }
 
   const oProductos = productos.map(item => ({
@@ -650,11 +911,11 @@ const Step2 = ({ nextStep, previousStep, fuente, segmento, canal, productos }) =
           <CRow>
               <CCol xs={12} md={12}>
                 <DataTable
-                columns={columns}
-                data={dDetalle}  // Usamos los datos filtrados
-                pagination
-                persistTableHead
-                subHeader
+                  columns={columns}
+                  data={dDetalle}  // Usamos los datos filtrados
+                  pagination
+                  persistTableHead
+                  subHeader
                 />
               </CCol>
           </CRow>
@@ -675,8 +936,6 @@ const Step2 = ({ nextStep, previousStep, fuente, segmento, canal, productos }) =
 };
 
 const Step3 = ({ previousStep }) => {
-  
-  
   return(
     <div>
       <CCard>
@@ -702,31 +961,5 @@ const Step3 = ({ previousStep }) => {
     </div>
   )
 };
-//------------------------------------------------------------------------MODAL--------------------------------------------------------
-const Modal = () =>{
-  return(
-    <CModal
-      backdrop="static"
-      visible={visible}
-      onClose={() => setVisible(false)}
-      aria-labelledby="StaticBackdropExampleLabel"
-    >
-      <CModalHeader>
-        <CModalTitle id="StaticBackdropExampleLabel">Modal title</CModalTitle>
-      </CModalHeader>
-      <CModalBody>
-        I will not close if you click outside me. Don't even try to press escape key.
-      </CModalBody>
-      <CModalFooter>
-        <CButton color="secondary" onClick={() => setVisible(false)}>
-          Close
-        </CButton>
-        <CButton color="primary">Save changes</CButton>
-      </CModalFooter>
-    </CModal>
-  )
-};
 //-------------------------------------------------------------------------------------------------------------------------------------
-
-
 export default Cotizador

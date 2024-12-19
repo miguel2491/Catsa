@@ -133,7 +133,7 @@ export  async function getPrecios(planta)
                 }
             }
             //------------------------------------------------------------------------------------------------------------------------------------------------------
-            await axios.get(baseUrl2+'Comercial/GetPreciosPla/'+'C,ti,'+planta+',2024-10-31,1932.65', confi_ax)
+            await axios.get(baseUrl+'Comercial/GetPreciosPla/'+'C,ti,'+planta+',2024-10-31,1932.65', confi_ax)
             .then(response=>{
               var obj = response.data;
               var tOne = obj[0].Rows;
@@ -170,6 +170,57 @@ export  async function getPrecios(planta)
         }
 }
 //--
+export async function getClientesCot(planta, cliente) {
+    console.log(planta, cliente)
+    try
+    {
+        let confi_ax = {
+            headers:
+            {
+                'Cache-Control': 'no-cache',
+                'Content-Type': 'application/json',
+                "Authorization": "Bearer "+cookies.get('token'),
+            },
+        };
+        //------------------------------------------------------------------------------------------------------------------------------------------------------
+        const response = await axios.get(baseUrl+'Comercial/GetClientesCot/'+planta+','+cliente, confi_ax);
+        if (response.data && response.data.length > 0) {
+            return response.data;
+        }else{
+            return false
+        }
+    } 
+    catch(error)
+    {
+        console.log(error);
+        return false
+    }
+}
+export async function getObrasCot(planta, obra) {
+    try
+    {
+        let confi_ax = {
+            headers:
+            {
+                'Cache-Control': 'no-cache',
+                'Content-Type': 'application/json',
+                "Authorization": "Bearer "+cookies.get('token'),
+            },
+        };
+        //------------------------------------------------------------------------------------------------------------------------------------------------------
+        const response = await axios.get(baseUrl+'Comercial/GetObraCot/'+planta+','+obra, confi_ax);
+        if (response.data && response.data.length > 0) {
+                return response.data;
+        }else{
+            return false
+        }
+    } 
+    catch(error)
+    {
+        console.log(error);
+        return false
+    }
+}
 export async function getProyeccion(FI, FF, planta, Tipo) {
     try
     {
@@ -269,7 +320,7 @@ export async function getCostoP(planta) {
             },
         };
         //------------------------------------------------------------------------------------------------------------------------------------------------------
-        const response = await axios.get(baseUrl2+'Comercial/GetPreProPla/'+planta, confi_ax);
+        const response = await axios.get(baseUrl+'Comercial/GetPreProPla/'+planta, confi_ax);
         if (response.data && response.data.length > 0) {
             return response.data;
         }else{return false}
@@ -293,7 +344,7 @@ export async function getDatosPlanta(planta, fecha, cpc)
             },
         };
         //------------------------------------------------------------------------------------------------------------------------------------------------------
-        const response = await axios.get(baseUrl2+'Comercial/GetDatosPlanta/C,'+planta+','+cookies.get('Usuario')+','+fecha+','+cpc, confi_ax);
+        const response = await axios.get(baseUrl+'Comercial/GetDatosPlanta/C,'+planta+','+cookies.get('Usuario')+','+fecha+','+cpc, confi_ax);
         if (response.data && response.data.length > 0)
         {
             const objAutoriza = response.data[0].Rows;
@@ -328,6 +379,31 @@ export async function getDatosPlanta(planta, fecha, cpc)
                     totalCount: objCanal.length
                 }
             };
+        }else{
+            return false
+        }
+    } 
+    catch(error)
+    {
+        console.log(error);
+        return false
+    }
+}
+export async function getProspectos_() {
+    try
+    {
+        let confi_ax = {
+            headers:
+            {
+                'Cache-Control': 'no-cache',
+                'Content-Type': 'application/json',
+                "Authorization": "Bearer "+cookies.get('token'),
+            },
+        };
+        //------------------------------------------------------------------------------------------------------------------------------------------------------
+        const response = await axios.get(baseUrl+'Comercial/GetProspectos/0,'+cookies.get('Usuario'), confi_ax);
+        if (response.data && response.data.length > 0) {
+            return response.data;
         }else{
             return false
         }

@@ -94,3 +94,8 @@ h3, label{
 	box-shadow: 0 2px 4px rgba;
 	color:black;
   }	
+
+  .c-modal .modal-dialog{
+	max-width: 60%;
+  }
+
