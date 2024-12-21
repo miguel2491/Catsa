@@ -98,4 +98,7 @@ h3, label{
   .c-modal .modal-dialog{
 	max-width: 60%;
   }
+  .c-modal-80 .modal-dialog{
+	max-width: 80%;
+  }
 

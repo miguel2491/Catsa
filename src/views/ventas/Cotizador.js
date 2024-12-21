@@ -205,13 +205,13 @@ const Cotizador = () => {
   return(
     <CContainer fluid>
       <CRow className='mt-2'>
-        <CCol xs={6} md={4} lg={4}>
+        <CCol xs={6} md={2} lg={2}>
           <Plantas  
             mCambio={mCambio}
             plantasSel={plantasSel}
           />
         </CCol>
-        <CCol xs={6} md={4} lg={4}>
+        <CCol xs={6} md={2} lg={2}>
           <FechaI 
               vFechaI={vFechaI} 
               cFechaI={cFechaI} 
@@ -225,6 +225,15 @@ const Cotizador = () => {
               <CIcon icon={cilSearch} className="me-2" />
             </CButton>
           </CInputGroup>
+        </CCol>
+        <CCol xs={4} md={1} lg={1} className='mt-4'>
+          <CButton color="primary">Limpiar</CButton>
+        </CCol>
+        <CCol xs={4} md={1} lg={1} className='mt-4'>
+          <CButton color="primary">Exportar</CButton>
+        </CCol>
+        <CCol xs={4} md={1} lg={1} className='mt-4'>
+          <CButton color="success">Guardar</CButton>
         </CCol>
       </CRow>
       <StepWizard>
@@ -602,6 +611,19 @@ const Step1 = ({ nextStep, fijos, corpo, mop, cdiesel, sucursal }) => {
 
 const Step2 = ({ nextStep, previousStep, fuente, segmento, canal, productos }) => {
   const [dDetalle, setDataD] = useState([]); // Estado para almacenar los datos de Detalle
+  const [productoBuscado, setProductoBuscado] = useState(""); 
+  const [vMExtras, setMExtras] = useState(false);// Modal Extras
+  const [aProductos, setProductos] = useState([]); 
+  const [aExtras, setExtras] = useState([]); 
+  const handleEdit = (e, rowIndex) => {
+    const updatedProductos = [...productos];
+    updatedProductos[rowIndex].CPC = e.target.value; // Actualiza el valor de la columna CPC
+    //setProductos(updatedProductos); // Actualiza el estado
+  };
+  const btnExtras = (Producto) => {
+    setMExtras(true);
+    console.log(Producto)
+  }
   const columns = [
           {
               name: 'Acciones',
@@ -610,20 +632,28 @@ const Step2 = ({ nextStep, previousStep, fuente, segmento, canal, productos }) =
               cell: (row) => (
                   <div>
                       <CButton
-                          color="primary"
+                          color="danger"
                           onClick={() => getDetalle(1)}
-                          size="sm"
+                          size="xs"
                           className="me-2"
-                          title="Detalle"
+                          title="Eliminar"
                       >
-                          <CIcon icon={cilPlus} />
+                          <CIcon icon={cilX} />
                       </CButton>
                   </div>
               ),
           },{
               name: 'M3',
-              selector: 1.0,
-              width:"40px",
+              selector: row => row.CPC,
+              width:"80px",
+              cell: (row, index) => (
+                <input
+                  type="number"
+                  value={row.CPC}
+                  onChange={(e) => handleEdit(e, index)} // Maneja el cambio de valor
+                  style={{ width: '100%' }}
+                />
+              ),
           },{
               name: 'Producto',
               selector: row => row.Producto,
@@ -633,12 +663,12 @@ const Step2 = ({ nextStep, previousStep, fuente, segmento, canal, productos }) =
           },
           {
               name: 'Descripcion',
-              width:"150px",
+              width:"300px",
               selector: row => row.Descripcion,
           },
           {
             name: 'Cemento',
-            width:"150px",
+            width:"100px",
             selector: row => row.CPC,
           },
           {
@@ -669,7 +699,7 @@ const Step2 = ({ nextStep, previousStep, fuente, segmento, canal, productos }) =
           {
             name: 'MB Mínimo',
             width:"150px",
-            selector: 0.00,
+            selector: row => row.CPC,
           },
           {
             name: 'Costo Total',
@@ -679,49 +709,129 @@ const Step2 = ({ nextStep, previousStep, fuente, segmento, canal, productos }) =
           {
             name: 'M3 Bomba',
             width:"150px",
-            selector: 0.00,
+            selector: row => row.CPC,
           },
           {
             name: 'Precio Bomba',
             width:"150px",
-            selector: 0.00,
+            selector: row => row.CPC,
           },
           {
             name: 'Extras',
             width:"150px",
-            selector: 0.00,
+            selector: row => row.CPC,
+            cell: (row) => (
+              <div>
+                  <CButton
+                      color="info"
+                      onClick={() => btnExtras(row.Producto)}
+                      size="xs"
+                      className="me-2"
+                      title="Extras"
+                  >
+                      <CIcon icon={cilPlus} />
+                  </CButton>
+              </div>
+            ),
           },
           {
             name: 'Importe Extras',
             width:"150px",
-            selector: 0.00,
+            selector: row => row.CPC,
           },
           {
             name: 'Precio Sugerido + Extras',
             width:"150px",
-            selector: 0.00,
+            selector: row => row.CPC,
           },
           {
             name: 'Precio Sugerido m3',
             width:"150px",
-            selector: 0.00,
+            selector: row => row.CPC,
+          },
+          {
+            name:'Precio Venta m3',
+            with:"100px",
+            cell: (row, index) => (
+              <input
+                type="number"
+                value={row.CPC}
+                style={{ width: '100%' }}
+              />
+            ),
           },
           {
             name: '% Venta',
             width:"150px",
-            selector: 0.00,
+            selector: row => row.CPC,
+            cell: (row, index) => (
+              <input
+                type="number"
+                value={row.CPC}
+                onChange={(e) => handleEdit(e, index)} // Maneja el cambio de valor
+                style={{ width: '100%' }}
+              />
+            ),
           },
           {
             name: 'Comisión',
             width:"150px",
-            selector: 0.00,
+            selector: row => row.CPC,
           },
           {
             name: 'Margen Bruto',
             width:"150px",
-            selector: 0.00,
+            selector: row => row.CPC,
           },
   ];
+  const columnsEx = [
+    {
+      name: 'Acciones',
+      selector: row => row.Id,
+      width:"80px",
+      cell: (row) => (
+        <div>
+            <CButton
+                color="danger"
+                onClick={() => getDetalle(1)}
+                size="xs"
+                className="me-2"
+                title="Eliminar"
+            >
+                <CIcon icon={cilX} />
+            </CButton>
+        </div>
+      ),
+    },
+    {
+        name: 'Identificador',
+        selector: row => row.Id,
+        width:"80px",
+    },
+    {
+      name: 'Concepto',
+      selector: row => row.Id,
+      width:"80px",
+    },
+    {
+      name: 'Cantidad',
+      selector: row => row.Id,
+      width:"80px",
+    },
+    {
+      name: 'Precio',
+      selector: row => row.Id,
+      width:"80px",
+      cell: (row, index) => (
+        <input
+          type="number"
+          value={row.Id}
+          onChange={(e) => handleEdit(e, index)} // Maneja el cambio de valor
+          style={{ width: '100%' }}
+        />
+      ),
+    }
+];
   const [sOProductos, setOProductos] = useState([]);
   
   const sProductos = (selected) =>{
@@ -740,8 +850,8 @@ const Step2 = ({ nextStep, previousStep, fuente, segmento, canal, productos }) =
   function getFindPro(pro)
   {
     const productoBuscado = productos.filter(producto => producto.Producto === pro);
-    console.log(productoBuscado)
-    setDataD(productoBuscado)
+    console.log(productoBuscado[0])
+    setProductos(prevProductos => [...prevProductos, ...productoBuscado])
   }
 
   const oProductos = productos.map(item => ({
@@ -778,17 +888,6 @@ const Step2 = ({ nextStep, previousStep, fuente, segmento, canal, productos }) =
                   <option key={index} value={item.IdCanal}>{item.Descripcion}</option>
                 ))}
               </CFormSelect>
-            </CCol>
-          </CRow>
-          <CRow className='mt-2 mb-2'>
-            <CCol xs={4} md={4} className='mt-3'>
-              <CButton color="primary">Limpiar</CButton>
-            </CCol>
-            <CCol xs={4} md={4} className='mt-3'>
-              <CButton color="primary">Exportar</CButton>
-            </CCol>
-            <CCol xs={1} md={4} className='mt-3'>
-              <CButton color="success">Guardar</CButton>
             </CCol>
           </CRow>
           <CRow className='mt-2 mb-2'>
@@ -912,7 +1011,7 @@ const Step2 = ({ nextStep, previousStep, fuente, segmento, canal, productos }) =
               <CCol xs={12} md={12}>
                 <DataTable
                   columns={columns}
-                  data={dDetalle}  // Usamos los datos filtrados
+                  data={aProductos}  // Usamos los datos filtrados
                   pagination
                   persistTableHead
                   subHeader
@@ -931,6 +1030,49 @@ const Step2 = ({ nextStep, previousStep, fuente, segmento, canal, productos }) =
           </CRow>
         </CCardFooter>
       </CCard>
+      <CModal
+          backdrop="static"
+          visible={vMExtras}
+          onClose={() => setMExtras(false)}
+          aria-labelledby="STM"
+          className='c-modal'
+      >
+        <CModalHeader>
+            <CModalTitle id="stitle">Extras</CModalTitle>
+        </CModalHeader>
+        <CModalBody>
+        <CRow>
+          <CCol>
+            <CFormSelect aria-label="Fuente">
+              <option>-</option>
+              <option value='1'>FIBRA</option>
+            </CFormSelect>
+          </CCol>
+          <CCol>
+            <CButton color='primary'>Agregar</CButton>
+          </CCol>
+        </CRow>
+        <CRow className='mt-2'>
+          <DataTable
+            columns={columnsEx}
+            data={aExtras}  // Usamos los datos filtrados
+            pagination
+            persistTableHead
+            subHeader
+          />
+        </CRow>
+        </CModalBody>
+        <CModalFooter>
+          <CRow className='w-100'>
+            <CCol xs={6} md={6}>
+              <CButton className='btn btn-primary' style={{'color':'white'}}>Aceptar <CIcon icon={cilCheck} className='me-2' /></CButton>
+            </CCol>
+            <CCol xs={6} md={6}>
+              <CButton className='btn btn-danger' onClick={() => setMExtras(false)} style={{'color':'white'}}>Cerrar <CIcon icon={cilX} className='me-2' /></CButton>
+            </CCol>
+          </CRow>
+        </CModalFooter>
+      </CModal>
     </div>
   )
 };
