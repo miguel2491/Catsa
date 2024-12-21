@@ -15,7 +15,8 @@ import {
     cilSearch,
     cilCode,
     cilStar,
-    cilClipboard
+    cilClipboard,
+    cilCog
   } from '@coreui/icons'
 import { CNavGroup, CNavItem, CNavTitle } from '@coreui/react'
 import CIcon from '@coreui/icons-react'
@@ -206,16 +207,22 @@ const NavProvider = ({ children }) => {
             ...((userIsAdmin) ? [
             {
               component: CNavGroup,
-              name: 'Interfaz',
+              name: 'Interfaz CB',
               to: '/interfaz',
               icon: <CIcon icon={cilCode} customClassName="nav-icon" />,
               items: [
                 ...((userIsAdmin) ? [
                 {
                   component: CNavItem,
-                  name: 'Productos',
+                  name: 'Principal',
                   icon: <CIcon icon={cilStar} customClassName="nav-icon" />,
-                  to: '/interfaz/Interfaz',
+                  to: '/interfaz/Obras',
+                },
+                {
+                  component: CNavItem,
+                  name: 'Configuraciones',
+                  icon: <CIcon icon={cilCog} customClassName="nav-icon" />,
+                  to: '/interfaz/Configuracion',
                 }]:[])
               ],
             }]:[]),

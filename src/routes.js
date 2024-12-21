@@ -17,7 +17,8 @@ const LPedidos = React.lazy(() => import('./views/logistica/LPedidos'))
 const PLinea = React.lazy(() => import('./views/logistica/PLinea'))
 const PedidosC = React.lazy(() => import('./views/logistica/Pedidos/PedidosC'))
 //INTERFAZ
-const IProducto = React.lazy(() => import('./views/interfaz/Interfaz'))
+const IObras = React.lazy(() => import('./views/interfaz/Obras'))
+const IConfiguracion = React.lazy(() => import('./views/interfaz/Configuracion'))
 //REPORTES
 const CostosProductos = React.lazy(() => import('./views/reportes/CProductos'))
 const RPedidosVenta = React.lazy(() => import('./views/reportes/PedidosVenta'))
@@ -98,7 +99,8 @@ const routes = [
   { path: '/logistica/PLinea', name: 'Pedidos Linea', element:PLinea },
   { path: '/logistica/Pedidos/PedidosC', name: 'PedidosC', element:PedidosC },
   // INTERFAZ
-  { path: '/interfaz/Interfaz', name: 'IProducto', element:IProducto },
+  { path: '/interfaz/Obras', name: 'IObras', element:IObras },
+  { path: '/interfaz/Configuracion', name: 'IConfiguracion', element:IConfiguracion },
   // { path: '/panel', name: 'Panel', element: Dashboard },
   // { path: '/theme', name: 'Theme', element: Colors, exact: true },
   // { path: '/theme/colors', name: 'Colors', element: Colors },
