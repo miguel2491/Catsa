@@ -3,11 +3,12 @@ import Swal from "sweetalert2";
 import ProgressBar from "@ramonak/react-progress-bar";
 import DataTable from 'react-data-table-component';
 import '../../estilos.css';
+import BuscadorDT from '../base/parametros/BuscadorDT'
 import { getPlantasCon } from '../../Utilidades/Funciones';
 import {
   CForm,
-  CFormSelect,
-  CWidgetStatsF,
+  CFormSwitch,
+  CFormInput,
   CContainer,
   CButton,
   CRow,
@@ -25,7 +26,7 @@ import {
 } from '@coreui/react'
 import '../../estilos.css';
 import {CIcon} from '@coreui/icons-react'
-import { cilSearch } from '@coreui/icons'
+import { cilSearch, cilX, cilCheckCircle } from '@coreui/icons'
 
 const Configuracion = () => {
     const [plantasSel , setPlantas] = useState('');
@@ -36,9 +37,32 @@ const Configuracion = () => {
     const [vPlantaM, setVPlanta] = useState(false);
     //Arrays
     const [dtPlanta, setDTPlanta] = useState([]);
-    
+    const [PlantaId, setPlantaId] = useState('');
+    const [PlantaTxt, setPlantaTxt] = useState('');
+    const [Company, setCompany] = useState('');
+    const [Unidad, setUnidad] = useState('');
+    const [IP, setIP] = useState('');
+    const [BD, setBD] = useState('');
+    const [Pass, setPass] = useState('');
+    const [Activa, setActiva] = useState(false);
+    //Buscador
+    const [vBPlanta, setBPlanta] = useState('');
+    const [fText, setFText] = useState(''); // Estado para el filtro de búsqueda
+
     const getPlantaI = (p) =>{
         console.log(p)
+        console.log(dtPlanta)
+        //Buscar Arreglo por Index Planta
+        const resultado = dtPlanta.find(item => item.Planta === p);
+        console.log(resultado)
+        setPlantaId(resultado.Planta)
+        setPlantaTxt(resultado.Planta)
+        setCompany(resultado.Compañia)
+        setIP(resultado.IP)
+        setPass(resultado.Pass)
+        setUnidad(resultado.Unidad)
+        setBD(resultado.BD)
+        setActiva(resultado.Activa)
         setVPlanta(true)
     }
     const colPlanta = [
@@ -95,17 +119,51 @@ const Configuracion = () => {
             sortable:true,
             grow:1,
         },
+        {
+            name:'Activo',
+            width:"180px",
+            cell: (row) => (
+                // Si el valor de row.Activa es 'False', mostramos un ícono de Activa (Logica antigua ya implementada =( )
+                row.Activa ? (
+                    <div>
+                        <CIcon icon={cilX} style={{ color: 'red', fontSize: '20px' }} />
+                        <span style={{ marginLeft: '3px' }}>Inactiva</span>
+                    </div>    
+                ) : (
+                    <div>
+                        <CIcon icon={cilCheckCircle} style={{ color: 'green', fontSize: '20px' }} />
+                        <span style={{ marginLeft: '3px' }}>Activa</span>
+                    </div>
+                    
+                )
+            ),
+        },
+    ];
+    // Estilos condicionales para filas
+    const rowStyles = [
+        {
+        when: row => !row.Activa, // Si Activa es false
+        style: {
+            backgroundColor: '#48CA84', // Color de fondo rojo claro
+            color: '#721c24', // Color de texto rojo oscuro
+        },
+        },
+        {
+        when: row => row.Activa, // Si Activa es true
+        style: {
+            backgroundColor: '#FFFEF6', // Color de fondo verde claro
+            color: '#155724', // Color de texto verde oscuro
+        },
+        },
     ];
 
     useEffect(() => {
-        console.log('La función se ejecutó una sola vez al renderizar');
         getPlantas_()
     }, []);
 
     const getPlantas_ = async () => {
         try {
             const plantas = await getPlantasCon();
-            console.log(plantas)
             if (plantas) {
                 setDTPlanta(plantas); 
             } else {
@@ -115,6 +173,29 @@ const Configuracion = () => {
             Swal.fire("Error", "No se pudo obtener la información", "error");
         }
     }
+    const mCambio = () =>{
+        setActiva(!Activa);
+    }
+    const onFindBusqueda = (e) => {
+        setBPlanta(e.target.value);
+        setFText(e.target.value);
+    };
+      // Función de búsqueda
+    const fBusqueda = () => {
+        console.log(vBPlanta.length);
+        if(vBPlanta.length != 0){
+            const valFiltrados = dtPlanta.filter(dtPlanta => 
+            dtPlanta.Planta.includes(vBPlanta) // Filtra los clientes por el número de cliente
+            );
+            setDTPlanta(valFiltrados);
+        }else{
+            getPlantas_()
+        }
+    };
+    const fDPlanta = dtPlanta.filter(item => {
+        // Filtrar por planta, interfaz y texto de búsqueda
+        return item.Planta.toLowerCase().includes(fText.toLowerCase()) || item.Descripcion.includes(fText) || item.IP.includes(fText);
+    });
 return (
     <>
         <CContainer fluid>
@@ -141,12 +222,16 @@ return (
         </CModal>
             <h3>Interfaz Configuraciones</h3>
             <CRow className='mt-4 mb-4'>
+                <CCol xs={3} md={3}>
+                    <BuscadorDT value={vBPlanta} onChange={onFindBusqueda} onSearch={fBusqueda} />
+                </CCol>
                 <DataTable
                     columns={colPlanta}
-                    data={dtPlanta}
+                    data={fDPlanta}
                     pagination
                     persistTableHead
                     subHeader
+                    conditionalRowStyles={rowStyles}
                 />
                 <CModal
                     backdrop="static"
@@ -161,30 +246,44 @@ return (
                         <CRow>
                             <CCol>
                                 <label>ID Planta</label>
+                                <CFormInput placeholder="" value={PlantaId} />
                             </CCol>
                             <CCol>
                                 <label>Planta</label>
+                                <CFormInput placeholder="" value={PlantaTxt} />
                             </CCol>
                             <CCol>
                                 <label>Compañia</label>
+                                <CFormInput placeholder="" value={Company} />
                             </CCol>
                             <CCol>
                                 <label>Unidad</label>
+                                <CFormInput placeholder="" value={Unidad} />
                             </CCol>
+                            </CRow>
+                            <CRow className='mt-2 mb-2'>
                             <CCol>
                                 <label>IP</label>
+                                <CFormInput placeholder="" value={IP} />
                             </CCol>
                             <CCol>
                                 <label>BD</label>
+                                <CFormInput placeholder="" value={BD} />
                             </CCol>
                             <CCol>
                                 <label>Pass</label>
+                                <CFormInput placeholder="" value={Pass} />
                             </CCol>
                             <CCol>
                                 <label>Activa</label>
+                                <CFormSwitch
+                                    size="lg"
+                                    checked={Activa}
+                                    onChange={mCambio}
+                                />
                             </CCol>
                         </CRow>
-                        <CRow>
+                        <CRow className='mt-2 mb-2'>
                             <CCol>
                                 <CButton color='success'>Guardar</CButton>
                             </CCol>
