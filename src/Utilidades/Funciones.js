@@ -415,7 +415,7 @@ export async function getProspectos_() {
     }
 }
 // INTERFAZ
-  // 
+  // CB
 export async function getProductoIF(planta, FI)
 {
     try
@@ -591,7 +591,117 @@ export async function resetProducto(Planta, Producto, Enviado, Eliminar)
         console.log(error);
     }
 }
-    // Configuraciones
+// Intelisis
+export async function getBitacoraI(FI)
+{
+    
+    try
+    {
+        let confi_ax = {
+            headers:
+            {
+                'Cache-Control': 'no-cache',
+                'Content-Type': 'application/json',
+                "Authorization": "Bearer "+cookies.get('token'),
+            },
+        };
+        const fcaI = FormatoFca(FI);
+        //------------------------------------------------------------------------------------------------------------------------------------------------------
+        const response = await axios.get(baseUrl+'Inte/GetBitacoraCISA/'+fcaI, confi_ax);
+        var obj = response.data;
+        if(obj.length > 0)
+        {
+            return obj
+        }else{return false}
+    } 
+    catch(error)
+    {
+        return false;
+        console.log(error);
+    }
+}
+export async function getMovimientos(FI)
+{
+    
+    try
+    {
+        let confi_ax = {
+            headers:
+            {
+                'Cache-Control': 'no-cache',
+                'Content-Type': 'application/json',
+                "Authorization": "Bearer "+cookies.get('token'),
+            },
+        };
+        const fcaI = FormatoFca(FI);
+        //------------------------------------------------------------------------------------------------------------------------------------------------------
+        const response = await axios.get(baseUrl+'Inte/GetMovimientosBitacora/'+fcaI, confi_ax);
+        var obj = response.data;
+        if(obj.length > 0)
+        {
+            return obj
+        }else{return false}
+    } 
+    catch(error)
+    {
+        return false;
+        console.log(error);
+    }
+}
+export async function getProductosI()
+{
+    try
+    {
+        let confi_ax = {
+            headers:
+            {
+                'Cache-Control': 'no-cache',
+                'Content-Type': 'application/json',
+                "Authorization": "Bearer "+cookies.get('token'),
+            },
+        };
+        //------------------------------------------------------------------------------------------------------------------------------------------------------
+        const response = await axios.get(baseUrl+'Inte/GetArticulos', confi_ax);
+        var obj = response.data;
+        if(obj.length > 0)
+        {
+            return obj
+        }else{return false}
+    } 
+    catch(error)
+    {
+        return false;
+        console.log(error);
+    }
+}
+export async function getMaterialesI(Producto)
+{
+    try
+    {
+        let confi_ax = {
+            headers:
+            {
+                'Cache-Control': 'no-cache',
+                'Content-Type': 'application/json',
+                "Authorization": "Bearer "+cookies.get('token'),
+            },
+        };
+        //------------------------------------------------------------------------------------------------------------------------------------------------------
+        const response = await axios.get(baseUrl+'Inte/GetArticuloMaterial/'+Producto, confi_ax);
+        var obj = response.data;
+        console.log(obj);
+        if(obj.length > 0)
+        {
+            return obj
+        }else{return false}
+    } 
+    catch(error)
+    {
+        return false;
+        console.log(error);
+    }
+}  
+// Configuraciones
 export async function getPlantasCon()
 {
     try

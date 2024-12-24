@@ -225,6 +225,20 @@ const NavProvider = ({ children }) => {
                   to: '/interfaz/Configuracion',
                 }]:[])
               ],
+            },{
+              component: CNavGroup,
+              name: 'Interfaz Intelisis',
+              to: '/interfaz',
+              icon: <CIcon icon={cilCode} customClassName="nav-icon" />,
+              items: [
+                ...((userIsAdmin) ? [
+                {
+                  component: CNavItem,
+                  name: 'Movimientos',
+                  icon: <CIcon icon={cilCursor} customClassName="nav-icon" />,
+                  to: '/interfaz/MovimientoI',
+                }]:[])
+              ],
             }]:[]),
             ...((userIsAdmin || userIsOperacion) ? [
             {
