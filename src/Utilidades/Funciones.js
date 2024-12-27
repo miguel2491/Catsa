@@ -44,7 +44,6 @@ export async function getPermisos()
     }
     const response = await axios.get(baseUrl+'Login/GetUserRol/'+cookies.get('idUsuario'), confi_ax);
     cookies.set('permisos', JSON.stringify(response), {path: '/'});
-    console.log(response.data);
     getPermisos();
     }
     catch(error)
@@ -71,7 +70,6 @@ export async function getPermisos()
             const response = await axios.get(baseUrl+'Logistica/GetPedidosAc/'+planta+","+cookies.get('Usuario')+"?Tipo=S", confi_ax);
             if (response.data && response.data.length > 0 && response.data[0].Rows) {
                 const obj = response.data[0].Rows;
-                //console.log(obj);
                 if(obj.length > 0)
                 {
                     return obj;
@@ -80,7 +78,6 @@ export async function getPermisos()
         } 
         catch(error)
         {
-            console.log(error);
             return false
         }
     }
@@ -103,7 +100,6 @@ export async function getResInv(material, FI, FF, planta) {
         const response = await axios.get(baseUrl+'Operaciones/GetInv/'+material+','+planta+','+fcaI+','+fcaF+',I', confi_ax);
         if (response.data && response.data.length > 0 && response.data[0].Rows) {
             const obj = response.data[0].Rows;
-            //console.log(obj);
             if(obj.length > 0)
             {
                 return obj;
@@ -112,7 +108,86 @@ export async function getResInv(material, FI, FF, planta) {
     } 
     catch(error)
     {
-        console.log(error);
+        return false
+    }
+}
+export async function getSimuladorInv(planta, FI, FF) {
+    try
+    {
+        let confi_ax = {
+            headers:
+            {
+                'Cache-Control': 'no-cache',
+                'Content-Type': 'application/json',
+                "Authorization": "Bearer "+cookies.get('token'),
+            },
+        };
+        const fcaI = FormatoFca(FI);
+        const fcaF = FormatoFca(FF);
+        //------------------------------------------------------------------------------------------------------------------------------------------------------
+        const response = await axios.get(baseUrl+'CB/GetSimulador/'+planta+','+fcaI+','+fcaF, confi_ax);
+        if (response.data && response.data.length > 0) {
+            const obj = response.data;
+            if(obj.length > 0)
+            {
+                return obj;
+            }else{return false}
+        }else{return false}
+    } 
+    catch(error)
+    {
+        return false
+    }
+}
+export async function getSimuladorPro(planta) {
+    try
+    {
+        let confi_ax = {
+            headers:
+            {
+                'Cache-Control': 'no-cache',
+                'Content-Type': 'application/json',
+                "Authorization": "Bearer "+cookies.get('token'),
+            },
+        };
+        //------------------------------------------------------------------------------------------------------------------------------------------------------
+        const response = await axios.get(baseUrl+'Operaciones/GetSimProducto/'+planta+',0,0', confi_ax);
+        if (response.data && response.data.length > 0) {
+            const obj = response.data;
+            if(obj.length > 0)
+            {
+                return obj;
+            }else{return false}
+        }else{return false}
+    } 
+    catch(error)
+    {
+        return false
+    }
+}
+export async function getSimuladorProInd(planta, producto) {
+    try
+    {
+        let confi_ax = {
+            headers:
+            {
+                'Cache-Control': 'no-cache',
+                'Content-Type': 'application/json',
+                "Authorization": "Bearer "+cookies.get('token'),
+            },
+        };
+        //------------------------------------------------------------------------------------------------------------------------------------------------------
+        const response = await axios.get(baseUrl+'Operaciones/GetSimProducto/'+planta+','+producto+',1', confi_ax);
+        if (response.data && response.data.length > 0) {
+            const obj = response.data;
+            if(obj.length > 0)
+            {
+                return obj;
+            }else{return false}
+        }else{return false}
+    } 
+    catch(error)
+    {
         return false
     }
 }
@@ -120,7 +195,6 @@ export async function getResInv(material, FI, FF, planta) {
     //---COTIZADOR
 export  async function getPrecios(planta)
   {
-    console.log(planta);
     try
         {
             let confi_ax = 
@@ -142,7 +216,6 @@ export  async function getPrecios(planta)
               var tFour = obj[3].Rows;
               var tFive = obj[4].Rows;
               var tSix = obj[5].Rows;
-                console.log(obj);
                 setDatosPla(tOne)
                 setDatosMop(tTwo);
                 setDFuente(tFour);
@@ -171,7 +244,6 @@ export  async function getPrecios(planta)
 }
 //--
 export async function getClientesCot(planta, cliente) {
-    console.log(planta, cliente)
     try
     {
         let confi_ax = {
@@ -236,11 +308,9 @@ export async function getProyeccion(FI, FF, planta, Tipo) {
         const fcaF = FormatoFca(FF);
         //------------------------------------------------------------------------------------------------------------------------------------------------------
         const response = await axios.get(baseUrl+'Comercial/GetAsesores/'+fcaI+','+fcaF+','+planta+',0', confi_ax);
-        console.log(response.data);
         if (response.data && response.data.length > 0 && response.data[0].Rows) {
             const objPlanta = response.data[0].Rows;
             const objAsesores = response.data[1].Rows;
-            console.log(objPlanta, objAsesores);
             if(objPlanta.length > 0 && objAsesores.length > 0)
             {
                 return {
@@ -258,7 +328,6 @@ export async function getProyeccion(FI, FF, planta, Tipo) {
     } 
     catch(error)
     {
-        console.log(error);
         return false
     }
 }
@@ -281,7 +350,6 @@ export async function getAllVendedores() {
     } 
     catch(error)
     {
-        console.log(error);
         return false
     }
 }
@@ -432,7 +500,6 @@ export async function getProductoIF(planta, FI)
         //------------------------------------------------------------------------------------------------------------------------------------------------------
         const response = await axios.get(baseUrl+'Inte/GetAlkonPr/'+planta+','+fcaI, confi_ax);
         var obj = response.data;
-        console.log(obj);
         if(obj.length > 0)
         {
             return obj
@@ -441,7 +508,6 @@ export async function getProductoIF(planta, FI)
     catch(error)
     {
         return false;
-        console.log(error);
     }
 }
 export async function getAlkon(FI)
@@ -468,7 +534,6 @@ export async function getAlkon(FI)
     catch(error)
     {
         return false;
-        console.log(error);
     }
 }
 export async function getObras(noCliente)
@@ -486,7 +551,6 @@ export async function getObras(noCliente)
         //------------------------------------------------------------------------------------------------------------------------------------------------------
         const response = await axios.get(baseUrl+'CB/GetObras/'+NoCliente, confi_ax);
         var obj = response.data;
-        console.log(obj);
         if(obj.length > 0)
         {
             return obj
@@ -513,7 +577,6 @@ export async function getProducto(Producto)
         //------------------------------------------------------------------------------------------------------------------------------------------------------
         const response = await axios.get(baseUrl+'CB/GetProducto/'+Producto, confi_ax);
         var obj = response.data;
-        console.log(obj);
         if(obj.length > 0)
         {
             return obj
@@ -545,7 +608,6 @@ export async function resetCliente(noCliente, Enviado, Eliminar)
         //------------------------------------------------------------------------------------------------------------------------------------------------------
         const response = await axios.put(baseUrl+'CB/setObra', confi_ax);
         var obj = response.data;
-        console.log(obj);
         if(obj.length > 0)
         {
             return obj
@@ -579,7 +641,6 @@ export async function resetProducto(Planta, Producto, Enviado, Eliminar)
         //------------------------------------------------------------------------------------------------------------------------------------------------------
         const response = await axios.post(baseUrl+'CB/setProductoSend', data, confi_ax);
         var obj = response.data;
-        console.log(obj);
         if(obj.length > 0)
         {
             return obj
@@ -645,7 +706,6 @@ export async function getMovimientos(FI)
     catch(error)
     {
         return false;
-        console.log(error);
     }
 }
 export async function getProductosI()
@@ -662,6 +722,7 @@ export async function getProductosI()
         };
         //------------------------------------------------------------------------------------------------------------------------------------------------------
         const response = await axios.get(baseUrl+'Inte/GetArticulos', confi_ax);
+        
         var obj = response.data;
         if(obj.length > 0)
         {
@@ -671,7 +732,6 @@ export async function getProductosI()
     catch(error)
     {
         return false;
-        console.log(error);
     }
 }
 export async function getMaterialesI(Producto)
@@ -689,7 +749,6 @@ export async function getMaterialesI(Producto)
         //------------------------------------------------------------------------------------------------------------------------------------------------------
         const response = await axios.get(baseUrl+'Inte/GetArticuloMaterial/'+Producto, confi_ax);
         var obj = response.data;
-        console.log(obj);
         if(obj.length > 0)
         {
             return obj
@@ -698,7 +757,6 @@ export async function getMaterialesI(Producto)
     catch(error)
     {
         return false;
-        console.log(error);
     }
 }  
 // Configuraciones
@@ -725,7 +783,6 @@ export async function getPlantasCon()
     catch(error)
     {
         return false;
-        console.log(error);
     }
 }
 export async function getPlantaCB(planta)
@@ -743,7 +800,6 @@ export async function getPlantaCB(planta)
         //------------------------------------------------------------------------------------------------------------------------------------------------------
         const response = await axios.get(baseUrl+'CB/GetPlantaCB/'+planta, confi_ax);
         var obj = response.data;
-        console.log(obj);
         if(obj.length > 0)
         {
             return obj
@@ -752,7 +808,6 @@ export async function getPlantaCB(planta)
     catch(error)
     {
         return false;
-        console.log(error);
     }
 }
 export async function setPlantaCB(planta)
@@ -773,7 +828,6 @@ export async function setPlantaCB(planta)
         //------------------------------------------------------------------------------------------------------------------------------------------------------
         const response = await axios.post(baseUrl+'CB/SetPlantasCB', data, confi_ax);
         var obj = response.data;
-        console.log(obj);
         if(obj.length > 0)
         {
             return obj
@@ -782,7 +836,6 @@ export async function setPlantaCB(planta)
     catch(error)
     {
         return false;
-        console.log(error);
     }
 }
 //--------------------
@@ -810,7 +863,6 @@ export async function getResInvCB(material, FI, FF, planta) {
     catch(error)
     {
         return false;
-        console.log(error);
     }
 }
 //REPORTES
@@ -836,7 +888,6 @@ export async function getPedidoInd(npedido) {
     catch(error)
     {
         return false;
-        console.log(error);
     }
 }
 export async function getObraInd(obra, planta) {
@@ -861,7 +912,6 @@ export async function getObraInd(obra, planta) {
     catch(error)
     {
         return false;
-        console.log(error);
     }
 }
 export async function getComisionesR(mes, periodo) {
@@ -886,7 +936,6 @@ export async function getComisionesR(mes, periodo) {
     catch(error)
     {
         return false;
-        console.log(error);
     }
 }
 export async function getDetalleComR(mes, periodo, usuario) {
@@ -903,7 +952,6 @@ export async function getDetalleComR(mes, periodo, usuario) {
         //------------------------------------------------------------------------------------------------------------------------------------------------------
         const response = await axios.get(baseUrl+'Reportes/GetComisionesR/'+mes+","+periodo+",1,"+usuario, confi_ax);
         var obj = response.data;
-        console.log(obj)
         if(obj && obj.length > 0)
         {
             return obj
@@ -912,7 +960,6 @@ export async function getDetalleComR(mes, periodo, usuario) {
     catch(error)
     {
         return false;
-        console.log(error);
     }
 }
 //UTILITIES

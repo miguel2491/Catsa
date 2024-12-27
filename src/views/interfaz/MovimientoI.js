@@ -26,7 +26,7 @@ import {
 } from '@coreui/react'
 import '../../estilos.css';
 import {CIcon} from '@coreui/icons-react'
-import { cilCameraControl } from '@coreui/icons'
+import { cilCameraControl, cilLoopCircular } from '@coreui/icons'
 
 const MovmientoI = () => {
     const [plantasSel , setPlantas] = useState('');
@@ -46,6 +46,7 @@ const MovmientoI = () => {
     const [vBitacora, setBitacora] = useState('');
     const [fText, setFText] = useState(''); // Estado para el filtro de búsqueda
     const [fTextB, setFTextB] = useState('');
+    const [fTextP, setFTextP] = useState('');
     
     const opcionesFca = {
         year: 'numeric', // '2-digit' para el año en dos dígitos
@@ -54,6 +55,9 @@ const MovmientoI = () => {
     };
     const cFechaI = (fecha) => {
         setFechaIni(fecha.toLocaleDateString('en-US',opcionesFca));
+        getBitacoraInt_(fecha.toLocaleDateString('en-US',opcionesFca))
+        getMovimientosInt_(fecha.toLocaleDateString('en-US',opcionesFca))
+        getProductosInt_(fecha.toLocaleDateString('en-US',opcionesFca))
     };
     //Movimientos
     const colMov = [
@@ -202,7 +206,7 @@ const MovmientoI = () => {
                 }
                 return estatus;
             },
-            width:"600px",
+            width:"200px",
             sortable:true,
             grow:1,
         },
@@ -365,26 +369,51 @@ const MovmientoI = () => {
     ];
     //------------
     useEffect(() => {
-        getBitacoraInt_();
-        getMovimientosInt_();
-        getProductosInt_();
+        getBitacoraInt_(null);
+        getMovimientosInt_(null);
+        getProductosInt_(null);
     }, []);
 
-    const getMovimientosInt_ = async () => {
+    const refrescar = ()=>{
+        setVisible(true);
+        setLoading(true);
+        setPercentage(0);
+        const interval = setInterval(() => {
+            setPercentage(prev => {
+            if (prev < 90) return prev + 10;
+            return prev;
+            });
+        }, 200);
+        getBitacoraInt_(null);
+        getMovimientosInt_(null);
+        getProductosInt_(null);
+        setTimeout(() => { 
+            setLoading(false);
+            setVisible(false); // Oculta el modal de carga
+            setPercentage(100);
+         },2000)
+    }
+
+    const getMovimientosInt_ = async (fec) => {
+        const fecha_ = fec == null ? vFechaI.toLocaleDateString('en-US',opcionesFca):fec;
         try {
-            const movs = await getMovimientos(vFechaI.toLocaleDateString('en-US',opcionesFca));
+            const movs = await getMovimientos(fecha_);
             if (movs) {
                 setDTMovimiento(movs); 
             } else {
-                Swal.fire("Error", "Ocurrió un error, vuelve a intentar", "error");
+                if(movs.length > 0){
+                    Swal.fire("Error", "Ocurrió un error, vuelve a intentar", "error");
+                }
+                
             }
         } catch (error) {
             Swal.fire("Error", "No se pudo obtener la información", "error");
         }
     }
-    const getBitacoraInt_ = async () => {
+    const getBitacoraInt_ = async (fec) => {
+        const fecha_ = fec == null ? vFechaI.toLocaleDateString('en-US',opcionesFca):fec;
         try {
-            const bitacora = await getBitacoraI(vFechaI.toLocaleDateString('en-US',opcionesFca));
+            const bitacora = await getBitacoraI(fecha_);
             if (bitacora) {
                 setDTBitacora(bitacora); 
             } else {
@@ -394,9 +423,10 @@ const MovmientoI = () => {
             Swal.fire("Error", "No se pudo obtener la información", "error");
         }
     }
-    const getProductosInt_ = async () => {
+    const getProductosInt_ = async (fec) => {
+        const fecha_ = fec == null ? vFechaI.toLocaleDateString('en-US',opcionesFca):fec;
         try {
-            const producto = await getProductosI(vFechaI.toLocaleDateString('en-US',opcionesFca));
+            const producto = await getProductosI(fecha_);
             if (producto) {
                 setDTProducto(producto); 
             } else {
@@ -426,7 +456,6 @@ const MovmientoI = () => {
         setFText(e.target.value);
     };
     const onFindBusquedaBit = (e) => {
-        console.log(e.target.value)
         setFTextB(e.target.value);
     };  
     const fBusqueda = () => {
@@ -440,7 +469,6 @@ const MovmientoI = () => {
         }
     };
     const fBusquedaBita = () => {
-        console.log(vBitacora);
         if(vBitacora.length != 0){
             const valFiltrados = dtBitacora.filter(dtBitacora => 
             dtBitacora.Sucursal.includes(vBitacora) // Filtra los clientes por el número de cliente
@@ -460,7 +488,7 @@ const MovmientoI = () => {
     });
     const fDProducto = dtProducto.filter(item => {
         // Filtrar por planta, interfaz y texto de búsqueda
-        //return item.Articulo.includes(fTextB) || item.Catalogo.includes(fTextB);
+        return item.Articulo.includes(fTextP) || item.Catalogo.includes(fTextP);
     });
     const fDMaterial = dtMaterial.filter(item => {
         // Filtrar por planta, interfaz y texto de búsqueda
@@ -492,7 +520,14 @@ return (
             </CModalFooter>
         </CModal>
 
-            <h3>Interfaz Movimientos Intelisis</h3>
+            <h3>Interfaz Movimientos Intelisis <CButton color='primary' onClick={refrescar}><CIcon icon={cilLoopCircular} className="me-2" /></CButton></h3>
+            <CRow className='mt-2 mb-2'>
+                <FechaI 
+                    vFechaI={vFechaI} 
+                    cFechaI={cFechaI} 
+                    className='form-control'
+                />
+            </CRow>
             <CTabs activeItemKey="Bit">
                 <CTabList variant='tabs' layout='justified'>
                     <CTab itemKey='Bit'>Bitacora</CTab>
@@ -505,12 +540,6 @@ return (
                             <CCol xs={3} md={3}>
                                 <br />
                                 <BuscadorDT value={vBPlanta} onChange={onFindBusqueda} onSearch={fBusqueda} />
-                            </CCol>
-                            <CCol className='mb-4'>
-                                <FechaI 
-                                    vFechaI={vFechaI} 
-                                    cFechaI={cFechaI} 
-                                />
                             </CCol>
                             <DataTable
                                 columns={colMov}
