@@ -7,15 +7,8 @@ import FechaF from '../../base/parametros/FechaFinal';
 import Plantas from '../../base/parametros/Plantas';
 import '../../../estilos.css';
 import BuscadorDT from '../../base/parametros/BuscadorDT'
-import { getRemFaltante,setRemFaltante } from '../../../Utilidades/Funciones';
+import { getRemFaltante,setRemFaltante,convertArrayOfObjectsToCSV } from '../../../Utilidades/Funciones';
 import {
-    CTab,
-    CTabContent,
-    CTabList,
-    CTabPanel,
-    CTabs,
-    CFormSwitch,
-    CFormInput,
     CContainer,
     CButton,
     CRow,
@@ -27,7 +20,7 @@ import {
     CModalFooter
 } from '@coreui/react'
 import {CIcon} from '@coreui/icons-react'
-import { cilCameraControl, cilLoopCircular, cilSave, cilSearch } from '@coreui/icons'
+import { cilCameraControl, cilCloudDownload, cilLoopCircular, cilSave, cilSearch, cilTrash } from '@coreui/icons'
 import { format } from 'date-fns';
 
 const RemiFal = () => {
@@ -39,6 +32,7 @@ const RemiFal = () => {
     const [visible, setVisible] = useState(false);
     //Arrays
     const [dtRemisiones, setDTRemisiones] = useState([]);
+    const [exRemisiones, setExRemisiones] = useState([]);
     //Buscador
     const [fText, setFText] = useState(''); // Estado para el filtro de búsqueda
     const [vBPlanta, setBPlanta] = useState('');
@@ -72,7 +66,7 @@ const RemiFal = () => {
                   type="number"
                   value={row.NoRemision}
                   onChange={(e) => handleEdit(e, index)} // Maneja el cambio de valor
-                  style={{ width: '100%' }}
+                  style={{ width: '100%', color:'black',background:'#DDF6EB' }}
                 />
               ),
         },{
@@ -81,15 +75,31 @@ const RemiFal = () => {
             width:"80px",
             cell: (row) => (
                 <div>
-                    <CButton
-                        color="primary"
-                        onClick={() => updRemision(row.IdOperacion, row.NoRemision, row.Planta)}
-                        size="sm"
-                        className="me-2"
-                        title="Actualizar"
-                    >
-                        <CIcon icon={cilSave} />
-                    </CButton>
+                    <CRow>
+                    <CCol>
+                        <CButton
+                            color="primary"
+                            onClick={() => updRemision(row.IdOperacion, row.NoRemision, row.Planta)}
+                            size="sm"
+                            className="me-2"
+                            title="Actualizar"
+                        >
+                            <CIcon icon={cilSave} />
+                        </CButton>
+                    </CCol>
+                    <CCol>
+                        <CButton
+                            color="danger"
+                            onClick={() => delRemision(row.IdOperacion, row.Planta)}
+                            size="sm"
+                            className="me-2"
+                            title="Eliminar"
+                            style={{color:'white'}}
+                        >
+                            <CIcon icon={cilTrash} />
+                        </CButton>
+                    </CCol>
+                    </CRow>
                 </div>
             ),
         },
@@ -127,6 +137,13 @@ const RemiFal = () => {
             grow:1,
         },
         {
+            name: 'Cantidad',
+            selector: row => row.Cantidad.toFixed(2),
+            width:"180px",
+            sortable:true,
+            grow:1,
+        },
+        {
             name: 'Material',
             selector: row => row.Material,
             width:"200px",
@@ -140,13 +157,6 @@ const RemiFal = () => {
             sortable:true,
             grow:1,
         },
-        {
-            name: 'Cantidad',
-            selector: row => row.Cantidad,
-            width:"180px",
-            sortable:true,
-            grow:1,
-        },
     ];
     //------------
     useEffect(() => {
@@ -156,25 +166,46 @@ const RemiFal = () => {
     const getRemFal = async () => {
         const auxFcaI = format(vFechaI, 'yyyy/MM/dd');
         const auxFcaF = format(vFechaF, 'yyyy/MM/dd');
+        Swal.fire({
+            title: 'Cargando...',
+            text: 'Estamos obteniendo la información...',
+            didOpen: () => {
+                Swal.showLoading();  // Muestra la animación de carga
+            }
+        });
         try {
-            const remF = await getRemFaltante(plantasSel,auxFcaI,auxFcaF);
+            // Llamada a la API
+            const remF = await getRemFaltante(plantasSel, auxFcaI, auxFcaF);
             console.log(remF);
-            if (remF) {
-                setDTRemisiones(remF); 
+            
+            // Cerrar el loading al recibir la respuesta
+            Swal.close();  // Cerramos el loading
+            
+            if (remF && remF.length > 0) {
+                const arrAux = [];
+                remF.forEach(item=>{
+                    arrAux.push({
+                        "IDOperacion":item.IdOperacion,
+                        "Fecha":item.Fecha,
+                        "Cantidad":item.Cantidad,
+                        "Material":item.Material
+                    });
+                })
+                setDTRemisiones(remF);  // Procesar la respuesta
+                setExRemisiones(arrAux);
             } else {
-                if(remF.length > 0){
-                    Swal.fire("Error", "Ocurrió un error, vuelve a intentar", "error");
-                }
+                Swal.fire("Error", "Ocurrió un error, vuelve a intentar", "error");
             }
         } catch (error) {
+            // Cerrar el loading y mostrar el error
+            Swal.close();
             Swal.fire("Error", "No se pudo obtener la información", "error");
         }
     }
     const updRemision = async (Id, NRem, Planta) => {
         console.log(Id, NRem, Planta);
         try {
-            const remF = await setRemFaltante(Id, NRem,Planta);
-            console.log(remF);
+            const remF = await setRemFaltante(Id, NRem,Planta,'1');
             if (remF) {
                 Swal.fire("Éxito", "Se actualizo correctamente", "success"); 
                 getRemFal();
@@ -187,6 +218,54 @@ const RemiFal = () => {
             Swal.fire("Error", "No se pudo obtener la información", "error");
         }
     }
+    const delRemision = (Id, Planta) => {
+        console.log(Id, Planta);
+        Swal.fire({
+            title: "En verdad quieres eliminarlo?",
+            showDenyButton: true,
+            confirmButtonText: "Eliminar",
+            denyButtonText: `Cancelar`
+        }).then((result) => {
+            /* Read more about isConfirmed, isDenied below */
+            if (result.isConfirmed) {
+              setRemFaltante_(Id, Planta)  
+            } else if (result.isDenied) {
+              Swal.fire("Operación Abortada", "Aviso", "info");
+            }
+        });
+    }
+    const setRemFaltante_ = async(Id, Planta) =>{
+        try {
+            const remF = await setRemFaltante(Id, '0', Planta,'0');
+            console.log(remF);
+            if (remF) {
+                Swal.fire("Éxito", "Se elimino correctamente", "success"); 
+                getRemFal();
+            } else {
+                if(remF.length > 0){
+                    Swal.fire("Error", "Ocurrió un error, vuelve a intentar", "error");
+                }
+            }
+        } catch (error) {
+            Swal.fire("Error", "No se pudo obtener la información", "error");
+        }
+    }
+    const downloadCSV = (e) => {
+        const link = document.createElement('a');
+        let csv = convertArrayOfObjectsToCSV(exRemisiones);
+        if (csv == null) return;
+    
+        const filename = 'Remisiones_Faltantes'+plantasSel+'_'+vFechaI+'_'+vFechaF+'.csv';
+    
+        if (!csv.match(/^data:text\/csv/i)) {
+            csv = `data:text/csv;charset=utf-8,${csv}`;
+        }
+    
+        link.setAttribute('href', encodeURI(csv));
+        link.setAttribute('download', filename);
+        link.click();
+    };
+    
     //************************************************************************************************************************************************************************** */
     // Función de búsqueda
     const onFindBusqueda = (e) => {
@@ -254,10 +333,16 @@ return (
                         plantasSel={plantasSel}
                     />
                 </CCol>
-                <CCol xs={6} md={3} className='mt-3'>
+                <CCol xs={6} md={2} className='mt-3'>
                     <CButton color='primary' onClick={getRemFal}> 
                         <CIcon icon={cilSearch} />
                             Buscar
+                    </CButton>
+                </CCol>
+                <CCol xs={6} md={2} className='mt-3'>
+                    <CButton color='danger' onClick={downloadCSV}>
+                        <CIcon icon={cilCloudDownload} className="me-2" />
+                        Exportar
                     </CButton>
                 </CCol>
             </CRow>
