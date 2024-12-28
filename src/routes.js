@@ -7,9 +7,9 @@ const LCotizaciones = React.lazy(() => import('./views/ventas/LCotizaciones'))
 const LPreCotizaciones = React.lazy(() => import('./views/ventas/LPreCotizaciones'))
 const Cotizador = React.lazy(() => import('./views/ventas/Cotizador'))
 const RCartera = React.lazy(() => import('./views/ventas/Cartera'))
-
 //PRODUCCION
 const RCicat = React.lazy(() => import('./views/cicat/Resumen/Resumen'))
+const RemiFal = React.lazy(() => import('./views/cicat/Remisiones/RemiFal'))
 const OSimulador = React.lazy(() => import('./views/Operaciones/Simulador/Simulador'))
 //LOGISTICA
 const LPedidos = React.lazy(() => import('./views/logistica/LPedidos'))
@@ -55,6 +55,7 @@ const routes = [
   { path: '/reportes/RProyeccion', name: 'Proyeccion', element:RProyeccion },
   //PRODUCCION
   { path: '/Cicat/Resumen', name: 'Resumen', element:RCicat },
+  { path: '/Cicat/Remisiones', name: 'Remisiones', element:RemiFal },
   { path: '/Operaciones/Simulador', name: 'Simulador', element:OSimulador },
   //LOGISTICA
   { path: '/logistica/LPedidos', name: 'Pedidos', element:LPedidos },
@@ -64,12 +65,6 @@ const routes = [
   { path: '/interfaz/Obras', name: 'IObras', element:IObras },
   { path: '/interfaz/Configuracion', name: 'IConfiguracion', element:IConfiguracion },
   { path: '/interfaz/MovimientoI', name: 'IMovimiento', element:IMovimiento },
-  { path: '/base', name: 'Base', element: Cards, exact: true },
-  { path: '/base/cards', name: 'Cards', element: Cards },
-  { path: '/charts', name: 'Charts', element: Charts },
-  { path: '/forms', name: 'Forms', element: FormControl, exact: true },
-  { path: '/forms/form-control', name: 'Form Control', element: FormControl },
-  { path: '/icons/coreui-icons', name: 'CoreUI Icons', element: CoreUIIcons },
   { path: '/reportes/CostosProductos', name: 'CostosProductos', element: CostosProductos },
   { path: '/reportes/RCotizaciones', name: 'RCotizaciones', element: RCotizaciones },
   { path: '/reportes/PedidosVenta', name: 'PedidosVenta', element: RPedidosVenta },

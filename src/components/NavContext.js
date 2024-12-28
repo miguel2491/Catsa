@@ -17,6 +17,7 @@ import {
   cilStar,
   cilClipboard,
   cilCog,
+  cilBusAlt,
 } from '@coreui/icons'
 import { CNavGroup, CNavItem, CNavTitle } from '@coreui/react'
 import CIcon from '@coreui/icons-react'
@@ -177,6 +178,12 @@ const NavProvider = ({ children }) => {
                   component: CNavItem,
                   name: 'CICAT Resumen',
                   to: '/Cicat/Resumen',
+                },
+                {
+                  component: CNavItem,
+                  name: 'Remisión Faltante',
+                  to: '/Cicat/Remisiones',
+                  icon: <CIcon icon={cilBusAlt} customClassName="nav-icon" />
                 },
                 {
                   component: CNavItem,
