@@ -219,7 +219,7 @@ export async function getRemFaltante(planta, FI, FF) {
         return false
     }
 }
-export async function setRemFaltante(Id,Nr, planta) {
+export async function setRemFaltante(Id,Nr, planta, tipo) {
     try
     {
         let confi_ax = {
@@ -231,7 +231,33 @@ export async function setRemFaltante(Id,Nr, planta) {
             },
         };
         //------------------------------------------------------------------------------------------------------------------------------------------------------
-        const response = await axios.get(baseUrl+'Operaciones/SetRemFal/'+Id+','+Nr+','+planta, confi_ax);
+        const response = await axios.get(baseUrl+'Operaciones/SetRemFal/'+Id+','+Nr+','+planta+','+tipo, confi_ax);
+        if (response.data && response.data.length > 0) {
+            const obj = response.data;
+            if(obj.length > 0)
+            {
+                return obj;
+            }else{return false}
+        }else{return false}
+    } 
+    catch(error)
+    {
+        return false
+    }
+}
+export async function delRemFaltante(Id, planta) {
+    try
+    {
+        let confi_ax = {
+            headers:
+            {
+                'Cache-Control': 'no-cache',
+                'Content-Type': 'application/json',
+                "Authorization": "Bearer "+cookies.get('token'),
+            },
+        };
+        //------------------------------------------------------------------------------------------------------------------------------------------------------
+        const response = await axios.get(baseUrl+'Operaciones/DelRemFal/'+Id+','+planta, confi_ax);
         if (response.data && response.data.length > 0) {
             const obj = response.data;
             if(obj.length > 0)
@@ -1025,3 +1051,9 @@ export const formatCurrency = (value) => {
   }).format(value);
 };
 
+export const convertArrayOfObjectsToCSV = (array) => {
+    if (!array || !array.length) return null;
+    const header = Object.keys(array[0]).join(','); // Extrae las claves como cabeceras
+    const rows = array.map(obj => Object.values(obj).join(',')); // Mapea los valores en cada fila
+    return [header, ...rows].join('\n'); // Une todo en una cadena CSV
+};

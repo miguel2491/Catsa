@@ -340,6 +340,21 @@ const RComision = () => {
         link.setAttribute('download', filename);
         link.click();
     };
+    const downloadCSVModal = (e) => {
+        const link = document.createElement('a');
+        let csv = convertArrayOfObjectsToCSV(dDetalle);
+        if (csv == null) return;
+    
+        const filename = 'ComisionAsesorDetalle.csv';
+    
+        if (!csv.match(/^data:text\/csv/i)) {
+            csv = `data:text/csv;charset=utf-8,${csv}`;
+        }
+    
+        link.setAttribute('href', encodeURI(csv));
+        link.setAttribute('download', filename);
+        link.click();
+    };
 
     return (
         <CContainer fluid>
@@ -416,6 +431,10 @@ const RComision = () => {
                     <CModalTitle id="StaticBackdropExampleLabel">DETALLES</CModalTitle>
                 </CModalHeader>
                 <CModalBody>
+                    <CButton color='danger' onClick={downloadCSVModal}>
+                        <CIcon icon={cilCloudDownload} className="me-2" />
+                        Exportar
+                    </CButton>
                     <DataTable
                         columns={columnsD}
                         data={dDetalle}  // Usamos los datos filtrados

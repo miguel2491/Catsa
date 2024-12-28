@@ -179,12 +179,15 @@ const NavProvider = ({ children }) => {
                   name: 'CICAT Resumen',
                   to: '/Cicat/Resumen',
                 },
-                {
-                  component: CNavItem,
-                  name: 'Remisión Faltante',
-                  to: '/Cicat/Remisiones',
-                  icon: <CIcon icon={cilBusAlt} customClassName="nav-icon" />
-                },
+                ...(userIsOperacion || userIsAdmin || userIsGerenteP
+                  ? [
+                    {
+                      component: CNavItem,
+                      name: 'Remisión Faltante',
+                      to: '/Cicat/Remisiones',
+                      icon: <CIcon icon={cilBusAlt} customClassName="nav-icon" />
+                    },
+                  ]:[]),
                 {
                   component: CNavItem,
                   name: 'Simulador',
