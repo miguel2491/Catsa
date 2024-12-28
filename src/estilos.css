@@ -101,4 +101,13 @@ h3, label{
   .c-modal-80 .modal-dialog{
 	max-width: 80%;
   }
-
+  .colBuscador{
+	padding: 0 !important;
+  	margin: 0 !important;
+  }
+  .jiMOeR .wrapper{
+	padding-left:0px !important
+  }
+  .jiMOeR{
+	z-index: 1;
+  }
