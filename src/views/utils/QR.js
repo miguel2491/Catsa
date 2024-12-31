@@ -3,6 +3,7 @@ import { CFormInput, CContainer, CButton, CRow, CCol, CCard, CCardHeader, CCardB
 import { CIcon } from '@coreui/icons-react';
 import { cilQrCode } from '@coreui/icons';
 import ReactQR from 'react-qr-code'; // Usando react-qr-code
+import WifiQrCode from './QRPass';
 
 const QR = () => {
     const [text, setText] = useState(''); // Estado para el texto
@@ -83,6 +84,14 @@ const QR = () => {
                         </CCol>
                     </CRow>
                 )}
+                <CRow className='mb-4 mt-2'>
+                    <h2>QR RED</h2>
+                    <WifiQrCode 
+                        ssid='CATSA_WIRELESS'
+                        password='C4TS44202.'
+                        securityType='WPA2'
+                    />
+                </CRow>
             </CContainer>
         </>
     );

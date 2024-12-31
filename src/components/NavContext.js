@@ -44,7 +44,7 @@ const NavProvider = ({ children }) => {
     const userIsFinanzas = Rol('Finanzas')
     const userIsDirector = Rol('Direccion')
     nav = [
-      ...(userIsVentas || userIsAdmin || userIsDirector || userIsFinanzas || userIsGerenteP
+      ...(userIsVentas || userIsAdmin || userIsDirector || userIsFinanzas
         ? [
             {
               component: CNavTitle,
@@ -80,7 +80,7 @@ const NavProvider = ({ children }) => {
                   },
                 ]
               : []),
-            ...(userIsVentas || userIsAdmin || userIsDirector || userIsFinanzas || userIsGerenteP
+            ...(userIsVentas || userIsAdmin || userIsDirector || userIsFinanzas
               ? [
                   {
                     component: CNavGroup,
@@ -130,7 +130,7 @@ const NavProvider = ({ children }) => {
                   },
                 ]
               : []),
-            ...(userIsVentas || userIsAdmin || userIsDirector || userIsFinanzas || userIsGerenteP
+            ...(userIsVentas || userIsAdmin || userIsDirector || userIsFinanzas
               ? [
                   {
                     component: CNavGroup,
@@ -188,17 +188,20 @@ const NavProvider = ({ children }) => {
                       icon: <CIcon icon={cilBusAlt} customClassName="nav-icon" />
                     },
                   ]:[]),
-                {
-                  component: CNavItem,
-                  name: 'Simulador',
-                  to: '/Operaciones/Simulador',
-                  icon: <CIcon icon={cilGraph} customClassName="nav-icon" />
-                },
+                ...(userIsOperacion || userIsAdmin  
+                ?[
+                  {
+                    component: CNavItem,
+                    name: 'Simulador',
+                    to: '/Operaciones/Simulador',
+                    icon: <CIcon icon={cilGraph} customClassName="nav-icon" />
+                  },
+                ]:[])
               ],
             },
           ]
         : []),
-      ...(userIsAdmin || userIsOperacion || userIsGerenteP
+      ...(userIsAdmin || userIsOperacion 
         ? [
             {
               component: CNavTitle,
