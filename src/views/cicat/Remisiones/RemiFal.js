@@ -22,6 +22,7 @@ import {
 import {CIcon} from '@coreui/icons-react'
 import { cilCameraControl, cilCloudDownload, cilLoopCircular, cilSave, cilSearch, cilTrash } from '@coreui/icons'
 import { format } from 'date-fns';
+import { Rol } from '../../../Utilidades/Roles'
 
 const RemiFal = () => {
     const [plantasSel , setPlantas] = useState('');
@@ -30,6 +31,8 @@ const RemiFal = () => {
     const [loading, setLoading] = useState(false);
     const [percentage, setPercentage] = useState(0);
     const [visible, setVisible] = useState(false);
+    const userIsOperacion = Rol('Operaciones');
+    const userIsJP = Rol('JefePlanta');
     //Arrays
     const [dtRemisiones, setDTRemisiones] = useState([]);
     const [exRemisiones, setExRemisiones] = useState([]);
@@ -87,18 +90,22 @@ const RemiFal = () => {
                             <CIcon icon={cilSave} />
                         </CButton>
                     </CCol>
-                    <CCol>
-                        <CButton
-                            color="danger"
-                            onClick={() => delRemision(row.IdOperacion, row.Planta)}
-                            size="sm"
-                            className="me-2"
-                            title="Eliminar"
-                            style={{color:'white'}}
-                        >
-                            <CIcon icon={cilTrash} />
-                        </CButton>
-                    </CCol>
+                    {...(userIsOperacion || !userIsJP
+                        ? [
+                        <CCol>
+                            <CButton
+                                color="danger"
+                                onClick={() => delRemision(row.IdOperacion, row.Planta)}
+                                size="sm"
+                                className="me-2"
+                                title="Eliminar"
+                                style={{color:'white'}}
+                            >
+                                <CIcon icon={cilTrash} />
+                            </CButton>
+                        </CCol>
+                        ]:[])
+                    }
                     </CRow>
                 </div>
             ),

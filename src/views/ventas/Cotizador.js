@@ -9,6 +9,8 @@ import { GoogleMap, LoadScript, Marker } from '@react-google-maps/api';
 import Plantas from '../base/parametros/Plantas'
 import FechaI from '../base/parametros/FechaInicio'
 import { formatCurrency, getCostoP, getDatosPlanta, getClientesCot, getObrasCot, getProspectos_ } from '../../Utilidades/Funciones';
+import { Rol } from '../../Utilidades/Roles'
+import { ReactSearchAutocomplete} from 'react-search-autocomplete';
 import {
   CContainer,
   CRow,
@@ -39,6 +41,7 @@ import { cilCheck, cilX, cilSearch, cilTrash, cilPlus } from '@coreui/icons'
 import '../../estilos.css'
 
 const animatedComponents = makeAnimated();
+const userIsAsesor = Rol('Vendedor');
 
 const containerStyle = {
   width: '100%',
@@ -60,6 +63,11 @@ const MyMap = () => {
   const [markerPosition, setMarkerPosition] = useState({
     lat: null,
     lng: null,
+  });
+  const [aDatos, setSave] = useState({
+    cliente:null,
+    obra:null,
+    coords:null
   });
   useEffect(() => {
     if ("geolocation" in navigator) {
@@ -148,14 +156,62 @@ const Cotizador = () => {
   const [aSegmento, setSegmento] = useState([]);
   const [aTC, setTC] = useState([]);
   const [aProducto, setProducto] = useState([]);
-  // También puedes usar useEffect para actualizar el estado cuando el componente se monta
-  // useEffect(() => {
-  //   setFechaIni(new Date()); // Esta línea es opcional si ya lo haces directamente en useState
-  // }, []);
+  const [aClientes, setClientes] = useState([]);
+  const [aObras, setObras] = useState([]);
+  //********************************************************************* */
+  const [fData, setFData] = useState({
+    planta:plantasSel,
+    fecha:vFechaI,
+    no_cotizacion:null,
+    cliente:null,
+    obras:null,
+    coordenadas:[],
+    fuente:null,
+    segmento:null,
+    tipo_cli:null,
+    concreto:null,
+    resistencia:null,
+    edad:null,
+    revenimiento:null,
+    tma:null,
+    colocacion:null,
+    producto:[],
+    facturar_a:null,
+    direccion_clie:null,
+    asesor:null,
+    alkon:false,
+    bloqueado:false,
+    seguridad:false,
+    fpago:null,
+    nombre_sol:null,
+    telefono:null,
 
+  });
+
+  const updFData = (newFData) => {
+    setFData((prevData) => ({
+      ...prevData,
+      ...newFData
+    }));
+  };
+  const [fProductos, setfProductos] = useState({
+    producto:null,
+    m3:0,
+    extras:[],
+    precioVentaM3:0,
+    porcVenta:0
+  })
+  const updProductos = (newPData) => {
+    setfProductos((prevData) => ({
+      ...prevData,
+      ...newPData
+    }));
+  }
+  //************************************************************** */
   const mCambio = (event) => {
     setPlantas(event.target.value);
     getCostoPlanta(event.target.value);
+    getClientes(event.target.value);
   };
 
   async function getCostoPlanta(planta)
@@ -192,7 +248,25 @@ const Cotizador = () => {
         setVModal(false); // Oculta el modal de carga
     }
   }
-
+  
+  async function getClientes(planta)
+  {
+    try{
+      const clientes = await getClientesCot(planta);
+      console.log(clientes)
+      if(clientes){
+          const clientesTransformados = clientes.map((clientes, index) => ({
+              id: index,            // Asignar un ID único (en este caso, usamos el índice)
+              name: clientes.Nombre, // Usamos la propiedad 'Producto' como 'name'
+              NoCliente: clientes.NoCliente,
+          }));
+          setClientes(clientesTransformados);
+      }    
+    }catch(error){
+        Swal.fire("Error", "No se pudo obtener la información", "error");
+    }
+  }
+  
   const cFechaI = (fecha) => {
     setFechaIni(fecha.toLocaleDateString('en-US',opcionesFca));
   };
@@ -237,9 +311,9 @@ const Cotizador = () => {
         </CCol>
       </CRow>
       <StepWizard>
-        <Step1 fijos={dFijos} corpo={dCorpo} mop={dMop} cdiesel={dDiesel} sucursal={plantasSel} />
-        <Step2 fuente={aFuente} segmento={aSegmento} canal={aTC} productos={aProducto} />
-        <Step3 />
+        <Step1 fijos={dFijos} corpo={dCorpo} mop={dMop} cdiesel={dDiesel} sucursal={plantasSel} clientes_={aClientes} obras_={aObras} onUpdateFData={updFData} />
+        <Step2 fuente={aFuente} segmento={aSegmento} canal={aTC} productos={aProducto} fData={fData} updPData={updProductos} />
+        <Step3 fData={fData} pData={fProductos} />
       </StepWizard>
       <CModal
           backdrop="static"
@@ -264,23 +338,25 @@ const Cotizador = () => {
   )  
 }
 //STEPS
-const Step1 = ({ nextStep, fijos, corpo, mop, cdiesel, sucursal }) => {
+const Step1 = ({ nextStep, fijos, corpo, mop, cdiesel, sucursal, clientes_, obras_, onUpdateFData }) => {
   const [visible, setVisible] = useState(false);// Modal Cargando
   const [vProspecto, setVProspecto] = useState(false);// Modal Cargando
   const [noCliente, setNoCliente] = useState('');
-  const [cliente, setCliente] = useState('');
+  const [clienteTxt, setClienteTxt] = useState('');
   const [municipio, setMunicipio] = useState('');
   const [contacto, setContacto] = useState('');
   const [noObra, setNoObra] = useState('');
-  const [obra_, setObra] = useState('');
+  const [obraTxt, setObraTxt] = useState('');
   const [oDir, setObraDir] = useState('');
   const [loading, setLoading] = useState(false);
   const [swValue, setswValue] = useState(false);
   const [dProspecto, setProspectoD] = useState([]);
+  const [aObrasB, setObrasB] = useState([]);
   const [fText, setFText] = useState(''); // Estado para el filtro de búsqueda
-
+  
   const handleChange = selectedOption => {
     setSelectedCity(selectedOption);
+    
   };
   const verCliente = async() =>{
     setLoading(true);
@@ -430,35 +506,120 @@ const Step1 = ({ nextStep, fijos, corpo, mop, cdiesel, sucursal }) => {
   // Lógica de filtro
   const onFilter = (e) => {
     setFText(e.target.value); // Actualiza el texto del filtro
-};
+  };
+  //----------FIND CLIENTE ------------------------------  
+  const hOnSearch = (string, results) => {
+    if(results.length == 0){
+        //setMostrarDataTable(false);
+    }
+  }
+  const hOnSelect = (item) =>{
+    console.log(item, sucursal);
+    setClienteTxt(item.name);
+    const ncliente = {cliente:item.NoCliente};
+    onUpdateFData({ cliente: item.NoCliente});
+    getObras(item.NoCliente, sucursal);
+    
+  }
+  const formatResult = (item) => {
+    return (
+        <>
+        <span style={{ display: 'block', textAlign: 'left', color:'black' }}>{item.name}</span>
+        </>
+    )
+  }
+  const hOnSearchObras = (string, results) => {
+    if(results.length == 0){
+        //setMostrarDataTable(false);
+    }
+  }
+  const hOnSelectObras = (item) =>{
+    setObraTxt(item.name)
+  }
+  //-----------------------------------------------------
+  async function getObras(cliente, sucursal)
+  {
+    console.log(cliente, sucursal)
+    try{
+      const obras = await getObrasCot(sucursal, cliente);
+      console.log(obras)
+      if(obras){
+          const obrasTransformados = obras.map((obras, index) => ({
+              id: index,            // Asignar un ID único (en este caso, usamos el índice)
+              name: obras.Obra, // Usamos la propiedad 'Producto' como 'name'
+              idObra: obras.NoObra
+          }));
+          setObrasB(obrasTransformados);
+      }
+    }catch(error){
+        Swal.fire("Error", "No se pudo obtener la información", "error");
+    }
+  }
+  //-----------------------------------------------------
   return(
     <div>
       <CCard>
         <CCardHeader>Paso 1</CCardHeader>
         <CCardBody>
-          <CRow className='mt-2'>
-          <CCol xs={4} md={2} lg={2}>
-            <label>Datos</label>
-            <p>Opción 1</p>
+          {...(!userIsAsesor ? [
+            <CRow className='mt-2'>
+            <CCol xs={4} md={2} lg={2}>
+              <label>Datos</label>
+              <p>Opción 1</p>
+            </CCol>
+            <CCol xs={4} md={2} lg={2}>
+              <label>Fijos</label>
+              <p><b>{formatCurrency(fijos)}</b></p>
+            </CCol>
+            <CCol xs={4} md={2} lg={2}>
+              <label>Corporativo</label>
+              <p><b>{formatCurrency(corpo)}</b></p>
+            </CCol>
+            <CCol xs={4} md={2} lg={2}>
+              <label>MOP</label>
+              <p><b>{formatCurrency(mop)}</b></p>
+            </CCol>
+            <CCol xs={8} md={4} lg={4}>
+              <label>Costo de Diesel / Tiempo de Ciclo</label>
+              <p><b>{formatCurrency(cdiesel)}</b></p>
+            </CCol>
+            </CRow>
+          ]:[])
+          }
+        <hr />
+        <CRow className='mt-2 mb-2'>
+          <CCol xs={12} md={6}>
+            <label>Cliente</label>
+            <ReactSearchAutocomplete
+              items={clientes_}
+              onSearch={hOnSearch}
+              onSelect={hOnSelect}
+              autoFocus
+              formatResult={formatResult}
+            />
           </CCol>
-          <CCol xs={4} md={2} lg={2}>
-            <label>Fijos</label>
-            <p><b>{formatCurrency(fijos)}</b></p>
-          </CCol>
-          <CCol xs={4} md={2} lg={2}>
-            <label>Corporativo</label>
-            <p><b>{formatCurrency(corpo)}</b></p>
-          </CCol>
-          <CCol xs={4} md={2} lg={2}>
-            <label>MOP</label>
-            <p><b>{formatCurrency(mop)}</b></p>
-          </CCol>
-          <CCol xs={8} md={4} lg={4}>
-            <label>Costo de Diesel / Tiempo de Ciclo</label>
-            <p><b>{formatCurrency(cdiesel)}</b></p>
+          <CCol xs={12} md={6}>
+            <label>Cliente</label><br />
+            <label id='lblCliente'>{clienteTxt}</label>
+            <label></label>
           </CCol>
         </CRow>
-        <hr />
+        <CRow className='mt-2 mb-2'>
+          <CCol xs={12} md={6}>
+            <label>Obra:</label>
+            <ReactSearchAutocomplete
+                items={aObrasB}
+                onSearch={hOnSearchObras}
+                onSelect={hOnSelectObras}
+                autoFocus
+                formatResult={formatResult}
+              />
+          </CCol>
+          <CCol xs={12} md={6}>
+            <label>Obra</label><br />
+            <label id='lblObra'>{obraTxt}</label>
+          </CCol>
+        </CRow>
         <CRow className='mt-2 mb-2'>
             <CCol xs={12} md={6} lg={6}>
               <CRow>
@@ -485,12 +646,7 @@ const Step1 = ({ nextStep, fijos, corpo, mop, cdiesel, sucursal }) => {
             <CCol xs={6} md={6} lg={6}>
               <CRow>
                 <CCol xs={6} md={6} lg={6}>
-                  <label>Cliente</label><br />
-                  <label id='lblCliente'>{cliente}</label>
-                </CCol>
-                <CCol xs={6} md={6} lg={6}>
-                  <label>Obra</label><br />
-                  <label id='lblObra'>{obra_}</label>
+                  
                 </CCol>
               </CRow>
             </CCol>
@@ -520,7 +676,7 @@ const Step1 = ({ nextStep, fijos, corpo, mop, cdiesel, sucursal }) => {
                 <CModalBody>
                     <CRow>
                       <CCol xs={12} md={12} className='mt-2 mb-2'>
-                        <CFormInput type="text" placeholder="Nombre" value={cliente} aria-label="Nombree"/>
+                        <CFormInput type="text" placeholder="Nombre" value={clienteTxt} aria-label="Nombree"/>
                       </CCol>
                       <CCol xs={12} md={12} className='mt-2 mb-2'>
                         <CFormInput type="text" placeholder="Municipio" value={municipio} aria-label="Nombree"/>
@@ -534,7 +690,7 @@ const Step1 = ({ nextStep, fijos, corpo, mop, cdiesel, sucursal }) => {
                         <h3>Datos de la Obra</h3>
                       </CCol>
                       <CCol xs={12} md={12} className='mt-2 mb-2'>
-                        <CFormInput type="text" placeholder="Nombre" value={obra_} aria-label="Nombree"/>
+                        <CFormInput type="text" placeholder="Nombre" value={obraTxt} aria-label="Nombree"/>
                       </CCol>
                       <CCol xs={12} md={12} className='mt-2 mb-2'>
                         <CFormInput type="text" placeholder="Dirección" value={oDir} aria-label="Nombree"/>
@@ -609,7 +765,7 @@ const Step1 = ({ nextStep, fijos, corpo, mop, cdiesel, sucursal }) => {
   );
 };
 
-const Step2 = ({ nextStep, previousStep, fuente, segmento, canal, productos }) => {
+const Step2 = ({ nextStep, previousStep, fuente, segmento, canal, productos, fData, updPData }) => {
   const [dDetalle, setDataD] = useState([]); // Estado para almacenar los datos de Detalle
   const [productoBuscado, setProductoBuscado] = useState(""); 
   const [vMExtras, setMExtras] = useState(false);// Modal Extras
@@ -620,6 +776,7 @@ const Step2 = ({ nextStep, previousStep, fuente, segmento, canal, productos }) =
     updatedProductos[rowIndex].CPC = e.target.value; // Actualiza el valor de la columna CPC
     //setProductos(updatedProductos); // Actualiza el estado
   };
+  const { cliente } = fData;
   const btnExtras = (Producto) => {
     setMExtras(true);
     console.log(Producto)
@@ -851,7 +1008,8 @@ const Step2 = ({ nextStep, previousStep, fuente, segmento, canal, productos }) =
   {
     const productoBuscado = productos.filter(producto => producto.Producto === pro);
     console.log(productoBuscado[0])
-    setProductos(prevProductos => [...prevProductos, ...productoBuscado])
+    setProductos(prevProductos => [...prevProductos, ...productoBuscado]);
+    updPData({producto:productoBuscado[0].Producto});
   }
 
   const oProductos = productos.map(item => ({
@@ -866,6 +1024,7 @@ const Step2 = ({ nextStep, previousStep, fuente, segmento, canal, productos }) =
         <CCardBody>
           <CRow className='mt-2'>
             <CCol xs={6} md={4}>
+              <label>Fuente:</label>
               <CFormSelect aria-label="Fuente">
                 <option>-</option>
                 {fuente.map((item, index) => (
@@ -874,6 +1033,7 @@ const Step2 = ({ nextStep, previousStep, fuente, segmento, canal, productos }) =
               </CFormSelect>
             </CCol>
             <CCol xs={6} md={4}>
+              <label>Segmento</label>
               <CFormSelect aria-label="Segmento">
                 <option>-</option>
                 {segmento.map((item, index) => (
@@ -882,6 +1042,7 @@ const Step2 = ({ nextStep, previousStep, fuente, segmento, canal, productos }) =
               </CFormSelect>
             </CCol>
             <CCol xs={6} md={4}>
+              <label>Tipo de Cliente</label>
               <CFormSelect aria-label="Tipo de Cliente">
                 <option>-</option>
                 {canal.map((item, index) => (
@@ -1025,7 +1186,7 @@ const Step2 = ({ nextStep, previousStep, fuente, segmento, canal, productos }) =
               <button className='btn btn-warning' onClick={previousStep}>Anterior</button>
             </CCol>
             <CCol xs={6} md={6}>
-              <button className='btn btn-success'>Finalizar</button>
+              <button className='btn btn-success' onClick={nextStep}>Siguiente </button>
             </CCol>
           </CRow>
         </CCardFooter>
@@ -1077,7 +1238,13 @@ const Step2 = ({ nextStep, previousStep, fuente, segmento, canal, productos }) =
   )
 };
 
-const Step3 = ({ previousStep }) => {
+const Step3 = ({ previousStep, formData, pData, onSave }) => {
+  const handleSave = () => {
+    // Aquí puedes manejar la lógica para guardar los datos
+    console.log("Guardando datos...", formData);
+    // Aquí iría la llamada a la API o la lógica de persistencia que necesites
+  };
+  console.log(pData)
   return(
     <div>
       <CCard>
@@ -1085,7 +1252,8 @@ const Step3 = ({ previousStep }) => {
         <CCardBody>
           <CRow className='mt-3'>
             <CCol xs={12}>
-              
+              <pre>{JSON.stringify(pData, null, 2)}</pre>
+              <button onClick={onSave}>Guardar</button>
             </CCol>
           </CRow>
         </CCardBody>

@@ -55,6 +55,7 @@ const routes = [
   { path: '/reportes/RProyeccion', name: 'Proyeccion', element:RProyeccion },
   //PRODUCCION
   { path: '/Cicat/Resumen', name: 'Resumen', element:RCicat },
+
   { path: '/Cicat/Remisiones', name: 'Remisiones', element:RemiFal },
   { path: '/Operaciones/Simulador', name: 'Simulador', element:OSimulador },
   //LOGISTICA

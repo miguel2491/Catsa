@@ -1,4 +1,3 @@
-
 import axios from 'axios'
 import {FormatoFca, Fnum} from './Tools'
 import { format } from 'date-fns';
@@ -231,7 +230,7 @@ export async function setRemFaltante(Id,Nr, planta, tipo) {
             },
         };
         //------------------------------------------------------------------------------------------------------------------------------------------------------
-        const response = await axios.get(baseUrl+'Operaciones/SetRemFal/'+Id+','+Nr+','+planta+','+tipo, confi_ax);
+        const response = await axios.get(baseUrl+'Operaciones/SetRemFal/'+Id+','+Nr+','+planta+','+tipo+','+cookies.get('Usuario'), confi_ax);
         if (response.data && response.data.length > 0) {
             const obj = response.data;
             if(obj.length > 0)
@@ -245,32 +244,7 @@ export async function setRemFaltante(Id,Nr, planta, tipo) {
         return false
     }
 }
-export async function delRemFaltante(Id, planta) {
-    try
-    {
-        let confi_ax = {
-            headers:
-            {
-                'Cache-Control': 'no-cache',
-                'Content-Type': 'application/json',
-                "Authorization": "Bearer "+cookies.get('token'),
-            },
-        };
-        //------------------------------------------------------------------------------------------------------------------------------------------------------
-        const response = await axios.get(baseUrl+'Operaciones/DelRemFal/'+Id+','+planta, confi_ax);
-        if (response.data && response.data.length > 0) {
-            const obj = response.data;
-            if(obj.length > 0)
-            {
-                return obj;
-            }else{return false}
-        }else{return false}
-    } 
-    catch(error)
-    {
-        return false
-    }
-}
+
 // VENTAS
     //---COTIZADOR
 export  async function getPrecios(planta)
@@ -323,7 +297,7 @@ export  async function getPrecios(planta)
         }
 }
 //--
-export async function getClientesCot(planta, cliente) {
+export async function getClientesCot(planta) {
     try
     {
         let confi_ax = {
@@ -335,7 +309,7 @@ export async function getClientesCot(planta, cliente) {
             },
         };
         //------------------------------------------------------------------------------------------------------------------------------------------------------
-        const response = await axios.get(baseUrl+'Comercial/GetClientesCot/'+planta+','+cliente, confi_ax);
+        const response = await axios.get(baseUrl+'Comercial/GetClientesCot/'+planta, confi_ax);
         if (response.data && response.data.length > 0) {
             return response.data;
         }else{
@@ -348,7 +322,7 @@ export async function getClientesCot(planta, cliente) {
         return false
     }
 }
-export async function getObrasCot(planta, obra) {
+export async function getObrasCot(planta, nocliente) {
     try
     {
         let confi_ax = {
@@ -360,7 +334,7 @@ export async function getObrasCot(planta, obra) {
             },
         };
         //------------------------------------------------------------------------------------------------------------------------------------------------------
-        const response = await axios.get(baseUrl+'Comercial/GetObraCot/'+planta+','+obra, confi_ax);
+        const response = await axios.get(baseUrl+'Comercial/GetObraCot/'+planta+','+nocliente, confi_ax);
         if (response.data && response.data.length > 0) {
                 return response.data;
         }else{
