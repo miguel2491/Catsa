@@ -112,3 +112,12 @@ h3, label{
 	
 	z-index: 1;
   }
+  .rc-time-picker-panel-select li{
+	color:black !important;
+	background: transparent;
+  }
+
+  .clockSel{
+	/* .rc-time-picker-panel-select li */
+	color:black;	
+}

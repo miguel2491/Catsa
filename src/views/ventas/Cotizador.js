@@ -8,23 +8,28 @@ import StepWizard from "react-step-wizard";
 import { GoogleMap, LoadScript, Marker } from '@react-google-maps/api';
 import Plantas from '../base/parametros/Plantas'
 import FechaI from '../base/parametros/FechaInicio'
-import { formatCurrency, getCostoP, getDatosPlanta, getClientesCot, getObrasCot, getProspectos_ } from '../../Utilidades/Funciones';
+import { formatCurrency, getCostoP, getDatosPlanta, getClientesCot, getObrasCot, getProspectos_, getElementos } from '../../Utilidades/Funciones';
 import { Rol } from '../../Utilidades/Roles'
 import { ReactSearchAutocomplete} from 'react-search-autocomplete';
+import { IMaskMixin } from 'react-imask'
+import IMask from 'imask'
+import DatePicker from 'react-datepicker';
+import "react-datepicker/dist/react-datepicker.css";
+import TimePicker from 'rc-time-picker';
+import 'rc-time-picker/assets/index.css';
+import moment from 'moment';
 import {
   CContainer,
   CRow,
   CCol,
   CFormSelect,
+  CFormCheck,
+  CFormTextarea,
+  CFormText,
+  CFormLabel,
   CButton,
   CFormInput,
   CInputGroup, 
-  CTable,
-  CTableHead,
-  CTableBody,
-  CTableRow,
-  CTableHeaderCell,
-  CTableDataCell,
   CModal,
   CModalHeader,
   CModalTitle,
@@ -34,8 +39,14 @@ import {
   CCardHeader,
   CCardBody,
   CCardFooter,
-  CFormSwitch
+  CFormSwitch,
+  CTab,
+  CTabContent,
+  CTabList,
+  CTabPanel,
+  CTabs
 } from '@coreui/react'
+import { useNavigate } from "react-router-dom";
 import {CIcon} from '@coreui/icons-react'
 import { cilCheck, cilX, cilSearch, cilTrash, cilPlus } from '@coreui/icons'
 import '../../estilos.css'
@@ -158,6 +169,10 @@ const Cotizador = () => {
   const [aProducto, setProducto] = useState([]);
   const [aClientes, setClientes] = useState([]);
   const [aObras, setObras] = useState([]);
+  const [pData, setPData] = useState([]);
+  const updPData = (newData) => {
+    setPData((prevData) => [...prevData, ...newData]);
+  };
   //********************************************************************* */
   const [fData, setFData] = useState({
     planta:plantasSel,
@@ -253,7 +268,6 @@ const Cotizador = () => {
   {
     try{
       const clientes = await getClientesCot(planta);
-      console.log(clientes)
       if(clientes){
           const clientesTransformados = clientes.map((clientes, index) => ({
               id: index,            // Asignar un ID único (en este caso, usamos el índice)
@@ -312,8 +326,8 @@ const Cotizador = () => {
       </CRow>
       <StepWizard>
         <Step1 fijos={dFijos} corpo={dCorpo} mop={dMop} cdiesel={dDiesel} sucursal={plantasSel} clientes_={aClientes} obras_={aObras} onUpdateFData={updFData} />
-        <Step2 fuente={aFuente} segmento={aSegmento} canal={aTC} productos={aProducto} fData={fData} updPData={updProductos} />
-        <Step3 fData={fData} pData={fProductos} />
+        <Step2 fuente={aFuente} segmento={aSegmento} canal={aTC} productos={aProducto} fData={fData} updPData={updPData} />
+        <Step3 fData={fData} pData={pData} />
       </StepWizard>
       <CModal
           backdrop="static"
@@ -514,7 +528,6 @@ const Step1 = ({ nextStep, fijos, corpo, mop, cdiesel, sucursal, clientes_, obra
     }
   }
   const hOnSelect = (item) =>{
-    console.log(item, sucursal);
     setClienteTxt(item.name);
     const ncliente = {cliente:item.NoCliente};
     onUpdateFData({ cliente: item.NoCliente});
@@ -539,10 +552,8 @@ const Step1 = ({ nextStep, fijos, corpo, mop, cdiesel, sucursal, clientes_, obra
   //-----------------------------------------------------
   async function getObras(cliente, sucursal)
   {
-    console.log(cliente, sucursal)
     try{
       const obras = await getObrasCot(sucursal, cliente);
-      console.log(obras)
       if(obras){
           const obrasTransformados = obras.map((obras, index) => ({
               id: index,            // Asignar un ID único (en este caso, usamos el índice)
@@ -619,37 +630,6 @@ const Step1 = ({ nextStep, fijos, corpo, mop, cdiesel, sucursal, clientes_, obra
             <label>Obra</label><br />
             <label id='lblObra'>{obraTxt}</label>
           </CCol>
-        </CRow>
-        <CRow className='mt-2 mb-2'>
-            <CCol xs={12} md={6} lg={6}>
-              <CRow>
-                <CCol xs={6} md={6} lg={6}>
-                  <label>Cliente</label>
-                  <CInputGroup className="mb-3">
-                  <CFormInput placeholder="" value={noCliente} onChange={onFindCliente} aria-label="Example text with two button addons"/>
-                    <CButton type="button" color="success" className='btn-primary' onClick={vCliente} style={{'color':'white'}} variant="outline">
-                      <CIcon icon={cilSearch} className="me-2" />
-                    </CButton>
-                  </CInputGroup>    
-                </CCol>
-                <CCol xs={6} md={4} lg={4}>
-                  <label>Obra</label>
-                  <CInputGroup className="mb-3">
-                  <CFormInput placeholder="" value={noObra} onChange={onFindObra} aria-label="Example text with two button addons"/>
-                    <CButton type="button" color="success" className='btn-primary' onClick={vObra} style={{'color':'white'}} variant="outline">
-                      <CIcon icon={cilSearch} className="me-2" />
-                    </CButton>
-                  </CInputGroup>
-                </CCol>
-              </CRow>
-            </CCol>
-            <CCol xs={6} md={6} lg={6}>
-              <CRow>
-                <CCol xs={6} md={6} lg={6}>
-                  
-                </CCol>
-              </CRow>
-            </CCol>
         </CRow>
         <CRow className='mt-2 mb-2'>
           <CCol xs={6} md={6} lg={6}>
@@ -779,7 +759,6 @@ const Step2 = ({ nextStep, previousStep, fuente, segmento, canal, productos, fDa
   const { cliente } = fData;
   const btnExtras = (Producto) => {
     setMExtras(true);
-    console.log(Producto)
   }
   const columns = [
           {
@@ -1007,9 +986,8 @@ const Step2 = ({ nextStep, previousStep, fuente, segmento, canal, productos, fDa
   function getFindPro(pro)
   {
     const productoBuscado = productos.filter(producto => producto.Producto === pro);
-    console.log(productoBuscado[0])
     setProductos(prevProductos => [...prevProductos, ...productoBuscado]);
-    updPData({producto:productoBuscado[0].Producto});
+    updPData(productoBuscado);
   }
 
   const oProductos = productos.map(item => ({
@@ -1155,7 +1133,7 @@ const Step2 = ({ nextStep, previousStep, fuente, segmento, canal, productos, fDa
                 <option value="L">Lanzado</option>
               </CFormSelect>
             </CCol>
-            <CCol xs={6} md={4} className='mt-3 mb-3'>
+            <CCol xs={12} md={6} className='mt-3 mb-3'>
               <label>Producto</label>
               <Select
                 className='sStyle'
@@ -1239,22 +1217,276 @@ const Step2 = ({ nextStep, previousStep, fuente, segmento, canal, productos, fDa
 };
 
 const Step3 = ({ previousStep, formData, pData, onSave }) => {
+  const navigate = useNavigate();
+  const [maskedValue, setMaskedValue] = useState('');
+  const [price, setPrice] = useState('');
+  const inputRef = useRef(null);
+  const [startDate, setStartDate] = useState(new Date());
+  const [time, setTime] = useState(null);
+  const [elementos, setElementos] = useState([]);
+  const handleClockCh = (value) => {
+    setTime(value);
+    console.log('Hora seleccionada:', value ? value.format('HH:mm') : 'No seleccionada');
+  }
   const handleSave = () => {
     // Aquí puedes manejar la lógica para guardar los datos
     console.log("Guardando datos...", formData);
     // Aquí iría la llamada a la API o la lógica de persistencia que necesites
+    Swal.fire({
+                title: 'Cargando...',
+                text: 'Estamos obteniendo la información...',
+                didOpen: () => {
+                    Swal.showLoading();  // Muestra la animación de carga
+                }
+              });
+              setTimeout(() => { Swal.close(); navigate('/ventas/LCotizacion');},3000)
   };
-  console.log(pData)
+  // Configuración de la máscara
+  const priceMask = {
+    mask: Number,  // Solo números permitidos
+    thousandsSeparator: ',',  // Separador de miles
+    radix: '.',  // Separador decimal
+    scale: 2,  // Para permitir 2 decimales
+    normalizeZeros: true,  // Normaliza los ceros decimales
+    padFractionalZeros: true,  // Agrega ceros después de la coma decimal si es necesario
+    min: 0, // Asegura que el número no sea negativo
+  };
+  
+  const handleChangeMK = (e) => {
+    const value = e.target.value.replace(/[^0-9.,]/g, '');  // Reemplazar cualquier carácter no numérico
+    setMaskedValue(value);
+  };
+
+  const handleBlurMK = () => {
+    if (inputRef.current) {
+      const masked = IMask(inputRef.current, priceMask);
+      const maskedValue = masked.value;
+      setMaskedValue(maskedValue);
+      // Aquí convertimos el valor a número para que puedas usarlo para guardarlo
+      const numericValue = masked.unmaskedValue;
+      setPrice(numericValue); // Guardamos el valor numérico sin formato
+    }
+  };
+  async function getElementos_()
+  {
+    try{
+      const elementos = await getElementos();
+      console.log(elementos)
+      if(elementos){
+        
+        setElementos(elementos);
+      }    
+    }catch(error){
+        Swal.fire("Error", "No se pudo obtener la información de Elementos a colar", "error");
+    }
+  }
+  const CFormInputWithMask = IMaskMixin(({ inputRef, ...props }) => (
+    <CFormInput {...props} ref={inputRef} />
+  ))
+  useEffect(() => {
+    getElementos_()
+  },[]);
+  
   return(
     <div>
       <CCard>
         <CCardHeader>Paso 3</CCardHeader>
         <CCardBody>
           <CRow className='mt-3'>
-            <CCol xs={12}>
-              <pre>{JSON.stringify(pData, null, 2)}</pre>
-              <button onClick={onSave}>Guardar</button>
-            </CCol>
+            <CTabs activeItemKey={1}>
+              <CTabList variant='tabs'>
+                {pData.map((producto, index) =>(
+                  <CTab itemKey={producto.Producto}>{producto.Producto}</CTab>
+                ))}
+              </CTabList>
+              <CTabContent>
+                {pData.map((producto2, index) =>(
+                  <CTabPanel className='p-3' itemKey={producto2.Producto}>
+                    <CRow>
+                      <CCol xs={6} md={2}>
+                        <label>Forma de pago</label>
+                        <CFormSelect size="sm" className="mb-3" aria-label="Small select example">
+                          <option>-</option>
+                          <option value="1">Contado</option>
+                          <option value="2">Crédito</option>
+                          <option value="3">Anticipo</option>
+                        </CFormSelect>
+                      </CCol>
+                      <CCol xs={6} md={3}>
+                        <label>Nombre del Solicitante</label>
+                        <CFormInput placeholder='Nombre Solicitante' />
+                      </CCol>
+                      <CCol xs={6} md={2}>
+                        <label>Teléfono</label>
+                        <CFormInputWithMask 
+                          mask="000 000 0000"
+                        />
+                      </CCol>
+                      <CCol xs={6} md={4} className='p-4'>
+                        <CFormCheck inline id="inlineCheckbox1" value="Alkon" label="Alkon" />
+                        <CFormCheck inline id="inlineCheckbox2" value="Bloqueado" label="Bloqueado" />
+                        <CFormCheck inline id="inlineCheckbox3" value="Seguridad" label="Seguridad" />
+                      </CCol>
+                    </CRow>
+                    <CRow className='mt-2 mb-2'>
+                      <CCol xs={6} md={2}>
+                        <label>Tipo Producto</label>
+                        <CFormInput disabled value={producto2.Producto} />
+                      </CCol>
+                      <CCol xs={6} md={2}>
+                        <label>Metros Cúbicos</label>
+                        <CFormInput />
+                      </CCol>
+                      <CCol xs={6} md={2}>
+                        <label>Elemento a colar</label>
+                        <CFormSelect size="sm" className="mb-3" aria-label="Small select example">
+                          <option>-</option>
+                          {elementos.map((item, index) => (
+                            <option key={index} value={item.id}>{item.descripcion}</option>
+                          ))}
+                        </CFormSelect>
+                      </CCol>
+                      <CCol xs={6} md={2}>
+                        <label>Tipo Bomba: </label>
+                        <CFormSelect size="sm" className="mb-3" aria-label="Small select example">
+                          <option>-</option>
+                          <option value="1">Bomba Pluma</option>
+                          <option value="2">Bomba Estacionaria</option>
+                        </CFormSelect>
+                      </CCol>
+                      <CCol xs={6} md={2}>
+                        <label>Precio Concreto P/U</label>
+                        <CFormInput
+                          ref={inputRef}
+                          id="price"
+                          name="price"
+                          value={maskedValue}  // Usamos el valor de la máscara
+                          onChange={handleChangeMK}
+                          onBlur={handleBlurMK}  // Aplicamos la máscara al perder el foco
+                        />
+                      </CCol>
+                    </CRow>
+                    <CRow className='mt-2 mb-2'>
+                      <CCol xs={6} md={2}>
+                        <label>Precio Extra</label>
+                        <CFormInput
+                          ref={inputRef}
+                          id="price"
+                          name="price"
+                          value={maskedValue}  // Usamos el valor de la máscara
+                          onChange={handleChangeMK}
+                          onBlur={handleBlurMK}  // Aplicamos la máscara al perder el foco
+                        />
+                      </CCol>
+                      <CCol xs={6} md={2}>
+                        <label>Precio Bomba P/U</label><CFormInput
+                          ref={inputRef}
+                          id="price"
+                          name="price"
+                          value={maskedValue}  // Usamos el valor de la máscara
+                          onChange={handleChangeMK}
+                          onBlur={handleBlurMK}  // Aplicamos la máscara al perder el foco
+                        />
+                      </CCol>
+                      <CCol xs={6} md={2}>
+                        <label>Subtotal</label>
+                        <CFormInput
+                          ref={inputRef}
+                          id="price"
+                          name="price"
+                          value={maskedValue}  // Usamos el valor de la máscara
+                          onChange={handleChangeMK}
+                          onBlur={handleBlurMK}  // Aplicamos la máscara al perder el foco
+                        />
+                      </CCol>
+                      <CCol xs={6} md={2}>
+                        <label>Total</label>
+                        <CFormInput
+                          ref={inputRef}
+                          id="price"
+                          name="price"
+                          value={maskedValue}  // Usamos el valor de la máscara
+                          onChange={handleChangeMK}
+                          onBlur={handleBlurMK}  // Aplicamos la máscara al perder el foco
+                        />
+                      </CCol>
+                      <CCol xs={6} md={2}>
+                        <label>Fecha Entrega</label>
+                        <DatePicker
+                          selected={startDate}
+                          onChange={(date) => setStartDate(date)}
+                          timeCaption="Hora"
+                          dateFormat="yyyy-MM-dd"
+                          placeholderText="Seleccionar hora"
+                        />
+
+                      </CCol>
+                    </CRow>
+                    <CRow className='mt-2 mb-2'>
+                      <CCol xs={6} md={2}>
+                        <label>Hora Llegada</label><br/>
+                        <TimePicker
+                          className='clockSel'
+                          showSecond={false}  // Deshabilitar la selección de segundos
+                          value={time}
+                          onChange={handleClockCh}
+                          format="HH:mm"
+                          minuteStep={5}  // Configura los minutos a intervalos de 5 minutos
+                        />
+                      </CCol>
+                      <CCol xs={6} md={2}>
+                        <label>M3 Viaje</label>
+                        <CFormInput
+                          ref={inputRef}
+                          id="price"
+                          name="price"
+                          value={maskedValue}  // Usamos el valor de la máscara
+                          onChange={handleChangeMK}
+                          onBlur={handleBlurMK}  // Aplicamos la máscara al perder el foco
+                        />
+                      </CCol>
+                      <CCol xs={6} md={2}>
+                        <label>Tiempo Recorrido</label><br/>
+                        <TimePicker
+                          className='clockSel'
+                          showSecond={false}  // Deshabilitar la selección de segundos
+                          value={time}
+                          onChange={handleClockCh}
+                          format="HH:mm"
+                          minuteStep={5}  // Configura los minutos a intervalos de 5 minutos
+                        />
+                      </CCol>
+                      <CCol xs={6} md={2}>
+                        <label>Tiempo Descarga</label>
+                        <TimePicker defaultValue={moment()} showMinute={false} />
+                      </CCol>
+                      <CCol xs={6} md={2}>
+                        <label>Frecuencia de Envío</label>
+                        <TimePicker defaultValue={moment()} showMinute={false} />
+                      </CCol>
+                    </CRow>
+                    <CRow className='mt-2 mb-2'>
+                      <CCol xs={6} md={4}>
+                        <label>Observaciones</label>
+                        <CFormTextarea
+                          className="mb-3"
+                          placeholder="Observaciones"
+                        ></CFormTextarea>
+                      </CCol>
+                      <CCol xs={6} md={3}>
+                        <CFormLabel htmlFor="xm">Recibe en Obra</CFormLabel>
+                        <CFormInput type="text" id="robra" placeholder="-" aria-describedby="-" />
+                      </CCol>
+                      <CCol xs={6} md={3}>
+                        <div className="mb-3">
+                          <CFormInput type="file" id="formFile" label="Examinar" />
+                        </div>
+                      </CCol>
+                    </CRow>
+                  </CTabPanel>
+                ))}
+              </CTabContent>
+            </CTabs>
           </CRow>
         </CCardBody>
         <CCardFooter>
@@ -1263,7 +1495,7 @@ const Step3 = ({ previousStep, formData, pData, onSave }) => {
               <button className='btn btn-warning' onClick={previousStep}>Anterior</button>
             </CCol>
             <CCol xs={6} md={6}>
-              <button className='btn btn-success'>Finalizar</button>
+              <button className='btn btn-success' onClick={handleSave}>Finalizar</button>
             </CCol>
           </CRow>
         </CCardFooter>

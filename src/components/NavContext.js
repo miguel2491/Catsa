@@ -18,6 +18,7 @@ import {
   cilClipboard,
   cilCog,
   cilBusAlt,
+  cilGarage,
 } from '@coreui/icons'
 import { CNavGroup, CNavItem, CNavTitle } from '@coreui/react'
 import CIcon from '@coreui/icons-react'
@@ -60,6 +61,12 @@ const NavProvider = ({ children }) => {
                     items: [
                       {
                         component: CNavItem,
+                        name: 'Cotizador',
+                        to: '/ventas/Cotizador',
+                        icon: <CIcon icon={cilCalculator} customClassName="nav-icon" />,
+                      },
+                      {
+                        component: CNavItem,
                         name: 'Lista Cotizaciones',
                         to: '/ventas/LCotizacion',
                         icon: <CIcon icon={cilCalendar} customClassName="nav-icon" />,
@@ -69,12 +76,6 @@ const NavProvider = ({ children }) => {
                         name: 'Lista PreCotizaciones',
                         to: '/ventas/LPreCotizacion',
                         icon: <CIcon icon={cilCalendar} customClassName="nav-icon" />,
-                      }, //]:[]),
-                      {
-                        component: CNavItem,
-                        name: 'Cotizador',
-                        to: '/ventas/Cotizador',
-                        icon: <CIcon icon={cilCalculator} customClassName="nav-icon" />,
                       },
                     ],
                   },
@@ -197,6 +198,23 @@ const NavProvider = ({ children }) => {
                     icon: <CIcon icon={cilGraph} customClassName="nav-icon" />
                   },
                 ]:[])
+              ],
+            },
+            {
+              component: CNavGroup,
+              name: 'Mantenimiento',
+              to: '/Mantenimiento',
+              icon: <CIcon icon={cilCog} customClassName="nav-icon" />,
+              items: [
+                ...(userIsOperacion || userIsAdmin || userIsGerenteP
+                  ? [
+                    {
+                      component: CNavItem,
+                      name: 'Orden Compra',
+                      to: '/Operaciones/Mantenimiento/OrdenCompra',
+                      icon: <CIcon icon={cilGarage} customClassName="nav-icon" />,
+                    },
+                  ]:[]),
               ],
             },
           ]
