@@ -66,7 +66,7 @@ const ResEntradas = forwardRef((props, ref) => {
         } 
         catch(error)
         {
-            Swal.fire("Error", "Ocurrio un error en el Detalle de Entrada", "error");
+            console.log(error)
         }finally{
             
         }

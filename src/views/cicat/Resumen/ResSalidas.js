@@ -68,7 +68,7 @@ const ResSalidas = forwardRef((props, ref) => {
         } 
         catch(error)
         {
-            Swal.fire("Error", "Ocurrio un error en las Detallas de Salida", "error");
+            console.log(error)
         }finally{
             
         }
