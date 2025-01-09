@@ -33,6 +33,7 @@ const InterfazInt = React.lazy(() => import('./views/utils/InterfazInt'))
 const UpdateProd = React.lazy(() => import('./views/utils/UpdateProd'))
 const UpdateMB = React.lazy(() => import('./views/utils/UpdateMB'))
 const QR = React.lazy(() => import('./views/utils/QR'))
+const Permisos = React.lazy(() => import('./views/permisos/Permisos'))
 //==================================================================================================================================
 // Base
 const Cards = React.lazy(() => import('./views/base/cards/Cards'))
@@ -76,6 +77,7 @@ const routes = [
   { path: '/utils/UpdateProd', name: 'UpdateProd', element: UpdateProd },
   { path: '/utils/UpdateMB', name: 'UpdateMB', element: UpdateMB },  
   { path: '/utils/QR', name: 'QR', element: QR },
+  { path: '/permisos/Permisos', name: 'Permisos', element: Permisos},
 ]
 
 export default routes

@@ -236,7 +236,7 @@ const NavProvider = ({ children }) => {
                       {
                         component: CNavItem,
                         name: 'Permisos',
-                        to: '/icons/coreui-icons',
+                        to: '/permisos/Permisos',
                       },
                     ],
                   },
