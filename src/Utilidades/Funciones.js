@@ -5,6 +5,7 @@ import Cookies from 'universal-cookie'
 const cookies = new Cookies();
 const baseUrl="http://apicatsa.catsaconcretos.mx:2543/api/";
 const baseUrl2="http://localhost:2548/api/";
+//****************************************************************************************************************************************************************************** */
 // LOGIN
 export async function getRol()
     {
@@ -52,6 +53,7 @@ export async function getPermisos()
 
     }
 }
+//****************************************************************************************************************************************************************************** */
 // CATALOGOS
 export async function getElementos() {
     try
@@ -79,6 +81,7 @@ export async function getElementos() {
         return false
     }
 }
+//****************************************************************************************************************************************************************************** */
 //LOGISTICA
     // Pedidos
     export async function getPedidos(planta) {
@@ -107,6 +110,7 @@ export async function getElementos() {
             return false
         }
     }
+//****************************************************************************************************************************************************************************** */
 // OPERACIONES
     // CICAT
 export async function getResInv(material, FI, FF, planta) {
@@ -246,6 +250,11 @@ export async function getRemFaltante(planta, FI, FF) {
     }
 }
 export async function setRemFaltante(Id,Nr, planta, tipo) {
+    const usuario = cookies.get('Usuario');
+    if(usuario.length == 0)
+    {
+        return false;
+    }
     try
     {
         let confi_ax = {
@@ -271,7 +280,170 @@ export async function setRemFaltante(Id,Nr, planta, tipo) {
         return false
     }
 }
-
+    // MANTENIMIENTO
+export async function getOCompras(planta, FI, FF) {
+    try
+    {
+        let confi_ax = {
+            headers:
+            {
+                'Cache-Control': 'no-cache',
+                'Content-Type': 'application/json',
+                "Authorization": "Bearer "+cookies.get('token'),
+            },
+        };
+        const fcaI = FormatoFca(FI);
+        const fcaF = FormatoFca(FF);
+        //------------------------------------------------------------------------------------------------------------------------------------------------------
+        const response = await axios.get(baseUrl+'Operaciones/GetOCompra/'+planta+','+fcaI+','+fcaF, confi_ax);
+        if (response.data && response.data.length > 0) {
+            const obj = response.data;
+            if(obj.length > 0)
+            {
+                return obj;
+            }else{return false}
+        }else{return false}
+    } 
+    catch(error)
+    {
+        return false
+    }
+}
+export async function getVehiculos(planta, grupo) {
+    try
+    {
+        let confi_ax = {
+            headers:
+            {
+                'Cache-Control': 'no-cache',
+                'Content-Type': 'application/json',
+                "Authorization": "Bearer "+cookies.get('token'),
+            },
+        };
+        //------------------------------------------------------------------------------------------------------------------------------------------------------
+        const response = await axios.get(baseUrl+'Operaciones/GetVehiculo/'+planta+','+grupo+',0', confi_ax);
+        if (response.data && response.data.length > 0) {
+            const obj = response.data;
+            if(obj.length > 0)
+            {
+                return obj;
+            }else{return false}
+        }else{return false}
+    } 
+    catch(error)
+    {
+        return false
+    }
+}
+export async function setOCompra(data, tipo) {
+    var Truta = tipo === '0' ? 'Operaciones/setOCompras':'Operaciones/updOCompras';
+    const userID = cookies.get('idUsuario');
+    data.userId = userID;
+    if(tipo === '0'){
+        delete data.id;
+    }
+    console.log(data)
+    try
+    {
+        let confi_ax = {
+            headers:
+            {
+                'Cache-Control': 'no-cache',
+                'Content-Type': 'application/json',
+                "Authorization": "Bearer "+cookies.get('token'),
+            },
+        };
+        
+        //------------------------------------------------------------------------------------------------------------------------------------------------------
+        const response = await axios.post(baseUrl+Truta, data, confi_ax);
+        if (response.data && response.data.length > 0) {
+            const obj = response.data;
+            if(obj.length > 0)
+            {
+                return obj;
+            }else{return false}
+        }else{return false}
+    } 
+    catch(error)
+    {
+        return false
+    }
+}
+export async function setStatusOC(id, tipo) {
+    try
+    {
+        let confi_ax = {
+            headers:
+            {
+                'Cache-Control': 'no-cache',
+                'Content-Type': 'application/json',
+                "Authorization": "Bearer "+cookies.get('token'),
+            },
+        };
+        
+        //------------------------------------------------------------------------------------------------------------------------------------------------------
+        const response = await axios.get(baseUrl+"Operaciones/EstatusOC/"+id+","+tipo, confi_ax);
+        return response.data
+    } 
+    catch(error)
+    {
+        return false
+    }
+}
+export async function getOComprasInd(id) {
+    try
+    {
+        let confi_ax = {
+            headers:
+            {
+                'Cache-Control': 'no-cache',
+                'Content-Type': 'application/json',
+                "Authorization": "Bearer "+cookies.get('token'),
+            },
+        };
+        //------------------------------------------------------------------------------------------------------------------------------------------------------
+        const response = await axios.get(baseUrl+'Operaciones/GetOCompraInd/'+id, confi_ax);
+        if (response.data && response.data.length > 0) {
+            const obj = response.data;
+            if(obj.length > 0)
+            {
+                return obj;
+            }else{return false}
+        }else{return false}
+    } 
+    catch(error)
+    {
+        return false
+    }
+}
+export async function delOCompra(id) {
+    try
+    {
+        let confi_ax = {
+            headers:
+            {
+                'Cache-Control': 'no-cache',
+                'Content-Type': 'application/json',
+                "Authorization": "Bearer "+cookies.get('token'),
+            },
+        };
+        
+        //------------------------------------------------------------------------------------------------------------------------------------------------------
+        const response = await axios.get(baseUrl+"Operaciones/delOCompras/"+id, confi_ax);
+        if (response.data && response.data.length > 0) {
+            const obj = response.data;
+            if(obj.length > 0)
+            {
+                return obj;
+            }else{return false}
+        }else{return false}
+    } 
+    catch(error)
+    {
+        return false
+    }
+}
+//****************************************************************************************************************************************************************************** */
 // VENTAS
     //---COTIZADOR
 export  async function getPrecios(planta)
@@ -591,6 +763,7 @@ export async function getProspectos_() {
         return false
     }
 }
+//****************************************************************************************************************************************************************************** */
 // INTERFAZ
   // CB
 export async function getProductoIF(planta, FI)
@@ -761,6 +934,7 @@ export async function resetProducto(Planta, Producto, Enviado, Eliminar)
         console.log(error);
     }
 }
+//****************************************************************************************************************************************************************************** */
 // Intelisis
 export async function getBitacoraI(FI)
 {
@@ -868,6 +1042,7 @@ export async function getMaterialesI(Producto)
         return false;
     }
 }  
+//****************************************************************************************************************************************************************************** */
 // Configuraciones
 export async function getPlantasCon()
 {
@@ -974,6 +1149,7 @@ export async function getResInvCB(material, FI, FF, planta) {
         return false;
     }
 }
+//****************************************************************************************************************************************************************************** */
 //REPORTES
 export async function getPedidoInd(npedido) {
     try
@@ -1071,6 +1247,7 @@ export async function getDetalleComR(mes, periodo, usuario) {
         return false;
     }
 }
+//****************************************************************************************************************************************************************************** */
 //UTILITIES
 // Función para formatear el número a formato de dinero
 export const formatCurrency = (value) => {
