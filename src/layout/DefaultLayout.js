@@ -1,40 +1,32 @@
 import React,{ useRef, useState, useEffect } from 'react'
+import axios from "axios";
 import { AppContent, AppSidebar, AppFooter, AppHeader } from '../components/index'
+import { NavProvider } from '../components/NavContext'
 import Cookies from 'universal-cookie';
 import { useNavigate } from "react-router-dom";
-import{
-  CToast,
-  CToastBody,
-  CToastClose,
-  CToastHeader,
-  CToaster
-}from '@coreui/react'
+import {baseUrl} from '../Utilidades/Tools'
 
 const DefaultLayout = () => {
-  const [toast, addToast] = useState(0)
-  const toaster = useRef()
   const cookies = new Cookies();
   const navigate = useNavigate();
-
-  const exampleToast = (
-    <CToast title="CoreUI for React.js">
-      <CToastHeader closeButton>
-        <strong className="me-auto">Catsa</strong>
-      </CToastHeader>
-      <CToastBody></CToastBody>
-    </CToast>
-  )
+  const [roles, setRoles] = useState(null);
+  
   useEffect(()=>{
-    if(cookies.get('token') == undefined)
+    if(cookies.get('token') === undefined)
     {
       cookies.remove('token', {path: '/'});
       navigate('/login');
+      return;
     }
-  },[]);
+    
+  }, [navigate]);
+  
+    
   return (
     <div>
-      <CToaster ref={toaster} push={toast} placement="top-end" />
+     <NavProvider>
       <AppSidebar />
+     </NavProvider> 
       <div className="wrapper d-flex flex-column min-vh-100">
         <AppHeader />
         <div className="body flex-grow-1">

@@ -2,6 +2,9 @@ import React,{useEffect, useState, useRef} from 'react';
 
 import Cookies from 'universal-cookie';
 import axios from 'axios';
+import {
+  CFormSelect,
+} from '@coreui/react'
 
 const cookies = new Cookies();
 const baseUrl="http://apicatsa.catsaconcretos.mx:2543/api/";
@@ -90,15 +93,15 @@ const Plantas = ({plantasSel, mCambio}) => {
       <div>
         <label>Seleccione Planta</label>
         <div>
-        <select id="cmbPlanta" value={plantasSel} onChange={mCambio}>
+          <CFormSelect size="lg" className="mb-3" aria-label="Selecciona" id="cmbPlanta" value={plantasSel} onChange={mCambio}>
             <option value="" >Selecciona...</option>
             {plantas_.map(planta =>(
                 <option value={planta.IdPlanta} key={planta.ID}>{planta.Planta}</option>
             ))}
-            </select>
-            {/* {selectedOption && (
-                <p>Has seleccionado: {selectedOption}</p>
-            )} */}
+          </CFormSelect>
+          {/* {selectedOption && (
+              <p>Has seleccionado: {selectedOption}</p>
+          )} */}
         </div> {/* Contenedor para Tabulator */}
       </div>
     );

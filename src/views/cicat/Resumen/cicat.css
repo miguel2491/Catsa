@@ -1,0 +1,21 @@
+.colCB{
+    background: #D3D3D3 !important;
+    color:darkblue !important;
+}
+.colERP{
+    background: #87CEFA !important;
+    color:black !important;
+}
+.modalLg .modal-dialog {
+    width: 90%;
+    max-width: 95%;
+}
+.tINT tr:nth-child(even) {
+    background-color: #ffffff !important;
+}
+.tCB tr:nth-child(even){
+    background: #A69C97 !important;
+}
+.center-text{
+    text-align: center;
+}

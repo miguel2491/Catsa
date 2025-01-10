@@ -3,7 +3,7 @@ import Cookies from 'universal-cookie'
 import axios from 'axios'
 import Swal from "sweetalert2";
 import ProgressBar from "@ramonak/react-progress-bar";
-import {FormatoFca} from '../../../Utilidades/Tools.js'
+import {FormatoFca, Fnum} from '../../../Utilidades/Tools.js'
 import { format } from 'date-fns';
 
 import {
@@ -36,12 +36,14 @@ const ResEntradas = forwardRef((props, ref) => {
     const [visible, setVisible] = useState(false)
     //Arrays
     const [dEntradas, putEntradas] = useState([]);
+    const [dHeaders, putHeaders] = useState([]);
     const getEntradas = () => {
         setEntradas(props.planta, props.fechaI, props.fechaF);
     };
     useImperativeHandle(ref, () => ({
         getEntradas,
     }));
+    
     async function setEntradas(planta, FI, FF) {
         try
         {
@@ -56,14 +58,15 @@ const ResEntradas = forwardRef((props, ref) => {
             const fcaI = FormatoFca(FI);
             const fcaF = FormatoFca(FF);
             //------------------------------------------------------------------------------------------------------------------------------------------------------
-            const response = await axios.get(baseUrl2+'Operaciones/GetResumen/'+planta+','+fcaI+','+fcaF+',DE', confi_ax);
+            const response = await axios.get(baseUrl+'Operaciones/GetResumen/'+planta+','+fcaI+','+fcaF+',DE', confi_ax);
             var obj =  response.data[0].Rows;
+            //console.log(obj)
             putEntradas(obj);
-            //console.log(obj);
+            putHeaders(Object.keys(obj[0]));
         } 
         catch(error)
         {
-            Swal.fire("Error", "Ocurrio un error, vuelva a intentarlo", "error");
+            console.log(error)
         }finally{
             
         }
@@ -78,20 +81,48 @@ const ResEntradas = forwardRef((props, ref) => {
                         <CTableRow>
                             <CTableHeaderCell scope="col">Entrada</CTableHeaderCell>
                             <CTableHeaderCell scope="col">Mov</CTableHeaderCell>
-
+                            {
+                                dHeaders.map((itemd,index) => {
+                                    if (index < 3) {
+                                        return null; // Si el índice es menor a 3, no renderizar nada
+                                    }
+                                    return(
+                                        <CTableHeaderCell key={itemd || index} scope="col">{itemd}</CTableHeaderCell>
+                                    )
+                                })
+                            }
                         </CTableRow>
                     </CTableHead>
                     <CTableBody>
                         {
                             dEntradas.length === 0 ?(
                                 <CTableRow>
-                                    <CTableDataCell colSpan={2}>Sin datos</CTableDataCell>
+                                    <CTableDataCell colSpan={dHeaders.length+2}>Sin datos</CTableDataCell>
                                 </CTableRow>
                             ):(
                                 dEntradas.map((itemd,index) => (
                                     <CTableRow key={itemd.Entrada || index}>
                                         <CTableDataCell>{format(itemd.Fecha_Entrada, 'yyyy/MM/dd')}</CTableDataCell>
                                         <CTableDataCell>{itemd.Mov}</CTableDataCell>
+                                        {
+                                            dHeaders.map((item, index_) => {
+                                                // Si el índice es menor a 3, no renderizamos nada
+                                                if (index_ < 3) {
+                                                  return null;
+                                                }
+                                                
+                                                // Accedemos al valor de 'item' en 'itemd', y si es undefined, mostramos 'Valor no disponible'
+                                                const value = itemd[item];
+                                                const renderableValue = value != null ? value : 'Valor no disponible';
+                                                const valueToDisplay = typeof renderableValue === 'object' ? Fnum(0) : Fnum(renderableValue);
+                                                // Si el valor es nulo o indefinido, se coloca un texto alternativo
+                                                return (
+                                                  <CTableDataCell key={item || index_}>
+                                                    {valueToDisplay}
+                                                  </CTableDataCell>
+                                                );
+                                            })
+                                        }
                                     </CTableRow>
                                 ))
                             )

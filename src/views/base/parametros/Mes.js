@@ -1,33 +1,31 @@
 import React,{useEffect, useState, useRef} from 'react';
 
-const Mes = ({mesSel, mMes}) => {
-    const [mes_, setmes] = useState([]);
-    const mes = Array.from({ length: 12 }, (_, index) => 1 + index);
+const mes = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
 
-    const [selectedOption, setSelectedOption] = useState('');
-    const handleChange = (event) => {
-        //setSelectedOption(event.target.value);
-    };
-    useEffect(()=>{
-        
-    });
+const MesSelector = ({mesSel, mMes}) => {
+    
+  //const [mesSel, setMesSel] = useState('');
+  const mesNombres = [
+    "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", 
+    "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"
+  ];
     
     return (
       <div>
         <label>Seleccione Mes</label>
         <div>
         <select id="cmbMes" value={mesSel} onChange={mMes}>
-            <option value="" >Selecciona...</option>
-                {mes.map(mes => (
-                    <option key={mes} value={mes}>
-                    {mes}
-                    </option>
-                ))}
-            </select>
+          <option value="">Selecciona...</option>
+          {mes.map((m) => (
+            <option key={m} value={m}>
+              {mesNombres[m - 1]} {/* Usamos m-1 porque el arreglo empieza en 0 */}
+            </option>
+          ))}
+        </select>
         </div>
       </div>
     );
   };
   
-  export default Mes;
+  export default MesSelector;
 

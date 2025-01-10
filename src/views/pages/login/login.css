@@ -358,10 +358,23 @@
     font-size: 16px;
     border-bottom: 1px solid rgba(0, 0, 0, 0.4);
     text-align: center;
+    color:rgba(0, 0, 0, 0.4);
   }
   
   .form__submit {
     width: 100%;
     background: #e62a43;
   }
-  
+  .centered-content {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    height: 100%; /* Asegura que el contenedor tenga suficiente altura */
+  }
+  .mLogin{
+    margin-top:10%
+  }
+
+

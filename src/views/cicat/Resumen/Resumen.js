@@ -14,10 +14,11 @@ import FechaF from '../../base/parametros/FechaFinal'
 import {FormatoFca} from '../../../Utilidades/Tools.js'
 import { format } from 'date-fns';
 
+
 import {
   CForm,
   CFormSelect,
-  CFormInput,
+  CWidgetStatsF,
   CContainer,
   CButton,
   CRow,
@@ -35,7 +36,7 @@ import {
 } from '@coreui/react'
 
 import {CIcon} from '@coreui/icons-react'
-import { cilCloudDownload, cilSearch } from '@coreui/icons'
+import { cilCloudDownload, cilSearch, cilChartPie } from '@coreui/icons'
 
 const cookies = new Cookies();
 const baseUrl="http://apicatsa.catsaconcretos.mx:2543/api/";
@@ -50,7 +51,9 @@ const Resumen = () => {
     const [btn1, setDisabled] = useState(false);
     const [loading, setLoading] = useState(false);
     const [percentage, setPercentage] = useState(0);
-    const [visible, setVisible] = useState(false)
+    const [visible, setVisible] = useState(false);
+    //Arrays
+    const [dMov, setMov] = useState([]);
     const hijoRef = useRef(); 
     const entradasRf = useRef();
     const salidasRf = useRef();
@@ -121,14 +124,15 @@ const Resumen = () => {
             const fcaI = FormatoFca(vFechaI);
             const fcaF = FormatoFca(vFcaF);
             //------------------------------------------------------------------------------------------------------------------------------------------------------
-            const response = await axios.get(baseUrl2+'Operaciones/GetResumen/'+plantasSel+','+fcaI+','+fcaF+',M', confi_ax);
+            const response = await axios.get(baseUrl+'Operaciones/GetResumen/'+plantasSel+','+fcaI+','+fcaF+',M', confi_ax);
             var obj = response.data[0].Rows;
+            setMov(obj);
             //console.log(obj);
         } 
         catch(error)
         {
             console.log(error);
-            Swal.fire("Error", "Ocurrio un error, vuelva a intentarlo", "error");
+            Swal.fire("Error", "Ocurrio un error al cargar Movimientos, vuelva a intentarlo", "error");
         }finally{
             clearInterval(interval); // Limpiar el intervalo
             setLoading(false);
@@ -163,25 +167,25 @@ return (
         </CModal>
             <h3>Control de Inventarios</h3>
             <CRow>
-                <CCol xs={2}>
+                <CCol xs={6} md={2}>
                     <FechaI 
                         vFechaI={vFechaI} 
                         cFechaI={cFechaI} 
                     />
                 </CCol>
-                <CCol xs={2}>
+                <CCol xs={6} md={2}>
                     <FechaF 
                         vFcaF={vFcaF} 
                         mFcaF={mFcaF}
                     />
                 </CCol>
-                <CCol xs={2}>
+                <CCol xs={6} md={2}>
                     <Plantas  
                         mCambio={mCambio}
                         plantasSel={plantasSel}
                     />
                 </CCol>
-                <CCol xs={3} className='mt-3'>
+                <CCol xs={6} md={3} className='mt-3'>
                     <CButton color='primary' onClick={getDatos}>
                       <CIcon icon={cilSearch} className="me-2" />
                        Buscar
@@ -192,7 +196,7 @@ return (
                     </CButton>
                 </CCol>
                 
-                <CCol xs={2}>
+                <CCol xs={6} md={2}>
                     <label>Medida</label>
                     <CFormSelect 
                         options={[
@@ -202,6 +206,23 @@ return (
                         ]}
                     />
                 </CCol>
+            </CRow>
+            <CRow>
+                {
+                    dMov.length === 0 ? (
+                        <p></p>
+                    ):(
+                        dMov.map((itemd,index) => (
+                            <CCol xs={6} md={2} key={itemd.Mov || index}>
+                                <CWidgetStatsF
+                                    className="mb-3"
+                                    color="primary"
+                                    title={itemd.Mov}
+                                />
+                            </CCol>
+                        ))
+                    )
+                }
             </CRow>
             <br />
             <CTabs activeItemKey={1}>

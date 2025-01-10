@@ -10,250 +10,184 @@ import {
   cilCalculator,
   cilCalendar,
   cilCheck,
-  cilGlobeAlt
+  cilGlobeAlt,
+  cilGraph
 } from '@coreui/icons'
 import { CNavGroup, CNavItem, CNavTitle } from '@coreui/react'
-import axios from 'axios';
-
+import {Rol} from './Utilidades/Roles'
 
 const cookies = new Cookies();
-const baseUrl="http://apicatsa.catsaconcretos.mx:2543/api/";
-const baseUrl2="http://localhost:2548/api/";
 const nav_ = [];
-if(cookies.get('menus') != undefined)
+var userIsAdmin = false; 
+var userIsVentas = false;
+var userIsOperacion = false;
+var userIsGerenteP = false;
+//console.log(cookies.get('roles'));
+if(cookies.get('roles') != undefined)
+{
+  userIsAdmin = Rol('Admin'); 
+  userIsVentas = Rol('AdminCICAT');
+  userIsOperacion = Rol('Operaciones');
+  userIsGerenteP = Rol('GerentePlanta');
+}else{
+  //window.location.reload();
+}
+ 
+//=============================================================================
+
+const _nav = [
+  ...((userIsVentas || userIsAdmin) ? [
   {
-    setMenus();
-  }else{
-    Menus();
-  }
-async function Menus(){
-  try{
-    let confi_ax = 
+    component: CNavTitle,
+    name: 'Ventas',
+  },
+  {
+    component: CNavGroup,
+    name: 'Cotizaciones',
+    to: '/theme/admin',
+    icon: <CIcon icon={cilWallet} customClassName="nav-icon" />,
+    items:[
       {
-        headers:
-        {
-          'Cache-Control': 'no-cache',
-          'Content-Type': 'application/json',
-          "Authorization": "Bearer "+cookies.get('token'),
-        }
-      }
-      //=======================================================
-      await axios.get(baseUrl+'Login/GetMenus',confi_ax)
-      .then(response=>{
-        cookies.set('menus', JSON.stringify(response), {path: '/'});
-        return response.data;
-      }).then(response=>{
-        //console.log("=>");
-      })
-      .catch(err=>{
-        if (err.response) {
-          // El servidor respondió con un código de estado fuera del rango de 2xx
-          console.error('Error de Respuesta:', err.response.data);
-          //setError(`Error: ${err.response.status} - ${err.response.data.message || err.response.statusText}`);
-        } else if (err.request) {
-          // La solicitud fue realizada pero no se recibió respuesta
-          //setError('Error: No se recibió respuesta del servidor.');
-        } else {
-          // Algo sucedió al configurar la solicitud
-          console.error('Error:', err.message);
-          //setError(`Error: ${err.message}`);
-        }
-      })
-      //=======================================================
-  }catch(error){
-
-  }
-}
-
-async function setMenus(){
-  var obj = cookies.get('menus');
-  for(var x = 0; x < obj.data.length; x++)
-    {
-      nav_.push({
-        component: CNavTitle,
-        name:obj.data[x].descripcion,
-      })
-      await SubMenus(obj.data[x].mnuId);
-    }
-}
-async function SubMenus(idMnu){
-  try{
-    let confi_ax = 
+        component: CNavItem,
+        name: 'Lista Cotizaciones',
+        to: '/ventas/LCotizacion',
+        icon: <CIcon icon={cilCalendar} customClassName="nav-icon" />,
+      },
       {
-        headers:
-        {
-          'Cache-Control': 'no-cache',
-          'Content-Type': 'application/json',
-          "Authorization": "Bearer "+cookies.get('token'),
-        }
+        component: CNavItem,
+        name: 'Lista PreCotizaciones',
+        to: '/ventas/LPreCotizacion',
+        icon: <CIcon icon={cilCalendar} customClassName="nav-icon" />,
+      },//]:[]),
+      {
+        component: CNavItem,
+        name: 'Cotizador',
+        to: '/ventas/Cotizador',
+        icon: <CIcon icon={cilCalculator} customClassName="nav-icon" />,
       }
-      //=======================================================
-      await axios.get(baseUrl+'Login/GetSubMenus/'+idMnu,confi_ax)
-      .then(response=>{
-        
-        cookies.set('SubMenus', JSON.stringify(response.data), {path: '/'});
-        var obj = response.data;
-        for(var z = 0; z < obj.length;z++)
-        {
-          nav_.push({
-            component: CNavItem,
-            name: 'Admin',
-            to: '/Ventas/admin',
-            icon: <CIcon icon={cilDrop} customClassName="nav-icon" />,
-          })
-        }
-      }).then(response=>{
-        
-      })
-      .catch(err=>{
-        if (err.response) {
-          // El servidor respondió con un código de estado fuera del rango de 2xx
-          console.error('Error de Respuesta:', err.response.data);
-          //setError(`Error: ${err.response.status} - ${err.response.data.message || err.response.statusText}`);
-        } else if (err.request) {
-          // La solicitud fue realizada pero no se recibió respuesta
-          //setError('Error: No se recibió respuesta del servidor.');
-        } else {
-          // Algo sucedió al configurar la solicitud
-          console.error('Error:', err.message);
-          //setError(`Error: ${err.message}`);
-        }
-      })
-      //=======================================================
-  }catch(error){
-
-  }
-}
-
-  const _nav = [
-    {
-      component: CNavTitle,
-      name: 'Ventas',
-    },
-    {
-      component: CNavGroup,
-      name: 'Cotizaciones',
-      to: '/theme/admin',
-      icon: <CIcon icon={cilWallet} customClassName="nav-icon" />,
-      items:[
-        {
-          component: CNavItem,
-          name: 'Lista Cotizaciones',
-          to: '/ventas/LCotizacion',
-          icon: <CIcon icon={cilCalendar} customClassName="nav-icon" />,
-        },
-        {
-          component: CNavItem,
-          name: 'Lista PreCotizaciones',
-          to: '/ventas/LPreCotizacion',
-          icon: <CIcon icon={cilCalendar} customClassName="nav-icon" />,
-        },
-        {
-          component: CNavItem,
-          name: 'Cotizador',
-          to: '/ventas/Cotizador',
-          icon: <CIcon icon={cilCalculator} customClassName="nav-icon" />,
-        }
-      ]
-    },
-    {
-      component: CNavGroup,
-      name: 'Pedidos',
-      to: '/theme/admin',
-      icon: <CIcon icon={cilCalendarCheck} customClassName="nav-icon" />,
-      items:[
-        {
-          component: CNavItem,
-          name: 'Ver Pedidos',
-          to: '/logistica/LPedidos',
-          icon: <CIcon icon={cilCheck} customClassName="nav-icon" />,
-        },
-        {
-          component: CNavItem,
-          name: 'Pedidos en línea',
-          to: '/logistica/PLinea',
-          icon: <CIcon icon={cilGlobeAlt} customClassName="nav-icon" />,
-        }
-      ]
-    },
-    {
-      component: CNavTitle,
-      name: 'Produccion',
-    },
-    {
-      component: CNavGroup,
-      name: 'Inventarios',
-      to: '/Inventario',
-      icon: <CIcon icon={cilUser} customClassName="nav-icon" />,
-      items: [
-        {
-          component: CNavItem,
-          name: 'CICAT Resumen',
-          to: '/Cicat/Resumen',
-        }
-      ],
-    },
-    {
-      component: CNavTitle,
-      name: 'Administración',
-    },
-    {
-      component: CNavGroup,
-      name: 'Usuarios',
-      to: '/base',
-      icon: <CIcon icon={cilUser} customClassName="nav-icon" />,
-      items: [
-        {
-          component: CNavItem,
-          name: 'Permisos',
-          to: '/permisos/Permisos',
-        }
-      ],
-    },
-    {
-      component: CNavGroup,
-      name: 'Extras',
-      to: '/utils',
-      icon: <CIcon icon={cilCursor} customClassName="nav-icon" />,
-      items: [
-        {
-          component: CNavItem,
-          name: 'PreCierres',
-          to: '/utils/PreCierres',
-        },
-        {
-          component: CNavItem,
-          name: 'INTERFAZ INTELISIS',
-          to: '/utils/InterfazIntelisis',
-        },
-        {
-          component: CNavItem,
-          name: 'Actualizar Producción',
-          to: '/utils/UpdateProd',
-        },
-        {
-          component: CNavItem,
-          name: 'Actualizar MB',
-          to: '/utils/UpdateMB',
-        }
-      ],
-    },
-    {
-      component: CNavTitle,
-      name: 'REPORTES',
-    },
-    {
-      component: CNavGroup,
-      name: 'Calidad',
-      to: '/Calidad',
-      icon: <CIcon icon={cilUser} customClassName="nav-icon" />,
-      items: [
-        {
-          component: CNavItem,
-          name: 'Costos Productos',
-          to: '/reportes/CostosProductos',
-        }
-      ],
-    },
-  ]
+    ]
+  },
+  {
+    component: CNavGroup,
+    name: 'Pedidos',
+    to: '/theme/admin',
+    icon: <CIcon icon={cilCalendarCheck} customClassName="nav-icon" />,
+    items:[
+      {
+        component: CNavItem,
+        name: 'Ver Pedidos',
+        to: '/logistica/LPedidos',
+        icon: <CIcon icon={cilCheck} customClassName="nav-icon" />,
+      },
+      {
+        component: CNavItem,
+        name: 'Pedidos en línea',
+        to: '/logistica/PLinea',
+        icon: <CIcon icon={cilGlobeAlt} customClassName="nav-icon" />,
+      }
+    ]
+  }]:[]),
+  ...((userIsAdmin || userIsOperacion || userIsGerenteP) ? [
+  {
+    component: CNavTitle,
+    name: 'Operaciones',
+  },
+  {
+    component: CNavGroup,
+    name: 'Inventarios',
+    to: '/Inventario',
+    icon: <CIcon icon={cilUser} customClassName="nav-icon" />,
+    items: [
+      {
+        component: CNavItem,
+        name: 'CICAT Resumen',
+        to: '/Cicat/Resumen',
+      }
+    ],
+  }]:[]),
+  ...((userIsAdmin || userIsOperacion || userIsGerenteP) ? [
+  {
+    component: CNavTitle,
+    name: 'Administración',
+  },
+  ...(userIsAdmin ? [{
+    component: CNavGroup,
+    name: 'Usuarios',
+    to: '/base',
+    icon: <CIcon icon={cilUser} customClassName="nav-icon" />,
+    items: [
+      {
+        component: CNavItem,
+        name: 'Permisos',
+        to: '/icons/coreui-icons',
+      }
+    ],
+  }]:[]),
+  {
+    component: CNavGroup,
+    name: 'Extras',
+    to: '/utils',
+    icon: <CIcon icon={cilCursor} customClassName="nav-icon" />,
+    items: [
+      ...((userIsAdmin || userIsOperacion || userIsGerenteP) ? [
+      {
+        component: CNavItem,
+        name: 'PreCierres',
+        to: '/utils/PreCierres',
+      }]:[]),
+      ...(userIsAdmin ? [{
+        component: CNavItem,
+        name: 'INTERFAZ INTELISIS',
+        to: '/utils/InterfazIntelisis',
+      }]:[]),
+      ...((userIsAdmin || userIsOperacion || userIsGerenteP) ? [
+      {
+        component: CNavItem,
+        name: 'Actualizar Producción',
+        to: '/utils/UpdateProd',
+      }]:[]),
+      ...(userIsAdmin ? [{
+        component: CNavItem,
+        name: 'Actualizar MB',
+        to: '/utils/UpdateMB',
+      }]:[])
+    ],
+  }]:[]),
+  ...(userIsAdmin ? [
+  {
+    component: CNavTitle,
+    name: 'REPORTES',
+  },
+  {
+    component: CNavGroup,
+    name: 'Logistica',
+    to: '/Logistica',
+    icon: <CIcon icon={cilGraph} customClassName="nav-icon" />,
+    items: [
+      {
+        component: CNavItem,
+        name: 'Pedidos Ventas',
+        to: '/reportes/PedidosVenta',
+      },
+      {
+        component: CNavItem,
+        name: 'Reporte de Cotizaciones',
+        to: '/reportes/RCotizaciones',
+      },
+    ],
+  },
+  {
+    component: CNavGroup,
+    name: 'Calidad',
+    to: '/Calidad',
+    icon: <CIcon icon={cilUser} customClassName="nav-icon" />,
+    items: [
+      {
+        component: CNavItem,
+        name: 'Costos Productos',
+        to: '/reportes/CostosProductos',
+      },
+    ],
+  }]:[]),
+]
 export default _nav;

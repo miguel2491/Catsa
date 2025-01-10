@@ -31,6 +31,9 @@
     .sidebar-nav .nav-link.active {
         background: #1f234a;
     } 
+    .sidebar-nav .simplebar-wrapper{
+        width: 100%;
+    }
 }
 
 
@@ -85,6 +88,7 @@
     --cui-primary-bg-subtle: #cfc7f3;
     --cui-secondary-bg-subtle: #ced2d8;
     --cui-success-bg-subtle: #cbedd6;
+    h1{color:white;font-weight: bold;}
 }
 
 

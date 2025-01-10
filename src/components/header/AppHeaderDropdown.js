@@ -24,6 +24,7 @@ import CIcon from '@coreui/icons-react'
 import Cookies from 'universal-cookie';
 import { Navigate, useNavigate } from "react-router-dom";
 import avatar8 from './../../assets/images/avatars/logo.png'
+import '../SideBar.css'
 
 const AppHeaderDropdown = () => {
   const cookies = new Cookies();
@@ -41,7 +42,7 @@ function cerrarSesion(){
   return (
     <CDropdown variant="nav-item">
       <CDropdownToggle placement="bottom-end" className="py-0 pe-0" caret={false}>
-        <CAvatar src={avatar8} size="md" />
+        <CAvatar src={avatar8} size="md" className='logo' />
       </CDropdownToggle>
       <CDropdownMenu className="pt-0" placement="bottom-end">
         <CDropdownHeader className="bg-body-secondary fw-semibold mb-2">Configuraciones</CDropdownHeader>

@@ -1,12 +1,13 @@
-import React, {useImperativeHandle, forwardRef, useState} from 'react'
+import React, {useImperativeHandle, forwardRef, useState, useRef} from 'react'
 import Cookies from 'universal-cookie'
 import axios from 'axios'
 import Swal from "sweetalert2";
 import ProgressBar from "@ramonak/react-progress-bar";
-import {FormatoFca} from '../../../Utilidades/Tools.js'
-
+import {FormatoFca, Fnum} from '../../../Utilidades/Tools.js'
+import { format } from 'date-fns';
+import './cicat.css'
 import {
-    CForm,
+    CBadge,
     CTable,
     CTableBody,
     CTableHead,
@@ -23,23 +24,33 @@ import {
     CModalBody,
     CModalFooter
 } from '@coreui/react'
+import {getResInv, getResInvCB} from '../../../Utilidades/Funciones.js'
 
 import {CIcon} from '@coreui/icons-react'
-import { cilLoopCircular, cilSearch } from '@coreui/icons'
+import { cilWarning, cilSearch } from '@coreui/icons'
 
 const cookies = new Cookies();
 const baseUrl="http://apicatsa.catsaconcretos.mx:2543/api/";
-const baseUrl2="http://localhost:2548/api/";
 
 const ResDiario = forwardRef((props, ref) => {
     const [loading, setLoading] = useState(false);
     const [percentage, setPercentage] = useState(0);
     const [visible, setVisible] = useState(false)
+    const [visibleM, setVisibleM] = useState(false);
+    const [plantasSel , setPlantas] = useState('');
+    const [vFechaI, setFechaIni] = useState(null);
+    const [vFcaF, setFechaFin] = useState(null);
     //Arrays
     const [dResumen, setResumen] = useState([]);
+    const [aInvInt, setInvInt] = useState([]);
+    const [aInvCB, setInvCB] = useState([]);
+    const RefInvs = useRef(null); 
 
     const ejecutarAccion = () => {
         getRes(props.planta, props.fechaI, props.fechaF);
+        setPlantas(props.planta);
+        setFechaIni(props.fechaI);
+        setFechaFin(props.fechaF);
     };
     useImperativeHandle(ref, () => ({
         ejecutarAccion,
@@ -67,7 +78,7 @@ const ResDiario = forwardRef((props, ref) => {
             const fcaI = FormatoFca(FI);
             const fcaF = FormatoFca(FF);
             //------------------------------------------------------------------------------------------------------------------------------------------------------
-            const response = await axios.get(baseUrl2+'Operaciones/GetResumen/'+planta+','+fcaI+','+fcaF+',R', confi_ax);
+            const response = await axios.get(baseUrl+'Operaciones/GetResumen/'+planta+','+fcaI+','+fcaF+',R', confi_ax);
             var obj = response.data[0].Rows;
             //console.log(obj);
             if(obj.length > 0)
@@ -78,7 +89,7 @@ const ResDiario = forwardRef((props, ref) => {
         } 
         catch(error)
         {
-            Swal.fire("Error", "Ocurrio un error, vuelva a intentarlo", "error");
+            Swal.fire("Error", "Ocurrio un error Resumen, vuelva a intentarlo", "error");
         }finally{
             clearInterval(interval); // Limpiar el intervalo
             setLoading(false);
@@ -86,10 +97,49 @@ const ResDiario = forwardRef((props, ref) => {
             setVisible(false);
         }
     }
+    const getMovInt = (item) =>{
+        setLoading(true);
+        setPercentage(0);
+        setVisible(!visible);
+        const interval = setInterval(() => {
+            setPercentage(prev => {
+            if (prev < 90) return prev + 10;
+            return prev;
+            });
+        }, 1000); // Incrementa cada 500 ms
+        getDataInv(item);
+    }
+
+    async function getDataInv(material)
+    {
+        var resulInt = false;
+        var resulCB = false;
+        resulInt = await getResInv(material, props.fechaI, props.fechaF, props.planta);
+        if(resulInt)
+            resulCB = await getResInvCB(material, props.fechaI, props.fechaF, props.planta)
+        if(resulInt && resulCB)
+        {
+            setVisible(visible);
+            setInvInt(resulInt);
+            setInvCB(resulCB);
+            setVisibleM(!visibleM);
+            if(RefInvs.current){
+                RefInvs.current.setInvs(resulInt, resulCB)
+            }
+        }else{
+            setLoading(false);
+            setPercentage(100); 
+            setVisible(false);
+            setInvInt([]);
+            setInvCB([]);
+            Swal.fire("Error", "No hay datos para este material", "error");
+        }
+    }
+
     return (
         <>
             <CContainer fluid>
-                <h2>Resumen Diario</h2>
+                <h2 style={{ textAlign: 'center' }}>Resumen Diario</h2>
                 <CCol xs={12}>
                 <CTable responsive style={{fontSize:'10px'}}>
                     <CTableHead>
@@ -118,19 +168,171 @@ const ResDiario = forwardRef((props, ref) => {
                             ):(
                                 dResumen.map((itemd,index) => (
                                     <CTableRow key={itemd.Material || index}>
-                                        <CTableDataCell>-</CTableDataCell>
+                                        <CTableDataCell>
+                                            <CButton color="primary" size="sm" title='Ver Movimientos Intelisis' onClick={()=>getMovInt(itemd.Material)}>
+                                                <CIcon icon={cilSearch} className="me-2" />
+                                            </CButton>
+                                            <CModal
+                                                backdrop="static"
+                                                visible={visibleM}
+                                                onClose={() => setVisibleM(false)}
+                                                aria-labelledby="StaticBackdropExampleLabel"
+                                                className='modalLg'
+                                            >
+                                                <CModalHeader>
+                                                <CModalTitle id="StaticBackdropExampleLabel">Movimientos</CModalTitle>
+                                                </CModalHeader>
+                                                <CModalBody>
+                                                <CRow>
+                                                    <CCol xs={6}>
+                                                        <h3 className='center-text'>Intelisis</h3>
+                                                        <CTable responsive style={{fontSize:'10px'}}>
+                                                            <CTableHead>
+                                                                <CTableRow>
+                                                                    <CTableHeaderCell scope="col">Material</CTableHeaderCell>
+                                                                    <CTableHeaderCell scope="col">Fecha</CTableHeaderCell>
+                                                                    <CTableHeaderCell scope="col">Cantidad</CTableHeaderCell>
+                                                                    <CTableHeaderCell scope="col">Movimiento</CTableHeaderCell>
+                                                                </CTableRow>
+                                                            </CTableHead>
+                                                            <CTableBody style={{backgroundColor:'#f0f0f0'}}>
+                                                                {
+                                                                    aInvInt.length === 0 ? (
+                                                                        <CTableRow>
+                                                                            <CTableDataCell colSpan={4}>Sin datos</CTableDataCell>
+                                                                        </CTableRow>
+                                                                    ):(
+                                                                        aInvInt.map((itemd, index) => (
+                                                                            <CTableRow key={index}>
+                                                                                <CTableDataCell>{itemd.Material}</CTableDataCell>
+                                                                                <CTableDataCell>{format(itemd.Fecha, 'yyyy/MM/dd')}</CTableDataCell>
+                                                                                <CTableDataCell>{Fnum(itemd.Cantidad)}</CTableDataCell>
+                                                                                <CTableDataCell>{itemd.Mov}</CTableDataCell>
+                                                                            </CTableRow>
+                                                                        ))
+                                                                    )
+                                                                }
+                                                            </CTableBody>
+                                                        </CTable>
+                                                    </CCol>
+                                                    <CCol xs={6}>
+                                                        <h3 className='center-text'>CB</h3>
+                                                        <CTable responsive style={{fontSize:'10px'}}>
+                                                            <CTableHead>
+                                                                <CTableRow>
+                                                                    <CTableHeaderCell scope="col">Material</CTableHeaderCell>
+                                                                    <CTableHeaderCell scope="col">Fecha</CTableHeaderCell>
+                                                                    <CTableHeaderCell scope="col">Cantidad</CTableHeaderCell>
+                                                                    <CTableHeaderCell scope="col">Movimiento</CTableHeaderCell>
+                                                                </CTableRow>
+                                                            </CTableHead>
+                                                            <CTableBody className='tCB'>
+                                                                {
+                                                                    aInvCB.length === 0 ? (
+                                                                        <CTableRow>
+                                                                            <CTableDataCell colSpan={4}>Sin datos</CTableDataCell>
+                                                                        </CTableRow>
+                                                                    ):(
+                                                                        aInvCB.map((itemd, index) => (
+                                                                            <CTableRow key={index}>
+                                                                                <CTableDataCell>{itemd.Material}</CTableDataCell>
+                                                                                <CTableDataCell>{format(itemd.Fecha, 'yyyy/MM/dd')}</CTableDataCell>
+                                                                                <CTableDataCell>{Fnum(itemd.Cantidad)}</CTableDataCell>
+                                                                                <CTableDataCell>{itemd.Mov}</CTableDataCell>
+                                                                            </CTableRow>
+                                                                        ))
+                                                                    )
+                                                                }
+                                                            </CTableBody>
+                                                        </CTable>
+                                                    </CCol>
+                                                </CRow>
+                                                </CModalBody>
+                                                <CModalFooter>
+                                                <CButton color="secondary"onClick={() => setVisibleM(false)} >
+                                                    Cerrar
+                                                </CButton>
+                                                </CModalFooter>
+                                            </CModal>
+                                        </CTableDataCell>
                                         <CTableDataCell>{itemd.Material}</CTableDataCell>
                                         <CTableDataCell>{itemd.Unidad}</CTableDataCell>
-                                        <CTableDataCell>{itemd.FechaInv}</CTableDataCell>
-                                        <CTableDataCell>{itemd.InvFisicoS}</CTableDataCell>
-                                        <CTableDataCell>{itemd.InicioERPSP}</CTableDataCell>
-                                        <CTableDataCell>{itemd.InicioCBSP}</CTableDataCell>
-                                        <CTableDataCell>{itemd.EntradasERP}</CTableDataCell>
-                                        <CTableDataCell>{itemd.EntradasCB}</CTableDataCell>
-                                        <CTableDataCell>{itemd.SalidasERP}</CTableDataCell>
-                                        <CTableDataCell>{itemd.SalidasCB}</CTableDataCell>
-                                        <CTableDataCell>{itemd.InicioERP + 5}</CTableDataCell>
-                                        <CTableDataCell>{itemd.InicioCB + 10}</CTableDataCell>
+                                        <CTableDataCell>{format(itemd.FechaSem, 'yyyy/MM/dd')}</CTableDataCell>
+                                        <CTableDataCell>{Fnum(itemd.InvFisicoS)}</CTableDataCell>
+                                        <CTableDataCell className="colERP">{Fnum(itemd.InicioERPSP)}</CTableDataCell>
+                                        <CTableDataCell className="colCB">{Fnum(itemd.InicioCBSP)}</CTableDataCell>
+                                        <CTableDataCell className="colERP">
+                                            <CRow>
+                                                <CCol xs={6}>
+                                                    {Fnum(itemd.EntradasERP)}
+                                                </CCol>
+                                                <CCol xs={3}>
+                                                    {itemd.EntradasERP !== itemd.EntradasCB && (
+                                                        <CBadge color="warning"><CIcon icon={cilWarning} className="me-2" /></CBadge>
+                                                    )}
+                                                </CCol>
+                                            </CRow>                                            
+                                        </CTableDataCell>
+                                        <CTableDataCell className="colCB">
+                                            <CRow>
+                                                <CCol xs={6}>{Fnum(itemd.EntradasCB)}</CCol>
+                                                <CCol xs={3}>
+                                                    {itemd.EntradasERP !== itemd.EntradasCB && (
+                                                        <CBadge color="warning"><CIcon icon={cilWarning} className="me-2" /></CBadge>
+                                                    )}
+                                                </CCol>
+                                            </CRow>
+                                        </CTableDataCell>
+                                        <CTableDataCell className="colERP">
+                                            <CRow>
+                                                <CCol xs={6}>
+                                                    {Fnum(itemd.SalidasERP)}
+                                                </CCol>
+                                                <CCol xs={3}>
+                                                    {itemd.SalidasERP !== itemd.SalidasCB && (
+                                                        <CBadge color="warning"><CIcon icon={cilWarning} className="me-2" /></CBadge>
+                                                    )}
+                                                </CCol>
+                                            </CRow>
+                                        </CTableDataCell>
+                                        <CTableDataCell className="colCB">
+                                            <CRow>
+                                                <CCol xs={6}>
+                                                    {Fnum(itemd.SalidasCB)}
+                                                </CCol>
+                                                <CCol xs={3}>
+                                                    {itemd.SalidasERP !== itemd.SalidasCB && (
+                                                        <CBadge color="warning"><CIcon icon={cilWarning} className="me-2" /></CBadge>
+                                                    )}
+                                                </CCol>
+                                            </CRow>
+                                        </CTableDataCell>
+                                        <CTableDataCell className="colERP">
+                                            <CRow>
+                                                <CCol xs={6}>
+                                                    {Fnum(itemd.InicioERP)}
+                                                </CCol>
+                                                <CCol xs={3}>
+                                                    {itemd.InicioCB !== itemd.InicioERP && (
+                                                        <CBadge color="warning"><CIcon icon={cilWarning} className="me-2" /></CBadge>
+                                                    )}
+                                                </CCol>
+                                            </CRow>
+                                        </CTableDataCell>
+                                        <CTableDataCell className="colCB">
+                                            <CRow>
+                                                <CCol xs={6}>
+                                                    {Fnum(itemd.InicioCB)}
+                                                </CCol>
+                                                <CCol xs={3}>
+                                                    {itemd.InicioCB !== itemd.InicioERP && (
+                                                        <CBadge color="warning">
+                                                            <CIcon icon={cilWarning} className="me-2" />
+                                                        </CBadge>
+                                                    )}
+                                                </CCol>
+                                            </CRow>
+                                        </CTableDataCell>
                                     </CTableRow>
                                 ))
                             )

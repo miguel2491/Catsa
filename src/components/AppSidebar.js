@@ -1,6 +1,6 @@
-import React from 'react'
+import React, {useContext, useState, useEffect} from 'react'
 import { useSelector, useDispatch } from 'react-redux'
-
+import { useNavigate } from 'react-router-dom';
 import {
   CAvatar,
   CCloseButton,
@@ -10,22 +10,25 @@ import {
   CSidebarHeader,
   CSidebarToggler,
 } from '@coreui/react'
-import CIcon from '@coreui/icons-react'
-
 import { AppSidebarNav } from './AppSidebarNav'
-
-import { logo } from 'src/assets/brand/logo'
-import { sygnet } from 'src/assets/brand/sygnet'
-
+import './SideBar.css'
 // sidebar nav config
-import navigation from '../_nav'
 import avatar8 from './../../src/assets/images/avatars/logo.png'
+import Cookies from 'universal-cookie';
+import { NavContext } from './NavContext';
 
 const AppSidebar = () => {
   const dispatch = useDispatch()
+  const navigate = useNavigate();
   const unfoldable = useSelector((state) => state.sidebarUnfoldable)
-  const sidebarShow = useSelector((state) => state.sidebarShow)
+  const sidebarShow = useSelector((state) => state.sidebarShow)  
+  const cookies = new Cookies();
+  const {navigation} = useContext(NavContext);
   
+  const navDash = () => {
+    navigate('/dashboard');
+  }
+
   return (
     <CSidebar
       className="border-end"
@@ -39,7 +42,7 @@ const AppSidebar = () => {
     >
       <CSidebarHeader className="border-bottom">
         <CSidebarBrand to="/">
-          <CAvatar src={avatar8} size="md" />
+          <CAvatar src={avatar8} size="md" className='imgLogo' onClick={navDash} />
           {/* <CIcon customClassName="sidebar-brand-full" icon={logo} height={32} />
           <CIcon customClassName="sidebar-brand-narrow" icon={sygnet} height={32} /> */}
         </CSidebarBrand>
