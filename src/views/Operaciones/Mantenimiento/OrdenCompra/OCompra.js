@@ -194,6 +194,7 @@ const OCompra = () => {
     const [vehiculo, setVehiculo_] = useState("");
     const [descMan, setDMan] = useState("");
     const [idOC, setIdOC] = useState("0");
+    const [file, setFile] = useState(null);
     //************************************************************************************************************************************************************************** */
     const opcionesFca = {
         year: 'numeric', // '2-digit' para el año en dos dígitos
@@ -218,6 +219,10 @@ const OCompra = () => {
         updatedRemisiones[rowIndex].NoRemision = newVal; // Actualiza el valor de la columna 
         //setDTRemisiones(updatedRemisiones);
     };
+    // Función para manejar el cambio del archivo
+    const handleFileChange = (event) => {
+        setFile(event.target.files[0]); // Solo se guardará el primer archivo seleccionado
+    };
     //************************************************************************************************************************************************************************** */
     const getOComprasBtn = () =>{
         Swal.fire({
@@ -238,9 +243,7 @@ const OCompra = () => {
         const auxFcaI = format(vFechaI, 'yyyy/MM/dd');
         const auxFcaF = format(vFechaF, 'yyyy/MM/dd');
         try{
-            console.log(planta)
             const ocList = await getOCompras(planta, auxFcaI, auxFcaF);
-            console.log(ocList)
             if(ocList)
             {
                 setDTOrdenes(ocList);
@@ -750,17 +753,19 @@ const OCompra = () => {
             }
         });
         var tipo = idOC == '0' ? '0':idOC == ''? '0':'1';
-        const data = {
-            "id":idOC,
-            "planta": plantasSelF,
-            "fecha": fechaOC,
-            "nFactura": nFactura == undefined ? '': nFactura,
-            "descripcion": descripcion == undefined ? '' : descripcion,
-            "tipoMant": tipoMantenimiento == undefined ? '' : tipoMantenimiento,
-            "idVehiculo": vehiculo == undefined ? 0 : vehiculo,
-            "descMant": descMan == undefined ? '' : descMan
-        }
-        saveOCompra(data,tipo);
+        // Crear un objeto FormData
+        const formData = {
+            id: idOC,
+            planta: plantasSelF,
+            fecha: fechaOC,
+            nFactura: nFactura,
+            descripcion: descripcion,
+            tipoMant: tipoMantenimiento,
+            idVehiculo: vehiculo,
+            descMant: descMan,
+            file: file,
+        };
+        saveOCompra(formData,tipo);
     }
     const saveOCompra = async (data, tipo) => {
         try{
@@ -933,6 +938,17 @@ const OCompra = () => {
                                 value={descripcion}
                                 onChange={onDescripcion}
                             ></CFormTextarea>
+                        </CCol>
+                    </CRow>
+                    <CRow className='mt-2 mb-2'>
+                        <CCol xs={6} md={3}>
+                            <CFormInput
+                                type="file"
+                                id="frmFile"
+                                label="Agregar Imagén"
+                                accept="image/*"
+                                onChange={handleFileChange}
+                            />
                         </CCol>
                     </CRow>
                 </CModalBody>
