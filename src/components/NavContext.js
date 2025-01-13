@@ -396,6 +396,11 @@ const NavProvider = ({ children }) => {
                   name: 'Costos Productos',
                   to: '/reportes/CostosProductos',
                 },
+                {
+                  component: CNavItem,
+                  name: 'Costos PV',
+                  to: '/Calidad/CostosPV',
+                },
               ],
             },
           ]

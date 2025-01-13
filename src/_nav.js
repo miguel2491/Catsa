@@ -187,6 +187,11 @@ const _nav = [
         name: 'Costos Productos',
         to: '/reportes/CostosProductos',
       },
+      {
+        component: CNavItem,
+        name: 'Costos PV',
+        to: '/Calidad/CostosPV',
+      },
     ],
   }]:[]),
 ]
