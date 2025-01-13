@@ -375,7 +375,7 @@ export async function setOCompra(data, tipo) {
         };
         
         //------------------------------------------------------------------------------------------------------------------------------------------------------
-        const response = await axios.post(baseUrl2+Truta, fData, confi_ax);
+        const response = await axios.post(baseUrl+Truta, fData, confi_ax);
         if (response.data && response.data.length > 0) {
             const obj = response.data;
             if(obj.length > 0)
@@ -457,6 +457,36 @@ export async function delOCompra(id) {
                 return obj;
             }else{return false}
         }else{return false}
+    } 
+    catch(error)
+    {
+        return false
+    }
+}
+export async function addNFac(id, nFac) {
+    try
+    {
+        let confi_ax = {
+            headers:
+            {
+                'Cache-Control': 'no-cache',
+                'Content-Type': 'application/json',
+                "Authorization": "Bearer "+cookies.get('token'),
+            },
+        };
+        const data = {
+            'id':id,
+            'nFactura':nFac
+        }
+        //------------------------------------------------------------------------------------------------------------------------------------------------------
+        const response = await axios.post(baseUrl+"Operaciones/setNFac", data, confi_ax);
+        const {message} = response.data;
+        var band = false;
+        // Validar el mensaje de la respuesta y mostrar el mensaje correspondiente
+        if (message === "Actualización exitosa.") {
+            band = true;
+        }
+        return band
     } 
     catch(error)
     {
