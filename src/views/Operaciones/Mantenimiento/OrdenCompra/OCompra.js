@@ -7,11 +7,12 @@ import FechaF from '../../../base/parametros/FechaFinal';
 import Plantas from '../../../base/parametros/Plantas';
 import '../../../../estilos.css';
 import BuscadorDT from '../../../base/parametros/BuscadorDT'
-import { convertArrayOfObjectsToCSV, getOCompras, setOCompra, delOCompra, getOComprasInd, setStatusOC, getVehiculos } from '../../../../Utilidades/Funciones';
+import { convertArrayOfObjectsToCSV, getOCompras, setOCompra, delOCompra, getOComprasInd, setStatusOC, getVehiculos, addNFac } from '../../../../Utilidades/Funciones';
 import {
     CContainer,
     CFormInput,
     CFormSelect,
+    CImage,
     CBadge,
     CFormTextarea,
     CButton,
@@ -48,9 +49,11 @@ const OCompra = () => {
     const userIsJP = Rol('JefePlanta');
     //Buscador
     const [fText, setFText] = useState(''); // Estado para el filtro de búsqueda
+    const [vBPlanta, setBPlanta] = useState('');
     //Arrays
     const [dtOrdenes, setDTOrdenes] = useState([]);
     const [cmbVehiculo, setVehiculo] = useState([]);
+    const [exOC, setExOc] = useState([]);
     // FROMS
     const [nOrden, setNorden] = useState("");
     const [fechaOC, setFechaOC] = useState(new Date());
@@ -194,6 +197,11 @@ const OCompra = () => {
     const [vehiculo, setVehiculo_] = useState("");
     const [descMan, setDMan] = useState("");
     const [idOC, setIdOC] = useState("0");
+    const [file, setFile] = useState(null);
+    //************************************************************************************************************************************************************************** */    
+    const [vFile, setVFile] = useState(false);
+    const [vImg, setVImg] = useState(false);
+    const [urlImg, setUrlImg] = useState('');
     //************************************************************************************************************************************************************************** */
     const opcionesFca = {
         year: 'numeric', // '2-digit' para el año en dos dígitos
@@ -218,6 +226,10 @@ const OCompra = () => {
         updatedRemisiones[rowIndex].NoRemision = newVal; // Actualiza el valor de la columna 
         //setDTRemisiones(updatedRemisiones);
     };
+    // Función para manejar el cambio del archivo
+    const handleFileChange = (event) => {
+        setFile(event.target.files[0]); // Solo se guardará el primer archivo seleccionado
+    };
     //************************************************************************************************************************************************************************** */
     const getOComprasBtn = () =>{
         Swal.fire({
@@ -238,12 +250,11 @@ const OCompra = () => {
         const auxFcaI = format(vFechaI, 'yyyy/MM/dd');
         const auxFcaF = format(vFechaF, 'yyyy/MM/dd');
         try{
-            console.log(planta)
             const ocList = await getOCompras(planta, auxFcaI, auxFcaF);
-            console.log(ocList)
             if(ocList)
             {
                 setDTOrdenes(ocList);
+                setExOc(ocList);
             }
             // Cerrar el loading al recibir la respuesta
             Swal.close();  // Cerramos el loading
@@ -279,6 +290,11 @@ const OCompra = () => {
             setDMan(ocList[0].descMant)
             setPlantasF(ocList[0].planta)
             setBtnTxt('Actualizar')
+            if(ocList[0].urlImg.length > 0){
+                setVFile(false)
+                setVImg(true)
+                setUrlImg("http://apicatsa.catsaconcretos.mx:2543/Uploads/OC/"+ocList[0].urlImg)
+            }
         }catch(error){
             Swal.close();
             Swal.fire("Error", "No se pudo obtener la información", "error");
@@ -337,7 +353,6 @@ const OCompra = () => {
     const getVehiculo = async(planta, vehiculo)=>{
         try{
             const ocVehiculo = await getVehiculos(planta,vehiculo);
-            console.log(ocVehiculo)
             if(ocVehiculo){
                 setVehiculo(ocVehiculo);
             }
@@ -370,13 +385,70 @@ const OCompra = () => {
     const generatePDF = async(id) => {
         try{
             const ocList = await getOComprasInd(id);
+            // Si ocList[0].idVehiculo puede ser null o undefined
+            let idVehiculoString = String(ocList[0]?.idVehiculo ?? "Valor no disponible");
             const doc = new jsPDF();
             const imgURL = "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTP3qFI_sXT_DHWAcUiaoXT_aJoW4V2E3qN3qHUZMG_q7vvjXNhf_KL8Zy_9iTTLkc72CY&usqp=CAU";
-            doc.addImage(imgURL, 'JPEG', 0, 0, doc.internal.pageSize.width, doc.internal.pageSize.height);
-            // Agregar contenido al PDF
-            doc.text(ocList[0].ordenCompra, 20, 30);
-            doc.text("Este PDF se genera cuando haces clic en el botón.", 20, 40);
+            //doc.addImage(imgURL, 'JPEG', 5, 5, doc.internal.pageSize.width, doc.internal.pageSize.height);
+            doc.addImage(imgURL, 'JPEG', 5, 5, 40, 30);
+            doc.addImage(imgURL, 'JPEG', 160, 5, 40, 30);
+            // Colocar el texto del encabezado
+            doc.setFont("helvetica", "bold");
+            doc.setFontSize(24);
+            doc.text("Orden de Compra", 70, 30);  // Posición X, Y
 
+            // Dibujar una línea debajo del encabezado
+            doc.setLineWidth(0.5);  // Establece el grosor de la línea
+            doc.line(10, 40, 200, 40);  // Dibuja una línea desde (10, 12) hasta (200, 12)
+            doc.setFontSize(16);
+            // Agregar contenido al PDF
+            doc.setFont("helvetica", "regular");
+            doc.text("No Orden Compra", 10, 50);
+            doc.setFont("helvetica", "bold");
+            doc.text(ocList[0].ordenCompra, 60, 50);
+            doc.setFont("helvetica", "regular");
+            doc.text("Fecha", 100, 50);
+            doc.setFont("helvetica", "bold");
+            doc.text(ocList[0].fecha, 120, 50);
+            doc.setFont("helvetica", "regular");
+            doc.text("Planta", 10, 70);
+            doc.setFont("helvetica", "bold");  
+            doc.text(ocList[0].planta, 30, 70);
+            doc.setFont("helvetica", "regular");
+            doc.text("No Factura", 60, 70);
+            doc.setFont("helvetica", "bold");
+            doc.text(ocList[0].nFactura, 90, 70);
+            doc.setFont("helvetica", "regular");
+            doc.text("Usuario", 120, 70);
+            doc.setFont("helvetica", "bold");
+            doc.text(ocList[0].UserName, 150, 70);
+            doc.setFont("helvetica", "regular");
+            doc.text("Tipo Mantenimiento", 10, 100);
+            doc.setFont("helvetica", "bold");
+            doc.text(ocList[0].tipoMant, 60, 100);
+            doc.setFont("helvetica", "regular");
+            doc.text("Grupo", 80, 100);
+            doc.setFont("helvetica", "bold");
+            doc.text(ocList[0].Grupo, 100, 1000);
+            doc.setFont("helvetica", "regular");
+            doc.text("NoEconomico", 120, 100);
+            doc.setFont("helvetica", "bold");
+            doc.text(ocList[0].NoEconomico, 160, 100);
+            doc.setFont("helvetica", "regular");
+            doc.text("Placas", 10, 120);
+            doc.setFont("helvetica", "bold");
+            doc.text(ocList[0].Placas, 40, 120);
+            doc.setFont("helvetica", "regular");
+            doc.text("Descripción Mantenimiento", 10, 140);
+            doc.setFont("helvetica", "bold");
+            doc.text(ocList[0].descMant, 10, 150);
+            doc.setFont("helvetica", "regular");
+            doc.text("Descripción", 10, 200);
+            doc.setFont("helvetica", "bold");
+            doc.text(ocList[0].descripcion, 10, 210);
+            //PIE DE PAGINA
+            const marginBottom = 40;  // Márgenes desde la parte inferior de la página
+            doc.addImage(imgURL, 'JPEG', 160, doc.internal.pageSize.height - marginBottom, 40, 30);
             // Guardar el archivo PDF con el nombre "mi_archivo.pdf"
             doc.save("OC_"+ocList[0].ordenCompra+".pdf");
             
@@ -399,32 +471,51 @@ const OCompra = () => {
             showLoaderOnConfirm: true,
             preConfirm: async (login) => {
               try {
-                const githubUrl = `
-                  https://api.github.com/users/${login}
-                `;
-                const response = await fetch(githubUrl);
-                if (!response.ok) {
-                  return Swal.showValidationMessage(`
-                    ${JSON.stringify(await response.json())}
-                  `);
+                const response = await addNFac(id, login);
+          
+                // Comprobamos si la respuesta es true o false
+                if (response) { 
+                  // Si la respuesta es true, mostramos un mensaje de éxito
+                  Swal.fire({
+                    title: "Factura Ingresada",
+                    text: "La factura fue ingresada correctamente.",
+                    icon: 'success'
+                  });
+                  gOC();
+                } else {
+                  // Si la respuesta es false, mostramos un mensaje de error
+                  Swal.fire({
+                    title: "Error",
+                    text: "No se pudo ingresar la factura.",
+                    icon: 'error'
+                  });
                 }
-                return response.json();
+                
+                return response;  // Devolvemos la respuesta para continuar con el flujo de la promesa
+          
               } catch (error) {
-                Swal.showValidationMessage(`
-                  Request failed: ${error}
-                `);
+                // En caso de error, mostramos un mensaje de fallo
+                Swal.fire({
+                  title: "Error",
+                  text: `Request failed: ${error}`,
+                  icon: 'error'
+                });
+                throw error;  // Rechazamos la promesa si hay error
               }
             },
-            allowOutsideClick: () => !Swal.isLoading()
+            allowOutsideClick: () => !Swal.isLoading(),  // Impide hacer clic fuera si está cargando
           }).then((result) => {
             if (result.isConfirmed) {
+              // Acción cuando el usuario confirma
               Swal.fire({
-                title: `${result.value.login}'s avatar`,
-                imageUrl: result.value.avatar_url
+                title: "Factura Ingresada",
+                text: "La factura fue procesada correctamente.",
+                icon: 'success'
               });
             }
           });
-    }
+                    
+    };
     //************************************************************************************************************************************************************************** */
     //---Movimientos
     const colOC = [
@@ -448,7 +539,7 @@ const OCompra = () => {
                         </CButton>
                         </CCol>
                     )}
-                    {userIsOperacion && row.estatus === '1' && (
+                    {userIsOperacion && (row.estatus === '2' || row.estatus === '3') && (
                         <CCol xs={6} md={2}>
                         <CButton
                             color="info"
@@ -461,7 +552,7 @@ const OCompra = () => {
                         </CButton>
                         </CCol>
                     )}
-                    {userIsOperacion && row.estatus === '1' && (
+                    {userIsOperacion && row.estatus === '2' && (
                         <CCol xs={6} md={2}>
                         <CButton
                             color="dark"
@@ -488,7 +579,7 @@ const OCompra = () => {
                         </CButton>
                         </CCol>
                     )}
-                    {...(userIsOperacion || !userIsJP
+                    {...((userIsOperacion || !userIsJP) && row.estatus !== '3'
                         ? [
                         <CCol xs={6} md={2}>
                             <CButton
@@ -516,6 +607,8 @@ const OCompra = () => {
                     return <CBadge textBgColor='danger'>Eliminado</CBadge>;
                 }else if(aux === '2'){
                     return <CBadge color='success' shape='rounded-pill'>Aprobada</CBadge>;
+                }else if(aux === '3'){
+                    return <CBadge color='warning' shape='rounded-pill'>Finalizada</CBadge>;
                 }else{
                     return <CBadge textBgColor='primary'>En Proceso</CBadge>;
                 }
@@ -559,7 +652,7 @@ const OCompra = () => {
         },
         {
             name: 'Usuario',
-            selector: row => row.userId,
+            selector: row => row.UserName,
             sortable:true,
             width:"150px",
         },
@@ -600,13 +693,14 @@ const OCompra = () => {
             name: 'Unidad',
             selector: row => {
                 const aux = row.idVehiculo;
+                const neco = "("+row.Grupo+")"+row.NoEconomico;
                 if (aux === null || aux === undefined) {
                     return "No disponible";
                 }
                 if (typeof aux === 'object') {
                 return "Sin Datos"; // O cualquier mensaje que prefieras
                 }
-                return aux;
+                return neco;
             },
             width:"150px",
             sortable:true,
@@ -645,19 +739,18 @@ const OCompra = () => {
             grow:1,
         },
     ];
-
     //------------
     useEffect(() => {
         //getProductosInt_(null);
-        
     }, []);
-
     const downloadCSV = (e) => {
+        const auxFcaI = format(vFechaI, 'yyyy/MM/dd');
+        const auxFcaF = format(vFechaF, 'yyyy/MM/dd');
         const link = document.createElement('a');
-        let csv = convertArrayOfObjectsToCSV(exRemisiones);
+        let csv = convertArrayOfObjectsToCSV(exOC);
         if (csv == null) return;
     
-        const filename = 'Remisiones_Faltantes'+plantasSel+'_'+vFechaI+'_'+vFechaF+'.csv';
+        const filename = 'OC_'+auxFcaI+'-'+auxFcaF+'.csv';
     
         if (!csv.match(/^data:text\/csv/i)) {
             csv = `data:text/csv;charset=utf-8,${csv}`;
@@ -670,22 +763,23 @@ const OCompra = () => {
     //************************************************************************************************************************************************************************** */
     // Función de búsqueda
     const onFindBusqueda = (e) => {
-        //setBPlanta(e.target.value);
+        setBPlanta(e.target.value);
         setFText(e.target.value);
     };
     const fBusqueda = () => {
         if(vBPlanta.length != 0){
-            const valFiltrados = dtPlanta.filter(dtPlanta => 
-            dtPlanta.Planta.includes(vBPlanta) // Filtra los clientes por el número de cliente
+            const valFiltrados = dtOrdenes.filter(dtOrdenes => 
+            dtOrdenes.Planta.includes(vBPlanta) // Filtra los clientes por el número de cliente
             );
-            setDTPlanta(valFiltrados);
+            setDTOrdenes(valFiltrados);
+            setExOc(valFiltrados);
         }else{
-            getPlantas_()
+            gOC()
         }
     };
     const fDOrdenes = dtOrdenes.filter(item => {
         // Filtrar por planta, interfaz y texto de búsqueda
-        return item.userId.toLowerCase().includes(fText.toLowerCase()) || item.nOrden.includes(fText) || item.tipoMant.includes(fText) || item.descMan.includes(fText);
+        return item.UserName.toLowerCase().includes(fText.toLowerCase()) || item.ordenCompra.includes(fText) || item.planta.includes(fText) || item.tipoMant.includes(fText);
     });
     //************************************************************************************************************************************************************************** */
     const nOrdenCh = (e) =>{
@@ -707,6 +801,8 @@ const OCompra = () => {
         setDescripcion("");
         setDMan("");
         setBtnTxt("Guardar")
+        setVFile(true)
+        setVImg(false)
     }
     const categoriasFiltradas = aDescripcion.filter(item => {
         switch(tipoMantenimiento){
@@ -750,17 +846,19 @@ const OCompra = () => {
             }
         });
         var tipo = idOC == '0' ? '0':idOC == ''? '0':'1';
-        const data = {
-            "id":idOC,
-            "planta": plantasSelF,
-            "fecha": fechaOC,
-            "nFactura": nFactura == undefined ? '': nFactura,
-            "descripcion": descripcion == undefined ? '' : descripcion,
-            "tipoMant": tipoMantenimiento == undefined ? '' : tipoMantenimiento,
-            "idVehiculo": vehiculo == undefined ? 0 : vehiculo,
-            "descMant": descMan == undefined ? '' : descMan
-        }
-        saveOCompra(data,tipo);
+        // Crear un objeto FormData
+        const formData = {
+            id: idOC,
+            planta: plantasSelF,
+            fecha: fechaOC,
+            nFactura: nFactura,
+            descripcion: descripcion,
+            tipoMant: tipoMantenimiento,
+            idVehiculo: vehiculo,
+            descMant: descMan,
+            file: file,
+        };
+        saveOCompra(formData,tipo);
     }
     const saveOCompra = async (data, tipo) => {
         try{
@@ -824,7 +922,7 @@ const OCompra = () => {
                 <CCol xs={12} md={12}>
                     <CCol xs={3} md={3}>
                         <br />
-                        
+                        <BuscadorDT value={vBPlanta} onChange={onFindBusqueda} onSearch={fBusqueda} />
                     </CCol>
                 </CCol>
                 <CCol>
@@ -934,6 +1032,24 @@ const OCompra = () => {
                                 onChange={onDescripcion}
                             ></CFormTextarea>
                         </CCol>
+                    </CRow>
+                    <CRow className='mt-2 mb-2'>
+                        {vFile && (
+                        <CCol xs={6} md={3}>
+                            <CFormInput
+                                type="file"
+                                id="frmFile"
+                                label="Agregar Imagén"
+                                accept="image/*"
+                                onChange={handleFileChange}
+                            />
+                        </CCol>
+                        )}
+                        {vImg&& (
+                            <CCol xs={6} md={3}>
+                                <CImage rounded thumbnail src={urlImg} width={200} height={200} />
+                            </CCol>
+                        )}
                     </CRow>
                 </CModalBody>
                 <CModalFooter>

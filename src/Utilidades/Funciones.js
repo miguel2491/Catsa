@@ -343,19 +343,39 @@ export async function setOCompra(data, tipo) {
         delete data.id;
     }
     console.log(data)
+    const fData = new FormData();
+    fData.append("oC", JSON.stringify({
+        id: data.id,
+        userId: cookies.get('idUsuario'),
+        planta: data.planta,
+        fecha: data.fecha,
+        nFactura: data.nFactura,
+        descripcion: data.descripcion,
+        tipoMant: data.tipoMant,
+        idVehiculo: data.idVehiculo,
+        descMant: data.descMant
+    }));
+    if (data.file) {
+        // Ahora asegurémonos de agregarlo
+        fData.append("image", data.file);
+    } else {
+        console.log("No se encontró el archivo en data.file");
+    }
+    for (let pair of fData.entries()) {
+        console.log(pair[0] + ": " + pair[1]);
+    }
     try
     {
         let confi_ax = {
             headers:
             {
                 'Cache-Control': 'no-cache',
-                'Content-Type': 'application/json',
                 "Authorization": "Bearer "+cookies.get('token'),
             },
         };
         
         //------------------------------------------------------------------------------------------------------------------------------------------------------
-        const response = await axios.post(baseUrl+Truta, data, confi_ax);
+        const response = await axios.post(baseUrl+Truta, fData, confi_ax);
         if (response.data && response.data.length > 0) {
             const obj = response.data;
             if(obj.length > 0)
@@ -437,6 +457,36 @@ export async function delOCompra(id) {
                 return obj;
             }else{return false}
         }else{return false}
+    } 
+    catch(error)
+    {
+        return false
+    }
+}
+export async function addNFac(id, nFac) {
+    try
+    {
+        let confi_ax = {
+            headers:
+            {
+                'Cache-Control': 'no-cache',
+                'Content-Type': 'application/json',
+                "Authorization": "Bearer "+cookies.get('token'),
+            },
+        };
+        const data = {
+            'id':id,
+            'nFactura':nFac
+        }
+        //------------------------------------------------------------------------------------------------------------------------------------------------------
+        const response = await axios.post(baseUrl+"Operaciones/setNFac", data, confi_ax);
+        const {message} = response.data;
+        var band = false;
+        // Validar el mensaje de la respuesta y mostrar el mensaje correspondiente
+        if (message === "Actualización exitosa.") {
+            band = true;
+        }
+        return band
     } 
     catch(error)
     {

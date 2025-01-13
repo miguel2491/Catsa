@@ -90,7 +90,7 @@ const RemiFal = () => {
                             <CIcon icon={cilSave} />
                         </CButton>
                     </CCol>
-                    {...(userIsOperacion || !userIsJP
+                    {...(userIsOperacion 
                         ? [
                         <CCol>
                             <CButton
