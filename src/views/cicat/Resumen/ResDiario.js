@@ -56,15 +56,6 @@ const ResDiario = forwardRef((props, ref) => {
         ejecutarAccion,
     }));
     async function getRes(planta,FI,FF) {
-        setVisible(!visible)
-        setLoading(true);
-        setPercentage(0);
-        const interval = setInterval(() => {
-            setPercentage(prev => {
-            if (prev < 90) return prev + 10;
-            return prev;
-            });
-        }, 1000); // Incrementa cada 500 ms
         try
         {
             let confi_ax = {
@@ -75,26 +66,24 @@ const ResDiario = forwardRef((props, ref) => {
                     "Authorization": "Bearer "+cookies.get('token'),
                 },
             };
-            const fcaI = FormatoFca(FI);
-            const fcaF = FormatoFca(FF);
+            const fcaI = format(FI, 'yyyy-MM-dd');
+            const fcaF = format(FF, 'yyyy-MM-dd');
+            console.log(planta, fcaI, fcaF)
             //------------------------------------------------------------------------------------------------------------------------------------------------------
             const response = await axios.get(baseUrl+'Operaciones/GetResumen/'+planta+','+fcaI+','+fcaF+',R', confi_ax);
             var obj = response.data[0].Rows;
-            //console.log(obj);
+            console.log(obj);
             if(obj.length > 0)
             {
                 setResumen(obj);
+                Swal.close();
             }
             
         } 
         catch(error)
         {
+            Swal.close();
             Swal.fire("Error", "Ocurrio un error Resumen, vuelva a intentarlo", "error");
-        }finally{
-            clearInterval(interval); // Limpiar el intervalo
-            setLoading(false);
-            setPercentage(100); 
-            setVisible(false);
         }
     }
     const getMovInt = (item) =>{
@@ -114,9 +103,11 @@ const ResDiario = forwardRef((props, ref) => {
     {
         var resulInt = false;
         var resulCB = false;
-        resulInt = await getResInv(material, props.fechaI, props.fechaF, props.planta);
+        const fcaI = format(props.fechaI, 'yyyy-MM-dd');
+        const fcaF = format(props.fechaF, 'yyyy-MM-dd');
+        resulInt = await getResInv(material, fcaI, fcaF, props.planta);
         if(resulInt)
-            resulCB = await getResInvCB(material, props.fechaI, props.fechaF, props.planta)
+            resulCB = await getResInvCB(material, fcaI, fcaF, props.planta)
         if(resulInt && resulCB)
         {
             setVisible(visible);

@@ -81,6 +81,32 @@ export async function getElementos() {
         return false
     }
 }
+export async function getPlantas() {
+    try
+    {
+        let confi_ax = {
+            headers:
+            {
+                'Cache-Control': 'no-cache',
+                'Content-Type': 'application/json',
+                "Authorization": "Bearer "+cookies.get('token'),
+            },
+        };
+        //------------------------------------------------------------------------------------------------------------------------------------------------------
+        const response = await axios.get(baseUrl+'Administracion/GetPlantas/'+cookies.get('Usuario'),confi_ax);
+        if (response.data && response.data.length > 0) {
+            const obj = response.data;
+            if(obj.length > 0)
+            {
+                return obj;
+            }else{return false}
+        }else{return false}
+    } 
+    catch(error)
+    {
+        return false
+    }
+}
 //****************************************************************************************************************************************************************************** */
 //LOGISTICA
     // Pedidos
@@ -112,8 +138,9 @@ export async function getElementos() {
     }
 //****************************************************************************************************************************************************************************** */
 // OPERACIONES
-    // CICAT
-export async function getResInv(material, FI, FF, planta) {
+    // CICAT 
+export async function getMovs(plantas, FI, FF)
+{
     try
     {
         let confi_ax = {
@@ -127,7 +154,35 @@ export async function getResInv(material, FI, FF, planta) {
         const fcaI = FormatoFca(FI);
         const fcaF = FormatoFca(FF);
         //------------------------------------------------------------------------------------------------------------------------------------------------------
-        const response = await axios.get(baseUrl+'Operaciones/GetInv/'+material+','+planta+','+fcaI+','+fcaF+',I', confi_ax);
+        const response = await axios.get(baseUrl+'Operaciones/GetResumen/'+plantas+','+fcaI+','+fcaF+',M', confi_ax);
+        if (response.data && response.data.length > 0 && response.data[0].Rows) {
+            const obj = response.data[0].Rows;
+            if(obj.length > 0)
+            {
+                return obj;
+            }else{return false}
+        }else{return false}
+    } 
+    catch(error)
+    {
+        return false
+    }
+}    
+export async function getResInv(material, FI, FF, planta) {
+    try
+    {
+        let confi_ax = {
+            headers:
+            {
+                'Cache-Control': 'no-cache',
+                'Content-Type': 'application/json',
+                "Authorization": "Bearer "+cookies.get('token'),
+            },
+        };
+        //const fcaI = FormatoFca(FI);
+        //const fcaF = FormatoFca(FF);
+        //------------------------------------------------------------------------------------------------------------------------------------------------------
+        const response = await axios.get(baseUrl+'Operaciones/GetInv/'+material+','+planta+','+FI+','+FF+',I', confi_ax);
         if (response.data && response.data.length > 0 && response.data[0].Rows) {
             const obj = response.data[0].Rows;
             if(obj.length > 0)
@@ -267,6 +322,33 @@ export async function setRemFaltante(Id,Nr, planta, tipo) {
         };
         //------------------------------------------------------------------------------------------------------------------------------------------------------
         const response = await axios.get(baseUrl+'Operaciones/SetRemFal/'+Id+','+Nr+','+planta+','+tipo+','+cookies.get('Usuario'), confi_ax);
+        if (response.data && response.data.length > 0) {
+            const obj = response.data;
+            if(obj.length > 0)
+            {
+                return obj;
+            }else{return false}
+        }else{return false}
+    } 
+    catch(error)
+    {
+        return false
+    }
+}
+    //PCancelados
+export async function getCmbsAreas(tipos,id){
+    try
+    {
+        let confi_ax = {
+            headers:
+            {
+                'Cache-Control': 'no-cache',
+                'Content-Type': 'application/json',
+                "Authorization": "Bearer "+cookies.get('token'),
+            },
+        };
+        //------------------------------------------------------------------------------------------------------------------------------------------------------
+        const response = await axios.get(baseUrl2+'Catalogo/GetCmb/'+tipos+","+id, confi_ax);
         if (response.data && response.data.length > 0) {
             const obj = response.data;
             if(obj.length > 0)
@@ -487,6 +569,37 @@ export async function addNFac(id, nFac) {
             band = true;
         }
         return band
+    } 
+    catch(error)
+    {
+        return false
+    }
+}
+//****************************************************************************************************************************************************************************** */
+// CALIDAD
+    //---ADMIN COSTOS PV
+export async function getCostosPV(planta, FI) {
+    try
+    {
+        let confi_ax = {
+            headers:
+            {
+                'Cache-Control': 'no-cache',
+                'Content-Type': 'application/json',
+                "Authorization": "Bearer "+cookies.get('token'),
+            },
+        };
+        //const fcaI = FormatoFca(FI);
+        //------------------------------------------------------------------------------------------------------------------------------------------------------
+        const response = await axios.get(baseUrl+'Calidad/getDesign/'+planta+','+FI, confi_ax);
+        console.log(response)
+        if (response.data && response.data.length > 0) {
+            const obj = response.data;
+            if(obj.length > 0)
+            {
+                return obj;
+            }else{return false}
+        }else{return false}
     } 
     catch(error)
     {
@@ -1184,10 +1297,10 @@ export async function getResInvCB(material, FI, FF, planta) {
                 "Authorization": "Bearer "+cookies.get('token'),
             },
         };
-        const fcaI = FormatoFca(FI);
-        const fcaF = FormatoFca(FF);
+        // const fcaI = FormatoFca(FI);
+        // const fcaF = FormatoFca(FF);
         //------------------------------------------------------------------------------------------------------------------------------------------------------
-        const response = await axios.get(baseUrl+'Operaciones/GetInv/'+material+','+planta+','+fcaI+','+fcaF+',C', confi_ax);
+        const response = await axios.get(baseUrl+'Operaciones/GetInv/'+material+','+planta+','+FI+','+FF+',C', confi_ax);
         var obj = response.data[0].Rows;
         if(obj.length > 0)
         {
@@ -1305,6 +1418,22 @@ export const formatCurrency = (value) => {
     style: 'currency',
     currency: 'MXN', // Cambia a la moneda que necesites
   }).format(value);
+};
+
+export const downloadCV = (e, dt, nameFile) => {
+    const link = document.createElement('a');
+    let csv = convertArrayOfObjectsToCSV(dt);
+    if (csv == null) return;
+
+    const filename = nameFile+'.csv';
+
+    if (!csv.match(/^data:text\/csv/i)) {
+        csv = `data:text/csv;charset=utf-8,${csv}`;
+    }
+
+    link.setAttribute('href', encodeURI(csv));
+    link.setAttribute('download', filename);
+    link.click();
 };
 
 export const convertArrayOfObjectsToCSV = (array) => {

@@ -45,6 +45,7 @@ const OCompra = () => {
     const [vFechaF, setFechaFin] = useState(new Date());
     const [vOC, setVOC] = useState(false);
     const [btnG, setBtnTxt] = useState('Guardar');
+    // ROLES
     const userIsOperacion = Rol('Operaciones');
     const userIsJP = Rol('JefePlanta');
     //Buscador
@@ -193,8 +194,8 @@ const OCompra = () => {
             },
 
         ]);
-    const [descripcion, setDescripcion] = useState("");
-    const [vehiculo, setVehiculo_] = useState("");
+    const [descripcion, setDescripcion] = useState("-");
+    const [vehiculo, setVehiculo_] = useState("-");
     const [descMan, setDMan] = useState("");
     const [idOC, setIdOC] = useState("0");
     const [file, setFile] = useState(null);
@@ -244,8 +245,15 @@ const OCompra = () => {
     const gOC = async () => {
         var planta = plantasSel;
         if(plantasSel == undefined || plantasSel.length == 0 || plantasSel === ""){
-            setPlantas('0')
-            planta = '0'
+            if(userIsJP && !userIsOperacion)
+            {
+                Swal.close();
+                Swal.fire("Error", "Debes seleccionar alguna planta", "error");
+                return false;
+            }else {
+                setPlantas('0')
+                planta = '0'
+            }
         }
         const auxFcaI = format(vFechaI, 'yyyy/MM/dd');
         const auxFcaF = format(vFechaF, 'yyyy/MM/dd');
@@ -387,6 +395,9 @@ const OCompra = () => {
             const ocList = await getOComprasInd(id);
             // Si ocList[0].idVehiculo puede ser null o undefined
             let idVehiculoString = String(ocList[0]?.idVehiculo ?? "Valor no disponible");
+            let nFactura = (ocList[0] && ocList[0].nFactura != null && typeof ocList[0].nFactura === 'string' && ocList[0].nFactura.trim() !== '') 
+                ? ocList[0].nFactura 
+                : '-';
             const doc = new jsPDF();
             const imgURL = "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTP3qFI_sXT_DHWAcUiaoXT_aJoW4V2E3qN3qHUZMG_q7vvjXNhf_KL8Zy_9iTTLkc72CY&usqp=CAU";
             //doc.addImage(imgURL, 'JPEG', 5, 5, doc.internal.pageSize.width, doc.internal.pageSize.height);
@@ -417,7 +428,7 @@ const OCompra = () => {
             doc.setFont("helvetica", "regular");
             doc.text("No Factura", 60, 70);
             doc.setFont("helvetica", "bold");
-            doc.text(ocList[0].nFactura, 90, 70);
+            doc.text(nFactura, 90, 70);
             doc.setFont("helvetica", "regular");
             doc.text("Usuario", 120, 70);
             doc.setFont("helvetica", "bold");
@@ -526,8 +537,8 @@ const OCompra = () => {
             cell: (row) => (
                 <div>
                     <CRow>
-                    {userIsOperacion && row.estatus === '1' && (
-                        <CCol xs={6} md={2}>
+                    {(userIsOperacion || userIsJP) && row.estatus === '1' && (
+                        <CCol xs={6} md={2} lg={2}>
                         <CButton
                             color="primary"
                             onClick={() => addOC(row.id)}
@@ -539,8 +550,8 @@ const OCompra = () => {
                         </CButton>
                         </CCol>
                     )}
-                    {userIsOperacion && (row.estatus === '2' || row.estatus === '3') && (
-                        <CCol xs={6} md={2}>
+                    {(userIsOperacion || userIsJP) && (row.estatus === '2' || row.estatus === '3') && (
+                        <CCol xs={6} md={2} lg={2}>
                         <CButton
                             color="info"
                             onClick={() => viewPDF(row.id)}
@@ -565,7 +576,7 @@ const OCompra = () => {
                         </CButton>
                         </CCol>
                     )}
-                    {row.estatus === '1' &&( 
+                    {userIsOperacion && row.estatus === '1' &&( 
                         <CCol xs={6} md={2}>
                         <CButton
                             color="warning"
@@ -799,7 +810,10 @@ const OCompra = () => {
         setNorden('');
         setFactura("");
         setDescripcion("");
-        setDMan("");
+        setDMan("-");
+        setVehiculo_("-");
+        setTipoMantenimiento("-");
+        setPlantasF("-");
         setBtnTxt("Guardar")
         setVFile(true)
         setVImg(false)
@@ -1047,7 +1061,7 @@ const OCompra = () => {
                         )}
                         {vImg&& (
                             <CCol xs={6} md={3}>
-                                <CImage rounded thumbnail src={urlImg} width={200} height={200} />
+                                <CImage rounded thumbnail src={urlImg} width={500} height={320} />
                             </CCol>
                         )}
                     </CRow>
