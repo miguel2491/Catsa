@@ -54,19 +54,24 @@ const Plantas = ({plantasSel, mCambio}) => {
             //=======================================================
             axios.get(baseUrl+'Administracion/GetPlantas/'+cookies.get('Usuario'),confi_ax)
             .then(response=>{
-              cookies.set('plantas', JSON.stringify(response.data), {path: '/'});
-              //setaplantas_(JSON.stringify(response.data));
-              var obj = response.data;
-              for(var x = 0; x < obj.length; x++)
-              {
-                  ap.push({
-                      "ID":x,
-                      "IdPlanta":obj[x].IdPlanta,
-                      "Planta":obj[x].Planta
-                  });
+              const objPlantas = response.data;
+              console.log(objPlantas.length)
+              if(objPlantas.length > 0){
+                cookies.set('plantas', JSON.stringify(response.data), {path: '/'});
+                //setaplantas_(JSON.stringify(response.data));
+                var obj = response.data;
+                for(var x = 0; x < obj.length; x++)
+                {
+                    ap.push({
+                        "ID":x,
+                        "IdPlanta":obj[x].IdPlanta,
+                        "Planta":obj[x].Planta
+                    });
+                }
+                setaplantas_(ap);
+                return response.data;
               }
-              setaplantas_(ap);
-              return response.data;
+
             }).then(response=>{
               //console.log("=>");
             })

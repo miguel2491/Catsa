@@ -12,6 +12,8 @@ const RCicat = React.lazy(() => import('./views/cicat/Resumen/Resumen'))
 const RemiFal = React.lazy(() => import('./views/cicat/Remisiones/RemiFal'))
 const OSimulador = React.lazy(() => import('./views/Operaciones/Simulador/Simulador'))
 const OCompraMan = React.lazy(() => import('./views/Operaciones/Mantenimiento/OrdenCompra/OCompra'))
+const PCancelados = React.lazy(() => import('./views/Operaciones/Pedidos/Cancelados'))
+const PCanceladosD = React.lazy(() => import('./views/Operaciones/Pedidos/DCancelados'))
 //=========================================> LOGISTICA <================================
 const LPedidos = React.lazy(() => import('./views/logistica/LPedidos'))
 const PLinea = React.lazy(() => import('./views/logistica/PLinea'))
@@ -37,13 +39,6 @@ const UpdateMB = React.lazy(() => import('./views/utils/UpdateMB'))
 const QR = React.lazy(() => import('./views/utils/QR'))
 const Permisos = React.lazy(() => import('./views/permisos/Permisos'))
 //==================================================================================================================================
-// Base
-const Cards = React.lazy(() => import('./views/base/cards/Cards'))
-//Forms
-const FormControl = React.lazy(() => import('./views/forms/form-control/FormControl'))
-const Charts = React.lazy(() => import('./views/charts/Charts'))
-// Icons
-const CoreUIIcons = React.lazy(() => import('./views/icons/coreui-icons/CoreUIIcons'))
 
 const routes = [
   //{ path: '/', exact: true, name: 'Home' },
@@ -60,6 +55,8 @@ const routes = [
   { path: '/Cicat/Resumen', name: 'Resumen', element:RCicat },
   { path: '/Cicat/Remisiones', name: 'Remisiones', element:RemiFal },
   { path: '/Operaciones/Simulador', name: 'Simulador', element:OSimulador },
+  { path: '/Operaciones/Pedidos/Cancelados', name: 'Pedidos', element:PCancelados },
+  { path: '/Operaciones/Pedidos/DCancelados', name: 'PedidosD', element:PCanceladosD },
   //------------------------------> MANTENIMIENTO <----------------------------------------
   { path: '/Operaciones/Mantenimiento/OrdenCompra', name: 'OCompra', element:OCompraMan },
   //------------------------------> LOGISTICA <--------------------------------------------

@@ -81,6 +81,32 @@ export async function getElementos() {
         return false
     }
 }
+export async function getPlantas() {
+    try
+    {
+        let confi_ax = {
+            headers:
+            {
+                'Cache-Control': 'no-cache',
+                'Content-Type': 'application/json',
+                "Authorization": "Bearer "+cookies.get('token'),
+            },
+        };
+        //------------------------------------------------------------------------------------------------------------------------------------------------------
+        const response = await axios.get(baseUrl+'Administracion/GetPlantas/'+cookies.get('Usuario'),confi_ax);
+        if (response.data && response.data.length > 0) {
+            const obj = response.data;
+            if(obj.length > 0)
+            {
+                return obj;
+            }else{return false}
+        }else{return false}
+    } 
+    catch(error)
+    {
+        return false
+    }
+}
 //****************************************************************************************************************************************************************************** */
 //LOGISTICA
     // Pedidos
@@ -112,8 +138,9 @@ export async function getElementos() {
     }
 //****************************************************************************************************************************************************************************** */
 // OPERACIONES
-    // CICAT
-export async function getResInv(material, FI, FF, planta) {
+    // CICAT 
+export async function getMovs(plantas, FI, FF)
+{
     try
     {
         let confi_ax = {
@@ -127,7 +154,35 @@ export async function getResInv(material, FI, FF, planta) {
         const fcaI = FormatoFca(FI);
         const fcaF = FormatoFca(FF);
         //------------------------------------------------------------------------------------------------------------------------------------------------------
-        const response = await axios.get(baseUrl+'Operaciones/GetInv/'+material+','+planta+','+fcaI+','+fcaF+',I', confi_ax);
+        const response = await axios.get(baseUrl+'Operaciones/GetResumen/'+plantas+','+fcaI+','+fcaF+',M', confi_ax);
+        if (response.data && response.data.length > 0 && response.data[0].Rows) {
+            const obj = response.data[0].Rows;
+            if(obj.length > 0)
+            {
+                return obj;
+            }else{return false}
+        }else{return false}
+    } 
+    catch(error)
+    {
+        return false
+    }
+}    
+export async function getResInv(material, FI, FF, planta) {
+    try
+    {
+        let confi_ax = {
+            headers:
+            {
+                'Cache-Control': 'no-cache',
+                'Content-Type': 'application/json',
+                "Authorization": "Bearer "+cookies.get('token'),
+            },
+        };
+        //const fcaI = FormatoFca(FI);
+        //const fcaF = FormatoFca(FF);
+        //------------------------------------------------------------------------------------------------------------------------------------------------------
+        const response = await axios.get(baseUrl+'Operaciones/GetInv/'+material+','+planta+','+FI+','+FF+',I', confi_ax);
         if (response.data && response.data.length > 0 && response.data[0].Rows) {
             const obj = response.data[0].Rows;
             if(obj.length > 0)
@@ -280,6 +335,33 @@ export async function setRemFaltante(Id,Nr, planta, tipo) {
         return false
     }
 }
+    //PCancelados
+export async function getCmbsAreas(tipos,id){
+    try
+    {
+        let confi_ax = {
+            headers:
+            {
+                'Cache-Control': 'no-cache',
+                'Content-Type': 'application/json',
+                "Authorization": "Bearer "+cookies.get('token'),
+            },
+        };
+        //------------------------------------------------------------------------------------------------------------------------------------------------------
+        const response = await axios.get(baseUrl2+'Catalogo/GetCmb/'+tipos+","+id, confi_ax);
+        if (response.data && response.data.length > 0) {
+            const obj = response.data;
+            if(obj.length > 0)
+            {
+                return obj;
+            }else{return false}
+        }else{return false}
+    } 
+    catch(error)
+    {
+        return false
+    }
+}
     // MANTENIMIENTO
 export async function getOCompras(planta, FI, FF) {
     try
@@ -343,19 +425,39 @@ export async function setOCompra(data, tipo) {
         delete data.id;
     }
     console.log(data)
+    const fData = new FormData();
+    fData.append("oC", JSON.stringify({
+        id: data.id,
+        userId: cookies.get('idUsuario'),
+        planta: data.planta,
+        fecha: data.fecha,
+        nFactura: data.nFactura,
+        descripcion: data.descripcion,
+        tipoMant: data.tipoMant,
+        idVehiculo: data.idVehiculo,
+        descMant: data.descMant
+    }));
+    if (data.file) {
+        // Ahora asegurémonos de agregarlo
+        fData.append("image", data.file);
+    } else {
+        console.log("No se encontró el archivo en data.file");
+    }
+    for (let pair of fData.entries()) {
+        console.log(pair[0] + ": " + pair[1]);
+    }
     try
     {
         let confi_ax = {
             headers:
             {
                 'Cache-Control': 'no-cache',
-                'Content-Type': 'application/json',
                 "Authorization": "Bearer "+cookies.get('token'),
             },
         };
         
         //------------------------------------------------------------------------------------------------------------------------------------------------------
-        const response = await axios.post(baseUrl+Truta, data, confi_ax);
+        const response = await axios.post(baseUrl+Truta, fData, confi_ax);
         if (response.data && response.data.length > 0) {
             const obj = response.data;
             if(obj.length > 0)
@@ -430,6 +532,67 @@ export async function delOCompra(id) {
         
         //------------------------------------------------------------------------------------------------------------------------------------------------------
         const response = await axios.get(baseUrl+"Operaciones/delOCompras/"+id, confi_ax);
+        if (response.data && response.data.length > 0) {
+            const obj = response.data;
+            if(obj.length > 0)
+            {
+                return obj;
+            }else{return false}
+        }else{return false}
+    } 
+    catch(error)
+    {
+        return false
+    }
+}
+export async function addNFac(id, nFac) {
+    try
+    {
+        let confi_ax = {
+            headers:
+            {
+                'Cache-Control': 'no-cache',
+                'Content-Type': 'application/json',
+                "Authorization": "Bearer "+cookies.get('token'),
+            },
+        };
+        const data = {
+            'id':id,
+            'nFactura':nFac
+        }
+        //------------------------------------------------------------------------------------------------------------------------------------------------------
+        const response = await axios.post(baseUrl+"Operaciones/setNFac", data, confi_ax);
+        const {message} = response.data;
+        var band = false;
+        // Validar el mensaje de la respuesta y mostrar el mensaje correspondiente
+        if (message === "Actualización exitosa.") {
+            band = true;
+        }
+        return band
+    } 
+    catch(error)
+    {
+        return false
+    }
+}
+//****************************************************************************************************************************************************************************** */
+// CALIDAD
+    //---ADMIN COSTOS PV
+export async function getCostosPV(planta, FI) {
+    try
+    {
+        let confi_ax = {
+            headers:
+            {
+                'Cache-Control': 'no-cache',
+                'Content-Type': 'application/json',
+                "Authorization": "Bearer "+cookies.get('token'),
+            },
+        };
+        //const fcaI = FormatoFca(FI);
+        //------------------------------------------------------------------------------------------------------------------------------------------------------
+        const response = await axios.get(baseUrl+'Calidad/getDesign/'+planta+','+FI, confi_ax);
+        console.log(response)
         if (response.data && response.data.length > 0) {
             const obj = response.data;
             if(obj.length > 0)
@@ -1134,10 +1297,10 @@ export async function getResInvCB(material, FI, FF, planta) {
                 "Authorization": "Bearer "+cookies.get('token'),
             },
         };
-        const fcaI = FormatoFca(FI);
-        const fcaF = FormatoFca(FF);
+        // const fcaI = FormatoFca(FI);
+        // const fcaF = FormatoFca(FF);
         //------------------------------------------------------------------------------------------------------------------------------------------------------
-        const response = await axios.get(baseUrl+'Operaciones/GetInv/'+material+','+planta+','+fcaI+','+fcaF+',C', confi_ax);
+        const response = await axios.get(baseUrl+'Operaciones/GetInv/'+material+','+planta+','+FI+','+FF+',C', confi_ax);
         var obj = response.data[0].Rows;
         if(obj.length > 0)
         {
@@ -1255,6 +1418,22 @@ export const formatCurrency = (value) => {
     style: 'currency',
     currency: 'MXN', // Cambia a la moneda que necesites
   }).format(value);
+};
+
+export const downloadCV = (e, dt, nameFile) => {
+    const link = document.createElement('a');
+    let csv = convertArrayOfObjectsToCSV(dt);
+    if (csv == null) return;
+
+    const filename = nameFile+'.csv';
+
+    if (!csv.match(/^data:text\/csv/i)) {
+        csv = `data:text/csv;charset=utf-8,${csv}`;
+    }
+
+    link.setAttribute('href', encodeURI(csv));
+    link.setAttribute('download', filename);
+    link.click();
 };
 
 export const convertArrayOfObjectsToCSV = (array) => {

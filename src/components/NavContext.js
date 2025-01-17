@@ -19,6 +19,8 @@ import {
   cilCog,
   cilBusAlt,
   cilGarage,
+  cilDollar,
+  cilBan,
 } from '@coreui/icons'
 import { CNavGroup, CNavItem, CNavTitle } from '@coreui/react'
 import CIcon from '@coreui/icons-react'
@@ -44,6 +46,7 @@ const NavProvider = ({ children }) => {
     const userIsGerenteP = Rol('GerentePlanta')
     const userIsFinanzas = Rol('Finanzas')
     const userIsDirector = Rol('Direccion')
+    const userIsJP = Rol('JefePlanta')
     nav = [
       ...(userIsVentas || userIsAdmin || userIsDirector || userIsFinanzas
         ? [
@@ -163,7 +166,7 @@ const NavProvider = ({ children }) => {
               : []),
           ]
         : []),
-      ...(userIsAdmin || userIsOperacion || userIsGerenteP
+      ...(userIsAdmin || userIsOperacion || userIsGerenteP || userIsJP
         ? [
             {
               component: CNavTitle,
@@ -206,7 +209,7 @@ const NavProvider = ({ children }) => {
               to: '/Mantenimiento',
               icon: <CIcon icon={cilCog} customClassName="nav-icon" />,
               items: [
-                ...(userIsOperacion || userIsAdmin || userIsGerenteP
+                ...(userIsOperacion || userIsAdmin || userIsGerenteP || userIsJP
                   ? [
                     {
                       component: CNavItem,
@@ -217,8 +220,55 @@ const NavProvider = ({ children }) => {
                   ]:[]),
               ],
             },
+            {
+              component: CNavGroup,
+              name: 'Pedidos',
+              to: '/Pedidos',
+              icon: <CIcon icon={cilUser} customClassName="nav-icon" />,
+              items: [
+                ...(userIsOperacion || userIsAdmin || userIsGerenteP
+                  ? [
+                    {
+                      component: CNavItem,
+                      name: 'Pedidos Cancelados',
+                      to: '/Operaciones/Pedidos/Cancelados',
+                      icon: <CIcon icon={cilBan} customClassName="nav-icon" />
+                    },
+                  ]:[]),
+              ],
+            },
           ]
         : []),
+        ...(userIsAdmin || userIsOperacion || userIsGerenteP
+          ? [
+              {
+                component: CNavTitle,
+                name: 'Calidad',
+              },
+              {
+                component: CNavGroup,
+                name: 'Sistema Gestión',
+                to: '/Gestion',
+                icon: <CIcon icon={cilUser} customClassName="nav-icon" />,
+                items: [
+                  {
+                    component: CNavItem,
+                    name: 'CICAT Resumen',
+                    to: '/Cicat/Resumen',
+                  },
+                ],
+              },
+              ...(userIsAdmin
+              ? [
+                  {
+                    component: CNavItem,
+                    name: 'Costos PV',
+                    to: '/Calidad/CostosPV',
+                    icon: <CIcon icon={cilDollar} customClassName="nav-icon" />,
+                  },
+              ]:[]),
+            ]
+          : []),
       ...(userIsAdmin || userIsOperacion 
         ? [
             {
@@ -395,11 +445,6 @@ const NavProvider = ({ children }) => {
                   component: CNavItem,
                   name: 'Costos Productos',
                   to: '/reportes/CostosProductos',
-                },
-                {
-                  component: CNavItem,
-                  name: 'Costos PV',
-                  to: '/Calidad/CostosPV',
                 },
               ],
             },

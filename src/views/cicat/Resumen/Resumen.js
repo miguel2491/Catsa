@@ -1,6 +1,4 @@
 import React, {useEffect, useState, useRef} from 'react'
-import Cookies from 'universal-cookie'
-import axios from 'axios'
 import Swal from "sweetalert2";
 import ProgressBar from "@ramonak/react-progress-bar";
 import ResD from './ResDiario'
@@ -13,8 +11,7 @@ import FechaI from '../../base/parametros/FechaInicio'
 import FechaF from '../../base/parametros/FechaFinal'
 import {FormatoFca} from '../../../Utilidades/Tools.js'
 import { format } from 'date-fns';
-
-
+import { getMovs} from '../../../Utilidades/Funciones.js'
 import {
   CForm,
   CFormSelect,
@@ -38,16 +35,17 @@ import {
 import {CIcon} from '@coreui/icons-react'
 import { cilCloudDownload, cilSearch, cilChartPie } from '@coreui/icons'
 
-const cookies = new Cookies();
-const baseUrl="http://apicatsa.catsaconcretos.mx:2543/api/";
-const baseUrl2="http://localhost:2548/api/";
-
 
 const Resumen = () => {
     const [mensaje , setMensaje] = useState('');
     const [plantasSel , setPlantas] = useState('');
-    const [vFechaI, setFechaIni] = useState(null);
-    const [vFcaF, setFechaFin] = useState(null);
+    const [vFechaI, setFechaIni] = useState(() => {
+        const fechaActual = new Date();
+        fechaActual.setDate(1); // Establecer al primer día del mes
+        return fechaActual;
+    });
+      
+    const [vFcaF, setFechaFin] = useState(new Date());
     const [btn1, setDisabled] = useState(false);
     const [loading, setLoading] = useState(false);
     const [percentage, setPercentage] = useState(0);
@@ -60,11 +58,6 @@ const Resumen = () => {
     const entradasDRf = useRef();
     const salidasDRf = useRef();
 
-    const opcionesFca = {
-        year: 'numeric', // '2-digit' para el año en dos dígitos
-        month: '2-digit',   // 'numeric', '2-digit', 'short', 'long', 'narrow'
-        day: '2-digit'   // 'numeric', '2-digit'
-    };
     const cFechaI = (fecha) => {
         const formattedDate = format(fecha, 'yyyy/MM/dd');
         setFechaIni(formattedDate);
@@ -78,67 +71,51 @@ const Resumen = () => {
     };
 
     const getDatos = () => {
-        if (hijoRef.current) {
-            hijoRef.current.ejecutarAccion(); // Llama a la función del hijo
-        }
-        if(entradasRf.current)
-        {
-            entradasRf.current.getEntradas();    
-        }
-        if(salidasRf.current)
-        {
-            salidasRf.current.getSalidas();    
-        }
-        if(entradasDRf.current)
-        {
-            entradasDRf.current.getEntradasD();    
-        }
-        if(salidasDRf.current)
-        {
-            salidasDRf.current.getSalidasD();    
-        }
-        getMovs();
+        
+        Swal.fire({
+                    title: 'Cargando...',
+                    text: 'Estamos obteniendo la información...',
+                    didOpen: () => {
+                        Swal.showLoading();  // Muestra la animación de carga
+                        getMovs_();
+                    }
+                });
     }
 
-    async function getMovs()
-    {
-        setVisible(!visible)
-        setLoading(true);
-        setPercentage(0);
-        const interval = setInterval(() => {
-            setPercentage(prev => {
-            if (prev < 90) return prev + 10;
-            return prev;
-            });
-        }, 20000);
-        try
-        {
-            let confi_ax = {
-                headers:
+    const getMovs_ = async () => {
+        const auxFcaI = format(vFechaI, 'yyyy/MM/dd');
+        const auxFcaF = format(vFcaF, 'yyyy/MM/dd');
+        try{
+            const obj = await getMovs(plantasSel, auxFcaI, auxFcaF);
+            if(obj)
+            {
+                setMov(obj);
+                if (hijoRef.current) {
+                    hijoRef.current.ejecutarAccion(); // Llama a la función del hijo
+                }
+                if(entradasRf.current)
                 {
-                    'Cache-Control': 'no-cache',
-                    'Content-Type': 'application/json',
-                    "Authorization": "Bearer "+cookies.get('token'),
-                },
-            };
-            const fcaI = FormatoFca(vFechaI);
-            const fcaF = FormatoFca(vFcaF);
-            //------------------------------------------------------------------------------------------------------------------------------------------------------
-            const response = await axios.get(baseUrl+'Operaciones/GetResumen/'+plantasSel+','+fcaI+','+fcaF+',M', confi_ax);
-            var obj = response.data[0].Rows;
-            setMov(obj);
-            //console.log(obj);
+                    entradasRf.current.getEntradas();    
+                }
+                if(salidasRf.current)
+                {
+                    salidasRf.current.getSalidas();    
+                }
+                if(entradasDRf.current)
+                {
+                    entradasDRf.current.getEntradasD();    
+                }
+                if(salidasDRf.current)
+                {
+                    salidasDRf.current.getSalidasD();    
+                }
+            }
+            // Cerrar el loading al recibir la respuesta
+            //Swal.close();  // Cerramos el loading
+        }catch(error){
+            Swal.close();
+            Swal.fire("Error", "No se pudo obtener la información", "error");
         } 
-        catch(error)
-        {
-            console.log(error);
-            Swal.fire("Error", "Ocurrio un error al cargar Movimientos, vuelva a intentarlo", "error");
-        }finally{
-            clearInterval(interval); // Limpiar el intervalo
-            setLoading(false);
-            setPercentage(100); 
-            setVisible(false);
-        }
     }
     
 return (

@@ -55,8 +55,8 @@ const ResEntradas = forwardRef((props, ref) => {
                     "Authorization": "Bearer "+cookies.get('token'),
                 },
             };
-            const fcaI = FormatoFca(FI);
-            const fcaF = FormatoFca(FF);
+            const fcaI = format(FI, 'yyyy-MM-dd');
+            const fcaF = format(FF, 'yyyy-MM-dd');
             //------------------------------------------------------------------------------------------------------------------------------------------------------
             const response = await axios.get(baseUrl+'Operaciones/GetResumen/'+planta+','+fcaI+','+fcaF+',DE', confi_ax);
             var obj =  response.data[0].Rows;

@@ -55,8 +55,8 @@ const ResEntradasD = forwardRef((props, ref) => {
                 },
             };
             //------------------------------------------------------------------------------------------------------------------------------------------------------
-            const fcaI = FormatoFca(FI);
-            const fcaF = FormatoFca(FF);
+            const fcaI = format(FI, 'yyyy-MM-dd');
+            const fcaF = format(FF, 'yyyy-MM-dd');
             //------------------------------------------------------------------------------------------------------------------------------------------------------
             const response = await axios.get(baseUrl+'Operaciones/GetResumen/'+planta+','+fcaI+','+fcaF+',ED', confi_ax);
             var obj =  response.data[0].Rows;

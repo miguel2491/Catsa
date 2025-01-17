@@ -1,46 +1,135 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import Swal from "sweetalert2";
 import DataTable from 'react-data-table-component';
+import { convertArrayOfObjectsToCSV, getCostosPV, getPlantas } from '../../Utilidades/Funciones';
 import './CostosPV.css';
+import { CRow } from '@coreui/react';
 
 function SearchFilters() {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedDate, setSelectedDate] = useState('');
   const [selectedPlant, setSelectedPlant] = useState('');
-
+  const [opPlants, setPlantas_] = useState([]);
+  // ARRAYS
+  const [dtDesigns, setDTDesigns] = useState([]);
+  const [exDes, setExDes] = useState([]);
+  //Buscador
+  const [fText, setFText] = useState(''); // Estado para el filtro de búsqueda
+  const [vBPlanta, setBPlanta] = useState('');
   // Ejemplo de columnas para la DataTable
   const columns = [
     {
-      name: 'Encabezado 1',
-      selector: (row) => row.encabezado1,
+      name: 'Planta',
+      selector: (row) => row.Planta,
       sortable: true, // Podemos habilitar el ordenamiento
     },
     {
-      name: 'Encabezado 2',
-      selector: (row) => row.encabezado2,
+      name: 'Mezcla',
+      selector: (row) => row.Mezcla,
       sortable: true,
     },
     {
-      name: 'Encabezado 3',
-      selector: (row) => row.encabezado3,
+      name: 'Descripción',
+      selector: (row) => row.Descripcion,
+      sortable: true,
+    },
+    {
+      name: 'UOM',
+      selector: (row) => row.UOM,
+      sortable: true,
+    },
+    {
+      name: 'Fecha Modificación',
+      selector: (row) => row.UOM,
+      sortable: true,
+    },
+    {
+      name: 'Material',
+      selector: (row) => row.Material,
+      sortable: true,
+    },
+    {
+      name: 'Cantidad',
+      selector: (row) => row.Cantidad,
+      sortable: true,
+    },
+    {
+      name: 'Unidad',
+      selector: (row) => row.Unidad,
       sortable: true,
     },
   ];
 
-  // Ejemplo de datos (puedes reemplazarlos con tu data real)
-  const data = [
-    { id: 1, encabezado1: 'Dato 1', encabezado2: 'Dato 2', encabezado3: 'Dato 3' },
-    { id: 2, encabezado1: 'Dato 4', encabezado2: 'Dato 5', encabezado3: 'Dato 6' },
-    { id: 3, encabezado1: 'Dato 7', encabezado2: 'Dato 8', encabezado3: 'Dato 9' },
-  ];
+  useEffect(() => {
+    getPlantasOp()
+  }, []);
+
+  const getPlantasOp = async () => {
+    try{
+        const ocList = await getPlantas();
+        console.log(ocList)
+        if(ocList)
+        {
+          setPlantas_(ocList);
+        }
+        Swal.close();  // Cerramos el loading
+    }catch(error){
+        Swal.close();
+        Swal.fire("Error", "No se pudo obtener la información", "error");
+    }
+  }
 
   const handleSearch = () => {
     // Aquí puedes manejar la lógica de búsqueda con los 3 parámetros
     // Por ejemplo, hacer un fetch a tu API con {searchTerm, selectedDate, selectedPlant}
-    console.log('Búsqueda con:', searchTerm, selectedDate, selectedPlant);
+    console.log('Búsqueda con:', selectedDate, selectedPlant);
+    Swal.fire({
+        title: 'Cargando...',
+        text: 'Estamos obteniendo la información...',
+        didOpen: () => {
+            Swal.showLoading();  // Muestra la animación de carga
+            getCostosPV_()
+        }
+    });
   };
-
+  const getCostosPV_ = async () => {
+    try{
+        const ocList = await getCostosPV(selectedPlant, selectedDate);
+        console.log(ocList)
+        if(ocList)
+        {
+            setDTDesigns(ocList);
+            setExDes(ocList);
+        }
+        Swal.close();  // Cerramos el loading
+    }catch(error){
+        Swal.close();
+        Swal.fire("Error", "No se pudo obtener la información", "error");
+    }
+  }
+  // Función de búsqueda
+  const onFindBusqueda = (e) => {
+    setBPlanta(e.target.value);
+    setFText(e.target.value);
+  };
+  const fBusqueda = () => {
+      if(vBPlanta.length != 0){
+          const valFiltrados = dtDesigns.filter(dtDesigns => 
+          dtDesigns.Planta.includes(vBPlanta) // Filtra los clientes por el número de cliente
+          );
+          setDTDesigns(valFiltrados);
+          setExDes(valFiltrados);
+      }else{
+          getCostosPV_()
+      }
+  };
+  const fDesign = dtDesigns.filter(item => {
+      // Filtrar por planta, interfaz y texto de búsqueda
+      return item.Planta.toLowerCase().includes(fText.toLowerCase()) || item.Mezcla.includes(fText) || item.Material.includes(fText);
+});
   return (
     <div>
+      
       <h2>Costos PV</h2>
 
       {/* Filtros */}
@@ -52,16 +141,9 @@ function SearchFilters() {
             id="autocomplete"
             type="text"
             list="search-options"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
+            value={vBPlanta} onChange={onFindBusqueda} onSearch={fBusqueda}
             placeholder="Escribe para autocompletar..."
           />
-          <datalist id="search-options">
-            <option value="Opción 1" />
-            <option value="Opción 2" />
-            <option value="Opción 3" />
-            <option value="Opción 4" />
-          </datalist>
         </div>
 
         {/* Selección de fecha */}
@@ -84,9 +166,9 @@ function SearchFilters() {
             onChange={(e) => setSelectedPlant(e.target.value)}
           >
             <option value="">Seleccionar planta</option>
-            <option value="Planta A">Planta A</option>
-            <option value="Planta B">Planta B</option>
-            <option value="Planta C">Planta C</option>
+            {opPlants.map(planta =>(
+                <option value={planta.IdPlanta} key={planta.ID}>{planta.Planta}</option>
+            ))}
           </select>
         </div>
 
@@ -98,7 +180,7 @@ function SearchFilters() {
       <div className="table-container">
         <DataTable
           columns={columns}
-          data={data}
+          data={fDesign}
           keyField="id"
           pagination
           responsive

@@ -37,6 +37,7 @@ function cerrarSesion(){
   cookies.remove('SubMenus');
   cookies.remove('token');
   cookies.remove('Usuario');
+  cookies.remove('plantas');
   navigate('/login');
 }
   return (
