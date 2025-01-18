@@ -226,7 +226,7 @@ const NavProvider = ({ children }) => {
               to: '/Pedidos',
               icon: <CIcon icon={cilUser} customClassName="nav-icon" />,
               items: [
-                ...(userIsOperacion || userIsAdmin || userIsGerenteP
+                ...(userIsOperacion || userIsAdmin || userIsGerenteP || userIsJP
                   ? [
                     {
                       component: CNavItem,

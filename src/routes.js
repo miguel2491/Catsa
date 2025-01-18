@@ -56,7 +56,7 @@ const routes = [
   { path: '/Cicat/Remisiones', name: 'Remisiones', element:RemiFal },
   { path: '/Operaciones/Simulador', name: 'Simulador', element:OSimulador },
   { path: '/Operaciones/Pedidos/Cancelados', name: 'Pedidos', element:PCancelados },
-  { path: '/Operaciones/Pedidos/DCancelados', name: 'PedidosD', element:PCanceladosD },
+  { path: '/Operaciones/Pedidos/DCancelados/:id/:tipo', name: 'PedidosD', element:PCanceladosD },
   //------------------------------> MANTENIMIENTO <----------------------------------------
   { path: '/Operaciones/Mantenimiento/OrdenCompra', name: 'OCompra', element:OCompraMan },
   //------------------------------> LOGISTICA <--------------------------------------------

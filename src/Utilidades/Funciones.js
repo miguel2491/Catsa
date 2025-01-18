@@ -348,7 +348,89 @@ export async function getCmbsAreas(tipos,id){
             },
         };
         //------------------------------------------------------------------------------------------------------------------------------------------------------
-        const response = await axios.get(baseUrl2+'Catalogo/GetCmb/'+tipos+","+id, confi_ax);
+        const response = await axios.get(baseUrl+'Catalogo/GetCmb/'+tipos+","+id, confi_ax);
+        if (response.data && response.data.length > 0) {
+            const obj = response.data;
+            if(obj.length > 0)
+            {
+                return obj;
+            }else{return false}
+        }else{return false}
+    } 
+    catch(error)
+    {
+        return false
+    }
+}
+export async function getPCancelados(planta, FI, FF, tipo, estatus) {
+    const fcaI = FormatoFca(FI);
+    const fcaF = FormatoFca(FF);
+    var urlB = tipo =="G" ? "GetPCanceladosGn/"+planta+','+fcaI+','+fcaF:"GetPCanceladosRh/"+planta+','+fcaI+','+fcaF+','+estatus;
+    try
+    {
+        let confi_ax = {
+            headers:
+            {
+                'Cache-Control': 'no-cache',
+                'Content-Type': 'application/json',
+                "Authorization": "Bearer "+cookies.get('token'),
+            },
+        };
+        
+        //------------------------------------------------------------------------------------------------------------------------------------------------------
+        const response = await axios.get(baseUrl+'Operaciones/'+urlB, confi_ax);
+        if (response.data && response.data.length > 0) {
+            const obj = response.data;
+            if(obj.length > 0)
+            {
+                return obj;
+            }else{return false}
+        }else{return false}
+    } 
+    catch(error)
+    {
+        return false
+    }
+}
+export async function getPCanceladoI(id) {
+    try
+    {
+        let confi_ax = {
+            headers:
+            {
+                'Cache-Control': 'no-cache',
+                'Content-Type': 'application/json',
+                "Authorization": "Bearer "+cookies.get('token'),
+            },
+        };
+        //------------------------------------------------------------------------------------------------------------------------------------------------------
+        const response = await axios.get(baseUrl+'Operaciones/GetPCancelado/'+id, confi_ax);
+        if (response.data && response.data.length > 0) {
+            const obj = response.data;
+            if(obj.length > 0)
+            {
+                return obj;
+            }else{return false}
+        }else{return false}
+    } 
+    catch(error)
+    {
+        return false
+    }
+}
+export async function getPCanceladoGn(id) {
+    try
+    {
+        let confi_ax = {
+            headers:
+            {
+                'Cache-Control': 'no-cache',
+                'Content-Type': 'application/json',
+                "Authorization": "Bearer "+cookies.get('token'),
+            },
+        };
+        //------------------------------------------------------------------------------------------------------------------------------------------------------
+        const response = await axios.get(baseUrl2+'Operaciones/GetPCanceladoGn/'+id, confi_ax);
         if (response.data && response.data.length > 0) {
             const obj = response.data;
             if(obj.length > 0)

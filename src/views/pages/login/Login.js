@@ -55,12 +55,21 @@ export default function Login() {
 
   // Inicia sesión con el backend
   async function Sesion(username, password) {
-    setVisible(true); // Mostrar modal de carga
     if (username === "" || password === "") {
       Swal.fire("Error", "Revise Usuario/Contraseña y vuelva a intentar", "error");
-      setVisible(false);
       return;
     }
+    Swal.fire({
+        title: 'Cargando...',
+        text: 'Reedirigiendo...',
+        didOpen: () => {
+            Swal.showLoading();  // Muestra la animación de carga
+            LoginP(username, password)
+        }
+    });
+  }
+
+  const LoginP = async (username, password) => {
     try {
       const postData = { usuario: username, pass: password };
       const confi_ax = {
@@ -75,20 +84,19 @@ export default function Login() {
 
       cookies.set("idUsuario", userInfo.id, { path: "/" });
       cookies.set("Usuario", username, { path: "/" });
-
       // getRol() de tu lógica
       getRol();
 
       // Redirige luego de 2 segundos
       setTimeout(() => {
+        Swal.close()
         navigate("/dashboard");
-      }, 2000);
+      }, 1000);
 
     } catch (error) {
       console.error(error);
+      Swal.close()
       Swal.fire("Error", "Usuario/Contraseña incorrecta, vuelve a intentar", "error");
-    } finally {
-      setVisible(false);
     }
   }
 
