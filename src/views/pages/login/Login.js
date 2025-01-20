@@ -13,6 +13,7 @@ import load from "../../../../public/loading.gif";
 import { getRol } from "../../../Utilidades/Funciones";
 import "./Login.css";
 
+// URL base y endpoint
 const baseUrl = "http://apicatsa.catsaconcretos.mx:2543/api/";
 
 export default function Login() {
@@ -26,17 +27,19 @@ export default function Login() {
   const cookies = new Cookies();
   const navigate = useNavigate();
 
+  // Al montar, revisa si ya hay sesión
   useEffect(() => {
     if (cookies.get("token") && cookies.get("idUsuario")) {
       navigate("/dashboard");
     } else {
       GetToken();
     }
+    // eslint-disable-next-line
   }, []);
 
-  // =================== FUNCIONES DE LA LÓGICA ===================
-
-  // Llama al endpoint para obtener token genérico
+  // =================================================================
+  //             OBTENER TOKEN GENÉRICO
+  // =================================================================
   async function GetToken() {
     const postData = { UserName: "ProCatsa", Password: "ProCatsa2024$." };
     const confi_ax = {
@@ -53,13 +56,16 @@ export default function Login() {
     }
   }
 
-  // Inicia sesión con el backend
+  // =================================================================
+  //                      INICIAR SESIÓN
+  // =================================================================
   async function Sesion(username, password) {
+    // Retornaremos true o false según éxito/fracaso
     setVisible(true); // Mostrar modal de carga
     if (username === "" || password === "") {
       Swal.fire("Error", "Revise Usuario/Contraseña y vuelva a intentar", "error");
       setVisible(false);
-      return;
+      return false; // Devuelve false
     }
     try {
       const postData = { usuario: username, pass: password };
@@ -73,6 +79,14 @@ export default function Login() {
       const response = await axios.post(baseUrl + "Login/GetUsuario", postData, confi_ax);
       const userInfo = response.data;
 
+      // Si la API no devuelve el usuario como esperas, podrías validar aquí
+      if (!userInfo.id) {
+        Swal.fire("Error", "Usuario/Contraseña incorrecta", "error");
+        setVisible(false);
+        return false;
+      }
+
+      // Guardar cookies
       cookies.set("idUsuario", userInfo.id, { path: "/" });
       cookies.set("Usuario", username, { path: "/" });
 
@@ -84,26 +98,65 @@ export default function Login() {
         navigate("/dashboard");
       }, 2000);
 
+      return true; // Éxito
     } catch (error) {
       console.error(error);
       Swal.fire("Error", "Usuario/Contraseña incorrecta, vuelve a intentar", "error");
+      return false;
     } finally {
       setVisible(false);
     }
   }
 
-  // Registra usuario (ejemplo simple, según tu lógica)
-  function handleRegisterSubmit(newUser, newEmail, newPassword, confirmNewPassword) {
-    // Validar contraseñas
+  // =================================================================
+  //                       REGISTRAR USUARIO
+  // =================================================================
+  async function handleRegisterSubmit(newUser, newEmail, newPassword, confirmNewPassword) {
+    // Retornaremos true o false según éxito/fracaso
     if (newPassword !== confirmNewPassword || newPassword.trim() === "") {
       Swal.fire("Error", "Las contraseñas no coinciden o están vacías", "error");
-      return;
+      return false;
     }
-    // Aquí iría tu llamada a la API de registro (si existe), por ahora un alert
-    Swal.fire("Éxito", "Registro exitoso", "success");
+
+    setVisible(true);
+    const postData = {
+      UserName: newUser,
+      Password: newPassword,
+      CorreoUser: newEmail
+    };
+
+    const config = {
+      headers: {
+        "Cache-Control": "no-cache",
+        "Content-Type": "application/json",
+        Authorization: "Bearer " + cookies.get("token"),
+      },
+    };
+
+    try {
+      // Llamada a la API de registro
+      const response = await axios.post(baseUrl + "Login/setUsuario", postData, config);
+
+      // Si la respuesta es satisfactoria
+      if (response.status === 200 || response.status === 201) {
+        Swal.fire("Éxito", "Registro exitoso", "success");
+        return true;
+      } else {
+        Swal.fire("Error", "No se pudo registrar el usuario", "error");
+        return false;
+      }
+    } catch (error) {
+      console.error("Error registrando usuario:", error);
+      Swal.fire("Error", "Ocurrió un problema al registrar", "error");
+      return false;
+    } finally {
+      setVisible(false);
+    }
   }
 
-  // Render del modal de carga
+  // =================================================================
+  //             RENDER DEL MODAL DE CARGA (SPINNER)
+  // =================================================================
   const renderLoadingModal = (
     <CModal
       className="mLogin"
@@ -123,7 +176,9 @@ export default function Login() {
     </CModal>
   );
 
-  // =================== RENDER PRINCIPAL ===================
+  // =================================================================
+  //                           RENDER PRINCIPAL
+  // =================================================================
   return (
     <div className="back">
       {renderLoadingModal}
@@ -132,14 +187,14 @@ export default function Login() {
         <LoginForm
           onRegister={() => setAuthMode("register")}
           onRecover={() => setAuthMode("recover")}
-          onLoginSubmit={Sesion} // Aquí pasamos la función de login real
+          onLoginSubmit={Sesion}
         />
       )}
 
       {authMode === "register" && (
         <RegisterForm
           onLogin={() => setAuthMode("login")}
-          onRegisterSubmit={handleRegisterSubmit} // Pasamos la función de registro real
+          onRegisterSubmit={handleRegisterSubmit}
         />
       )}
 
@@ -153,18 +208,15 @@ export default function Login() {
 }
 
 /* ------------------------------------------------------------------
-                  FORMULARIO DE LOGIN
+                  FORMULARIO DE LOGIN 
    ------------------------------------------------------------------ */
 function LoginForm({ onRegister, onRecover, onLoginSubmit }) {
-  // El viejo diseño usaba "username" y "password". 
-  // El nuevo decía "email" y "password". 
-  // Aquí lo nombramos "username" para que coincida con tu Sesion().
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
 
   // Clases para la animación
   const [usernameSectionClass, setUsernameSectionClass] = useState(
-    "input-section email-section" // Reutilizamos la clase "email-section"
+    "input-section email-section"
   );
   const [passwordSectionClass, setPasswordSectionClass] = useState(
     "input-section password-section folded"
@@ -175,19 +227,25 @@ function LoginForm({ onRegister, onRecover, onLoginSubmit }) {
   const handleUsernameChange = (e) => setUsername(e.target.value);
   const handlePasswordChange = (e) => setPassword(e.target.value);
 
-  // Cuando termina de llenar "usuario" y pasa a "password"
+  // Avanzar a la sección de contraseña
   const handleUsernameNext = () => {
     setUsernameSectionClass((prev) => prev + " fold-up");
     setPasswordSectionClass("input-section password-section");
   };
 
-  // Cuando termina de llenar "password"
-  const handlePasswordNext = () => {
-    // Aquí podemos llamar la función real de login
-    onLoginSubmit(username, password);
-    // Animación de éxito local
-    setPasswordSectionClass((prev) => prev + " fold-up");
-    setSuccessClass("success show");
+  // Intentar login al dar clic en el botón de la contraseña
+  const handlePasswordNext = async () => {
+    const isOk = await onLoginSubmit(username, password);
+    if (isOk) {
+      // Sólo si el login fue exitoso hacemos el fold-up y mostramos "BIENVENIDO"
+      setPasswordSectionClass((prev) => prev + " fold-up");
+      setSuccessClass("success show");
+    } else {
+      // Si falló, NO hacemos fold-up. 
+      // Opcional: podrías limpiar password o hacer focus en el campo.
+      // setPassword("");
+      // setUsernameSectionClass("input-section email-section");
+    }
   };
 
   return (
@@ -198,7 +256,7 @@ function LoginForm({ onRegister, onRecover, onLoginSubmit }) {
       </header>
 
       <form>
-        {/* Sección "usuario" (antes "emailSectionClass") */}
+        {/* Sección "usuario" */}
         <div className={usernameSectionClass}>
           <input
             type="text"
@@ -251,7 +309,7 @@ function LoginForm({ onRegister, onRecover, onLoginSubmit }) {
           </div>
         </div>
 
-        {/* Mensaje de éxito (se muestra cuando termina el fold-up) */}
+        {/* Mensaje de éxito */}
         <div className={successClass}>
           <p>BIENVENIDO</p>
         </div>
@@ -314,14 +372,25 @@ function RegisterForm({ onLogin, onRegisterSubmit }) {
     setConfirmPassSectionClass("input-section confirm-pass-section");
   };
 
-  const handleConfirmPassNext = () => {
-    // Aquí llamamos la función de registro real (del antiguo diseño)
-    onRegisterSubmit(newUser, newEmail, newPassword, confirmNewPassword);
 
-    // Si pasa la validación, plegamos y mostramos éxito
-    // TIP: Podrías checar el resultado de la API, pero para simplificar:
-    setConfirmPassSectionClass((prev) => prev + " fold-up");
-    setSuccessClass("success show");
+  const handleConfirmPassNext = async () => {
+    const success = await onRegisterSubmit(
+      newUser,
+      newEmail,
+      newPassword,
+      confirmNewPassword
+    );
+    if (success) {
+      setConfirmPassSectionClass((prev) => prev + " fold-up");
+      setSuccessClass("success show");
+
+
+      setTimeout(() => {
+        onLogin();
+      }, 1500);
+    } else {
+      // Si falló, no se pliega.
+    }
   };
 
   return (
@@ -471,8 +540,7 @@ function RecoverForm({ onLogin }) {
       alert("Por favor, ingresa tu correo");
       return;
     }
-    // Aquí podrías hacer tu lógica de "recuperar" (enviar correo, etc.)
-    // Por ahora, simulamos que funciona
+    // Logica para recuperar contraseña API
     setRecoverSectionClass((prev) => prev + " fold-up");
     setSuccessClass("success show");
   };
