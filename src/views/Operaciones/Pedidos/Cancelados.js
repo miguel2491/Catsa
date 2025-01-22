@@ -41,6 +41,7 @@ const Cancelados = () => {
     const [vFechaF, setFechaFin] = useState(new Date());
     const [tipoGn, setTipoGn] = useState('-');
     const [tipoSt, setTipoSt] = useState('-');
+    const [tipoRes, setTipoRes] = useState('-');
     const [shTR, setshTR] = useState(false);
     const [shTG, setshTG] = useState(true);
     const [shCmbStatus, setshCmbStatus] = useState(false);
@@ -122,13 +123,13 @@ const Cancelados = () => {
             Swal.fire("Error", "No se pudo obtener la información", "error");
         }
     }
-    const viewPC = (id,tipo) =>{
+    const viewPC = (id,tipo, idTicket) =>{
         Swal.fire({
             title: 'Cargando...',
             text: 'Reedirigiendo...',
             didOpen: () => {
                 Swal.showLoading();  // Muestra la animación de carga
-                navigate('/Operaciones/Pedidos/DCancelados/'+id+'/'+tipo);
+                navigate('/Operaciones/Pedidos/DCancelados/'+id+'/'+tipo+'/'+idTicket);
             }
         });
     }
@@ -148,7 +149,7 @@ const Cancelados = () => {
                         <CButton
                             style={{'color':'white'}}
                             color="warning"
-                            onClick={() => viewPC(row.IdTicket, 'PC')}
+                            onClick={() => viewPC(row.id_cancelados, 'PC',row.IdTicket)}
                             size="sm"
                             className="me-2"
                             title="Cancelar"
@@ -218,7 +219,16 @@ const Cancelados = () => {
         },
         {
             name: 'Pedido Programa',
-            selector: row => row.PedidoPrograma,
+            selector: row =>{
+                const aux = row.PedidoPrograma;
+                if (aux === null || aux === undefined) {
+                    return "No disponible";
+                }
+                if (typeof aux === 'object') {
+                return "Sin Datos"; // O cualquier mensaje que prefieras
+                }
+                return aux;
+            },
             sortable:true,
             width:"150px",
         },
@@ -272,7 +282,16 @@ const Cancelados = () => {
         },
         {
             name: 'Tiempo Carga',
-            selector: row => row.TiempoCarga,
+            selector: row => {
+                const aux = row.TiempoCarga;
+                if (aux === null || aux === undefined) {
+                    return "No disponible";
+                }
+                if (typeof aux === 'object') {
+                return "Sin Datos"; // O cualquier mensaje que prefieras
+                }
+                return aux;
+            },
             sortable:true,
             width:"150px",
         },
@@ -297,7 +316,7 @@ const Cancelados = () => {
                         <CButton
                             style={{'color':'white'}}
                             color="warning"
-                            onClick={() => viewPC(row.id_cancelados,'RH')}
+                            onClick={() => viewPC(row.id_cancelados,'RH', row.id_ticket)}
                             size="sm"
                             className="me-2"
                             title="Editar"

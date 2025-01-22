@@ -197,12 +197,16 @@ const OCompra = () => {
     const [descripcion, setDescripcion] = useState("-");
     const [vehiculo, setVehiculo_] = useState("-");
     const [descMan, setDMan] = useState("");
+    const [respuesta, setResp] = useState("");
     const [idOC, setIdOC] = useState("0");
     const [file, setFile] = useState(null);
     //************************************************************************************************************************************************************************** */    
     const [vFile, setVFile] = useState(false);
     const [vImg, setVImg] = useState(false);
     const [urlImg, setUrlImg] = useState('');
+    //************************************************************************************************************************************************************************** */
+    const [shRespuesta, setshRespuesta] = useState(false);
+    const shDisR = !userIsJP ? true : false;
     //************************************************************************************************************************************************************************** */
     const opcionesFca = {
         year: 'numeric', // '2-digit' para el año en dos dígitos
@@ -285,6 +289,7 @@ const OCompra = () => {
     const gOCI = async (id) => {
         try{
             const ocList = await getOComprasInd(id);
+            console.log(ocList)
             // Cerrar el loading al recibir la respuesta
             Swal.close();  // Cerramos el loading
             setIdOC(ocList[0].id)
@@ -303,6 +308,8 @@ const OCompra = () => {
                 setVImg(true)
                 setUrlImg("http://apicatsa.catsaconcretos.mx:2543/Uploads/OC/"+ocList[0].urlImg)
             }
+            setshRespuesta(true);
+            setResp(ocList[0].respuesta)
         }catch(error){
             Swal.close();
             Swal.fire("Error", "No se pudo obtener la información", "error");
@@ -840,6 +847,7 @@ const OCompra = () => {
     const CFormInputWithMask = IMaskMixin(({ inputRef, ...props }) => (
         <CFormInput {...props} ref={inputRef} />
     ))
+    //************************************************************************************************************************************************************************************** */
     // Maneja el cambio en el select de tipo de mantenimiento
     const handleTipoMantenimientoChange = (e) => {
         setTipoMantenimiento(e.target.value);
@@ -851,6 +859,10 @@ const OCompra = () => {
     const hVehiculo = (e) => {
         setVehiculo_(e.target.value);
     }
+    const onRespuesta = (e) => {
+        setResp(e.target.value);
+    };
+    //************************************************************************************************************************************************************************************* */
     const onSaveOC = () =>{
         Swal.fire({
             title: 'Guardar...',
@@ -870,6 +882,7 @@ const OCompra = () => {
             tipoMant: tipoMantenimiento,
             idVehiculo: vehiculo,
             descMant: descMan,
+            respuesta:respuesta,
             file: file,
         };
         saveOCompra(formData,tipo);
@@ -887,7 +900,7 @@ const OCompra = () => {
             Swal.fire("Error", "No se pudo obtener la información", "error");
         }
     }
-    //************************************************************************************************************************************************************************** */
+    //************************************************************************************************************************************************************************************** */
     return (
     <>
         <CContainer fluid>
@@ -1047,6 +1060,21 @@ const OCompra = () => {
                             ></CFormTextarea>
                         </CCol>
                     </CRow>
+                    {shRespuesta && (
+                        <CRow className='mt-2 mb-2'>
+                            <CCol xs={12} md={12}>
+                                <CFormTextarea
+                                    className="mb-3"
+                                    placeholder="Respuesta"
+                                    aria-label="Res"
+                                    label="Respuesta"
+                                    value={respuesta}
+                                    onChange={onRespuesta}
+                                    disabled={shDisR}
+                                ></CFormTextarea>
+                            </CCol>
+                        </CRow>
+                    )}
                     <CRow className='mt-2 mb-2'>
                         {vFile && (
                         <CCol xs={6} md={3}>

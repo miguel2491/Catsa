@@ -22,6 +22,7 @@ import {
   cilBell,
   cilContrast,
   cilEnvelopeOpen,
+  cilHeadphones,
   cilHome,
   cilList,
   cilMenu,
@@ -49,6 +50,9 @@ const AppHeader = () => {
 
   const navDash = () => {
     navigate('/dashboard');
+  }
+  const navHelp = () => {
+    navigate('/help');
   }
 
   return (
@@ -93,8 +97,8 @@ const AppHeader = () => {
             </CNavLink>
           </CNavItem>
           <CNavItem>
-            <CNavLink href="#">
-              <CIcon icon={cilEnvelopeOpen} size="lg" />
+            <CNavLink title='Ayuda'>
+              <CIcon icon={cilHeadphones} onClick={navHelp} size="lg" />
             </CNavLink>
           </CNavItem>
         </CHeaderNav>

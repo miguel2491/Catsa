@@ -55,7 +55,6 @@ const Plantas = ({plantasSel, mCambio}) => {
             axios.get(baseUrl+'Administracion/GetPlantas/'+cookies.get('Usuario'),confi_ax)
             .then(response=>{
               const objPlantas = response.data;
-              console.log(objPlantas.length)
               if(objPlantas.length > 0){
                 cookies.set('plantas', JSON.stringify(response.data), {path: '/'});
                 //setaplantas_(JSON.stringify(response.data));
