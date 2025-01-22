@@ -13,6 +13,7 @@ const RCicat = React.lazy(() => import('./views/cicat/Resumen/Resumen'))
 const RemiFal = React.lazy(() => import('./views/cicat/Remisiones/RemiFal'))
 const OSimulador = React.lazy(() => import('./views/Operaciones/Simulador/Simulador'))
 const OCompraMan = React.lazy(() => import('./views/Operaciones/Mantenimiento/OrdenCompra/OCompra'))
+const ReportesOC = React.lazy(() => import('./views/Operaciones/Mantenimiento/OrdenCompra/ReporteOC'))
 const PCancelados = React.lazy(() => import('./views/Operaciones/Pedidos/Cancelados'))
 const PCanceladosD = React.lazy(() => import('./views/Operaciones/Pedidos/DCancelados'))
 //=========================================> LOGISTICA <================================
@@ -59,6 +60,7 @@ const routes = [
   { path: '/Operaciones/Simulador', name: 'Simulador', element:OSimulador },
   { path: '/Operaciones/Pedidos/Cancelados', name: 'Pedidos', element:PCancelados },
   { path: '/Operaciones/Pedidos/DCancelados/:id/:tipo/:idTicket', name: 'PedidosD', element:PCanceladosD },
+  { path: '/Operaciones/Mantenimiento/ReporteOC', name: 'ReportesOC', element:ReportesOC },
   //------------------------------> MANTENIMIENTO <----------------------------------------
   { path: '/Operaciones/Mantenimiento/OrdenCompra', name: 'OCompra', element:OCompraMan },
   //------------------------------> LOGISTICA <--------------------------------------------

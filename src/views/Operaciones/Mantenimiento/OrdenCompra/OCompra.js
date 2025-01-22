@@ -206,7 +206,7 @@ const OCompra = () => {
     const [urlImg, setUrlImg] = useState('');
     //************************************************************************************************************************************************************************** */
     const [shRespuesta, setshRespuesta] = useState(false);
-    const shDisR = !userIsJP ? true : false;
+    const shDisR = !userIsJP ? false : true;
     //************************************************************************************************************************************************************************** */
     const opcionesFca = {
         year: 'numeric', // '2-digit' para el año en dos dígitos
