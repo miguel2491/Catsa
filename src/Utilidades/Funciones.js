@@ -558,7 +558,7 @@ export async function setTicketCancel(data, tipo) {
         };
         
         //------------------------------------------------------------------------------------------------------------------------------------------------------
-        const response = await axios.post(baseUrl2+"Operaciones/setPCan", fData, confi_ax);
+        const response = await axios.post(baseUrl+"Operaciones/setPCan", fData, confi_ax);
         if (response.data && response.data.length > 0) {
             const obj = response.data;
             if(obj.length > 0)
@@ -608,7 +608,7 @@ export async function answTicketCancel(data, tipo) {
             },
         };
         //------------------------------------------------------------------------------------------------------------------------------------------------------
-        const response = await axios.post(baseUrl2+"Operaciones/resPCan", fData, confi_ax);
+        const response = await axios.post(baseUrl+"Operaciones/resPCan", fData, confi_ax);
         if (response.data && response.data.length > 0) {
             const obj = response.data;
             if(obj.length > 0)
@@ -718,7 +718,7 @@ export async function setOCompra(data, tipo) {
         };
         
         //------------------------------------------------------------------------------------------------------------------------------------------------------
-        const response = await axios.post(baseUrl2+Truta, fData, confi_ax);
+        const response = await axios.post(baseUrl+Truta, fData, confi_ax);
         if (response.data && response.data.length > 0) {
             const obj = response.data;
             if(obj.length > 0)
@@ -830,6 +830,35 @@ export async function addNFac(id, nFac) {
             band = true;
         }
         return band
+    } 
+    catch(error)
+    {
+        return false
+    }
+}
+ //REPORTES
+ export async function getOC(FI, FF) {
+    try
+    {
+        let confi_ax = {
+            headers:
+            {
+                'Cache-Control': 'no-cache',
+                'Content-Type': 'application/json',
+                "Authorization": "Bearer "+cookies.get('token'),
+            },
+        };
+        const fcaI = FormatoFca(FI);
+        const fcaF = FormatoFca(FF);
+        //------------------------------------------------------------------------------------------------------------------------------------------------------
+        const response = await axios.get(baseUrl+'Reportes/GetOCompras/'+fcaI+','+fcaF, confi_ax);
+        if (response.data && response.data.length > 0) {
+            const obj = response.data;
+            if(obj.length > 0)
+            {
+                return obj;
+            }else{return false}
+        }else{return false}
     } 
     catch(error)
     {
