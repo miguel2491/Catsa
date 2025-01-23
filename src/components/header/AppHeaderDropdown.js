@@ -58,7 +58,7 @@ function cerrarSesion(){
           <CIcon icon={cilTask} className="me-2" />
           Pendientes
           <CBadge color="danger" className="ms-2">
-            42
+            4
           </CBadge>
         </CDropdownItem> */}
         <CDropdownHeader className="bg-body-secondary fw-semibold my-2">Settings</CDropdownHeader>

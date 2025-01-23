@@ -53,6 +53,109 @@ export async function getPermisos()
 
     }
 }
+export function findLogin()
+{
+    const isLoggedIn = cookies.get('idUsuario') !== undefined;
+      if (!isLoggedIn) {
+        // Si no está logueado, redirige a la página de login
+        return false;
+      }
+      // Si está logueado, renderiza el componente
+      return true;
+}
+export async function getNotificaciones()
+{
+    try
+    {
+        let confi_ax = {
+            headers:
+            {
+                'Cache-Control': 'no-cache',
+                'Content-Type': 'application/json',
+                "Authorization": "Bearer "+cookies.get('token'),
+            },
+        };
+        //------------------------------------------------------------------------------------------------------------------------------------------------------
+        const response = await axios.get(baseUrl2+'Login/GetNotificaciones/'+cookies.get('Usuario'), confi_ax);
+        if (response.data && response.data.length > 0) {
+            const obj = response.data;
+            if(obj.length > 0)
+            {
+                return obj;
+            }else{return false}
+        }else{return false}
+    } 
+    catch(error)
+    {
+        return false
+    }
+}
+export async function setNotificacion(id)
+{
+    try
+    {
+        let confi_ax = {
+            headers:
+            {
+                'Cache-Control': 'no-cache',
+                'Content-Type': 'application/json',
+                "Authorization": "Bearer "+cookies.get('token'),
+            },
+        };
+        //------------------------------------------------------------------------------------------------------------------------------------------------------
+        const response = await axios.get(baseUrl2+'Login/SetReadNotificacion/'+id, confi_ax);
+        if (response.data && response.data.length > 0) {
+            const obj = response.data;
+            if(obj.length > 0)
+            {
+                return obj;
+            }else{return false}
+        }else{return false}
+    } 
+    catch(error)
+    {
+        return false
+    }
+}
+export async function makeNotificacion(userDestino, categoria, titulo, desc, url)
+{
+    const fData = new FormData();
+    fData.append("nO", JSON.stringify({
+        usuarioCreo: cookies.get('Usuario'),
+        usuarioDestino: userDestino,
+        categoria: categoria,
+        titulo: titulo,
+        descripcion: desc,
+        url: url,
+    }));
+    for (let pair of fData.entries()) {
+        console.log(pair[0] + ": " + pair[1]);
+    }
+    try
+    {
+        let confi_ax = {
+            headers:
+            {
+                'Cache-Control': 'no-cache',
+                'Content-Type': 'application/json',
+                "Authorization": "Bearer "+cookies.get('token'),
+            },
+        };
+        //------------------------------------------------------------------------------------------------------------------------------------------------------
+        const response = await axios.post(baseUrl2+'Login/setNotificacion', confi_ax);
+        if (response.data && response.data.length > 0) {
+            const obj = response.data;
+            if(obj.length > 0)
+            {
+                return obj;
+            }else{return false}
+        }else{return false}
+    } 
+    catch(error)
+    {
+        return false
+    }
+}
 //****************************************************************************************************************************************************************************** */
 // CATALOGOS
 export async function getElementos() {

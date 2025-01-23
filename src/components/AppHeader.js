@@ -31,7 +31,8 @@ import {
 } from '@coreui/icons'
 
 import { AppBreadcrumb } from './index'
-import { AppHeaderDropdown } from './header/index'
+import { AppHeaderDropdown, AppBell } from './header/index'
+import App from '../views/permisos/Permisos';
 
 const AppHeader = () => {
   const headerRef = useRef()
@@ -87,9 +88,7 @@ const AppHeader = () => {
             <div className="h-300 text-opacity-75">Bienvenido: <b>{cookies.get('Usuario')}</b></div>
           </CNavItem>
           <CNavItem>
-            <CNavLink href="#">
-              <CIcon icon={cilBell} size="lg" />
-            </CNavLink>
+            <AppBell />
           </CNavItem>
           <CNavItem>
             <CNavLink href="#">

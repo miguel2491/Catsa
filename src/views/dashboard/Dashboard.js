@@ -1,5 +1,4 @@
 import React, {useRef, useState, useEffect} from 'react'
-import classNames from 'classnames'
 import { CChart, CChartPolarArea } from '@coreui/react-chartjs'
 import {
   CAvatar,
@@ -24,6 +23,7 @@ import Cookies from 'universal-cookie'
 import axios from 'axios'
 import Swal from "sweetalert2";
 import { format } from 'date-fns';
+import { useNavigate } from "react-router-dom";
 import CIcon from '@coreui/icons-react'
 import {
   cibCcAmex,
@@ -47,16 +47,16 @@ import {
   cilUser,
   cilUserFemale,
 } from '@coreui/icons'
+import { findLogin } from '../../Utilidades/Funciones';
 
-import WidgetsBrand from '../widgets/WidgetsBrand'
 import WidgetsDropdown from '../widgets/WidgetsDropdown'
-import MainChart from './MainChart'
 
 const cookies = new Cookies();
 const baseUrl="http://apicatsa.catsaconcretos.mx:2543/api/";
 const currentDate = new Date();
 
 const Dashboard = () => {
+  const navigate = useNavigate();
   const userIsA = true;
   const [aPedidosD, setPedidosD] = useState([]);
   //Diario
@@ -108,6 +108,10 @@ const Dashboard = () => {
   });
   
   useEffect(() => {
+    const banderaL = findLogin();
+    if(!banderaL){
+      navigate('/login')
+    }
     getPedidosD();
     getPedidosS();
     getPedidosPS();
@@ -133,7 +137,6 @@ const Dashboard = () => {
       const dataSetR = [];
       var totalP = 0;
       var totalPR = 0;
-      console.log(obj);
       obj.forEach(item => {
         if (item.TPA !== null && !(typeof item.TPA === 'object' && Object.keys(item.TPA).length === 0)) {
           totalP += item.P_TotalPedidos;
