@@ -65,7 +65,7 @@ export default function Login() {
     if (username === "" || password === "") {
       Swal.fire("Error", "Revise Usuario/Contraseña y vuelva a intentar", "error");
       setVisible(false);
-      return false; // Devuelve false
+      return false; 
     }
     try {
       const postData = { usuario: username, pass: password };
@@ -79,7 +79,6 @@ export default function Login() {
       const response = await axios.post(baseUrl + "Login/GetUsuario", postData, confi_ax);
       const userInfo = response.data;
 
-      // Si la API no devuelve el usuario como esperas, podrías validar aquí
       if (!userInfo.id) {
         Swal.fire("Error", "Usuario/Contraseña incorrecta", "error");
         setVisible(false);
@@ -112,7 +111,6 @@ export default function Login() {
   //                       REGISTRAR USUARIO
   // =================================================================
   async function handleRegisterSubmit(newUser, newEmail, newPassword, confirmNewPassword) {
-    // Retornaremos true o false según éxito/fracaso
     if (newPassword !== confirmNewPassword || newPassword.trim() === "") {
       Swal.fire("Error", "Las contraseñas no coinciden o están vacías", "error");
       return false;
@@ -137,7 +135,6 @@ export default function Login() {
       // Llamada a la API de registro
       const response = await axios.post(baseUrl + "Login/setUsuario", postData, config);
 
-      // Si la respuesta es satisfactoria
       if (response.status === 200 || response.status === 201) {
         Swal.fire("Éxito", "Registro exitoso", "success");
         return true;
@@ -148,6 +145,45 @@ export default function Login() {
     } catch (error) {
       console.error("Error registrando usuario:", error);
       Swal.fire("Error", "Ocurrió un problema al registrar", "error");
+      return false;
+    } finally {
+      setVisible(false);
+    }
+  }
+
+  // =================================================================
+  //                       RECUPERAR CONTRASEÑA
+  // =================================================================
+  async function handleRecoverSubmit(email) {
+    // Retornar true o false según éxito/fracaso
+    setVisible(true);
+
+    // Validar email vacio
+    if (!email || email.trim() === "") {
+      Swal.fire("Advertencia", "El correo está vacío", "warning");
+      setVisible(false);
+      return false;
+    }
+
+    try {
+      // GET a la API: /Login/SendPass/<correo>
+      const config = {
+        headers: {
+          Authorization: "Bearer " + cookies.get("token"),
+        },
+      };
+      const response = await axios.get(baseUrl + "Login/SendPass/" + email, config);
+      // Status 200 => se envió con éxito
+      if (response.status === 200) {
+        Swal.fire("Éxito", "Te enviamos un correo para restablecer tu contraseña", "success");
+        return true;
+      } else {
+        Swal.fire("Error", "No se pudo enviar el correo", "error");
+        return false;
+      }
+    } catch (error) {
+      console.error("Error en recuperar contraseña:", error);
+      Swal.fire("Error", "Ocurrió un problema al enviar el correo", "error");
       return false;
     } finally {
       setVisible(false);
@@ -201,6 +237,7 @@ export default function Login() {
       {authMode === "recover" && (
         <RecoverForm
           onLogin={() => setAuthMode("login")}
+          onRecoverSubmit={handleRecoverSubmit} // <== Pasamos aquí la función
         />
       )}
     </div>
@@ -237,14 +274,8 @@ function LoginForm({ onRegister, onRecover, onLoginSubmit }) {
   const handlePasswordNext = async () => {
     const isOk = await onLoginSubmit(username, password);
     if (isOk) {
-      // Sólo si el login fue exitoso hacemos el fold-up y mostramos "BIENVENIDO"
       setPasswordSectionClass((prev) => prev + " fold-up");
       setSuccessClass("success show");
-    } else {
-      // Si falló, NO hacemos fold-up. 
-      // Opcional: podrías limpiar password o hacer focus en el campo.
-      // setPassword("");
-      // setUsernameSectionClass("input-section email-section");
     }
   };
 
@@ -372,7 +403,6 @@ function RegisterForm({ onLogin, onRegisterSubmit }) {
     setConfirmPassSectionClass("input-section confirm-pass-section");
   };
 
-
   const handleConfirmPassNext = async () => {
     const success = await onRegisterSubmit(
       newUser,
@@ -384,12 +414,10 @@ function RegisterForm({ onLogin, onRegisterSubmit }) {
       setConfirmPassSectionClass((prev) => prev + " fold-up");
       setSuccessClass("success show");
 
-
+      // Después de mostrar "¡Registro completado!"
       setTimeout(() => {
         onLogin();
       }, 1500);
-    } else {
-      // Si falló, no se pliega.
     }
   };
 
@@ -522,7 +550,7 @@ function RegisterForm({ onLogin, onRegisterSubmit }) {
 /* ------------------------------------------------------------------
                 FORMULARIO DE RECUPERACIÓN
    ------------------------------------------------------------------ */
-function RecoverForm({ onLogin }) {
+function RecoverForm({ onLogin, onRecoverSubmit }) {
   const [email, setEmail] = useState("");
 
   // Clases de la sección de email
@@ -535,14 +563,15 @@ function RecoverForm({ onLogin }) {
 
   const handleEmailChange = (e) => setEmail(e.target.value);
 
-  const handleRecoverNext = () => {
-    if (email.trim() === "") {
-      alert("Por favor, ingresa tu correo");
-      return;
+  // Ahora llamamos a onRecoverSubmit (del padre) y, si es true, hacemos fold-up
+  const handleRecoverNext = async () => {
+    const success = await onRecoverSubmit(email);
+    if (success) {
+      // Animación y mensaje
+      setRecoverSectionClass((prev) => prev + " fold-up");
+      setSuccessClass("success show");
     }
-    // Logica para recuperar contraseña API
-    setRecoverSectionClass((prev) => prev + " fold-up");
-    setSuccessClass("success show");
+    // Si no hay éxito, no plegamos
   };
 
   return (
