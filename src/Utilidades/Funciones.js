@@ -1226,6 +1226,7 @@ export async function getCostoP(planta) {
         };
         //------------------------------------------------------------------------------------------------------------------------------------------------------
         const response = await axios.get(baseUrl+'Comercial/GetPreProPla/'+planta, confi_ax);
+        console.log(response)
         if (response.data && response.data.length > 0) {
             return response.data;
         }else{return false}

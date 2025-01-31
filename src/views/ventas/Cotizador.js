@@ -1,9 +1,7 @@
 import React, {useEffect, useState, useRef} from 'react'
 import ProgressBar from "@ramonak/react-progress-bar";
-import Select from 'react-select';
 import makeAnimated from 'react-select/animated';
 import Swal from 'sweetalert2';
-import DataTable from 'react-data-table-component';
 import StepWizard from "react-step-wizard";
 import { GoogleMap, LoadScript, Marker } from '@react-google-maps/api';
 import Plantas from '../base/parametros/Plantas'
@@ -11,7 +9,7 @@ import FechaI from '../base/parametros/FechaInicio'
 import Step1 from '../ventas/Cotizador/Step1'
 import Step2 from '../ventas/Cotizador/Step2'
 import Step3 from '../ventas/Cotizador/Step3'
-import { formatCurrency, getCostoP, getDatosPlanta, getClientesCot, getObrasCot, getProspectos_, getElementos } from '../../Utilidades/Funciones';
+import { getCostoP, getClientesCot, getDatosPlanta } from '../../Utilidades/Funciones';
 import { Rol } from '../../Utilidades/Roles'
 import { IMaskMixin } from 'react-imask'
 import IMask from 'imask'
@@ -50,7 +48,7 @@ import {
 } from '@coreui/react'
 import { useNavigate } from "react-router-dom";
 import {CIcon} from '@coreui/icons-react'
-import { cilCheck, cilX, cilSearch, cilTrash, cilPlus } from '@coreui/icons'
+import { cilSearch } from '@coreui/icons'
 import '../../estilos.css'
 
 const animatedComponents = makeAnimated();
@@ -68,6 +66,7 @@ const Cotizador = () => {
   const [loading, setLoading] = useState(false);
   const [percentage, setPercentage] = useState(0);
   const [vModal, setVModal] = useState(false);// Modal Cargando
+  const [shSteps, setShSteps] = useState(false);
   const opcionesFca = {
     year: 'numeric', // '2-digit' para el año en dos dígitos
     month: '2-digit',   // 'numeric', '2-digit', 'short', 'long', 'narrow'
@@ -138,20 +137,31 @@ const Cotizador = () => {
   }
   //************************************************************** */
   const mCambio = (event) => {
-    setPlantas(event.target.value);
-    getCostoPlanta(event.target.value);
-    getClientes(event.target.value);
+    const planta = event.target.value;
+    if(planta.length > 0){
+      Swal.fire({
+        title: 'Cargando...',
+        text: 'Trabajando...',
+        didOpen: () => {
+            Swal.showLoading();  // Muestra la animación de carga
+            setPlantas(planta);
+            getCostoPlanta(planta);
+            setShSteps(true)     
+        }
+    });
+    }else{
+      setShSteps(false);
+    } 
   };
 
-  async function getCostoPlanta(planta)
+  const getCostoPlanta = async (planta) =>
   {
-    setLoading(true);
-    setVModal(true);
     try {
       const comisiones = await getCostoP(planta);
       setProducto(comisiones)
       if (comisiones) {
-          //setDFijos(comisiones);
+          Swal.close();
+          setDFijos(comisiones);
           //setData(comisiones);
           var cpc = comisiones[0].CPC;
           var fecha = vFechaI.toLocaleDateString('en-US',opcionesFca);
@@ -166,15 +176,15 @@ const Cotizador = () => {
           setSegmento(datosPla.segmento.data);
           setTC(datosPla.canal.data);
           setPlantas(planta);
+          getClientes(planta);
       } else {
+          Swal.close();
           Swal.fire("Error", "Ocurrió un error, vuelve a intentar", "error");
       }
     } catch (error) {
+      Swal.close();
       console.log(error);
       //Swal.fire("Error", "No se pudo obtener la información", "error");
-    } finally {
-        setLoading(false);
-        setVModal(false); // Oculta el modal de carga
     }
   }
   
@@ -229,20 +239,22 @@ const Cotizador = () => {
           </CInputGroup>
         </CCol>
         <CCol xs={4} md={1} lg={1} className='mt-4'>
-          <CButton color="primary">Limpiar</CButton>
+          <CButton color="success" className='txtTitleBtn'>Limpiar</CButton>
         </CCol>
         <CCol xs={4} md={1} lg={1} className='mt-4'>
-          <CButton color="primary">Exportar</CButton>
+          <CButton color="danger" className='txtTitleBtn'>Exportar</CButton>
         </CCol>
         <CCol xs={4} md={1} lg={1} className='mt-4'>
-          <CButton color="success">Guardar</CButton>
+          <CButton color="primary" className='txtTitleBtn'>Guardar</CButton>
         </CCol>
       </CRow>
+      {shSteps && (
       <StepWizard>
         <Step1 fijos={dFijos} corpo={dCorpo} mop={dMop} cdiesel={dDiesel} sucursal={plantasSel} clientes_={aClientes} obras_={aObras} onUpdateFData={updFData} />
         <Step2 fuente={aFuente} segmento={aSegmento} canal={aTC} productos={aProducto} fData={fData} updPData={updPData} />
         <Step3 fData={fData} pData={pData} />
       </StepWizard>
+      )}
       <CModal
           backdrop="static"
           visible={vModal}

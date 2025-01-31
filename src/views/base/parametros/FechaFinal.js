@@ -17,7 +17,8 @@ const FechaFinal = ({vFcaF, mFcaF}) => {
               selected={vFcaF} 
               onChange={mFcaF} 
               placeholderText='Selecciona Fecha' 
-              dateFormat="yyyy/MM/dd" />
+              dateFormat="yyyy/MM/dd"
+              className='form-control' />
         </div>
       </div>
     );

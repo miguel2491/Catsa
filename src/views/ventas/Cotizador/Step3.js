@@ -29,6 +29,7 @@ import TimePicker from 'rc-time-picker';
 import 'rc-time-picker/assets/index.css';
 import { useNavigate } from "react-router-dom";
 import moment from 'moment';
+import { getElementos } from '../../../Utilidades/Funciones';
 import {CIcon} from '@coreui/icons-react'
 import { cilCheck, cilX, cilSearch, cilTrash, cilPlus } from '@coreui/icons'
 import { Rol } from '../../../Utilidades/Roles'
@@ -48,16 +49,17 @@ const Step3 = ({ previousStep, formData, pData, onSave }) => {
     }
     const handleSave = () => {
       // Aquí puedes manejar la lógica para guardar los datos
-      console.log("Guardando datos...", formData);
+      console.log("Guardando datos...", formData, pData);
+
       // Aquí iría la llamada a la API o la lógica de persistencia que necesites
-      Swal.fire({
-                  title: 'Cargando...',
-                  text: 'Estamos obteniendo la información...',
-                  didOpen: () => {
-                      Swal.showLoading();  // Muestra la animación de carga
-                  }
-                });
-                setTimeout(() => { Swal.close(); navigate('/ventas/LCotizacion');},3000)
+        Swal.fire({
+            title: 'Cargando...',
+            text: 'Estamos obteniendo la información...',
+            didOpen: () => {
+                Swal.showLoading();  // Muestra la animación de carga
+            }
+        });
+        setTimeout(() => { Swal.close(); navigate('/ventas/LCotizacion');},3000)
     };
     // Configuración de la máscara
     const priceMask = {
@@ -91,11 +93,11 @@ const Step3 = ({ previousStep, formData, pData, onSave }) => {
         const elementos = await getElementos();
         console.log(elementos)
         if(elementos){
-          
           setElementos(elementos);
         }    
       }catch(error){
-          Swal.fire("Error", "No se pudo obtener la información de Elementos a colar", "error");
+        console.log(error)
+        //Swal.fire("Error", "No se pudo obtener la información de Elementos a colar", "error");
       }
     }
     const CFormInputWithMask = IMaskMixin(({ inputRef, ...props }) => (
