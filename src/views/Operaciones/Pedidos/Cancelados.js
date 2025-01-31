@@ -6,7 +6,7 @@ import FechaF from '../../base/parametros/FechaFinal';
 import Plantas from '../../base/parametros/Plantas';
 import '../../../estilos.css';
 import BuscadorDT from '../../base/parametros/BuscadorDT'
-import { downloadCV } from '../../../Utilidades/Funciones';
+import { downloadCV, getPCancelados } from '../../../Utilidades/Funciones';
 import {
     CContainer,
     CFormInput,
@@ -25,7 +25,7 @@ import {
 } from '@coreui/react'
 import { useNavigate } from "react-router-dom";
 import {CIcon} from '@coreui/icons-react'
-import { cilCloudDownload, cilSave, cilSearch } from '@coreui/icons'
+import { cilCloudDownload, cilSave, cilSearch, cilColorBorder, cilXCircle } from '@coreui/icons'
 import { format } from 'date-fns';
 import { Rol } from '../../../Utilidades/Roles'
 import DatePicker,{registerLocale} from 'react-datepicker';
@@ -41,9 +41,12 @@ const Cancelados = () => {
     const [vFechaF, setFechaFin] = useState(new Date());
     const [tipoGn, setTipoGn] = useState('-');
     const [tipoSt, setTipoSt] = useState('-');
+    const [tipoRes, setTipoRes] = useState('-');
     const [shTR, setshTR] = useState(false);
     const [shTG, setshTG] = useState(true);
     const [shCmbStatus, setshCmbStatus] = useState(false);
+    const [shDTPC, setshDTPC] = useState(false);
+    const [shBtnBuscar, setshBtnBuscar] = useState(false);
     // ROLES
     const userIsOperacion = Rol('Operaciones');
     const userIsJP = Rol('JefePlanta');
@@ -54,7 +57,6 @@ const Cancelados = () => {
     const [dtPCan, setDTCan] = useState([]);
     const [dtRch, setDTRch] = useState([]);
     // FROMS
-    const [nOrden, setNorden] = useState("");
     const [idOC, setIdOC] = useState("0");
     //************************************************************************************************************************************************************************** */    
     //************************************************************************************************************************************************************************** */
@@ -74,17 +76,17 @@ const Cancelados = () => {
     };
     //************************************************************************************************************************************************************************** */
     //************************************************************************************************************************************************************************** */
-    const getOComprasBtn = () =>{
+    const getPCanBtn = () =>{
         Swal.fire({
             title: 'Cargando...',
             text: 'Estamos obteniendo la información...',
             didOpen: () => {
                 Swal.showLoading();  // Muestra la animación de carga
-                gOC();
+                gPC();
             }
         });
     }
-    const gOC = async () => {
+    const gPC = async () => {
         var planta = plantasSel;
         if(plantasSel == undefined || plantasSel.length == 0 || plantasSel === ""){
             if(userIsJP && !userIsOperacion)
@@ -93,33 +95,41 @@ const Cancelados = () => {
                 Swal.fire("Error", "Debes seleccionar alguna planta", "error");
                 return false;
             }else {
-                setPlantas('0')
-                planta = '0'
+                setPlantas('-')
+                planta = '-'
             }
         }
         const auxFcaI = format(vFechaI, 'yyyy/MM/dd');
         const auxFcaF = format(vFechaF, 'yyyy/MM/dd');
         try{
-            const ocList = await getOCompras(planta, auxFcaI, auxFcaF);
-            if(ocList)
-            {
-                setDTOrdenes(ocList);
-                setExOc(ocList);
+            if(tipoGn == "G"){
+                const ocList = await getPCancelados(planta, auxFcaI, auxFcaF, tipoGn, tipoSt);
+                if(ocList){
+                    setDTCan(ocList);
+                }
+            }else{
+                const ocList = await getPCancelados(planta, auxFcaI, auxFcaF, tipoGn, tipoSt);
+                console.log(ocList)
+                if(ocList){
+                    setDTRch(ocList)
+                }
             }
+            setshDTPC(true)
             // Cerrar el loading al recibir la respuesta
             Swal.close();  // Cerramos el loading
         }catch(error){
+            setshDTPC(false)
             Swal.close();
             Swal.fire("Error", "No se pudo obtener la información", "error");
         }
     }
-    const viewPC = (id) =>{
+    const viewPC = (id,tipo, idTicket) =>{
         Swal.fire({
             title: 'Cargando...',
             text: 'Reedirigiendo...',
             didOpen: () => {
                 Swal.showLoading();  // Muestra la animación de carga
-                navigate('/Operaciones/Pedidos/DCancelados');
+                navigate('/Operaciones/Pedidos/DCancelados/'+id+'/'+tipo+'/'+idTicket);
             }
         });
     }
@@ -130,20 +140,21 @@ const Cancelados = () => {
         {
             name: 'Acción',
             selector: row => row.id,
-            width:"200px",
+            width:"100px",
             cell: (row) => (
                 <div>
                     <CRow>
-                    {(userIsOperacion || userIsJP) && row.estatus === '1' && (
+                    {(userIsOperacion || userIsJP) && (
                         <CCol xs={6} md={2} lg={2}>
                         <CButton
+                            style={{'color':'white'}}
                             color="warning"
-                            onClick={() => viewPC(row.id)}
+                            onClick={() => viewPC(row.id_cancelados, 'PC',row.IdTicket)}
                             size="sm"
                             className="me-2"
                             title="Cancelar"
                         >
-                            <CIcon icon={cilSave} />
+                            <CIcon icon={cilXCircle} />
                         </CButton>
                         </CCol>
                     )}
@@ -154,7 +165,7 @@ const Cancelados = () => {
         {
             name: 'No. Orden',
             selector: row => {
-                const aux = row.ordenCompra;
+                const aux = row.NoOrden;
                 if (aux === null || aux === undefined) {
                     return "No disponible";
                 }
@@ -170,7 +181,7 @@ const Cancelados = () => {
         {
             name: 'Planta',
             selector: row => {
-                const aux = row.planta;
+                const aux = row.Planta;
                 if (aux === null || aux === undefined) {
                     return "No disponible";
                 }
@@ -186,7 +197,7 @@ const Cancelados = () => {
         {
             name: 'Fecha Cancelación',
             selector: row => {
-                const fecha = row.fecha;
+                const fecha = row.FechaCreacion;
                 // Verifica si estatus es null, undefined o un objeto
                 if (fecha === null || fecha === undefined) {
                 return "No disponible";
@@ -202,85 +213,91 @@ const Cancelados = () => {
         },
         {
             name: 'No. Remisión',
-            selector: row => row.UserName,
+            selector: row => row.NoRemision,
             sortable:true,
             width:"150px",
         },
         {
             name: 'Pedido Programa',
-            selector: row => row.UserName,
+            selector: row =>{
+                const aux = row.PedidoPrograma;
+                if (aux === null || aux === undefined) {
+                    return "No disponible";
+                }
+                if (typeof aux === 'object') {
+                return "Sin Datos"; // O cualquier mensaje que prefieras
+                }
+                return aux;
+            },
             sortable:true,
             width:"150px",
         },
         {
             name: 'No CLiente',
-            selector: row => row.UserName,
+            selector: row => row.NoCliente,
             sortable:true,
             width:"150px",
         },
         {
             name: 'Cliente',
-            selector: row => row.UserName,
+            selector: row => row.Cliente,
             sortable:true,
             width:"150px",
         },
         {
             name: 'No Obra',
-            selector: row => row.UserName,
+            selector: row => row.NoObra,
             sortable:true,
             width:"150px",
         },
         {
             name: 'Obra',
-            selector: row => row.UserName,
+            selector: row => row.Obra,
             sortable:true,
             width:"150px",
         },
         {
             name: 'Producto',
-            selector: row => row.UserName,
+            selector: row => row.Producto,
             sortable:true,
             width:"150px",
         },
         {
             name: 'Costo',
-            selector: row => row.UserName,
+            selector: row => row.CostoMP,
             sortable:true,
             width:"150px",
         },
         {
             name: 'Precio Concreto',
-            selector: row => row.UserName,
+            selector: row => row.PrecioConcreto,
             sortable:true,
             width:"150px",
         },
         {
             name: 'Cantidad',
-            selector: row => row.UserName,
+            selector: row => row.Cantidad,
             sortable:true,
             width:"150px",
         },
         {
             name: 'Tiempo Carga',
-            selector: row => row.UserName,
+            selector: row => {
+                const aux = row.TiempoCarga;
+                if (aux === null || aux === undefined) {
+                    return "No disponible";
+                }
+                if (typeof aux === 'object') {
+                return "Sin Datos"; // O cualquier mensaje que prefieras
+                }
+                return aux;
+            },
             sortable:true,
             width:"150px",
         },
         {
             name: 'Fecha Creación',
-            selector: row => {
-                const aux = row.estatus;
-                if (aux === '0' ) {
-                    return <CBadge textBgColor='danger'>Eliminado</CBadge>;
-                }else if(aux === '2'){
-                    return <CBadge color='success' shape='rounded-pill'>Aprobada</CBadge>;
-                }else if(aux === '3'){
-                    return <CBadge color='warning' shape='rounded-pill'>Finalizada</CBadge>;
-                }else{
-                    return <CBadge textBgColor='primary'>En Proceso</CBadge>;
-                }
-                return aux;
-            },
+            selector: row => row.FechaCreacion,
             width:"100px",
             sortable:true,
             grow:1,
@@ -289,21 +306,22 @@ const Cancelados = () => {
     const colRCH = [
         {
             name: 'Acción',
-            selector: row => row.id,
-            width:"200px",
+            selector: row => row.id_cancelados,
+            width:"80px",
             cell: (row) => (
                 <div>
                     <CRow>
                     {(userIsOperacion || userIsJP) && row.estatus === '1' && (
                         <CCol xs={6} md={2} lg={2}>
                         <CButton
+                            style={{'color':'white'}}
                             color="warning"
-                            onClick={() => addOC(row.id)}
+                            onClick={() => viewPC(row.id_cancelados,'RH', row.id_ticket)}
                             size="sm"
                             className="me-2"
-                            title="Cancelar"
+                            title="Editar"
                         >
-                            <CIcon icon={cilSave} />
+                            <CIcon icon={cilColorBorder} />
                         </CButton>
                         </CCol>
                     )}
@@ -314,7 +332,7 @@ const Cancelados = () => {
         {
             name: 'Planta',
             selector: row => {
-                const aux = row.planta;
+                const aux = row.clave_planta;
                 if (aux === null || aux === undefined) {
                     return "No disponible";
                 }
@@ -323,14 +341,14 @@ const Cancelados = () => {
                 }
                 return aux;
             },
-            width:"100px",
+            width:"80px",
             sortable:true,
             grow:1,
         },
         {
             name: 'Fecha Cancelación',
             selector: row => {
-                const fecha = row.fecha;
+                const fecha = row.created_at;
                 // Verifica si estatus es null, undefined o un objeto
                 if (fecha === null || fecha === undefined) {
                 return "No disponible";
@@ -342,68 +360,80 @@ const Cancelados = () => {
                 return fecha_;
             },
             sortable:true,
-            width:"150px",
+            width:"120px",
         },
         {
             name: 'Remisión',
-            selector: row => row.UserName,
+            selector: row => row.r_origen+'-->'+row.r_destino,
             sortable:true,
-            width:"150px",
+            width:"200px",
         },
         {
             name: 'Id Ticket',
-            selector: row => row.UserName,
+            selector: row => row.id_ticket,
             sortable:true,
-            width:"150px",
+            width:"300px",
         },
         {
             name: 'Área',
-            selector: row => row.UserName,
+            selector: row => row.area,
             sortable:true,
             width:"150px",
         },
         {
             name: 'Motivo',
-            selector: row => row.UserName,
+            selector: row => {
+                const aux = row.motivo;
+                switch(aux){
+                    case "1":
+                        return "RECHAZADO/ARREGLADO";
+                    case "2":
+                        return "RECHAZADO/RE DIRECCIONADO";
+                    case "3":
+                        return "RECHAZADO/TIRADO";
+                    default:
+                        return "RECHAZADO/RETORNADA";
+                }
+            },
             sortable:true,
-            width:"150px",
+            width:"300px",
         },
         {
             name: 'Descripción',
-            selector: row => row.UserName,
+            selector: row => row.descripcion,
             sortable:true,
-            width:"150px",
+            width:"500px",
         },
         {
             name: 'Solicitante',
-            selector: row => row.UserName,
+            selector: row => {
+                const aux = row.usuarioCreo;
+                if (aux === null || aux === undefined) {
+                    return "No disponible";
+                }
+                if (typeof aux === 'object') {
+                return "Sin Datos"; // O cualquier mensaje que prefieras
+                }
+                return aux;
+            },
             sortable:true,
             width:"150px",
         },
         {
             name: 'Estatus',
-            selector: row => row.UserName,
-            sortable:true,
-            width:"150px",
-        },
-        {
-            name: 'Fecha Creación',
             selector: row => {
                 const aux = row.estatus;
-                if (aux === '0' ) {
-                    return <CBadge textBgColor='danger'>Eliminado</CBadge>;
-                }else if(aux === '2'){
-                    return <CBadge color='success' shape='rounded-pill'>Aprobada</CBadge>;
-                }else if(aux === '3'){
-                    return <CBadge color='warning' shape='rounded-pill'>Finalizada</CBadge>;
-                }else{
-                    return <CBadge textBgColor='primary'>En Proceso</CBadge>;
+                switch(aux){
+                    case "1":
+                        return <CBadge textBgColor='primary'>En Proceso</CBadge>;
+                    case "2":
+                        return <CBadge textBgColor='warning'>Finalizada</CBadge>;
+                    default:
+                        return false;
                 }
-                return aux;
             },
-            width:"100px",
             sortable:true,
-            grow:1,
+            width:"150px",
         },
     ];
     //------------
@@ -430,11 +460,12 @@ const Cancelados = () => {
     };
     const fPCan = dtPCan.filter(item => {
         // Filtrar por planta, interfaz y texto de búsqueda
-        return item.UserName.toLowerCase().includes(fText.toLowerCase()) || item.ordenCompra.includes(fText) || item.planta.includes(fText) || item.tipoMant.includes(fText);
+        return item.Cliente.toLowerCase().includes(fText.toLowerCase()) || String(item.NoOrden).includes(fText) || item.Planta.includes(fText) || item.Producto.includes(fText) || 
+        item.NoObra.includes(fText) || item.PedidoPrograma.includes(fText) || item.NoCliente.includes(fText);
     });
     const fRch = dtRch.filter(item => {
         // Filtrar por planta, interfaz y texto de búsqueda
-        return item.UserName.toLowerCase().includes(fText.toLowerCase()) || item.ordenCompra.includes(fText) || item.planta.includes(fText) || item.tipoMant.includes(fText);
+        return item.clave_planta.includes(fText) || item.id_ticket.includes(fText) || item.area.includes(fText);
     });
     //************************************************************************************************************************************************************************** */
     const nOrdenCh = (e) =>{
@@ -446,6 +477,11 @@ const Cancelados = () => {
     // Maneja el cambio en el select de tipo de mantenimiento
     const handleTipoGn = (e) => {
         setTipoGn(e.target.value);
+        setshBtnBuscar(true);
+        if(e.target.value == "-")
+        {
+            setshBtnBuscar(false)
+        }
         if(e.target.value == "G" || e.target.value == "-"){
             setshTR(false);
             setshTG(true);
@@ -546,12 +582,14 @@ const Cancelados = () => {
                     </CFormSelect>
                 </CCol>
                 )}
+                {shBtnBuscar && (
                 <CCol xs={6} md={2} lg={2} className='mt-3'>
-                    <CButton color='primary' onClick={getOComprasBtn}> 
+                    <CButton color='primary' onClick={getPCanBtn}> 
                         <CIcon icon={cilSearch} />
                             Buscar
                     </CButton>
                 </CCol>
+                )}
                 <CCol xs={6} md={2} className='mt-3'>
                     <CButton color='danger' onClick={viewPC}>
                         <CIcon icon={cilCloudDownload} className="me-2" />
@@ -559,36 +597,38 @@ const Cancelados = () => {
                     </CButton>
                 </CCol>
             </CRow>
-            <CRow className='mt-2 mb-2'>
-                <CCol xs={12} md={12}>
-                    <CCol xs={3} md={3}>
-                        <br />
-                        <BuscadorDT value={vBPlanta} onChange={onFindBusqueda} onSearch={fBusqueda} />
+            { shDTPC && (
+                <CRow className='mt-2 mb-2'>
+                    <CCol xs={12} md={12}>
+                        <CCol xs={3} md={3}>
+                            <br />
+                            <BuscadorDT value={vBPlanta} onChange={onFindBusqueda} onSearch={fBusqueda} />
+                        </CCol>
                     </CCol>
-                </CCol>
-                {shTG && (
-                <CCol xs={12} md={12}>
-                    <DataTable
-                        columns={colPC}
-                        data={fPCan}
-                        pagination
-                        persistTableHead
-                        subHeader
-                    />
-                </CCol>
-                )}
-                {shTR && (
-                <CCol xs={12} md={12}>
-                    <DataTable
-                        columns={colRCH}
-                        data={fRch}
-                        pagination
-                        persistTableHead
-                        subHeader
-                    />
-                </CCol>
-                )}
-            </CRow>
+                    {shTG && (
+                    <CCol xs={12} md={12}>
+                        <DataTable
+                            columns={colPC}
+                            data={fPCan}
+                            pagination
+                            persistTableHead
+                            subHeader
+                        />
+                    </CCol>
+                    )}
+                    {shTR && (
+                    <CCol xs={12} md={12}>
+                        <DataTable
+                            columns={colRCH}
+                            data={fRch}
+                            pagination
+                            persistTableHead
+                            subHeader
+                        />
+                    </CCol>
+                    )}
+                </CRow>
+            )}
             <br />
         </CContainer>
     </>

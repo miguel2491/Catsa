@@ -22,6 +22,7 @@ import {
   cilBell,
   cilContrast,
   cilEnvelopeOpen,
+  cilHeadphones,
   cilHome,
   cilList,
   cilMenu,
@@ -30,7 +31,8 @@ import {
 } from '@coreui/icons'
 
 import { AppBreadcrumb } from './index'
-import { AppHeaderDropdown } from './header/index'
+import { AppHeaderDropdown, AppBell } from './header/index'
+import App from '../views/permisos/Permisos';
 
 const AppHeader = () => {
   const headerRef = useRef()
@@ -49,6 +51,9 @@ const AppHeader = () => {
 
   const navDash = () => {
     navigate('/dashboard');
+  }
+  const navHelp = () => {
+    navigate('/help');
   }
 
   return (
@@ -83,9 +88,7 @@ const AppHeader = () => {
             <div className="h-300 text-opacity-75">Bienvenido: <b>{cookies.get('Usuario')}</b></div>
           </CNavItem>
           <CNavItem>
-            <CNavLink href="#">
-              <CIcon icon={cilBell} size="lg" />
-            </CNavLink>
+            <AppBell />
           </CNavItem>
           <CNavItem>
             <CNavLink href="#">
@@ -93,8 +96,8 @@ const AppHeader = () => {
             </CNavLink>
           </CNavItem>
           <CNavItem>
-            <CNavLink href="#">
-              <CIcon icon={cilEnvelopeOpen} size="lg" />
+            <CNavLink title='Ayuda'>
+              <CIcon icon={cilHeadphones} onClick={navHelp} size="lg" />
             </CNavLink>
           </CNavItem>
         </CHeaderNav>

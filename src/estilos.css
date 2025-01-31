@@ -2,7 +2,9 @@
 h3, label{
     color:white;
 }
-
+.txtTitleBtn{
+	color:white
+}
 .txtBuscar{
     height: 32px;
 	width: 200px;

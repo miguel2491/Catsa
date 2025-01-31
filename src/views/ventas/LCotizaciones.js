@@ -27,8 +27,6 @@ const LCotizacion = () => {
   const [plantasSel , setPlantas] = useState('');
   const [vFechaI, setFechaIni] = useState(null);
   const [vFcaF, setFechaFin] = useState(null);
-  const [toast, addToast] = useState(0)
-  const toaster = useRef()
   const [posts, setPosts] = useState([]);
   //Arrays
   const [dtCotizacion, setDTCotizacion] = useState([]);
@@ -49,8 +47,12 @@ const LCotizacion = () => {
     }
   },[]);
   const mCambio = (event) => {
-    setPlantas(event.target.value);
-    GetCotizaciones_(event.target.value);
+    const pla = event.target.value; 
+    if(pla.length > 0)
+    {
+      setPlantas(pla);
+      GetCotizaciones_(pla);
+    }
   };
   const cFechaI = (fecha) => {
     setFechaIni(fecha.toLocaleDateString('en-US',opcionesFca));

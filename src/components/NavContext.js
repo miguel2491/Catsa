@@ -21,6 +21,7 @@ import {
   cilGarage,
   cilDollar,
   cilBan,
+  cilBarChart,
 } from '@coreui/icons'
 import { CNavGroup, CNavItem, CNavTitle } from '@coreui/react'
 import CIcon from '@coreui/icons-react'
@@ -218,6 +219,15 @@ const NavProvider = ({ children }) => {
                       icon: <CIcon icon={cilGarage} customClassName="nav-icon" />,
                     },
                   ]:[]),
+                  ...(userIsOperacion || userIsAdmin || userIsGerenteP 
+                    ?[
+                  {
+                    component: CNavItem,
+                    name: 'Reporte Orden Compra',
+                    to: '/Operaciones/Mantenimiento/ReporteOC',
+                    icon: <CIcon icon={cilBarChart} customClassName="nav-icon" />,
+                  },
+                ]:[]),
               ],
             },
             {
@@ -226,7 +236,7 @@ const NavProvider = ({ children }) => {
               to: '/Pedidos',
               icon: <CIcon icon={cilUser} customClassName="nav-icon" />,
               items: [
-                ...(userIsOperacion || userIsAdmin || userIsGerenteP
+                ...(userIsOperacion || userIsAdmin || userIsGerenteP || userIsJP
                   ? [
                     {
                       component: CNavItem,

@@ -53,6 +53,109 @@ export async function getPermisos()
 
     }
 }
+export function findLogin()
+{
+    const isLoggedIn = cookies.get('idUsuario') !== undefined;
+      if (!isLoggedIn) {
+        // Si no está logueado, redirige a la página de login
+        return false;
+      }
+      // Si está logueado, renderiza el componente
+      return true;
+}
+export async function getNotificaciones()
+{
+    try
+    {
+        let confi_ax = {
+            headers:
+            {
+                'Cache-Control': 'no-cache',
+                'Content-Type': 'application/json',
+                "Authorization": "Bearer "+cookies.get('token'),
+            },
+        };
+        //------------------------------------------------------------------------------------------------------------------------------------------------------
+        const response = await axios.get(baseUrl2+'Login/GetNotificaciones/'+cookies.get('Usuario'), confi_ax);
+        if (response.data && response.data.length > 0) {
+            const obj = response.data;
+            if(obj.length > 0)
+            {
+                return obj;
+            }else{return false}
+        }else{return false}
+    } 
+    catch(error)
+    {
+        return false
+    }
+}
+export async function setNotificacion(id)
+{
+    try
+    {
+        let confi_ax = {
+            headers:
+            {
+                'Cache-Control': 'no-cache',
+                'Content-Type': 'application/json',
+                "Authorization": "Bearer "+cookies.get('token'),
+            },
+        };
+        //------------------------------------------------------------------------------------------------------------------------------------------------------
+        const response = await axios.get(baseUrl2+'Login/SetReadNotificacion/'+id, confi_ax);
+        if (response.data && response.data.length > 0) {
+            const obj = response.data;
+            if(obj.length > 0)
+            {
+                return obj;
+            }else{return false}
+        }else{return false}
+    } 
+    catch(error)
+    {
+        return false
+    }
+}
+export async function makeNotificacion(userDestino, categoria, titulo, desc, url)
+{
+    const fData = new FormData();
+    fData.append("nO", JSON.stringify({
+        usuarioCreo: cookies.get('Usuario'),
+        usuarioDestino: userDestino,
+        categoria: categoria,
+        titulo: titulo,
+        descripcion: desc,
+        url: url,
+    }));
+    for (let pair of fData.entries()) {
+        console.log(pair[0] + ": " + pair[1]);
+    }
+    try
+    {
+        let confi_ax = {
+            headers:
+            {
+                'Cache-Control': 'no-cache',
+                'Content-Type': 'application/json',
+                "Authorization": "Bearer "+cookies.get('token'),
+            },
+        };
+        //------------------------------------------------------------------------------------------------------------------------------------------------------
+        const response = await axios.post(baseUrl2+'Login/setNotificacion', confi_ax);
+        if (response.data && response.data.length > 0) {
+            const obj = response.data;
+            if(obj.length > 0)
+            {
+                return obj;
+            }else{return false}
+        }else{return false}
+    } 
+    catch(error)
+    {
+        return false
+    }
+}
 //****************************************************************************************************************************************************************************** */
 // CATALOGOS
 export async function getElementos() {
@@ -94,6 +197,75 @@ export async function getPlantas() {
         };
         //------------------------------------------------------------------------------------------------------------------------------------------------------
         const response = await axios.get(baseUrl+'Administracion/GetPlantas/'+cookies.get('Usuario'),confi_ax);
+        if (response.data && response.data.length > 0) {
+            const obj = response.data;
+            if(obj.length > 0)
+            {
+                return obj;
+            }else{return false}
+        }else{return false}
+    } 
+    catch(error)
+    {
+        return false
+    }
+}
+
+export async function getTutoriales() {
+    try
+    {
+        let confi_ax = {
+            headers:
+            {
+                'Cache-Control': 'no-cache',
+                'Content-Type': 'application/json',
+                "Authorization": "Bearer "+cookies.get('token'),
+            },
+        };
+        //------------------------------------------------------------------------------------------------------------------------------------------------------
+        const response = await axios.get(baseUrl+'Catalogo/GetVideos',confi_ax);
+        if (response.data && response.data.length > 0) {
+            const obj = response.data;
+            if(obj.length > 0)
+            {
+                return obj;
+            }else{return false}
+        }else{return false}
+    } 
+    catch(error)
+    {
+        return false
+    }
+}
+export async function setVideoUpload(data) {
+    const fData = new FormData();
+    fData.append("uV", JSON.stringify({
+        titulo: data.titulo,
+        categoria: data.categoria,
+        descripcion: data.descripcion
+    }));
+    if (data.file) {
+        // Ahora asegurémonos de agregarlo
+        fData.append("video", data.file);
+    } else {
+        console.log("No se encontró el archivo en data.file");
+    }
+    for (let pair of fData.entries()) {
+        console.log(pair[0] + ": " + pair[1]);
+    }
+    try
+    {
+        let confi_ax = {
+            headers:
+            {
+                'Cache-Control': 'no-cache',
+                'Content-Type': 'application/json',
+                "Authorization": "Bearer "+cookies.get('token'),
+            },
+        };
+        
+        //------------------------------------------------------------------------------------------------------------------------------------------------------
+        const response = await axios.get(baseUrl+'Catalogo/SetVideo',fData,confi_ax);
         if (response.data && response.data.length > 0) {
             const obj = response.data;
             if(obj.length > 0)
@@ -348,7 +520,198 @@ export async function getCmbsAreas(tipos,id){
             },
         };
         //------------------------------------------------------------------------------------------------------------------------------------------------------
-        const response = await axios.get(baseUrl2+'Catalogo/GetCmb/'+tipos+","+id, confi_ax);
+        const response = await axios.get(baseUrl+'Catalogo/GetCmb/'+tipos+","+id, confi_ax);
+        if (response.data && response.data.length > 0) {
+            const obj = response.data;
+            if(obj.length > 0)
+            {
+                return obj;
+            }else{return false}
+        }else{return false}
+    } 
+    catch(error)
+    {
+        return false
+    }
+}
+export async function getPCancelados(planta, FI, FF, tipo, estatus) {
+    const fcaI = FormatoFca(FI);
+    const fcaF = FormatoFca(FF);
+    var urlB = tipo =="G" ? "GetPCanceladosGn/"+planta+','+fcaI+','+fcaF:"GetPCanceladosRh/"+planta+','+fcaI+','+fcaF+','+estatus;
+    try
+    {
+        let confi_ax = {
+            headers:
+            {
+                'Cache-Control': 'no-cache',
+                'Content-Type': 'application/json',
+                "Authorization": "Bearer "+cookies.get('token'),
+            },
+        };
+        
+        //------------------------------------------------------------------------------------------------------------------------------------------------------
+        const response = await axios.get(baseUrl+'Operaciones/'+urlB, confi_ax);
+        if (response.data && response.data.length > 0) {
+            const obj = response.data;
+            if(obj.length > 0)
+            {
+                return obj;
+            }else{return false}
+        }else{return false}
+    } 
+    catch(error)
+    {
+        return false
+    }
+}
+export async function getPCanceladoI(id) {
+    try
+    {
+        let confi_ax = {
+            headers:
+            {
+                'Cache-Control': 'no-cache',
+                'Content-Type': 'application/json',
+                "Authorization": "Bearer "+cookies.get('token'),
+            },
+        };
+        //------------------------------------------------------------------------------------------------------------------------------------------------------
+        const response = await axios.get(baseUrl+'Operaciones/GetPCancelado/'+id, confi_ax);
+        if (response.data && response.data.length > 0) {
+            const obj = response.data;
+            if(obj.length > 0)
+            {
+                return obj;
+            }else{return false}
+        }else{return false}
+    } 
+    catch(error)
+    {
+        return false
+    }
+}
+export async function getPCanceladoGn(id) {
+    try
+    {
+        let confi_ax = {
+            headers:
+            {
+                'Cache-Control': 'no-cache',
+                'Content-Type': 'application/json',
+                "Authorization": "Bearer "+cookies.get('token'),
+            },
+        };
+        //------------------------------------------------------------------------------------------------------------------------------------------------------
+        const response = await axios.get(baseUrl+'Operaciones/GetPCanceladoGn/'+id, confi_ax);
+        if (response.data && response.data.length > 0) {
+            const obj = response.data;
+            if(obj.length > 0)
+            {
+                return obj;
+            }else{return false}
+        }else{return false}
+    } 
+    catch(error)
+    {
+        return false
+    }
+}
+export async function setTicketCancel(data, tipo) {
+    const userID = cookies.get('idUsuario');
+    data.userId = userID;
+    if(tipo === '0'){
+        delete data.id;
+    }
+    let usuario_ = cookies.get('Usuario') == undefined ? "-":cookies.get('Usuario');
+    const fData = new FormData();
+    fData.append("pC", JSON.stringify({
+        id_cancelados: data.id_cancelados,
+        id_ticket:data.id_ticket,
+        usuarioCreo: usuario_,
+        motivo: data.motivo,
+        area: data.area,
+        causa: data.causa,
+        causante: data.causante,
+        cantidad:data.cantidad ? data.cantidad:0,
+        r_origen: data.remOrigen,
+        r_destino: data.remDestino,
+        comentario: data.Comentario,
+        clave_planta:data.planta,
+        precioConcreto:data.precioConcreto ? data.precioConcreto:0,
+        costoMP:data.costoMP ? data.costoMP : 0,
+        descripcion:data.Comentario
+    }));
+    if (data.file) {
+        // Ahora asegurémonos de agregarlo
+        fData.append("image", data.file);
+    } else {
+        console.log("No se encontró el archivo en data.file");
+    }
+    for (let pair of fData.entries()) {
+        console.log(pair[0] + ": " + pair[1]);
+    }
+    try
+    {
+        let confi_ax = {
+            headers:
+            {
+                'Cache-Control': 'no-cache',
+                "Authorization": "Bearer "+cookies.get('token'),
+            },
+        };
+        
+        //------------------------------------------------------------------------------------------------------------------------------------------------------
+        const response = await axios.post(baseUrl+"Operaciones/setPCan", fData, confi_ax);
+        if (response.data && response.data.length > 0) {
+            const obj = response.data;
+            if(obj.length > 0)
+            {
+                return obj;
+            }else{return false}
+        }else{return false}
+    } 
+    catch(error)
+    {
+        return false
+    }
+}
+export async function answTicketCancel(data, tipo) {
+    console.log(data)
+    let usuario_respuesta = cookies.get('Usuario') == undefined ? "-":cookies.get('Usuario');
+    const fData = new FormData();
+    fData.append("pC", JSON.stringify({
+        id_cancelados: data.id_cancelados,
+        id_ticket:data.id_ticket,
+        motivo: data.motivo,
+        area: data.area,
+        causa: data.causa,
+        causante: data.causante,
+        r_origen: data.remOrigen,
+        r_destino: data.remDestino,
+        comentario: data.Comentario,
+        usuario_respuesta:usuario_respuesta,
+        tipo_respuesta:data.Aceptacion,
+        cantidad:data.cantidad ? data.cantidad:0,
+        precioConcreto:data.precioConcreto ? data.precioConcreto:0,
+        costoMP:data.costoMP ? data.costoMP : 0,
+        historial:data.Historial,
+        usuario_responsable:data.Responsable,
+        costo: data.Costo
+    }));
+    for (let pair of fData.entries()) {
+        console.log(pair[0] + ": " + pair[1]);
+    }
+    try
+    {
+        let confi_ax = {
+            headers:
+            {
+                'Cache-Control': 'no-cache',
+                "Authorization": "Bearer "+cookies.get('token'),
+            },
+        };
+        //------------------------------------------------------------------------------------------------------------------------------------------------------
+        const response = await axios.post(baseUrl+"Operaciones/resPCan", fData, confi_ax);
         if (response.data && response.data.length > 0) {
             const obj = response.data;
             if(obj.length > 0)
@@ -435,7 +798,8 @@ export async function setOCompra(data, tipo) {
         descripcion: data.descripcion,
         tipoMant: data.tipoMant,
         idVehiculo: data.idVehiculo,
-        descMant: data.descMant
+        descMant: data.descMant,
+        respuesta:data.respuesta
     }));
     if (data.file) {
         // Ahora asegurémonos de agregarlo
@@ -569,6 +933,35 @@ export async function addNFac(id, nFac) {
             band = true;
         }
         return band
+    } 
+    catch(error)
+    {
+        return false
+    }
+}
+ //REPORTES
+ export async function getOC(FI, FF) {
+    try
+    {
+        let confi_ax = {
+            headers:
+            {
+                'Cache-Control': 'no-cache',
+                'Content-Type': 'application/json',
+                "Authorization": "Bearer "+cookies.get('token'),
+            },
+        };
+        const fcaI = FormatoFca(FI);
+        const fcaF = FormatoFca(FF);
+        //------------------------------------------------------------------------------------------------------------------------------------------------------
+        const response = await axios.get(baseUrl+'Reportes/GetOCompras/'+fcaI+','+fcaF, confi_ax);
+        if (response.data && response.data.length > 0) {
+            const obj = response.data;
+            if(obj.length > 0)
+            {
+                return obj;
+            }else{return false}
+        }else{return false}
     } 
     catch(error)
     {
@@ -833,6 +1226,7 @@ export async function getCostoP(planta) {
         };
         //------------------------------------------------------------------------------------------------------------------------------------------------------
         const response = await axios.get(baseUrl+'Comercial/GetPreProPla/'+planta, confi_ax);
+        console.log(response)
         if (response.data && response.data.length > 0) {
             return response.data;
         }else{return false}

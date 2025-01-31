@@ -118,7 +118,11 @@ function cerrarSesion(){
           <CIcon icon={cilTask} className="me-2" />
           Cambiar Pass
           <CBadge color="danger" className="ms-2">
+<<<<<<< HEAD
             1
+=======
+            4
+>>>>>>> origin/main
           </CBadge>
         </CDropdownItem>
         <CDropdownHeader className="bg-body-secondary fw-semibold my-2">Settings</CDropdownHeader>
