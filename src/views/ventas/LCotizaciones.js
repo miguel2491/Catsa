@@ -85,7 +85,16 @@ const LCotizacion = () => {
     },
     {
       name: 'No. Cliente',
-      selector: row => row.NoCliente,
+      selector: row => {
+        const ncliente = row.NoCliente
+        if (ncliente === null || ncliente === undefined) {
+          return "No disponible";
+        }
+        if (typeof ncliente === 'object') {
+          return "Sin Datos"; // O cualquier mensaje que prefieras
+        }
+        return ncliente;
+      },
       sortable:true,
       width:"200px",
     },
@@ -103,25 +112,43 @@ const LCotizacion = () => {
     },
     {
       name: 'Dirección',
-      selector: row => row.IdCotizacion,
+      selector: row => row.Direccion,
       sortable:true,
       width:"200px",
     },
     {
       name: 'No. Obra',
-      selector: row => row.IdCotizacion,
+      selector: row => {
+        const nobra = row.NoObra
+        if (nobra === null || nobra === undefined) {
+          return "No disponible";
+        }
+        if (typeof nobra === 'object') {
+          return "Sin Datos"; // O cualquier mensaje que prefieras
+        }
+        return nobra;
+      },
       sortable:true,
       width:"200px",
     },
     {
       name: 'Obra',
-      selector: row => row.IdCotizacion,
+      selector: row => {
+        const obra = row.Obra
+        if (obra === null || obra === undefined) {
+          return "No disponible";
+        }
+        if (typeof obra === 'object') {
+          return "Sin Datos"; // O cualquier mensaje que prefieras
+        }
+        return obra;
+      },
       sortable:true,
       width:"200px",
     },
     {
       name: 'Vendedor',
-      selector: row => row.IdCotizacion,
+      selector: row => row.Vendedor,
       sortable:true,
       width:"200px",
     },
@@ -155,7 +182,7 @@ const LCotizacion = () => {
         const cotI = await GetCotizaciones(vFechaI, vFcaF, planta);
         Swal.close();  // Cerramos el loading
         console.log(cotI)
-        if (cotI && cotI.length > 0) {
+        if (cotI) {
             setDTCotizacion(cotI);  // Procesar la respuesta
         } else {
             Swal.close();
