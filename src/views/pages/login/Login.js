@@ -547,7 +547,7 @@ function RegisterForm({ onLogin, onRegisterSubmit }) {
   );
 }
 
-/* ------------------------------------------------------------------
+/* ------------------------------------------------------------------ 
                 FORMULARIO DE RECUPERACIÓN
    ------------------------------------------------------------------ */
 function RecoverForm({ onLogin, onRecoverSubmit }) {
