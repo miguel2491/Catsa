@@ -63,6 +63,11 @@ const LCotizacion = () => {
   //COLS
   const colCot = [
     {
+      name: 'ACCIONES',
+      selector: row => row.IdCotizacion,
+      sortable:true,
+      width:"200px",
+    },{
       name: 'ID',
       selector: row => row.IdCotizacion,
       sortable:true,
@@ -70,7 +75,7 @@ const LCotizacion = () => {
     },{
       name: 'Fecha',
       selector: row => {
-        const fecha = row.Actualizo;
+        const fecha = row.FechaSeg;
         if (fecha === null || fecha === undefined) {
           return "No disponible";
         }
@@ -148,19 +153,46 @@ const LCotizacion = () => {
     },
     {
       name: 'Vendedor',
-      selector: row => row.Vendedor,
+      selector: row => {
+        const vendedor = row.Vendedor
+        if (vendedor === null || vendedor === undefined) {
+          return "No disponible";
+        }
+        if (typeof vendedor === 'object') {
+          return "Sin Datos"; // O cualquier mensaje que prefieras
+        }
+        return vendedor;
+      },
       sortable:true,
       width:"200px",
     },
     {
       name: 'Actualizo',
-      selector: row => row.IdCotizacion,
+      selector: row => {
+        const actualizo = row.Actualizo
+        if (actualizo === null || actualizo === undefined) {
+          return "No disponible";
+        }
+        if (typeof actualizo === 'object') {
+          return "Sin Datos"; // O cualquier mensaje que prefieras
+        }
+        return actualizo;
+      },
       sortable:true,
       width:"200px",
     },
     {
       name: 'Autorizo',
-      selector: row => row.IdCotizacion,
+      selector: row => {
+        const autorizo = row.Autorizante
+        if (autorizo === null || autorizo === undefined) {
+          return "No disponible";
+        }
+        if (typeof autorizo === 'object') {
+          return "Sin Datos"; // O cualquier mensaje que prefieras
+        }
+        return autorizo;
+      },
       sortable:true,
       width:"200px",
     },
