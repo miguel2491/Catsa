@@ -60,9 +60,17 @@ export default function Login() {
   //                      INICIAR SESIÓN
   // =================================================================
   async function Sesion(username, password) {
+    Swal.fire({
+        title: 'Cargando...',
+        text: 'Iniciando...',
+        didOpen: () => {
+            Swal.showLoading();  // Muestra la animación de carga
+        }
+    });
     // Retornaremos true o false según éxito/fracaso
     setVisible(true); // Mostrar modal de carga
     if (username === "" || password === "") {
+      Swal.close();
       Swal.fire("Error", "Revise Usuario/Contraseña y vuelva a intentar", "error");
       setVisible(false);
       return false; 
@@ -80,6 +88,7 @@ export default function Login() {
       const userInfo = response.data;
 
       if (!userInfo.id) {
+        Swal.close();
         Swal.fire("Error", "Usuario/Contraseña incorrecta", "error");
         setVisible(false);
         return false;
@@ -94,12 +103,14 @@ export default function Login() {
 
       // Redirige luego de 2 segundos
       setTimeout(() => {
+        Swal.close();
         navigate("/dashboard");
       }, 2000);
 
       return true; // Éxito
     } catch (error) {
       console.error(error);
+      Swal.close();
       Swal.fire("Error", "Usuario/Contraseña incorrecta, vuelve a intentar", "error");
       return false;
     } finally {

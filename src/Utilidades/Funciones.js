@@ -1320,6 +1320,31 @@ export async function getProspectos_() {
         return false
     }
 }
+export async function getPedidosCot(id) {
+    try
+    {
+        let confi_ax = {
+            headers:
+            {
+                'Cache-Control': 'no-cache',
+                'Content-Type': 'application/json',
+                "Authorization": "Bearer "+cookies.get('token'),
+            },
+        };
+        //------------------------------------------------------------------------------------------------------------------------------------------------------
+        const response = await axios.get(baseUrl+'Comercial/GetPedidos/,'+id, confi_ax);
+        if (response.data && response.data.length > 0) {
+            return response.data;
+        }else{
+            return false
+        }
+    } 
+    catch(error)
+    {
+        console.log(error);
+        return false
+    }
+}
 //****************************************************************************************************************************************************************************** */
 // INTERFAZ
   // CB
