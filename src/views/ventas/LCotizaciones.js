@@ -2,7 +2,7 @@ import React, {useEffect, useState, useRef} from 'react'
 import '../../estilos.css';
 import Swal from "sweetalert2";
 import DataTable from 'react-data-table-component';
-import { GetCotizaciones,convertArrayOfObjectsToCSV, getPedidosCot } from '../../Utilidades/Funciones';
+import { GetCotizaciones,convertArrayOfObjectsToCSV, getPedidosCot, getArchivo } from '../../Utilidades/Funciones';
 import {
   CButton,
   CContainer,
@@ -17,11 +17,13 @@ import {
 import CIcon from '@coreui/icons-react'
 import {
   cilCheck,
+  cilImage,
   cilPencil,
   cilShareAlt,
   cilTag,
   cilTrash
 } from '@coreui/icons'
+import BuscadorDT from '../base/parametros/BuscadorDT'
 //import TabulatorTest from '../base/tables/Tabulator'
 import Plantas from '../base/parametros/Plantas'
 import FechaI from '../base/parametros/FechaInicio'
@@ -36,12 +38,14 @@ const LCotizacion = () => {
   //Arrays
   const [dtCotizacion, setDTCotizacion] = useState([]);
   const [dtPedidos, setDTPedidos] = useState([]);
-  const [fText, setFText] = useState('');
   const opcionesFca = {
     year: 'numeric', // '2-digit' para el año en dos dígitos
     month: '2-digit',   // 'numeric', '2-digit', 'short', 'long', 'narrow'
     day: '2-digit'   // 'numeric', '2-digit'
   };
+  //Buscador
+  const [fText, setFText] = useState(''); // Estado para el filtro de búsqueda
+  const [vBPlanta, setBPlanta] = useState('');
   // ROLES
   const userIsAdmin = Rol('Admin');
   useEffect(()=>{    
@@ -58,7 +62,17 @@ const LCotizacion = () => {
     if(pla.length > 0)
     {
       setPlantas(pla);
-      GetCotizaciones_(pla);
+      if(posts.length>0){
+        const filteredCotizaciones = posts.filter(item => item.IdPlanta === pla);
+        setDTCotizacion(filteredCotizaciones);
+      }else{
+        GetCotizaciones_(pla);
+      }
+    }else{
+      setPlantas(pla);
+      if(posts.length>0){
+        setDTCotizacion(posts);
+      }
     }
   };
   const cFechaI = (fecha) => {
@@ -76,11 +90,11 @@ const LCotizacion = () => {
       cell: (row) => (
         <div>
           <CRow>
-            {userIsAdmin && (
+            {userIsAdmin && (row.Estatus == 'Aceptada') && (
               <CCol xs={6} md={3} lg={3}>
                 <CButton
                   color="warning"
-                  onClick={() => viewPedidos(row.id)}
+                  onClick={() => viewPedidos(row.IdCotizacion)}
                   size="sm"
                   className="me-2"
                   title="Autorizar"
@@ -93,7 +107,7 @@ const LCotizacion = () => {
               <CCol xs={6} md={3} lg={3}>
                 <CButton
                   color="info"
-                  onClick={() => viewPDF(row.id)}
+                  onClick={() => viewPDF(row.IdCotizacion)}
                   size="sm"
                   className="me-2"
                   title="Modificar"
@@ -106,7 +120,7 @@ const LCotizacion = () => {
               <CCol xs={6} md={3} lg={3}>
                 <CButton
                   color="danger"
-                  onClick={() => setNFactura(row.id)}
+                  onClick={() => setNFactura(row.IdCotizacion)}
                   size="sm"
                   className="me-2"
                   title="Eliminar"
@@ -126,7 +140,7 @@ const LCotizacion = () => {
     },{
       name: 'Fecha',
       selector: row => {
-        const fecha = row.FechaSeg;
+        const fecha = row.Creo;
         if (fecha === null || fecha === undefined) {
           return "No disponible";
         }
@@ -169,7 +183,16 @@ const LCotizacion = () => {
     },
     {
       name: 'Dirección',
-      selector: row => row.Direccion,
+      selector: row => {
+        var Direccion = row.Direccion
+        if (Direccion === null || Direccion === undefined) {
+          Direccion = "-";
+        }
+        if (typeof Direccion === 'object') {
+          Direccion = "-"; // O cualquier mensaje que prefieras
+        }
+        return Direccion;
+      },
       sortable:true,
       width:"200px",
     },
@@ -244,16 +267,16 @@ const LCotizacion = () => {
   const colPed = [
     {
       name: 'ACCIONES',
-      selector: row => row.IdCotizacion,
+      selector: row => row.IdPedido,
       width:"200px",
       cell: (row) => (
         <div>
           <CRow>
             {userIsAdmin && (
-              <CCol xs={6} md={3} lg={3}>
+              <CCol xs={6} md={4} lg={4}>
                 <CButton
                   color="warning"
-                  onClick={() => viewPedidos(row.id)}
+                  onClick={() => autorizarPedido(row.IdPedido)}
                   size="sm"
                   className="me-2"
                   title="Autorizar"
@@ -262,29 +285,16 @@ const LCotizacion = () => {
                 </CButton>
               </CCol>
             )}
-            {userIsAdmin && (
-              <CCol xs={6} md={3} lg={3}>
+            {userIsAdmin && (row.Archivos) && (
+              <CCol xs={6} md={6} lg={6}>
                 <CButton
-                  color="info"
-                  onClick={() => viewPDF(row.id)}
+                  color="primary"
+                  onClick={() => viewPago(row.IdPedido)}
                   size="sm"
                   className="me-2"
-                  title="Modificar"
+                  title="Ver Pago"
                 >
-                  <CIcon icon={cilPencil} style={{'color':'white'}} />
-                </CButton>
-              </CCol>
-            )}
-            {userIsAdmin && (
-              <CCol xs={6} md={3} lg={3}>
-                <CButton
-                  color="danger"
-                  onClick={() => setNFactura(row.id)}
-                  size="sm"
-                  className="me-2"
-                  title="Eliminar"
-                >
-                  <CIcon icon={cilTrash} style={{'color':'white'}} />
+                  <CIcon icon={cilImage} style={{'color':'white'}} />
                 </CButton>
                 </CCol>
             )}
@@ -293,80 +303,77 @@ const LCotizacion = () => {
       ),
     },{
       name: 'ID',
-      selector: row => row.IdCotizacion,
+      selector: row => row.IdPedido,
       sortable:true,
-      width:"120px",
+      width:"80px",
     },{
-      name: 'Fecha',
+      name: 'Fecha Pedido',
       selector: row => {
-        const fecha = row.FechaSeg;
+        const fecha = row.FechaHoraPedido;
         if (fecha === null || fecha === undefined) {
           return "No disponible";
         }
         if (typeof fecha === 'object') {
           return "Sin Fecha"; // O cualquier mensaje que prefieras
         }
-        const [asesor, fechaA] = fecha.split(" ");
-        return fechaA;
+        const [fecha_, hora] = fecha.split("T");
+        return fecha_+" "+hora;
       },
       sortable:true,
-      width:"150px",
-    },
-    {
-      name: 'Cliente',
-      selector: row => {
-        var ncliente = row.NoCliente
-        if (ncliente === null || ncliente === undefined) {
-          ncliente =  "-";
-        }
-        if (typeof ncliente === 'object') {
-          ncliente = "-"; // O cualquier mensaje que prefieras
-        }
-        var nombreCliente = row.Cliente
-        if (nombreCliente === null || nombreCliente === undefined) {
-          nombreCliente = "-";
-        }
-        if (typeof nombreCliente === 'object') {
-          nombreCliente = "-"; // O cualquier mensaje que prefieras
-        }
-        return ncliente+" "+nombreCliente;
-      },
-      sortable:true,
-      width:"200px",
-    },
-    {
-      name: 'Metros',
-      selector: row => row.Estatus,
-      sortable:true,
-      width:"200px",
+      width:"250px",
     },
     {
       name: 'Obra',
       selector: row => {
         var nobra = row.NoObra
         if (nobra === null || nobra === undefined) {
-          nobra = "No disponible";
+          nobra =  "-";
         }
         if (typeof nobra === 'object') {
-          nobra = "Sin Datos"; // O cualquier mensaje que prefieras
+          nobra = "-"; // O cualquier mensaje que prefieras
         }
-        var obra = row.Obra
-        if (obra === null || obra === undefined) {
-          obra = "-";
+        return nobra;
+      },
+      sortable:true,
+      width:"200px",
+    },
+    {
+      name: 'Metros',
+      selector: row => row.CantidadM3,
+      sortable:true,
+      width:"100px",
+    },
+    {
+      name: 'Elemento',
+      selector: row => {
+        var elemento = row.Elemento
+        if (elemento === null || elemento === undefined) {
+          elemento = "No disponible";
         }
-        if (typeof obra === 'object') {
-          obra = "-"; // O cualquier mensaje que prefieras
+        if (typeof elemento === 'object') {
+          elemento = "Sin Datos"; // O cualquier mensaje que prefieras
         }
-        return nobra+" "+obra;
+        return elemento;
+      },
+      sortable:true,
+      width:"200px",
+    },
+    {
+      name: 'Producto',
+      selector: row => {
+        var elemento = row.Producto
+        if (elemento === null || elemento === undefined) {
+          elemento = "No disponible";
+        }
+        if (typeof elemento === 'object') {
+          elemento = "Sin Datos"; // O cualquier mensaje que prefieras
+        }
+        return elemento;
       },
       sortable:true,
       width:"200px",
     },
   ];
-  const fDCot = dtCotizacion.filter(item => {
-    // Filtrar por planta, interfaz y texto de búsqueda
-    //return item.IdCotizacion.includes(fText);
-  });
   const GetCotizaciones_ = async (planta) =>{
     Swal.fire({
       title: 'Cargando...',
@@ -381,7 +388,9 @@ const LCotizacion = () => {
         Swal.close();  // Cerramos el loading
         console.log(cotI)
         if (cotI) {
-            setDTCotizacion(cotI);  // Procesar la respuesta
+          const filteredCotizaciones = cotI.filter(item => item.IdPlanta === planta);
+          setPosts(cotI);
+          setDTCotizacion(filteredCotizaciones);  // Procesar la respuesta
         } else {
             Swal.close();
             Swal.fire("Error", "Ocurrió un error, vuelve a intentar", "error");
@@ -409,12 +418,97 @@ const LCotizacion = () => {
     try{
       Swal.close();
       const ocList = await getPedidosCot(id);
+      if(ocList){
+        setDTPedidos(ocList)
+      }
+      console.log(ocList)
     }catch(error){
         Swal.close();
         Swal.fire("Error", "No se pudo obtener la información", "error");
     }
 
   }
+  const autorizarPedido = async(id) =>{
+    Swal.fire({
+              title: "¿Autorizar Pedido?",
+              icon: "warning",
+              showCancelButton: true,
+              confirmButtonColor: "#3085d6",
+              cancelButtonColor: "#d33",
+              confirmButtonText: "Autorizar"
+            }).then((result) => {
+              if (result.isConfirmed) {
+                cPedido(id)
+              }
+            });
+  }
+  const cPedido = async(id) =>{
+    Swal.fire({
+      title: 'Cargando...',
+      text: 'Autorizando...',
+      didOpen: () => {
+          Swal.showLoading();  // Muestra la animación de carga
+      }
+    });    
+    setTimeout(function(){
+      Swal.close();
+      Swal.fire({
+        title: "Autorizado Correctamente",
+        icon: "success",
+        draggable: true
+      });
+    },3000);
+  }
+  const viewPago = async(id) =>{
+    Swal.fire({
+      title: 'Cargando...',
+      text: 'Buscando...',
+      didOpen: () => {
+          Swal.showLoading();  // Muestra la animación de carga
+      }
+    });
+      Swal.close();
+      try{
+        const extFile = await getArchivo(id);
+        Swal.close();
+        console.log(extFile)
+        if(extFile){
+          Swal.fire({
+            title: "Peido #"+id,
+            text: "Pedido",
+            imageUrl: "http://apicatsa.catsaconcretos.mx:2543/Uploads/DocPedidos/"+id+"/"+extFile,
+            imageWidth: 600,
+            imageHeight: 400,
+            imageAlt: "Pedido"
+          });
+        }
+      }catch(error){
+            Swal.close();
+            Swal.fire("Error", "No se pudo obtener la información", "error");
+      } 
+  }
+  // Buscador
+  //************************************************************************************************************************************************************************** */
+    // Función de búsqueda
+    const onFindBusqueda = (e) => {
+      setBPlanta(e.target.value);
+      setFText(e.target.value);
+  };
+  const fBusqueda = () => {
+      if(vBPlanta.length != 0){
+          const valFiltrados = dtCotizacion.filter(dtCotizacion => 
+          dtCotizacion.Planta.includes(vBPlanta) // Filtra los clientes por el número de cliente
+          );
+          setDTCotizacion(valFiltrados);
+      }else{
+          GetCotizaciones_(plantasSel)
+      }
+  };
+  const fCotizacion = dtCotizacion.filter(item => {
+      // Filtrar por planta, interfaz y texto de búsqueda
+      return item.IdCotizacion.toString().includes(fText) || item.Cliente.toString().includes(fText) || item.Estatus.includes(fText) || item.Obra.toString().includes(fText) || 
+      item.Vendedor.toString().includes(fText);
+  });
   return (
     <>
     <CContainer fluid>
@@ -437,11 +531,14 @@ const LCotizacion = () => {
             plantasSel={plantasSel}
           />
         </CCol>
+        <CCol sm="auto">
+          <BuscadorDT value={vBPlanta} onChange={onFindBusqueda} onSearch={fBusqueda} />
+        </CCol>
       </CRow>
       <CRow className='mt-4 mb-4'>
         <DataTable
           columns={colCot}
-          data={dtCotizacion}
+          data={fCotizacion}
           pagination
           persistTableHead
           subHeader

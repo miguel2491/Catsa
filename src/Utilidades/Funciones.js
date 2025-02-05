@@ -76,7 +76,7 @@ export async function getNotificaciones()
             },
         };
         //------------------------------------------------------------------------------------------------------------------------------------------------------
-        const response = await axios.get(baseUrl2+'Login/GetNotificaciones/'+cookies.get('Usuario'), confi_ax);
+        const response = await axios.get(baseUrl+'Login/GetNotificaciones/'+cookies.get('Usuario'), confi_ax);
         if (response.data && response.data.length > 0) {
             const obj = response.data;
             if(obj.length > 0)
@@ -103,7 +103,7 @@ export async function setNotificacion(id)
             },
         };
         //------------------------------------------------------------------------------------------------------------------------------------------------------
-        const response = await axios.get(baseUrl2+'Login/SetReadNotificacion/'+id, confi_ax);
+        const response = await axios.get(baseUrl+'Login/SetReadNotificacion/'+id, confi_ax);
         if (response.data && response.data.length > 0) {
             const obj = response.data;
             if(obj.length > 0)
@@ -142,7 +142,7 @@ export async function makeNotificacion(userDestino, categoria, titulo, desc, url
             },
         };
         //------------------------------------------------------------------------------------------------------------------------------------------------------
-        const response = await axios.post(baseUrl2+'Login/setNotificacion', confi_ax);
+        const response = await axios.post(baseUrl+'Login/setNotificacion', confi_ax);
         if (response.data && response.data.length > 0) {
             const obj = response.data;
             if(obj.length > 0)
@@ -1053,7 +1053,6 @@ export  async function getPrecios(planta)
 }
 export  async function GetCotizaciones(FI, FF,planta)
 {
-    console.log(FI,FF,planta)
     try
     {
         let confi_ax = {
@@ -1332,7 +1331,33 @@ export async function getPedidosCot(id) {
             },
         };
         //------------------------------------------------------------------------------------------------------------------------------------------------------
-        const response = await axios.get(baseUrl+'Comercial/GetPedidos/,'+id, confi_ax);
+        const response = await axios.get(baseUrl+'Comercial/GetPedidosCotizacion/'+id, confi_ax);
+        if (response.data && response.data.length > 0) {
+            return response.data;
+        }else{
+            return false
+        }
+    } 
+    catch(error)
+    {
+        console.log(error);
+        return false
+    }
+}
+export async function getArchivo(id)
+{
+    try
+    {
+        let confi_ax = {
+            headers:
+            {
+                'Cache-Control': 'no-cache',
+                'Content-Type': 'application/json',
+                "Authorization": "Bearer "+cookies.get('token'),
+            },
+        };
+        //------------------------------------------------------------------------------------------------------------------------------------------------------
+        const response = await axios.get(baseUrl+'Comercial/GetPedidoFile/'+id, confi_ax);
         if (response.data && response.data.length > 0) {
             return response.data;
         }else{

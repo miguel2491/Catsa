@@ -80,11 +80,6 @@ const AppHeader = () => {
         </CHeaderNav> */}
         <CHeaderNav className="ms-auto">
           <CNavItem>
-            <CNavLink href="#">
-              <CIcon icon={cilHome} size="lg" onClick={navDash} />
-            </CNavLink>
-          </CNavItem>
-          <CNavItem>
             <div className="h-300 text-opacity-75">Bienvenido: <b>{cookies.get('Usuario')}</b></div>
           </CNavItem>
           <CNavItem>

@@ -150,16 +150,9 @@ const AppHeaderDropdown = () => {
             1
           </CBadge>
         </CDropdownItem>
-        <CDropdownHeader className="bg-body-secondary fw-semibold my-2">
+        {/* <CDropdownHeader className="bg-body-secondary fw-semibold my-2">
           Settings
-        </CDropdownHeader>
-        <CDropdownItem href="#">
-          <CIcon icon={cilFile} className="me-2" />
-          Projects
-          <CBadge color="primary" className="ms-2">
-            42
-          </CBadge>
-        </CDropdownItem>
+        </CDropdownHeader> */}
         <CDropdownDivider />
         <CDropdownItem onClick={cerrarSesion}>
           <CIcon icon={cilLockLocked} className="me-2" />
