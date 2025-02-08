@@ -99,14 +99,11 @@ const Plantas = ({plantasSel, mCambio}) => {
         <div>
           <CFormSelect aria-label="Selecciona" id="cmbPlanta" value={plantasSel} onChange={mCambio}>
             <option value="" >Selecciona...</option>
-            {plantas_.map(planta =>(
-                <option value={planta.IdPlanta} key={planta.ID}>{planta.Planta}</option>
+            {plantas_.map((planta, index) =>(
+                <option value={planta.IdPlanta} key={index}>{planta.Planta}</option>
             ))}
           </CFormSelect>
-          {/* {selectedOption && (
-              <p>Has seleccionado: {selectedOption}</p>
-          )} */}
-        </div> {/* Contenedor para Tabulator */}
+        </div>
       </div>
     );
   };

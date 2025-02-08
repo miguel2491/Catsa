@@ -66,7 +66,7 @@ const NavProvider = ({ children }) => {
                       {
                         component: CNavItem,
                         name: 'Cotizador',
-                        to: '/ventas/Cotizador',
+                        to: '/ventas/Cotizador/0',
                         icon: <CIcon icon={cilCalculator} customClassName="nav-icon" />,
                       },
                       {

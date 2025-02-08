@@ -1,6 +1,7 @@
 import React, {useEffect, useState, useRef} from 'react'
 import Swal from 'sweetalert2';
 import DataTable from 'react-data-table-component';
+import { LoadScript } from '@react-google-maps/api';
 import MyMap from '../../ventas/Cotizador/Mapa'
 import { formatCurrency, getClientesCot, getObrasCot, getProspectos_ } from '../../../Utilidades/Funciones';
 import { ReactSearchAutocomplete} from 'react-search-autocomplete';
@@ -28,9 +29,11 @@ import { cilCheck, cilX, cilSearch, cilTrash, cilPlus } from '@coreui/icons'
 import { Rol } from '../../../Utilidades/Roles'
 import '../../../estilos.css'
 
-const Step1 = ({ nextStep, fijos, corpo, mop, cdiesel, sucursal, clientes_, obras_, onUpdateFData }) => {
+const Step1 = ({ nextStep, fijos, corpo, mop, cdiesel, sucursal, clientes_, obras_, coords, onUpdateFData }) => {
   const [visible, setVisible] = useState(false);// Modal Cargando
-  const [vProspecto, setVProspecto] = useState(false);// Modal Cargando
+  const [isScriptLoaded, setIsScriptLoaded] = useState(false);
+  const [mMapa, setMMapa] = useState(false);
+  const [vProspecto, setVProspecto] = useState(false);
   const [noCliente, setNoCliente] = useState('');
   const [clienteTxt, setClienteTxt] = useState('');
   const [municipio, setMunicipio] = useState('');
@@ -44,7 +47,16 @@ const Step1 = ({ nextStep, fijos, corpo, mop, cdiesel, sucursal, clientes_, obra
   const [aObrasB, setObrasB] = useState([]);
   const [fText, setFText] = useState(''); // Estado para el filtro de búsqueda
   const userIsAsesor = Rol('Vendedor');
-
+  //**************************************************************** */
+  useEffect(() => {
+    // Si la API de Google Maps ya está cargada, no la cargamos de nuevo
+    if (window.google) {
+      setIsScriptLoaded(true);
+    } else {
+      setIsScriptLoaded(false);
+    }
+  }, []);
+  //**************************************************************** */
   const handleChange = selectedOption => {
     setSelectedCity(selectedOption);
     
@@ -243,6 +255,7 @@ const Step1 = ({ nextStep, fijos, corpo, mop, cdiesel, sucursal, clientes_, obra
         Swal.fire("Error", "No se pudo obtener la información", "error");
     }
   }
+  
   //-----------------------------------------------------
   return(
     <div>
@@ -318,7 +331,18 @@ const Step1 = ({ nextStep, fijos, corpo, mop, cdiesel, sucursal, clientes_, obra
         </CRow>
         <CRow className='mt-2 mb-2'>
           <CCol>
-            <MyMap />
+            {isScriptLoaded ? (
+              <MyMap coords={"0,0"} />
+            ):(
+              <LoadScript googleMapsApiKey="AIzaSyCxaRbEHBInFto-cnzDgPzqZuaVmllksOE">
+                <MyMap coords={"0,0"} />
+              </LoadScript>
+            )}
+          </CCol>
+        </CRow>
+        <CRow className='mt-2 mb-2'>
+          <CCol>
+            <CButton color='primary' size='sm' onClick={()=> setMMapa(true)}>Ver Ubicación Real</CButton>
           </CCol>
         </CRow>
         <CModal
@@ -408,6 +432,34 @@ const Step1 = ({ nextStep, fijos, corpo, mop, cdiesel, sucursal, clientes_, obra
               </CCol>
             </CRow>
           </CModalFooter>
+        </CModal>
+        <CModal
+                backdrop="static"
+                visible={mMapa}
+                onClose={() => setMMapa(false)}
+                className='c-modal'
+            >
+                <CModalHeader>
+                    <CModalTitle id="stitle">Ubicación Origen</CModalTitle>
+                </CModalHeader>
+                <CModalBody>
+                    <CRow>
+                      {isScriptLoaded ? (
+                        <MyMap coords={coords} />
+                      ):(
+                        <LoadScript googleMapsApiKey="AIzaSyCxaRbEHBInFto-cnzDgPzqZuaVmllksOE">
+                          <MyMap coords={coords} />
+                        </LoadScript>
+                      )}
+                    </CRow>
+                </CModalBody>
+                <CModalFooter>
+                  <CRow className='w-100'>
+                    <CCol xs={6} md={6}>
+                      <CButton className='btn btn-danger' onClick={() => setMMapa(false)} style={{'color':'white'}}>Cerrar <CIcon icon={cilX} className='me-2' /></CButton>
+                    </CCol>
+                  </CRow>
+                </CModalFooter>
         </CModal>
         </CCardBody>
         <CCardFooter>

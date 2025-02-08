@@ -58,7 +58,6 @@ const AppBell = () => {
     });
     try{
       const ocList = await setNotificacion(idN);
-      console.log(ocList)
       navigate(url)
       getNoticias();
       Swal.close();
@@ -86,18 +85,18 @@ const AppBell = () => {
           )}
       </CDropdownToggle>
       {shNot && (
-      <CDropdownMenu className="pt-0" placement="bottom-end">
-        <CDropdownHeader className="bg-body-secondary fw-semibold mb-2">Nuevas</CDropdownHeader>
-        {ListNot.map(noticia =>(
-          <CDropdownItem key={noticia.id_notificaciones} onClick={()=>getUrl(noticia.id_notificaciones,noticia.url)}>
-            <CIcon icon={cilBell} className="mt-2 mr-2" /> 
-            {noticia.descripcion}
-            <CBadge color="info" className="ms-2">
-              {noticia.titulo}
-            </CBadge>
-          </CDropdownItem>
-        ))}
-      </CDropdownMenu>
+        <CDropdownMenu className="pt-0" placement="bottom-end">
+          <CDropdownHeader className="bg-body-secondary fw-semibold mb-2">Nuevas</CDropdownHeader>
+          {ListNot.map(noticia =>(
+              <CDropdownItem key={noticia.id_notificaciones} onClick={()=>getUrl(noticia.id_notificaciones,noticia.url)}>
+                <CIcon icon={cilBell} className="mt-2 mr-2" /> 
+                {noticia.descripcion}
+                <CBadge color="info" className="ms-2">
+                  {noticia.titulo}
+                </CBadge>
+              </CDropdownItem>
+          ))}
+        </CDropdownMenu>
       )}
     </CDropdown>
   )

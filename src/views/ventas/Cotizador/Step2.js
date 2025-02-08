@@ -22,7 +22,7 @@ import {
   CFormSelect,
 } from '@coreui/react'
 import {CIcon} from '@coreui/icons-react'
-import { cilCheck, cilX, cilSearch, cilTrash, cilPlus } from '@coreui/icons'
+import { cilCheck, cilX, cilPlus } from '@coreui/icons'
 import { Rol } from '../../../Utilidades/Roles'
 import '../../../estilos.css'
 
@@ -33,6 +33,17 @@ const Step2 = ({ nextStep, previousStep, fuente, segmento, canal, productos, fDa
     const [vMExtras, setMExtras] = useState(false);// Modal Extras
     const [aProductos, setProductos] = useState([]); 
     const [aExtras, setExtras] = useState([]); 
+    //Seleccs
+    const [selectedFuente, setSelectedFuente] = useState("-");
+    const [selectedSegmento, setSelectedSegmento] = useState("-");
+    const [selectedTCliente, setSelectedTCliente] = useState("-");
+    const [selectedConcreto, setSelectedConcreto] = useState("-");
+    const [selectedResistencia, setSelectedResistencia] = useState("-");
+    const [selectedEdad, setSelectedEdad] = useState("-");
+    const [selectedRev, setSelectedRev] = useState("-");
+    const [selectedTMA, setSelectedTMA] = useState("-");
+    const [selectedCol, setSelectedCol] = useState("-");
+
     const handleEdit = (e, rowIndex) => {
       const updatedProductos = [...productos];
       updatedProductos[rowIndex].CPC = e.target.value; // Actualiza el valor de la columna CPC
@@ -51,8 +62,8 @@ const Step2 = ({ nextStep, previousStep, fuente, segmento, canal, productos, fDa
                     <div>
                         <CButton
                             color="danger"
+                            size="sm"
                             onClick={() => getDetalle(1)}
-                            size="xs"
                             className="me-2"
                             title="Eliminar"
                         >
@@ -143,7 +154,7 @@ const Step2 = ({ nextStep, previousStep, fuente, segmento, canal, productos, fDa
                     <CButton
                         color="info"
                         onClick={() => btnExtras(row.Producto)}
-                        size="xs"
+                        size="sm"
                         className="me-2"
                         title="Extras"
                     >
@@ -212,7 +223,7 @@ const Step2 = ({ nextStep, previousStep, fuente, segmento, canal, productos, fDa
               <CButton
                   color="danger"
                   onClick={() => getDetalle(1)}
-                  size="xs"
+                  size="sm"
                   className="me-2"
                   title="Eliminar"
               >
@@ -249,7 +260,15 @@ const Step2 = ({ nextStep, previousStep, fuente, segmento, canal, productos, fDa
           />
         ),
       }
-  ];
+    ];
+    //************************************************************************************* */
+    useEffect(()=>{    
+          setSelectedFuente(fData.fuente)
+          setSelectedSegmento(fData.segmento)
+          updPData(fData.producto)
+          setProductos(fData.producto)
+        },[]);
+    //************************************************************************************* */
     const [sOProductos, setOProductos] = useState([]);
     
     const sProductos = (selected) =>{
@@ -262,7 +281,6 @@ const Step2 = ({ nextStep, previousStep, fuente, segmento, canal, productos, fDa
         // Selección única
         console.log('Valor seleccionado:', selected.value);
       }
-      
     }
   
     function getFindPro(pro)
@@ -277,6 +295,35 @@ const Step2 = ({ nextStep, previousStep, fuente, segmento, canal, productos, fDa
       label:item.Producto
     }))
     const [visible, setVisible] = useState(false)
+    //**************************** HANDLES ********************************************************* */
+    const hFuente = (event) =>{
+      setSelectedFuente(event.target.value);
+    }
+    const hSegmento = (event) =>{
+      setSelectedSegmento(event.target.value);
+    }
+    const hTCliente = (event) =>{
+      setSelectedTCliente(event.target.value);
+    }
+    const hConcreto = (event) =>{
+      setSelectedConcreto(event.target.value);
+    }
+    const hResistencia = (event) =>{
+      setSelectedResistencia(event.target.value);
+    }
+    const hEdad = (event) =>{
+      setSelectedEdad(event.target.value);
+    }
+    const hReve = (event) =>{
+      setSelectedRev(event.target.value);
+    }
+    const hTMA = (event) =>{
+      setSelectedTMA(event.target.value);
+    }
+    const hColocacion = (event) =>{
+      setSelectedCol(event.target.value);
+    }
+    //*********************************************************************************************** */
     return(
       <div>
         <CCard>
@@ -285,8 +332,8 @@ const Step2 = ({ nextStep, previousStep, fuente, segmento, canal, productos, fDa
             <CRow className='mt-2'>
               <CCol xs={6} md={4}>
                 <label>Fuente:</label>
-                <CFormSelect aria-label="Fuente">
-                  <option>-</option>
+                <CFormSelect aria-label="Fuente" value={selectedFuente} onChange={hFuente}>
+                  <option value="-">-</option>
                   {fuente.map((item, index) => (
                     <option key={index} value={item.IdFuente}>{item.Descripcion}</option>
                   ))}
@@ -294,8 +341,8 @@ const Step2 = ({ nextStep, previousStep, fuente, segmento, canal, productos, fDa
               </CCol>
               <CCol xs={6} md={4}>
                 <label>Segmento</label>
-                <CFormSelect aria-label="Segmento">
-                  <option>-</option>
+                <CFormSelect aria-label="Segmento" value={selectedSegmento} onChange={hSegmento}>
+                  <option value="-">-</option>
                   {segmento.map((item, index) => (
                     <option key={index} value={item.IdSegmento}>{item.Descripcion}</option>
                   ))}
@@ -303,8 +350,8 @@ const Step2 = ({ nextStep, previousStep, fuente, segmento, canal, productos, fDa
               </CCol>
               <CCol xs={6} md={4}>
                 <label>Tipo de Cliente</label>
-                <CFormSelect aria-label="Tipo de Cliente">
-                  <option>-</option>
+                <CFormSelect aria-label="Tipo de Cliente" value={selectedTCliente} onChange={hTCliente}>
+                  <option value="-">-</option>
                   {canal.map((item, index) => (
                     <option key={index} value={item.IdCanal}>{item.Descripcion}</option>
                   ))}
@@ -314,8 +361,8 @@ const Step2 = ({ nextStep, previousStep, fuente, segmento, canal, productos, fDa
             <CRow className='mt-2 mb-2'>
               <CCol xs={6} md={4} className='mt-3 mb-3'>
                 <label>Concreto</label>
-                <CFormSelect aria-label="Concreto">
-                  <option>-</option>
+                <CFormSelect aria-label="Concreto" value={selectedConcreto} onChange={hConcreto}>
+                  <option value="-">-</option>
                   <option value="C">Convencionales</option>
                   <option value="E">Estructurales</option>
                   <option value="R">Altas Resistencias</option>
@@ -334,8 +381,8 @@ const Step2 = ({ nextStep, previousStep, fuente, segmento, canal, productos, fDa
               </CCol>
               <CCol xs={6} md={4} className='mt-3 mb-3'>
                 <label>Resistencia</label>
-                <CFormSelect aria-label="Resistencia">
-                  <option>-</option>
+                <CFormSelect aria-label="Resistencia" value={selectedResistencia} onChange={hResistencia}>
+                  <option value="-">-</option>
                   <option value="15">15</option>
                   <option value="20">20</option>
                   <option value="25">25</option>
@@ -370,8 +417,8 @@ const Step2 = ({ nextStep, previousStep, fuente, segmento, canal, productos, fDa
               </CCol>
               <CCol xs={6} md={4} className='mt-3 mb-3'>
                 <label>Edad</label>
-                <CFormSelect aria-label="Edad">
-                  <option>-</option>
+                <CFormSelect aria-label="Edad" value={selectedEdad} onChange={hEdad}>
+                  <option value="-">-</option>
                   <option value="1">1 Día</option>
                   <option value="3">3 Días</option>
                   <option value="7">7 Días</option>
@@ -381,8 +428,8 @@ const Step2 = ({ nextStep, previousStep, fuente, segmento, canal, productos, fDa
               </CCol>
               <CCol xs={6} md={4} className='mt-3 mb-3'>
                 <label>Revenimiento</label>
-                <CFormSelect aria-label="Revenimiento">
-                  <option>-</option>
+                <CFormSelect aria-label="Revenimiento" value={selectedRev} onChange={hReve}>
+                  <option value="-">-</option>
                   <option value="10">10</option>
                   <option value="12">12</option>
                   <option value="14">14</option>
@@ -395,8 +442,8 @@ const Step2 = ({ nextStep, previousStep, fuente, segmento, canal, productos, fDa
               </CCol>
               <CCol xs={6} md={4} className='mt-3 mb-3'>
                 <label>TMA</label>
-                <CFormSelect aria-label="TMA">
-                  <option>-</option>
+                <CFormSelect aria-label="TMA" value={selectedTMA} onChange={hTMA}>
+                  <option value="-">-</option>
                   <option value="05">05</option>
                   <option value="08">08</option>
                   <option value="10">10</option>
@@ -408,8 +455,8 @@ const Step2 = ({ nextStep, previousStep, fuente, segmento, canal, productos, fDa
               </CCol>
               <CCol xs={6} md={4} className='mt-3 mb-3'>
                 <label>Colocación</label>
-                <CFormSelect aria-label="Colocación">
-                  <option>-</option>
+                <CFormSelect aria-label="Colocación" value={selectedCol} onChange={hColocacion}>
+                  <option value="-">-</option>
                   <option value="D">Directo</option>
                   <option value="B">Bombeado</option>
                   <option value="L">Lanzado</option>

@@ -22,6 +22,7 @@ import {
   CTabContent,
   CTabList,
   CTabPanel,
+  CImage,
 } from '@coreui/react'
 import DatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
@@ -43,6 +44,10 @@ const Step3 = ({ previousStep, formData, pData, onSave }) => {
     const [startDate, setStartDate] = useState(new Date());
     const [time, setTime] = useState(null);
     const [elementos, setElementos] = useState([]);
+    //******************* VARS **************************** */
+    const [sFPago, setFPago] = useState("-");
+    const [cM3, setCM3] = useState("-");
+    //******************* HANDLE ************************
     const handleClockCh = (value) => {
       setTime(value);
       console.log('Hora seleccionada:', value ? value.format('HH:mm') : 'No seleccionada');
@@ -61,6 +66,100 @@ const Step3 = ({ previousStep, formData, pData, onSave }) => {
         });
         setTimeout(() => { Swal.close(); navigate('/ventas/LCotizacion');},3000)
     };
+    const hFPago = (e, index) => {
+      const updatedData = [...pData];
+      updatedData[index].Pago = e.target.value;  // Actualizamos el valor de FormaPago
+      setPData(updatedData);  // Actualizamos el estado
+    }
+    const hCantidadM3 = (e, index) => {
+      const updatedData = [...pData];
+      updatedData[index].CantidadM3 = e.target.value;  // Actualizamos el valor de FormaPago
+      setPData(updatedData);  // Actualizamos el estado
+    }
+    const hSolicitante = (e, index) => {
+      const updatedData = [...pData];
+      updatedData[index].Recibe = e.target.value;  // Actualizamos el valor de FormaPago
+      setPData(updatedData);  // Actualizamos el estado
+    }
+    const hTelefono = (e, index) => {
+      const updatedData = [...pData];
+      updatedData[index].Telefono = e.target.value;  // Actualizamos el valor de FormaPago
+      setPData(updatedData);  // Actualizamos el estado
+    }
+    
+    const hElementoColar = (e, index) => {
+      const updatedData = [...pData];
+      updatedData[index].Elemento = e.target.value;  // Actualizamos el valor de FormaPago
+      setPData(updatedData);  // Actualizamos el estado
+    }
+    const hTBomba = (e, index) => {
+      const updatedData = [...pData];
+      updatedData[index].CodBomba = e.target.value;  // Actualizamos el valor de FormaPago
+      setPData(updatedData);  // Actualizamos el estado
+    }
+    const hPrecioConcreto = (e, index) => {
+      const updatedData = [...pData];
+      updatedData[index].PrecioProducto = e.target.value;  // Actualizamos el valor de FormaPago
+      setPData(updatedData);  // Actualizamos el estado
+    }
+    const hPrecioExtra = (e, index) => {
+      const updatedData = [...pData];
+      updatedData[index].PrecioExtra = e.target.value;  // Actualizamos el valor de FormaPago
+      setPData(updatedData);  // Actualizamos el estado
+    }
+    const hPrecioBomba = (e, index) => {
+      const updatedData = [...pData];
+      updatedData[index].PrecioBomba = e.target.value;  // Actualizamos el valor de FormaPago
+      setPData(updatedData);  // Actualizamos el estado
+    }
+    const hSubtotal = (e, index) => {
+      const updatedData = [...pData];
+      updatedData[index].PrecioProducto = e.target.value;  // Actualizamos el valor de FormaPago
+      setPData(updatedData);  // Actualizamos el estado
+    }
+    const hTotal = (e, index) => {
+      const updatedData = [...pData];
+      updatedData[index].PrecioProducto = e.target.value;  // Actualizamos el valor de FormaPago
+      setPData(updatedData);  // Actualizamos el estado
+    }
+    const hFcaEntrega = (e, index) => {
+      const fca = e.target.value;
+      const [fecha_, hora_] = fca.split("T");
+      const updatedData = [...pData];
+      updatedData[index].FechaHoraPedido = fca; 
+      setPData(updatedData);  // Actualizamos el estado
+    }
+    const hMViaje = (e, index) => {
+      const updatedData = [...pData];
+      updatedData[index].M3Viaje = e.target.value; 
+      setPData(updatedData); 
+    }
+    const hTRecorrido = (e, index) => {
+      const updatedData = [...pData];
+      updatedData[index].TRecorrido = e.target.value; 
+      setPData(updatedData); 
+    }
+    const hTDescarga = (e, index) => {
+      const updatedData = [...pData];
+      updatedData[index].TDescarga = e.target.value; 
+      setPData(updatedData); 
+    }
+    const hFEnvio = (e, index) => {
+      const updatedData = [...pData];
+      updatedData[index].Espaciado = e.target.value; 
+      setPData(updatedData); 
+    }
+    const hObservaciones = (e, index) => {
+      const updatedData = [...pData];
+      updatedData[index].Observaciones = e.target.value; 
+      setPData(updatedData); 
+    }
+    const hRecibeObra = (e, index) => {
+      const updatedData = [...pData];
+      updatedData[index].Recibe = e.target.value; 
+      setPData(updatedData); 
+    }
+
     // Configuración de la máscara
     const priceMask = {
       mask: Number,  // Solo números permitidos
@@ -91,7 +190,6 @@ const Step3 = ({ previousStep, formData, pData, onSave }) => {
     {
       try{
         const elementos = await getElementos();
-        console.log(elementos)
         if(elementos){
           setElementos(elementos);
         }    
@@ -104,8 +202,12 @@ const Step3 = ({ previousStep, formData, pData, onSave }) => {
       <CFormInput {...props} ref={inputRef} />
     ))
     useEffect(() => {
-      getElementos_()
-    },[]);
+      getElementos_();
+      const updData = pData.map(producto => ({
+        ...producto
+      }));
+      console.log(updData)
+    },[pData]);
     
     return(
       <div>
@@ -116,25 +218,25 @@ const Step3 = ({ previousStep, formData, pData, onSave }) => {
               <CTabs activeItemKey={1}>
                 <CTabList variant='tabs'>
                   {pData.map((producto, index) =>(
-                    <CTab itemKey={producto.Producto}>{producto.Producto}</CTab>
+                    <CTab itemKey={producto.Producto} key={index}>{producto.Producto}</CTab>
                   ))}
                 </CTabList>
                 <CTabContent>
                   {pData.map((producto2, index) =>(
-                    <CTabPanel className='p-3' itemKey={producto2.Producto}>
+                    <CTabPanel className='p-3' key={index} itemKey={producto2.Producto}>
                       <CRow>
                         <CCol xs={6} md={2}>
                           <label>Forma de pago</label>
-                          <CFormSelect size="sm" className="mb-3" aria-label="Small select example">
-                            <option>-</option>
-                            <option value="1">Contado</option>
-                            <option value="2">Crédito</option>
-                            <option value="3">Anticipo</option>
+                          <CFormSelect size="sm" className="mb-3" value={producto2.Pago} onChange={(e) => hFPago(e, index)}>
+                            <option value="-">-</option>
+                            <option value="Contado">Contado</option>
+                            <option value="Credito">Crédito</option>
+                            <option value="Anticipo">Anticipo</option>
                           </CFormSelect>
                         </CCol>
                         <CCol xs={6} md={3}>
                           <label>Nombre del Solicitante</label>
-                          <CFormInput placeholder='Nombre Solicitante' />
+                          <CFormInput placeholder='Nombre Solicitante' value={producto2.Recibe} onChange={(e)=>hSolicitante(e, index)} />
                         </CCol>
                         <CCol xs={6} md={2}>
                           <label>Teléfono</label>
@@ -155,20 +257,20 @@ const Step3 = ({ previousStep, formData, pData, onSave }) => {
                         </CCol>
                         <CCol xs={6} md={2}>
                           <label>Metros Cúbicos</label>
-                          <CFormInput />
+                          <CFormInput value={producto2.CantidadM3} onChange={(e) => hCantidadM3(e, index)} />
                         </CCol>
                         <CCol xs={6} md={2}>
                           <label>Elemento a colar</label>
-                          <CFormSelect size="sm" className="mb-3" aria-label="Small select example">
-                            <option>-</option>
+                          <CFormSelect size="sm" className="mb-3" value={producto2.Elemento} onChange={(e)=>hElementoColar(e, index)}>
+                            <option value="-">-</option>
                             {elementos.map((item, index) => (
-                              <option key={index} value={item.id}>{item.descripcion}</option>
+                              <option key={index} value={item.descripcion}>{item.descripcion}</option>
                             ))}
                           </CFormSelect>
                         </CCol>
                         <CCol xs={6} md={2}>
                           <label>Tipo Bomba: </label>
-                          <CFormSelect size="sm" className="mb-3" aria-label="Small select example">
+                          <CFormSelect size="sm" className="mb-3" value={producto2.CodBomba} onChange={(e)=>{hTBomba(e, index)}}>
                             <option>-</option>
                             <option value="1">Bomba Pluma</option>
                             <option value="2">Bomba Estacionaria</option>
@@ -180,8 +282,8 @@ const Step3 = ({ previousStep, formData, pData, onSave }) => {
                             ref={inputRef}
                             id="price"
                             name="price"
-                            value={maskedValue}  // Usamos el valor de la máscara
-                            onChange={handleChangeMK}
+                            value={producto2.PrecioProducto}  // Usamos el valor de la máscara
+                            onChange={(e) => {hPrecioConcreto(e, index)}}
                             onBlur={handleBlurMK}  // Aplicamos la máscara al perder el foco
                           />
                         </CCol>
@@ -193,8 +295,8 @@ const Step3 = ({ previousStep, formData, pData, onSave }) => {
                             ref={inputRef}
                             id="price"
                             name="price"
-                            value={maskedValue}  // Usamos el valor de la máscara
-                            onChange={handleChangeMK}
+                            value={producto2.PrecioExtra}  // Usamos el valor de la máscara
+                            onChange={(e)=>hPrecioExtra(e, index)}
                             onBlur={handleBlurMK}  // Aplicamos la máscara al perder el foco
                           />
                         </CCol>
@@ -203,8 +305,8 @@ const Step3 = ({ previousStep, formData, pData, onSave }) => {
                             ref={inputRef}
                             id="price"
                             name="price"
-                            value={maskedValue}  // Usamos el valor de la máscara
-                            onChange={handleChangeMK}
+                            value={producto2.PrecioBomba}  // Usamos el valor de la máscara
+                            onChange={(e)=>hPrecioBomba(e, index)}
                             onBlur={handleBlurMK}  // Aplicamos la máscara al perder el foco
                           />
                         </CCol>
@@ -260,8 +362,8 @@ const Step3 = ({ previousStep, formData, pData, onSave }) => {
                             ref={inputRef}
                             id="price"
                             name="price"
-                            value={maskedValue}  // Usamos el valor de la máscara
-                            onChange={handleChangeMK}
+                            value={producto2.M3Viaje}  // Usamos el valor de la máscara
+                            onChange={(e)=>hMViaje(e, index)}
                             onBlur={handleBlurMK}  // Aplicamos la máscara al perder el foco
                           />
                         </CCol>
@@ -291,17 +393,26 @@ const Step3 = ({ previousStep, formData, pData, onSave }) => {
                           <CFormTextarea
                             className="mb-3"
                             placeholder="Observaciones"
+                            value={producto2.Observaciones}
+                            onChange={(e)=>hObservaciones(e,index)}
                           ></CFormTextarea>
                         </CCol>
                         <CCol xs={6} md={3}>
                           <CFormLabel htmlFor="xm">Recibe en Obra</CFormLabel>
-                          <CFormInput type="text" id="robra" placeholder="-" aria-describedby="-" />
+                          <CFormInput type="text" id="robra" placeholder="-" value={producto2.Recibe} onChange={(e)=>hRecibeObra(e, index)} />
                         </CCol>
+                        {(!producto2.Archivos) && (
                         <CCol xs={6} md={3}>
                           <div className="mb-3">
                             <CFormInput type="file" id="formFile" label="Examinar" />
                           </div>
                         </CCol>
+                        )}
+                        {(producto2.Archivos) && (
+                        <CCol xs={6} md={3}>
+                          {/* <CImage rounded thumbnail src={`http://apicatsa.catsaconcretos.mx:2543/Uploads/DocPedidos/${producto2.IdPedido}/${producto2.IdPedido}.png`} width={500} height={320} /> */}
+                        </CCol>
+                        )}
                       </CRow>
                     </CTabPanel>
                   ))}

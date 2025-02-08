@@ -1,8 +1,16 @@
 import React, {useEffect, useState, useRef} from 'react'
 import '../../estilos.css';
 import Swal from "sweetalert2";
+import "sweetalert2/dist/sweetalert2.min.css";
 import DataTable from 'react-data-table-component';
-import { GetCotizaciones,convertArrayOfObjectsToCSV, getPedidosCot, getArchivo } from '../../Utilidades/Funciones';
+import DatePicker from 'react-datepicker';
+import "react-datepicker/dist/react-datepicker.css";
+import TimePicker from 'rc-time-picker';
+import 'rc-time-picker/assets/index.css';
+import { useNavigate } from "react-router-dom";
+import { GetCotizaciones,convertArrayOfObjectsToCSV, getPedidosCot, getArchivo, setStatus, getCotizacionExtra, getCotizacionLog, getSegmentos,
+  getSeguimientos
+ } from '../../Utilidades/Funciones';
 import {
   CButton,
   CContainer,
@@ -12,12 +20,22 @@ import {
   CModalHeader,
   CModalTitle,
   CModalBody,
-  CModalFooter
+  CModalFooter,
+  CTabs,
+  CTabPanel,
+  CTabContent,
+  CTabList,
+  CTab,
+  CFormSelect,
+  CFormCheck,
+  CFormInput,
 } from '@coreui/react'
 import CIcon from '@coreui/icons-react'
 import {
   cilCheck,
+  cilClearAll,
   cilImage,
+  cilMenu,
   cilPencil,
   cilShareAlt,
   cilTag,
@@ -30,14 +48,26 @@ import FechaI from '../base/parametros/FechaInicio'
 import FechaF from '../base/parametros/FechaFinal'
 import { Rol } from '../../Utilidades/Roles'
 const LCotizacion = () => {    
+  const navigate = useNavigate();
   const [plantasSel , setPlantas] = useState('');
   const [vFechaI, setFechaIni] = useState(null);
   const [vFcaF, setFechaFin] = useState(null);
   const [posts, setPosts] = useState([]);
   const [mPedidos, setMPedidos] = useState(false);
+  const [mOpciones, setMOpciones] = useState(false);
+  const [sEstatusC, setSEstatusC] = useState(null);
+  const [dSeg, setDSeg] = useState('');
+  const [time, setTime] = useState(null);
+  const [chkFT, setChkFT] = useState('Cliente');
+  //------------------Shows----------------------------
+  const [shCO, setShCO] = useState('Cliente');
   //Arrays
   const [dtCotizacion, setDTCotizacion] = useState([]);
   const [dtPedidos, setDTPedidos] = useState([]);
+  const [dtExtras, setDTExtras] = useState([]);
+  const [dtLog, setDTLog] = useState([]);
+  const [dtSeg, setDTSeg] = useState([]);
+  const [cmbSeg, setCmbSeg] = useState([]);
   const opcionesFca = {
     year: 'numeric', // '2-digit' para el año en dos dígitos
     month: '2-digit',   // 'numeric', '2-digit', 'short', 'long', 'narrow'
@@ -81,7 +111,7 @@ const LCotizacion = () => {
   const mFcaF = (fcaF) => {
     setFechaFin(fcaF.toLocaleDateString('en-US',opcionesFca));
   };
-  //COLS
+  //--------------------------- COLS -----------------------------------------------
   const colCot = [
     {
       name: 'ACCIONES',
@@ -107,7 +137,7 @@ const LCotizacion = () => {
               <CCol xs={6} md={3} lg={3}>
                 <CButton
                   color="info"
-                  onClick={() => viewPDF(row.IdCotizacion)}
+                  onClick={() => vCotizacion(row.IdCotizacion)}
                   size="sm"
                   className="me-2"
                   title="Modificar"
@@ -129,6 +159,30 @@ const LCotizacion = () => {
                 </CButton>
                 </CCol>
             )}
+            {userIsAdmin && (
+              <CCol xs={6} md={3} lg={3}>
+                <CButton
+                  color="success"
+                  onClick={() => mEstatus(row.IdCotizacion, row.Estatus)}
+                  size="sm"
+                  className="me-2"
+                  title="Estatus"
+                >
+                  <CIcon icon={cilCheck} style={{'color':'white'}} />
+                </CButton>
+              </CCol>
+            )}
+              <CCol xs={6} md={3} lg={3}>
+                <CButton
+                  color="info"
+                  onClick={() => openMOpciones(row.IdCotizacion)}
+                  size="sm"
+                  className="me-2"
+                  title="Opciones"
+                >
+                  <CIcon icon={cilMenu} style={{'color':'white'}} />
+                </CButton>
+              </CCol>
           </CRow>
       </div>
       ),
@@ -374,6 +428,237 @@ const LCotizacion = () => {
       width:"200px",
     },
   ];
+  const colExtras = [
+  {
+      name: 'Extra',
+      selector: row => row.Extra,
+      sortable:true,
+      width:"250px",
+    },{
+      name: 'Cantidad',
+      selector: row => {
+        const cantidad = row.Cantidad;
+        if (cantidad === null || cantidad === undefined) {
+          return "0";
+        }
+        if (typeof cantidad === 'object') {
+          return "0"; // O cualquier mensaje que prefieras
+        }
+        return cantidad;
+      },
+      sortable:true,
+      width:"150px",
+    },
+    {
+      name: 'Unidad',
+      selector: row => {
+        var unidad = row.Unidad
+        if (unidad === null || unidad === undefined) {
+          unidad =  "-";
+        }
+        if (typeof unidad === 'object') {
+          unidad = "-"; // O cualquier mensaje que prefieras
+        }
+        return unidad;
+      },
+      sortable:true,
+      width:"80px",
+    },
+    {
+      name: 'Precio',
+      selector: row => row.Precio,
+      sortable:true,
+      width:"100px",
+    },
+    {
+      name: 'Total',
+      selector: row => {
+        var elemento = row.Total
+        if (elemento === null || elemento === undefined) {
+          elemento = "0";
+        }
+        if (typeof elemento === 'object') {
+          elemento = "0"; // O cualquier mensaje que prefieras
+        }
+        return elemento;
+      },
+      sortable:true,
+      width:"100px",
+    },
+  ];
+  const colLog = [
+    {
+        name: 'ID',
+        selector: row => row.Cotizacion,
+        sortable:true,
+        width:"80px",
+      },{
+        name: 'FechaCambio',
+        selector: row => {
+          const fecha = row.FechaCambio;
+          if (fecha === null || fecha === undefined) {
+            return "No disponible";
+          }
+          if (typeof fecha === 'object') {
+            return "Sin Fecha"; // O cualquier mensaje que prefieras
+          }
+          const [fecha_, hora] = fecha.split("T");
+          return fecha_+" "+hora;
+        },
+        sortable:true,
+        width:"200px",
+      },
+      {
+        name: 'UsuarioActualizo',
+        selector: row => {
+          var usuarioAct = row.UsuarioActualizo
+          if (usuarioAct === null || usuarioAct === undefined) {
+            usuarioAct =  "-";
+          }
+          if (typeof usuarioAct === 'object') {
+            usuarioAct = "-"; // O cualquier mensaje que prefieras
+          }
+          return usuarioAct;
+        },
+        sortable:true,
+        width:"150px",
+      },
+      {
+        name: 'Campo',
+        selector: row => {
+          var Campo = row.Campo
+          if (Campo === null || Campo === undefined) {
+            Campo =  "-";
+          }
+          if (typeof Campo === 'object') {
+            Campo = "-"; // O cualquier mensaje que prefieras
+          }
+          return Campo;
+        },
+        sortable:true,
+        width:"200px",
+      },
+      {
+        name: 'Valor Anterior',
+        selector: row => {
+          var elemento = row.ValorAnterior
+          if (elemento === null || elemento === undefined) {
+            elemento = "No disponible";
+          }
+          if (typeof elemento === 'object') {
+            elemento = "Sin Datos"; // O cualquier mensaje que prefieras
+          }
+          return elemento;
+        },
+        sortable:true,
+        width:"200px",
+      },
+      {
+        name: 'Valor Nuevo',
+        selector: row => {
+          var elemento = row.ValorNuevo
+          if (elemento === null || elemento === undefined) {
+            elemento = "No disponible";
+          }
+          if (typeof elemento === 'object') {
+            elemento = "Sin Datos"; // O cualquier mensaje que prefieras
+          }
+          return elemento;
+        },
+        sortable:true,
+        width:"200px",
+      },
+      {
+        name: 'Comentario',
+        selector: row => {
+          var elemento = row.Comentario
+          if (elemento === null || elemento === undefined) {
+            elemento = "No disponible";
+          }
+          if (typeof elemento === 'object') {
+            elemento = "Sin Datos"; // O cualquier mensaje que prefieras
+          }
+          return elemento;
+        },
+        sortable:true,
+        width:"200px",
+      },
+    ];
+  const colSeg = [
+  {
+      name: 'ID',
+      selector: row => row.IdSeguimiento,
+      sortable:true,
+      width:"80px",
+  },{
+    name: 'COTIZACION',
+    selector: row => row.IdCotizacion,
+    sortable:true,
+    width:"80px",
+  },{
+    name: 'DESCRIPCIÓN',
+    selector: row => {
+      const desc = row.Descripcion;
+      if (desc === null || desc === undefined) {
+        return "No disponible";
+      }
+      if (typeof desc === 'object') {
+        return "-"; // O cualquier mensaje que prefieras
+      }
+      return desc;
+    },
+    sortable:true,
+    width:"250px",
+  },
+  {
+    name: 'Fecha',
+    selector: row => {
+      var Fca = row.Fecha
+      if (Fca === null || Fca === undefined) {
+        Fca =  "-";
+      }
+      if (typeof Fca === 'object') {
+        Fca = "-"; // O cualquier mensaje que prefieras
+      }
+      const[fecha, hora] = Fca.split("T"); 
+      return fecha;
+    },
+    sortable:true,
+    width:"150px",
+  },
+  {
+    name: 'Hora',
+    selector: row => {
+      var Fca = row.Fecha
+      if (Fca === null || Fca === undefined) {
+        Fca =  "-";
+      }
+      if (typeof Fca === 'object') {
+        Fca = "-"; // O cualquier mensaje que prefieras
+      }
+      const[fecha, hora] = Fca.split("T"); 
+      return hora;
+    },
+    sortable:true,
+    width:"150px",
+  },
+  {
+    name: 'Usuario Cambio',
+    selector: row => {
+      var Campo = row.UsuarioCambio
+      if (Campo === null || Campo === undefined) {
+        Campo =  "-";
+      }
+      if (typeof Campo === 'object') {
+        Campo = "-"; // O cualquier mensaje que prefieras
+      }
+      return Campo;
+    },
+    sortable:true,
+    width:"150px",
+  },
+  ];
+  //--------------------------------------------------------------------------------
   const GetCotizaciones_ = async (planta) =>{
     Swal.fire({
       title: 'Cargando...',
@@ -386,7 +671,6 @@ const LCotizacion = () => {
         // Llamada a la API
         const cotI = await GetCotizaciones(vFechaI, vFcaF, planta);
         Swal.close();  // Cerramos el loading
-        console.log(cotI)
         if (cotI) {
           const filteredCotizaciones = cotI.filter(item => item.IdPlanta === planta);
           setPosts(cotI);
@@ -487,10 +771,91 @@ const LCotizacion = () => {
             Swal.fire("Error", "No se pudo obtener la información", "error");
       } 
   }
+  const vCotizacion = async(id) =>{
+    Swal.fire({
+      title: 'Cargando...',
+      text: 'Buscando...',
+      didOpen: () => {
+          Swal.showLoading();  // Muestra la animación de carga
+      }
+    });
+    navigate('/ventas/Cotizador/'+id);
+  }
+  // Opciones
+  const openMOpciones = (id) =>{
+    setMOpciones(true);
+    getExtras(id);
+    getSeg();
+    gtSeguimientos_(id);
+  }
+  const getExtras = async(id)=>{
+    Swal.fire({
+      title: 'Cargando...',
+      text: 'Estamos obteniendo la información...',
+      didOpen: () => {
+          Swal.showLoading();  // Muestra la animación de carga
+      }
+    });
+    try {
+      Swal.close();
+      const ocList = await getCotizacionExtra(id);
+      if(ocList){
+        setDTExtras(ocList)
+      }
+      getLogs(id);
+    }catch(error){
+      Swal.close()
+      console.error(error)
+    }
+  }
+  const getLogs = async(id)=>{
+    Swal.fire({
+      title: 'Cargando...',
+      text: 'Estamos obteniendo la información...',
+      didOpen: () => {
+          Swal.showLoading();  // Muestra la animación de carga
+      }
+    });
+    try {
+      Swal.close();
+      const ocList = await getCotizacionLog(id);
+      if(ocList){
+        setDTLog(ocList)
+      }
+    }catch(error){
+      Swal.close()
+      console.error(error)
+    }
+  }
+  const getSeg = async()=>{
+    try {
+      const ocList = await getSegmentos();
+      if(ocList){
+        setCmbSeg(ocList)
+      }
+    }catch(error){
+      console.error(error)
+    }
+  }
+  const gtSeguimientos_ = async(id)=>{
+    try
+    {
+      const ocList = await getSeguimientos(id);
+      console.log(ocList)
+      if(ocList)
+      {
+        setDTSeg(ocList)
+      }
+    }
+    catch(error)
+    {
+      console.error(error)
+    }
+  }
   // Buscador
   //************************************************************************************************************************************************************************** */
     // Función de búsqueda
-    const onFindBusqueda = (e) => {
+  const onFindBusqueda = (e) => {
       setBPlanta(e.target.value);
       setFText(e.target.value);
   };
@@ -509,6 +874,76 @@ const LCotizacion = () => {
       return item.IdCotizacion.toString().includes(fText) || item.Cliente.toString().includes(fText) || item.Estatus.includes(fText) || item.Obra.toString().includes(fText) || 
       item.Vendedor.toString().includes(fText);
   });
+  //**********************************MODALES**************************************************** */
+  const mEstatus = async(id, estatus) =>{
+    try{
+      const {value:selectedOption} = await Swal.fire({
+        title: "Elige una opción",
+        input: "select",
+        inputValue:estatus,
+        inputOptions: {
+          Cancelada: "Cancelada",
+          Aceptada: "Aceptada",
+          Negociando: "Negociando",
+          Perdida: "Perdida",
+          Prospecto: "Prospecto",
+        },
+        inputPlaceholder: "Selecciona una opción",
+        showCancelButton: true,
+        inputValidator: (value) => {
+          if (!value) {
+            return "¡Debes elegir una opción!";
+          }
+        },
+      });
+      if(selectedOption){
+        chStatus(id, selectedOption)
+      }
+    } catch(error){
+      console.error("Error al mostrar SweetAlert2:", error)
+    }
+  }
+  const chStatus = async (id, estatus) =>{
+    Swal.fire({
+      title: 'Cargando...',
+      text: 'Actualizando...',
+      didOpen: () => {
+          Swal.showLoading();  // Muestra la animación de carga
+      }
+    });
+    try {
+        // Llamada a la API
+        const cotI = await setStatus(id, estatus);
+        if (cotI) {
+          Swal.close();
+          Swal.fire("Correcto", "Se actualizo Correctamente", "success");
+          GetCotizaciones_(plantasSel)
+        } else {
+            Swal.close();
+            Swal.fire("Error", "Ocurrió un error, vuelve a intentar", "error");
+        }
+    } catch (error) {
+        // Cerrar el loading y mostrar el error
+        Swal.close();
+        Swal.fire("Error", "No se pudo obtener la información", "error");
+    }
+  }
+  //************************* HANDLE*************************************************************** */
+  const hDSeg = (e) =>{
+    setDSeg(e.target.value)
+  };
+  const handleClockCh = (value) => {
+    setTime(value);
+  };
+  const hRadioCh = (e) => {
+    setChkFT(e.target.value);
+    if(e.target.value == "Cliente"){
+      setShCO(true)
+    }else{
+      setShCO(false)
+    }
+  };
+  //********************************************************************************************** */
   return (
     <>
     <CContainer fluid>
@@ -570,7 +1005,216 @@ const LCotizacion = () => {
                     </CButton>
                 </CCol>
             </CModalFooter>
-          </CModal>
+        </CModal>
+        <CModal 
+          backdrop="static"
+          visible={mOpciones}
+          onClose={() => setMOpciones(false)}
+          className='c-modal-80'
+        >
+          <CModalHeader>
+            <CModalTitle>Opciones</CModalTitle>
+          </CModalHeader>
+            <CModalBody>
+              <CTabs activeItemKey={1}>
+                <CTabList variant="tabs" layout="fill">
+                    <CTab aria-controls="Extras" itemKey={1}>Extras</CTab>
+                    <CTab aria-controls="Seguimiento" itemKey={2}>Seguimiento</CTab>
+                    <CTab aria-controls="ClienteObra" itemKey={3}>Cliente</CTab>
+                    <CTab aria-controls="Log" itemKey={4}>Log de Modificaciones</CTab>
+                </CTabList>
+                <CTabContent>
+                    <CTabPanel className="py-3" aria-labelledby="Extras" itemKey={1}>
+                      <DataTable
+                        columns={colExtras}
+                        data={dtExtras}
+                        pagination
+                        persistTableHead
+                        subHeader
+                      />
+                    </CTabPanel>
+                    <CTabPanel className="py-3" aria-labelledby="Seguimiento" itemKey={2}>
+                        <CRow className='mt-2 mb-2'>
+                          <CCol xs={4} md={3}>
+                            <label className='mb-2'>Descripción del Seguimiento</label>
+                            <CFormSelect size="sm" className="mb-3" value={dSeg} onChange={(e) => hDSeg(e)}>
+                              <option value="-">-</option>
+                              {cmbSeg.map((m) => (
+                                <option key={m.IdAccion} value={m.IdAccion}>
+                                  {m.Descripcion}
+                                </option>
+                              ))}
+                            </CFormSelect>
+                          </CCol>
+                          <CCol xs={4} md={3}>
+                            <FechaI 
+                              vFechaI={vFechaI} 
+                              cFechaI={cFechaI} 
+                            />
+                          </CCol>
+                          <CCol xs={4} md={3}>
+                            <label>Hora</label><br/>
+                            <TimePicker
+                              className='clockSel'
+                              showSecond={false}  // Deshabilitar la selección de segundos
+                              value={time}
+                              onChange={handleClockCh}
+                              format="HH:mm"
+                              minuteStep={5}  // Configura los minutos a intervalos de 5 minutos
+                            />
+                          </CCol>
+                          <CCol xs={4} md={3}>
+                            <CButton color='primary' className='mt-2' style={{'margin-top':'3px'}}> Agregar</CButton>
+                          </CCol>
+                        </CRow>
+                        <CRow className='mt-2 mb-2'>
+                          <DataTable
+                            columns={colSeg}
+                            data={dtSeg}
+                            pagination
+                            persistTableHead
+                            subHeader
+                          />        
+                        </CRow>
+                    </CTabPanel>
+                    <CTabPanel className="py-3" aria-labelledby="Log" itemKey={3}>
+                      <CRow className='mt-4 mb-4'>
+                        <CCol xs={2} md={2}>
+                          <CFormCheck
+                            type="radio"
+                            name="fRT"
+                            id="fR"
+                            label="Cliente"
+                            value="Cliente"
+                            checked={chkFT === 'Cliente'}
+                            onChange={hRadioCh}
+                          />
+                        </CCol>
+                        <CCol xs={6} md={2}>
+                          <CFormCheck
+                            type="radio"
+                            name="fRT"
+                            id="fR1"
+                            label="Obra"
+                            value="Obra"
+                            checked={chkFT === 'Obra'}
+                            onChange={hRadioCh}
+                            defaultChecked
+                          />
+                        </CCol>
+                      </CRow>
+                        {shCO && (
+                        <CRow>
+                          <CCol xs={6} md={4}>
+                            <label>Nombre de Razón Social</label>
+                            <CFormInput type="text" placeholder="Nombre de Cliente" aria-label="Nombre" />
+                          </CCol>
+                          <CCol xs={6} md={4}>
+                            <label>RFC</label>
+                            <CFormInput type="text" placeholder="RFC" />
+                          </CCol>
+                          <CCol xs={6} md={4}>
+                            <label>Metodo de Pago</label>
+                            <CFormInput type="text" placeholder="Metodo de Pago" />
+                          </CCol>
+                          <CCol xs={6} md={4}>
+                            <label>4 Últimos Dígitos Cuenta</label>
+                            <CFormInput type="text" placeholder="****" />
+                          </CCol>
+                          <CCol xs={6} md={4}>
+                            <label>Dirección Fiscal</label>
+                            <CFormInput type="text" placeholder="Dirección Fiscal" />
+                          </CCol>
+                          <hr/>
+                          <h4>DIRECCIÓN FISCAL</h4>
+                          <br />
+                          <CCol xs={6} md={4}>
+                            <label>Calle</label>
+                            <CFormInput type="text" placeholder="Dirección Fiscal" />
+                          </CCol>
+                          <CCol xs={6} md={4}>
+                            <label>No. Exterior</label>
+                            <CFormInput type="text" placeholder="No. Exterior" />
+                          </CCol>
+                          <CCol xs={6} md={4}>
+                            <label>COLONIA</label>
+                            <CFormInput type="text" placeholder="Colonia" />
+                          </CCol>
+                          <CCol xs={6} md={4}>
+                            <label>MUNICIPIO</label>
+                            <CFormInput type="text" placeholder="Municipio" />
+                          </CCol>
+                          <CCol xs={6} md={4}>
+                            <label>ESTADO</label>
+                            <CFormInput type="text" placeholder="Estado" />
+                          </CCol>
+                          <CCol xs={6} md={4}>
+                            <label>TELÉFONO</label>
+                            <CFormInput type="text" placeholder="Telefono" />
+                          </CCol>
+                          <CCol xs={6} md={4}>
+                            <label>PERSONA CONTACTO</label>
+                            <CFormInput type="text" placeholder="Persona Contacto" />
+                          </CCol>
+                          <CCol xs={6} md={4}>
+                            <label>CLAVE CFDI</label>
+                            <CFormInput type="text" placeholder="Clave CFDI" />
+                          </CCol>
+                        </CRow>
+                        )}
+                      {!shCO && (
+                        <CRow>
+                          <CCol xs={6} md={4}>
+                            <label>Nombre de Obra</label>
+                            <CFormInput type="text" placeholder="Nombre de Obra" aria-label="Nombre" />
+                          </CCol>
+                          <CCol xs={6} md={4}>
+                            <label>NÚMERO CLIENTE</label>
+                            <CFormInput type="text" placeholder="NÚMERO CLIENTE" />
+                          </CCol>
+                          <h4>UBICACIÓN</h4>
+                          <CCol xs={6} md={4}>
+                            <label>DIRECCIÓN</label>
+                            <CFormInput type="text" placeholder="DIRECCIÓN" />
+                          </CCol>
+                          <CCol xs={6} md={4}>
+                            <label>COLONIA</label>
+                            <CFormInput type="text" placeholder="COLONIA" />
+                          </CCol>
+                          <CCol xs={6} md={4}>
+                            <label>MUNICIPIO</label>
+                            <CFormInput type="text" placeholder="MUNICIPIO" />
+                          </CCol>
+                          <CCol xs={6} md={4}>
+                            <label>ESTADO</label>
+                            <CFormInput type="text" placeholder="ESTADO" />
+                          </CCol>
+                          <CCol xs={6} md={4}>
+
+                          </CCol>
+                        </CRow>
+                      )}
+                    </CTabPanel>
+                    <CTabPanel className="py-3" aria-labelledby="Log" itemKey={4}>
+                      <DataTable
+                        columns={colLog}
+                        data={dtLog}
+                        pagination
+                        persistTableHead
+                        subHeader
+                      />
+                    </CTabPanel>
+                </CTabContent>
+              </CTabs>
+            </CModalBody>
+            <CModalFooter>
+                <CCol xs={4} md={2}>
+                    <CButton color='danger' onClick={() => setMOpciones(false)} style={{'color':'white'}} > 
+                        <CIcon icon={cilClearAll} /> Cerrar
+                    </CButton>
+                </CCol>
+            </CModalFooter>
+        </CModal>
       </CRow>
     </CContainer>
     </>

@@ -1,5 +1,5 @@
 import React, {useEffect, useState, useRef} from 'react'
-import { GoogleMap, LoadScript, Marker } from '@react-google-maps/api';
+import { GoogleMap, Marker } from '@react-google-maps/api';
 import "react-datepicker/dist/react-datepicker.css";
 import 'rc-time-picker/assets/index.css';
 import {
@@ -10,7 +10,7 @@ import { cilCheck, cilX, cilSearch, cilTrash, cilPlus } from '@coreui/icons'
 import { Rol } from '../../../Utilidades/Roles'
 import '../../../estilos.css'
 
-const Mapa = () => {
+const Mapa = ({coords}) => {
     const [map, setMap] = useState(null);
     const [locationO, setLocationO] = useState({
       latitude: null,
@@ -35,16 +35,42 @@ const Mapa = () => {
       if ("geolocation" in navigator) {
         navigator.geolocation.getCurrentPosition(
           (position) => {
-            setLocationO({
-              latitude: position.coords.latitude,
-              longitude: position.coords.longitude,
-              error: null
-            });
-            setLocation({
-              latitude: position.coords.latitude,
-              longitude: position.coords.longitude,
-              error: null
-            });
+            //const [lat, lon] = coords.split(",");
+            console.log(coords)
+            if(coords.length > 5){
+              const [lat, lon] = coords.split(",");
+              setLocation({
+                latitude: parseFloat(lat),//lat,
+                longitude: parseFloat(lon),//lon
+                error: null
+              });
+            }
+            else if(coords.length > 0 && coords.length < 5)
+            {
+              const [lat, lon] = coords.split(",");
+              console.log(lat)
+              if(lat != "0"){
+                setLocation({
+                  latitude: 19.033171714176245,//lat,
+                  longitude: -98.30718927809613,//lon
+                  error: null
+                });
+              }else{
+                setLocation({
+                  latitude: position.coords.latitude,
+                  longitude: position.coords.longitude,
+                  error: null
+                });  
+              }
+            }else{
+              setLocation({
+                latitude: position.coords.latitude,
+                longitude: position.coords.longitude,
+                error: null
+              });
+              console.log(location)
+            }
+            console.log(location)
           },
           (error) => {
             setLocation({
@@ -76,13 +102,13 @@ const Mapa = () => {
         longitude: lng,
         error: null
       });
-      //console.log("Nuevo marcador en:", lat, lng);
+      console.log("Nuevo marcador en:", lat, lng);
       //console.log(locationO);
     };
     //AIzaSyCmR8S151uu3BTA7Mgtpl6-TBA3_U8HjGQ
     if (location.latitude && location.longitude) {
       return (
-        <LoadScript googleMapsApiKey="AIzaSyCxaRbEHBInFto-cnzDgPzqZuaVmllksOE">
+        // <LoadScript googleMapsApiKey="AIzaSyCxaRbEHBInFto-cnzDgPzqZuaVmllksOE">
           <GoogleMap
             mapContainerStyle={{ width: '100%', height: '400px' }}
             center={{ lat: location.latitude, lng: location.longitude }}
@@ -93,7 +119,7 @@ const Mapa = () => {
               draggable={true}  // Hacer que el marcador sea arrastrable
               onDragEnd={onMarkerDragEnd} />
           </GoogleMap>
-        </LoadScript>
+        // </LoadScript>
       );
     }
     return <p>Loading...</p>;

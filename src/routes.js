@@ -50,7 +50,7 @@ const routes = [
   //------------------------------> VENTAS <----------------------------------------------
   { path: '/ventas/LCotizacion', name: 'Cotizaciones', element:LCotizaciones },
   { path: '/ventas/LPreCotizacion', name: 'PreCotizaciones', element:LPreCotizaciones },
-  { path: '/ventas/Cotizador', name: 'Cotizador', element:Cotizador },
+  { path: '/ventas/Cotizador/:id', name: 'Cotizador', element:Cotizador },
   { path: '/reportes/RComision', name: 'Comisiones', element:RComision },
   { path: '/ventas/Cartera', name: 'Cartera', element:RCartera },
   { path: '/reportes/RProyeccion', name: 'Proyeccion', element:RProyeccion },

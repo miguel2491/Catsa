@@ -1,4 +1,5 @@
 import React, {useEffect, useState, useRef} from 'react'
+import { useParams } from 'react-router-dom';
 import ProgressBar from "@ramonak/react-progress-bar";
 import makeAnimated from 'react-select/animated';
 import Swal from 'sweetalert2';
@@ -9,7 +10,7 @@ import FechaI from '../base/parametros/FechaInicio'
 import Step1 from '../ventas/Cotizador/Step1'
 import Step2 from '../ventas/Cotizador/Step2'
 import Step3 from '../ventas/Cotizador/Step3'
-import { getCostoP, getClientesCot, getDatosPlanta } from '../../Utilidades/Funciones';
+import { getCostoP, getClientesCot, getDatosPlanta, getCotizacionId, getCotizacionPedido } from '../../Utilidades/Funciones';
 import { Rol } from '../../Utilidades/Roles'
 import { IMaskMixin } from 'react-imask'
 import IMask from 'imask'
@@ -60,9 +61,10 @@ const containerStyle = {
 };
 
 const Cotizador = () => {
+  const { id } = useParams();
   const [plantasSel , setPlantas] = useState('');
   const [vFechaI, setFechaIni] = useState(new Date());
-  const [noCotizacion, setNoCotizacion] = useState(0);
+  const [noCotizacion, setNoCotizacion] = useState(id);
   const [loading, setLoading] = useState(false);
   const [percentage, setPercentage] = useState(0);
   const [vModal, setVModal] = useState(false);// Modal Cargando
@@ -83,10 +85,11 @@ const Cotizador = () => {
   const [aClientes, setClientes] = useState([]);
   const [aObras, setObras] = useState([]);
   const [pData, setPData] = useState([]);
+  const [coordsO, setCoordsO] = useState("");
+  //********************************************************************* */
   const updPData = (newData) => {
     setPData((prevData) => [...prevData, ...newData]);
   };
-  //********************************************************************* */
   const [fData, setFData] = useState({
     planta:plantasSel,
     fecha:vFechaI,
@@ -113,9 +116,110 @@ const Cotizador = () => {
     fpago:null,
     nombre_sol:null,
     telefono:null,
-
   });
+  const [pedData, setPedData] = useState({
+    IdPedido:null,
+    FechaCreacion:null,
+    Planta:null,
+    Archivos:null,
+    CantidadM3:null,
+    CodBomba:null,
+    Distancia:null,
+    Elemento:null,
+    Espaciado:null,
+    FechaHoraPedido:null,
+    M3Viaje:null,
+    NoObra:null,
+    Observaciones:null,
+    Pago:null,
+    PlantaEnvio:null,
+    PrecioBomba:null,
+    PrecioExtra:null,
+    PrecioProducto:null,
+    Producto:null,
+    Recibe:null,
+  });
+  //********************************************************************* */
+  useEffect(()=>{    
+      if(noCotizacion != 0)
+      {   
+          Swal.fire({
+            title: 'Cargando...',
+            text: 'Buscando...',
+            didOpen: () => {
+              Swal.showLoading();  // Muestra la animación de carga
+              getCotizacion(noCotizacion)
+            }
+          });
+      }
+    },[]);
 
+    const getCotizacion = async(id) =>{
+      try{
+        const ocList = await getCotizacionId(id);
+        if(ocList){
+          console.log(ocList)
+          setPlantas(ocList[0].Planta);
+          getCostoPlanta(ocList[0].Planta);
+          const fecha = ocList[0].FechaCreacion;
+          const [fecha_, hora_] = fecha.split("T");
+          setCoordsO(ocList[0].coordenada)//coordenadaR
+          setFechaIni(fecha_);
+          setFData(prevState => ({
+            ...prevState,
+            planta: ocList[0].Planta,
+            fecha: fecha_,
+            no_cotizacion: ocList[0].IdCotizacion,
+            cliente: ocList[0].Cliente,
+            obras: ocList[0].Obra,
+            coordenadas:ocList[0].coordenada,            
+            fuente:ocList[0].Fuente,
+            segmento:ocList[0].Segmento,
+            tipo_cli:null,
+            concreto:null,
+            resistencia:null,
+            edad:null,
+            revenimiento:null,
+            tma:null,
+            colocacion:null,
+            producto:null,
+            facturar_a:null,
+            direccion_clie:ocList[0].Direccion,
+            asesor:null,
+            alkon:null,
+            bloqueado:null,
+            seguridad:null,
+            fpago:null,
+            nombre_sol:null,
+            telefono:null,
+          }));          
+          console.log(ocList)
+          getPedidosCot(id)
+        }
+      }catch(error){
+          Swal.close();
+          Swal.fire("Error", "No se pudo obtener la información", "error");
+      }
+    }
+
+    const getPedidosCot = async(id) => {
+      try{
+        Swal.close();
+        const ocList = await getCotizacionPedido(id);
+        if(ocList){
+          setShSteps(true)
+          console.log(ocList)
+          setFData(prevState => ({
+            ...prevState,
+            producto:ocList
+          }));
+        }
+      }catch(error){
+        Swal.fire("Error", "No se pudo obtener la información", "error");
+      }
+    }
+
+  //******************************************************************** */
   const updFData = (newFData) => {
     setFData((prevData) => ({
       ...prevData,
@@ -153,7 +257,6 @@ const Cotizador = () => {
       setShSteps(false);
     } 
   };
-
   const getCostoPlanta = async (planta) =>
   {
     try {
@@ -186,8 +289,7 @@ const Cotizador = () => {
       console.log(error);
       //Swal.fire("Error", "No se pudo obtener la información", "error");
     }
-  }
-  
+  };  
   async function getClientes(planta)
   {
     try{
@@ -203,8 +305,7 @@ const Cotizador = () => {
     }catch(error){
         Swal.fire("Error", "No se pudo obtener la información", "error");
     }
-  }
-  
+  };
   const cFechaI = (fecha) => {
     setFechaIni(fecha.toLocaleDateString('en-US',opcionesFca));
   };
@@ -213,7 +314,8 @@ const Cotizador = () => {
   };
   const fCotizacion = async() =>{
     console.log(noCotizacion)
-  }
+  };
+  //***************************************************************** */
   return(
     <CContainer fluid>
       <CRow className='mt-2'>
@@ -250,7 +352,7 @@ const Cotizador = () => {
       </CRow>
       {shSteps && (
       <StepWizard>
-        <Step1 fijos={dFijos} corpo={dCorpo} mop={dMop} cdiesel={dDiesel} sucursal={plantasSel} clientes_={aClientes} obras_={aObras} onUpdateFData={updFData} />
+        <Step1 fijos={dFijos} corpo={dCorpo} mop={dMop} cdiesel={dDiesel} sucursal={plantasSel} clientes_={aClientes} obras_={aObras} coords={coordsO} onUpdateFData={updFData} />
         <Step2 fuente={aFuente} segmento={aSegmento} canal={aTC} productos={aProducto} fData={fData} updPData={updPData} />
         <Step3 fData={fData} pData={pData} />
       </StepWizard>
