@@ -65,25 +65,9 @@ const AppHeader = () => {
         >
           <CIcon icon={cilMenu} size="lg" />
         </CHeaderToggler>
-        {/* <CHeaderNav className="d-none d-md-flex">
-          <CNavItem>
-            <CNavLink to="/dashboard" as={NavLink}>
-              Dashboard
-            </CNavLink>
-          </CNavItem>
-          <CNavItem>
-            <CNavLink href="#">Users</CNavLink>
-          </CNavItem>
-          <CNavItem>
-            <CNavLink href="#">Settings</CNavLink>
-          </CNavItem>
-        </CHeaderNav> */}
         <CHeaderNav className="ms-auto">
           <CNavItem>
             <div className="h-300 text-opacity-75">Bienvenido: <b>{cookies.get('Usuario')}</b></div>
-          </CNavItem>
-          <CNavItem>
-            <AppBell />
           </CNavItem>
           <CNavItem>
             <CNavLink href="#">
@@ -95,6 +79,11 @@ const AppHeader = () => {
               <CIcon icon={cilHeadphones} onClick={navHelp} size="lg" />
             </CNavLink>
           </CNavItem>
+        </CHeaderNav>
+        <CHeaderNav>
+          <div>
+            <AppBell />
+          </div>
         </CHeaderNav>
         <CHeaderNav>
           <li className="nav-item py-1">

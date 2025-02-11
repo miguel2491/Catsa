@@ -43,12 +43,8 @@ const Step2 = ({ nextStep, previousStep, fuente, segmento, canal, productos, fDa
     const [selectedRev, setSelectedRev] = useState("-");
     const [selectedTMA, setSelectedTMA] = useState("-");
     const [selectedCol, setSelectedCol] = useState("-");
-
-    const handleEdit = (e, rowIndex) => {
-      const updatedProductos = [...productos];
-      updatedProductos[rowIndex].CPC = e.target.value; // Actualiza el valor de la columna CPC
-      //setProductos(updatedProductos); // Actualiza el estado
-    };
+    // FILTROS ARRAY 
+    const [filteredProductos, setFilteredProductos] = useState([]);
     const { cliente } = fData;
     const btnExtras = (Producto) => {
       setMExtras(true);
@@ -267,6 +263,7 @@ const Step2 = ({ nextStep, previousStep, fuente, segmento, canal, productos, fDa
           setSelectedSegmento(fData.segmento)
           updPData(fData.producto)
           setProductos(fData.producto)
+          setFilteredProductos(fData.producto)
         },[]);
     //************************************************************************************* */
     const [sOProductos, setOProductos] = useState([]);
@@ -296,6 +293,11 @@ const Step2 = ({ nextStep, previousStep, fuente, segmento, canal, productos, fDa
     }))
     const [visible, setVisible] = useState(false)
     //**************************** HANDLES ********************************************************* */
+    const handleEdit = (e, rowIndex) => {
+      const updatedProductos = [...productos];
+      updatedProductos[rowIndex].CPC = e.target.value; // Actualiza el valor de la columna CPC
+      //setProductos(updatedProductos); // Actualiza el estado
+    };
     const hFuente = (event) =>{
       setSelectedFuente(event.target.value);
     }
@@ -307,22 +309,37 @@ const Step2 = ({ nextStep, previousStep, fuente, segmento, canal, productos, fDa
     }
     const hConcreto = (event) =>{
       setSelectedConcreto(event.target.value);
+      //console.log(oProductos)
+      const filteredData = 'C' ? oProductos.filter(item => item.value.includes('C')) : oProductos;
+      setFilteredProductos(filteredData)
+      //console.log(filteredData)
     }
     const hResistencia = (event) =>{
       setSelectedResistencia(event.target.value);
+      const filteredData = '200' ? filteredProductos.filter(item => item.value.includes('200')) : filteredProductos;
+      setFilteredProductos(filteredData)
     }
     const hEdad = (event) =>{
       setSelectedEdad(event.target.value);
     }
     const hReve = (event) =>{
       setSelectedRev(event.target.value);
+      const filteredData = '14' ? filteredProductos.filter(item => item.value.includes('14')) : filteredProductos;
+      setFilteredProductos(filteredData)
     }
     const hTMA = (event) =>{
       setSelectedTMA(event.target.value);
+      const filteredData = '10' ? filteredProductos.filter(item => item.value.includes('10')) : filteredProductos;
+      setFilteredProductos(filteredData)
     }
     const hColocacion = (event) =>{
       setSelectedCol(event.target.value);
+      console.log(filteredProductos)
+      const filteredData = 'D' ? filteredProductos.filter(item => item.value.includes('D')) : filteredProductos;
+      console.log(filteredData)
+      setFilteredProductos(filteredData)
     }
+
     //*********************************************************************************************** */
     return(
       <div>
@@ -470,7 +487,7 @@ const Step2 = ({ nextStep, previousStep, fuente, segmento, canal, productos, fDa
                   closeMenuOnSelect={false}
                   components={animatedComponents}
                   isMulti
-                  options={oProductos}
+                  options={filteredProductos}
                   onChange={sProductos}
                 />
               </CCol>

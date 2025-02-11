@@ -29,7 +29,7 @@ import { cilCheck, cilX, cilSearch, cilTrash, cilPlus } from '@coreui/icons'
 import { Rol } from '../../../Utilidades/Roles'
 import '../../../estilos.css'
 
-const Step1 = ({ nextStep, fijos, corpo, mop, cdiesel, sucursal, clientes_, obras_, coords, onUpdateFData }) => {
+const Step1 = ({ nextStep, fijos, corpo, mop, cdiesel, sucursal, clientes_, obras_, coords, nCot, onUpdateFData }) => {
   const [visible, setVisible] = useState(false);// Modal Cargando
   const [isScriptLoaded, setIsScriptLoaded] = useState(false);
   const [mMapa, setMMapa] = useState(false);
@@ -55,6 +55,7 @@ const Step1 = ({ nextStep, fijos, corpo, mop, cdiesel, sucursal, clientes_, obra
     } else {
       setIsScriptLoaded(false);
     }
+    console.log(nCot)
   }, []);
   //**************************************************************** */
   const handleChange = selectedOption => {
@@ -255,6 +256,9 @@ const Step1 = ({ nextStep, fijos, corpo, mop, cdiesel, sucursal, clientes_, obra
         Swal.fire("Error", "No se pudo obtener la información", "error");
     }
   }
+  const getMMap = ()=>{
+    setMMapa(true)
+  }
   
   //-----------------------------------------------------
   return(
@@ -331,18 +335,21 @@ const Step1 = ({ nextStep, fijos, corpo, mop, cdiesel, sucursal, clientes_, obra
         </CRow>
         <CRow className='mt-2 mb-2'>
           <CCol>
-            {isScriptLoaded ? (
+            <MyMap coords={"0,0"} />
+            {/* {isScriptLoaded ? (
               <MyMap coords={"0,0"} />
             ):(
               <LoadScript googleMapsApiKey="AIzaSyCxaRbEHBInFto-cnzDgPzqZuaVmllksOE">
                 <MyMap coords={"0,0"} />
               </LoadScript>
-            )}
+            )} */}
           </CCol>
         </CRow>
         <CRow className='mt-2 mb-2'>
           <CCol>
-            <CButton color='primary' size='sm' onClick={()=> setMMapa(true)}>Ver Ubicación Real</CButton>
+            {nCot != 0 && (
+              <CButton color='primary' size='sm' onClick={getMMap}>Ver Ubicación Real</CButton>
+            )}
           </CCol>
         </CRow>
         <CModal
@@ -444,13 +451,14 @@ const Step1 = ({ nextStep, fijos, corpo, mop, cdiesel, sucursal, clientes_, obra
                 </CModalHeader>
                 <CModalBody>
                     <CRow>
-                      {isScriptLoaded ? (
+                      <MyMap coords={"19.05258,-97.5896"} />
+                      {/* {isScriptLoaded ? (
                         <MyMap coords={coords} />
                       ):(
                         <LoadScript googleMapsApiKey="AIzaSyCxaRbEHBInFto-cnzDgPzqZuaVmllksOE">
                           <MyMap coords={coords} />
                         </LoadScript>
-                      )}
+                      )} */}
                     </CRow>
                 </CModalBody>
                 <CModalFooter>

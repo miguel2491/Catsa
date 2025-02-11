@@ -9,7 +9,7 @@ import TimePicker from 'rc-time-picker';
 import 'rc-time-picker/assets/index.css';
 import { useNavigate } from "react-router-dom";
 import { GetCotizaciones,convertArrayOfObjectsToCSV, getPedidosCot, getArchivo, setStatus, getCotizacionExtra, getCotizacionLog, getSegmentos,
-  getSeguimientos
+  getSeguimientos, getObraCot, getClienteCot
  } from '../../Utilidades/Funciones';
 import {
   CButton,
@@ -73,7 +73,27 @@ const LCotizacion = () => {
     month: '2-digit',   // 'numeric', '2-digit', 'short', 'long', 'narrow'
     day: '2-digit'   // 'numeric', '2-digit'
   };
-  //Buscador
+  //------------ FROMS CLIENTE/OBRAS ------------------------------------------
+  const [RazonTxtC, setRazonC] = useState('');
+  const [RFCTxtC, setRFCC] = useState('');
+  const [PagoTxtC, setPagoC] = useState('');
+  const [DigitosTxtC, setDigitosC] = useState('');
+  const [DFiscalTxtC, setDFiscalC] = useState('');
+  const [CalleTxtC, setCalleC] = useState('');
+  const [nExtTxtC, setNExtC] = useState('');
+  const [ColTxtC, setColoniaC] = useState('');
+  const [MunTxtC, setMunC] = useState('');
+  const [EdoTxtC, setEdoC] = useState('');
+  const [TelTxtC, setTelC] = useState('');
+  const [PContactoTxtC, setPContactoC] = useState('');
+  const [CFDITxtC, setCFDIC] = useState('');
+  const [nClienteTxt, setNCliente] = useState('');
+  const [nObraTxt, setNObra] = useState('');
+  const [DirTxtO, setDirO] = useState('');
+  const [ColTxtO, setColoniaO] = useState('');
+  const [MunTxtO, setMunicO] = useState('');
+  const [EstadoTxtO, setEstadoO] = useState('');
+  //--------------------------- Buscador --------------------------------------
   const [fText, setFText] = useState(''); // Estado para el filtro de búsqueda
   const [vBPlanta, setBPlanta] = useState('');
   // ROLES
@@ -668,10 +688,11 @@ const LCotizacion = () => {
       }
     });
     try {
-        // Llamada a la API
+      // Llamada a la API
         const cotI = await GetCotizaciones(vFechaI, vFcaF, planta);
         Swal.close();  // Cerramos el loading
         if (cotI) {
+          console.log(cotI)
           const filteredCotizaciones = cotI.filter(item => item.IdPlanta === planta);
           setPosts(cotI);
           setDTCotizacion(filteredCotizaciones);  // Procesar la respuesta
@@ -787,6 +808,8 @@ const LCotizacion = () => {
     getExtras(id);
     getSeg();
     gtSeguimientos_(id);
+    getObraCot_(id);
+    getClienteCot_(id);
   }
   const getExtras = async(id)=>{
     Swal.fire({
@@ -837,6 +860,73 @@ const LCotizacion = () => {
       console.error(error)
     }
   }
+  const getClienteCot_ = async(id)=>{
+    //Buscar en ArrayCotizador NoCliente y NoObra
+    const ArrayCO = dtCotizacion.filter(item => item.IdCotizacion === id);
+    let idC = (ArrayCO && ArrayCO[0] && ArrayCO[0].NoCliente !== "") ? ArrayCO[0].NoCliente:'0';
+    Swal.fire({
+      title: 'Cargando...',
+      text: 'Estamos obteniendo la información...',
+      didOpen: () => {
+          Swal.showLoading();  // Muestra la animación de carga
+      }
+    });
+    try {
+      Swal.close();
+      const ocList = await getClienteCot(idC);
+      if(ocList){
+        const ArrayC = ocList.sort((a,b) => a.RFC - b.RFC);
+        setRazonC(ArrayC[0]?.Nombre && (typeof ArrayC[0].Nombre === 'object' ? Object.keys(ArrayC[0].Nombre) > 0: true)?ArrayC[0].Nombre:'-');
+        setRFCC(ArrayC[0]?.RFC && (typeof ArrayC[0].RFC === 'object' ? Object.keys(ArrayC[0].RFC) > 0: true)?ArrayC[0].RFC:'-');
+        setPagoC(ArrayC[0]?.MetodoPago && (typeof ArrayC[0].MetodoPago === 'object' ? Object.keys(ArrayC[0].MetodoPago) > 0: true)?ArrayC[0].MetodoPago:'-');
+        setDigitosC('****');
+        setCalleC(ArrayC[0]?.Calle && (typeof ArrayC[0].Calle === 'object' ? Object.keys(ArrayC[0].Calle) > 0: true)?ArrayC[0].Calle:'-');
+        setNExtC(ArrayC[0]?.Numero && (typeof ArrayC[0].Numero === 'object' ? Object.keys(ArrayC[0].Numero) > 0: true)?ArrayC[0].Numero:'-');
+        setColoniaC(ArrayC[0]?.Colonia && (typeof ArrayC[0].Colonia === 'object' ? Object.keys(ArrayC[0].Colonia) > 0: true)?ArrayC[0].Colonia:'-');
+        setMunC(ArrayC[0]?.Municipio && (typeof ArrayC[0].Municipio === 'object' ? Object.keys(ArrayC[0].Municipio) > 0: true)?ArrayC[0].Municipio:'-');
+        setEdoC(ArrayC[0]?.Estado && (typeof ArrayC[0].Estado === 'object' ? Object.keys(ArrayC[0].Estado) > 0: true)?ArrayC[0].Estado:'-');
+        setTelC(ArrayC[0]?.Telefono && (typeof ArrayC[0].Telefono === 'object' ? Object.keys(ArrayC[0].Telefono) > 0: true)?ArrayC[0].Telefono:'-');
+        setPContactoC('-');
+        setCFDIC(ArrayC[0]?.ClaveCFDI && (typeof ArrayC[0].ClaveCFDI === 'object' ? Object.keys(ArrayC[0].ClaveCFDI) > 0: true)?ArrayC[0].ClaveCFDI:'-');
+      }
+      //getLogs(id);
+    }catch(error){
+      Swal.close()
+      console.error(error)
+    }
+  }
+  const getObraCot_ = async(id)=>{
+    const ArrayCO = dtCotizacion.filter(item => item.IdCotizacion === id);
+    let idC = (ArrayCO && ArrayCO[0] && ArrayCO[0].NoCliente !== "") ? ArrayCO[0].NoCliente:'0';
+    let idO = (ArrayCO && ArrayCO[0] && ArrayCO[0].NoObra !== "") ? ArrayCO[0].NoObra : '0';
+    setNCliente(idC);
+    setNObra(idO)
+    Swal.fire({
+      title: 'Cargando...',
+      text: 'Estamos obteniendo la información...',
+      didOpen: () => {
+          Swal.showLoading();  // Muestra la animación de carga
+      }
+    });
+    try {
+      Swal.close();
+      const ocList = await getObraCot(idC, idO);
+      if(ocList){
+        //Buscar en ArrayCotizador NoCliente y NoObra
+        const ArrayC = ocList.sort((a,b) => a.Estado - b.Estado);
+        console.log(ArrayC)
+        setDirO((ArrayC[0] && ArrayC[0] && ArrayC[0].Direccion !== "") ? ArrayC[0].Direccion:'-');
+        setColoniaO((ArrayC[0] && ArrayC[0] && ArrayC[0].Colonia !== "") ? ArrayC[0].Colonia:'-');
+        setMunicO((ArrayC[0] && ArrayC[0] && ArrayC[0].Municipio !== "") ? ArrayC[0].Municipio:'-');
+        setEstadoO((ArrayC[0] && ArrayC[0] && ArrayC[0].Estado !== "") ? ArrayC[0].Estado:'-')        
+      }
+      //getLogs(id);
+    }catch(error){
+      Swal.close()
+      console.error(error)
+    }
+  }
+
   const gtSeguimientos_ = async(id)=>{
     try
     {
@@ -942,6 +1032,60 @@ const LCotizacion = () => {
     }else{
       setShCO(false)
     }
+  };
+  const hNCliente = (e) => {
+    setNCliente(e.target.value);
+  };
+  const hNObra = (e) => {
+    setNObra(e.target.value);
+  };
+  const hRazon = (e) => {
+    setRazonC(e.target.value);
+  };
+  const hRFC = (e) => {
+    setRFCC(e.target.value);
+  };
+  const hMPago = (e) => {
+    setPagoC(e.target.value);
+  };
+  const hDigCue = (e) => {
+    setDigitosC(e.target.value);
+  };
+  const hDirF = (e) => {
+    setDFiscalC(e.target.value);
+  };
+  const hCalleC = (e) => {
+    setCalleC(e.target.value);
+  };
+  const hNExtC = (e) => {
+    setNExtC(e.target.value);
+  };
+  const hColC = (e) => {
+    setColoniaC(e.target.value);
+  };
+  const hMunC = (e) => {
+    setMunC(e.target.value);
+  };
+  const hEdoC = (e) => {
+    setEdoC(e.target.value);
+  };
+  const hTelC = (e) => {
+    setTelC(e.target.value);
+  };
+  const hCFDI = (e) => {
+    setCFDIC(e.target.value);
+  };
+  const hDirO = (e) => {
+    setDir(e.target.value);
+  };
+  const hColO = (e) => {
+    setColonia(e.target.value);
+  };
+  const hMunO = (e) => {
+    setMunic(e.target.value);
+  };
+  const hEdoO = (e) => {
+    setEstado(e.target.value);
   };
   //********************************************************************************************** */
   return (
@@ -1107,50 +1251,50 @@ const LCotizacion = () => {
                         <CRow>
                           <CCol xs={6} md={4}>
                             <label>Nombre de Razón Social</label>
-                            <CFormInput type="text" placeholder="Nombre de Cliente" aria-label="Nombre" />
+                            <CFormInput type="text" placeholder="Nombre de Cliente" aria-label="Nombre" value={RazonTxtC} onChange={hRazon} />
                           </CCol>
                           <CCol xs={6} md={4}>
                             <label>RFC</label>
-                            <CFormInput type="text" placeholder="RFC" />
+                            <CFormInput type="text" placeholder="RFC" value={RFCTxtC} onChange={hRFC} />
                           </CCol>
                           <CCol xs={6} md={4}>
                             <label>Metodo de Pago</label>
-                            <CFormInput type="text" placeholder="Metodo de Pago" />
+                            <CFormInput type="text" placeholder="Metodo de Pago" value={PagoTxtC} onChange={hMPago} />
                           </CCol>
                           <CCol xs={6} md={4}>
                             <label>4 Últimos Dígitos Cuenta</label>
-                            <CFormInput type="text" placeholder="****" />
+                            <CFormInput type="text" placeholder="****" value={DigitosTxtC} onChange={hDigCue} />
                           </CCol>
                           <CCol xs={6} md={4}>
                             <label>Dirección Fiscal</label>
-                            <CFormInput type="text" placeholder="Dirección Fiscal" />
+                            <CFormInput type="text" placeholder="Dirección Fiscal" value={DFiscalTxtC} onChange={hDirF} />
                           </CCol>
                           <hr/>
                           <h4>DIRECCIÓN FISCAL</h4>
                           <br />
                           <CCol xs={6} md={4}>
                             <label>Calle</label>
-                            <CFormInput type="text" placeholder="Dirección Fiscal" />
+                            <CFormInput type="text" placeholder="Calle" value={CalleTxtC} onChange={hCalleC} />
                           </CCol>
                           <CCol xs={6} md={4}>
                             <label>No. Exterior</label>
-                            <CFormInput type="text" placeholder="No. Exterior" />
+                            <CFormInput type="text" placeholder="No. Exterior" value={nExtTxtC} onChange={hNExtC} />
                           </CCol>
                           <CCol xs={6} md={4}>
                             <label>COLONIA</label>
-                            <CFormInput type="text" placeholder="Colonia" />
+                            <CFormInput type="text" placeholder="Colonia" value={ColTxtC} onChange={hColC}/>
                           </CCol>
                           <CCol xs={6} md={4}>
                             <label>MUNICIPIO</label>
-                            <CFormInput type="text" placeholder="Municipio" />
+                            <CFormInput type="text" placeholder="Municipio" value={MunTxtC} onChange={hMunC}/>
                           </CCol>
                           <CCol xs={6} md={4}>
                             <label>ESTADO</label>
-                            <CFormInput type="text" placeholder="Estado" />
+                            <CFormInput type="text" placeholder="Estado" value={EdoTxtC} onChange={hEdoC} />
                           </CCol>
                           <CCol xs={6} md={4}>
                             <label>TELÉFONO</label>
-                            <CFormInput type="text" placeholder="Telefono" />
+                            <CFormInput type="text" placeholder="Telefono" value={TelTxtC} onChange={hTelC} />
                           </CCol>
                           <CCol xs={6} md={4}>
                             <label>PERSONA CONTACTO</label>
@@ -1158,7 +1302,7 @@ const LCotizacion = () => {
                           </CCol>
                           <CCol xs={6} md={4}>
                             <label>CLAVE CFDI</label>
-                            <CFormInput type="text" placeholder="Clave CFDI" />
+                            <CFormInput type="text" placeholder="Clave CFDI" value={CFDITxtC} onChange={hCFDI}/>
                           </CCol>
                         </CRow>
                         )}
@@ -1166,28 +1310,28 @@ const LCotizacion = () => {
                         <CRow>
                           <CCol xs={6} md={4}>
                             <label>Nombre de Obra</label>
-                            <CFormInput type="text" placeholder="Nombre de Obra" aria-label="Nombre" />
+                            <CFormInput type="text" value={nObraTxt} onChange={hNObra} placeholder="Nombre de Obra" aria-label="Nombre" />
                           </CCol>
                           <CCol xs={6} md={4}>
                             <label>NÚMERO CLIENTE</label>
-                            <CFormInput type="text" placeholder="NÚMERO CLIENTE" />
+                            <CFormInput type="text" value={nClienteTxt} onChange={hNCliente} placeholder="NÚMERO CLIENTE" />
                           </CCol>
                           <h4>UBICACIÓN</h4>
                           <CCol xs={6} md={4}>
                             <label>DIRECCIÓN</label>
-                            <CFormInput type="text" placeholder="DIRECCIÓN" />
+                            <CFormInput type="text" value={DirTxtO} onChange={hDirO} placeholder="DIRECCIÓN" />
                           </CCol>
                           <CCol xs={6} md={4}>
                             <label>COLONIA</label>
-                            <CFormInput type="text" placeholder="COLONIA" />
+                            <CFormInput type="text" value={ColTxtO} onChange={hColO} placeholder="COLONIA" />
                           </CCol>
                           <CCol xs={6} md={4}>
                             <label>MUNICIPIO</label>
-                            <CFormInput type="text" placeholder="MUNICIPIO" />
+                            <CFormInput type="text" value={MunTxtO} onChange={hMunO} placeholder="MUNICIPIO" />
                           </CCol>
                           <CCol xs={6} md={4}>
                             <label>ESTADO</label>
-                            <CFormInput type="text" placeholder="ESTADO" />
+                            <CFormInput type="text" value={EstadoTxtO} onChange={hEdoO} placeholder="ESTADO" />
                           </CCol>
                           <CCol xs={6} md={4}>
 

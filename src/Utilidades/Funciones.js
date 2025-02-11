@@ -1278,7 +1278,33 @@ export  async function getClienteCot(id)
         return false;
     }    
 }
-export  async function getObraCot(id)
+export  async function getObraCot(idC, idO)
+{
+    try
+    {
+        let confi_ax = {
+            headers:
+            {
+                'Cache-Control': 'no-cache',
+                'Content-Type': 'application/json',
+                "Authorization": "Bearer "+cookies.get('token'),
+            },
+        };
+        //------------------------------------------------------------------------------------------------------------------------------------------------------
+        const response = await axios.get(baseUrl2+'Comercial/GetObraCot/'+idO+'/'+idC, confi_ax);
+        console.log(response)
+        var obj = response.data;
+        if(obj.length > 0)
+        {
+            return obj
+        }else{return false}
+    } 
+    catch(error)
+    {
+        return false;
+    }    
+}
+export  async function getCliObras(idC, idO)
 {
     try
     {

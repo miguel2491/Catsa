@@ -352,7 +352,7 @@ const Cotizador = () => {
       </CRow>
       {shSteps && (
       <StepWizard>
-        <Step1 fijos={dFijos} corpo={dCorpo} mop={dMop} cdiesel={dDiesel} sucursal={plantasSel} clientes_={aClientes} obras_={aObras} coords={coordsO} onUpdateFData={updFData} />
+        <Step1 fijos={dFijos} corpo={dCorpo} mop={dMop} cdiesel={dDiesel} sucursal={plantasSel} clientes_={aClientes} obras_={aObras} coords={coordsO} nCot={noCotizacion} onUpdateFData={updFData} />
         <Step2 fuente={aFuente} segmento={aSegmento} canal={aTC} productos={aProducto} fData={fData} updPData={updPData} />
         <Step3 fData={fData} pData={pData} />
       </StepWizard>

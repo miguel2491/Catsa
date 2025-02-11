@@ -5,6 +5,9 @@ h3, label{
 .txtTitleBtn{
 	color:white
 }
+.fc .fc-timegrid-slot-label{
+	color:black !important;
+}
 .txtBuscar{
     height: 32px;
 	width: 200px;

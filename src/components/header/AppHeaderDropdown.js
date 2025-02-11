@@ -150,9 +150,6 @@ const AppHeaderDropdown = () => {
             1
           </CBadge>
         </CDropdownItem>
-        {/* <CDropdownHeader className="bg-body-secondary fw-semibold my-2">
-          Settings
-        </CDropdownHeader> */}
         <CDropdownDivider />
         <CDropdownItem onClick={cerrarSesion}>
           <CIcon icon={cilLockLocked} className="me-2" />

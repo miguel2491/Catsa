@@ -38,7 +38,7 @@ const Plantas = ({plantasSel, mCambio}) => {
         }else{
             getPlantas();
         }
-    });
+    },[]);
     function getPlantas()
     {
       try{
