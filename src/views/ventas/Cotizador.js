@@ -4,7 +4,6 @@ import ProgressBar from "@ramonak/react-progress-bar";
 import makeAnimated from 'react-select/animated';
 import Swal from 'sweetalert2';
 import StepWizard from "react-step-wizard";
-import { GoogleMap, LoadScript, Marker } from '@react-google-maps/api';
 import Plantas from '../base/parametros/Plantas'
 import FechaI from '../base/parametros/FechaInicio'
 import Step1 from '../ventas/Cotizador/Step1'

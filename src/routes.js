@@ -20,6 +20,7 @@ const PCanceladosD = React.lazy(() => import('./views/Operaciones/Pedidos/DCance
 const LPedidos = React.lazy(() => import('./views/logistica/LPedidos'))
 const PLinea = React.lazy(() => import('./views/logistica/PLinea'))
 const PedidosC = React.lazy(() => import('./views/logistica/Pedidos/PedidosC'))
+const TimePedidos = React.lazy(() => import('./views/logistica/Pedidos/TimeLinePedidos'))
 //=========================================> INTERFAZ <=================================
 const IObras = React.lazy(() => import('./views/interfaz/Obras'))
 const IConfiguracion = React.lazy(() => import('./views/interfaz/Configuracion'))
@@ -28,6 +29,7 @@ const IMovimiento = React.lazy(() => import('./views/interfaz/MovimientoI'))
 const CostosProductos = React.lazy(() => import('./views/reportes/CProductos'))
 const RPedidosVenta = React.lazy(() => import('./views/reportes/PedidosVenta'))
 const RCotizaciones = React.lazy(() => import('./views/reportes/RCotizaciones'))
+const RCotizacionesP = React.lazy(() => import('./views/reportes/RCotizacionesP'))
 const RBPedido = React.lazy(() => import('./views/reportes/RBPedido'))
 const RComision = React.lazy(() => import('./views/reportes/RComision'))
 const RProyeccion = React.lazy(() => import('./views/reportes/RProyeccion'))
@@ -67,12 +69,14 @@ const routes = [
   { path: '/logistica/LPedidos', name: 'Pedidos', element:LPedidos },
   { path: '/logistica/PLinea', name: 'Pedidos Linea', element:PLinea },
   { path: '/logistica/Pedidos/PedidosC', name: 'PedidosC', element:PedidosC },
+  { path: '/logistica/Pedidos/TimeLinePedidos', name: 'TimePedidos', element:TimePedidos },
   //--------------------------------------------> INTERFAZ <-------------------------------
   { path: '/interfaz/Obras', name: 'IObras', element:IObras },
   { path: '/interfaz/Configuracion', name: 'IConfiguracion', element:IConfiguracion },
   { path: '/interfaz/MovimientoI', name: 'IMovimiento', element:IMovimiento },
   { path: '/reportes/CostosProductos', name: 'CostosProductos', element: CostosProductos },
   { path: '/reportes/RCotizaciones', name: 'RCotizaciones', element: RCotizaciones },
+  { path: '/reportes/RCotizacionesP', name: 'RCotizacionesP', element: RCotizacionesP },
   { path: '/reportes/PedidosVenta', name: 'PedidosVenta', element: RPedidosVenta },
   { path: '/reportes/RBPedido', name: 'BuscarPedido', element: RBPedido },
   { path: '/utils/PreCierres', name: 'PreCierres', element: PreCierre },

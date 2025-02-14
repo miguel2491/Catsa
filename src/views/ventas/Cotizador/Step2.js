@@ -45,6 +45,7 @@ const Step2 = ({ nextStep, previousStep, fuente, segmento, canal, productos, fDa
     const [selectedCol, setSelectedCol] = useState("-");
     // FILTROS ARRAY 
     const [filteredProductos, setFilteredProductos] = useState([]);
+    const [fProductos, setFProductos] = useState([]);
     const { cliente } = fData;
     const btnExtras = (Producto) => {
       setMExtras(true);
@@ -264,6 +265,8 @@ const Step2 = ({ nextStep, previousStep, fuente, segmento, canal, productos, fDa
           updPData(fData.producto)
           setProductos(fData.producto)
           setFilteredProductos(fData.producto)
+          setFProductos(fData.producto)
+          console.log(fData.producto)
         },[]);
     //************************************************************************************* */
     const [sOProductos, setOProductos] = useState([]);
@@ -307,39 +310,66 @@ const Step2 = ({ nextStep, previousStep, fuente, segmento, canal, productos, fDa
     const hTCliente = (event) =>{
       setSelectedTCliente(event.target.value);
     }
+    //**************************************************************************************************************** */
     const hConcreto = (event) =>{
-      setSelectedConcreto(event.target.value);
-      //console.log(oProductos)
-      const filteredData = 'C' ? oProductos.filter(item => item.value.includes('C')) : oProductos;
-      setFilteredProductos(filteredData)
-      //console.log(filteredData)
+      const aux = event.target.value;
+      setSelectedConcreto(aux);
+      setTimeout(function(){
+        filterProductos(aux)
+      },900)
     }
     const hResistencia = (event) =>{
       setSelectedResistencia(event.target.value);
-      const filteredData = '200' ? filteredProductos.filter(item => item.value.includes('200')) : filteredProductos;
-      setFilteredProductos(filteredData)
+      const aux = event.target.value;
+      setTimeout(function(){
+        filterProductos(aux)
+      },900)
     }
     const hEdad = (event) =>{
       setSelectedEdad(event.target.value);
+      const aux = event.target.value;
+      setTimeout(function(){
+        filterProductos(aux)
+      },900)
     }
     const hReve = (event) =>{
       setSelectedRev(event.target.value);
-      const filteredData = '14' ? filteredProductos.filter(item => item.value.includes('14')) : filteredProductos;
-      setFilteredProductos(filteredData)
+      const aux = event.target.value;
+      setTimeout(function(){
+        filterProductos(aux)
+      },900);
     }
     const hTMA = (event) =>{
       setSelectedTMA(event.target.value);
-      const filteredData = '10' ? filteredProductos.filter(item => item.value.includes('10')) : filteredProductos;
-      setFilteredProductos(filteredData)
+      const aux = event.target.value;
+      setTimeout(function(){
+        filterProductos(aux)
+      },900);
     }
     const hColocacion = (event) =>{
       setSelectedCol(event.target.value);
-      console.log(filteredProductos)
-      const filteredData = 'D' ? filteredProductos.filter(item => item.value.includes('D')) : filteredProductos;
-      console.log(filteredData)
-      setFilteredProductos(filteredData)
+      const aux = event.target.value;
+      setTimeout(function(){
+        filterProductos(aux)
+      },900);
     }
-
+    //************************************************************************************************ */
+    const filterProductos = (aux) =>{
+        const fProd = oProductos.filter(item => {
+          console.log(selectedResistencia, selectedEdad, selectedRev, selectedTMA, selectedCol, aux)
+          // Filtrar por planta, interfaz y texto de búsqueda
+          return (
+            (!selectedResistencia || selectedResistencia === "-" || item.value.includes(selectedResistencia)) &&
+            (!selectedEdad || selectedEdad === "-" || item.value.includes(selectedEdad)) &&
+            (!selectedRev || selectedRev === "-" || item.value.includes(selectedRev)) &&
+            (!selectedTMA || selectedTMA === "-" || item.value.includes(selectedTMA)) &&
+            (!selectedCol || selectedCol === "-" || item.value.includes(selectedCol)) &&
+            item.value.includes(aux) // Siempre se filtra por `aux`
+          );
+        });        
+        console.log(fProd)
+        setFilteredProductos(fProd)
+    };
     //*********************************************************************************************** */
     return(
       <div>

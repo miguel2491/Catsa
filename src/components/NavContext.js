@@ -22,6 +22,8 @@ import {
   cilDollar,
   cilBan,
   cilBarChart,
+  cilFile,
+  cilCash,
 } from '@coreui/icons'
 import { CNavGroup, CNavItem, CNavTitle } from '@coreui/react'
 import CIcon from '@coreui/icons-react'
@@ -118,6 +120,12 @@ const NavProvider = ({ children }) => {
                               name: 'Calendario',
                               to: '/logistica/Pedidos/PedidosC',
                               icon: <CIcon icon={cilCalendar} customClassName="nav-icon" />,
+                            },
+                            {
+                              component: CNavItem,
+                              name: 'Timer Pedidos',
+                              to: '/logistica/Pedidos/TimeLinePedidos',
+                              icon: <CIcon icon={cilBan} customClassName="nav-icon" />,
                             },
                           ]
                         : []),
@@ -455,6 +463,20 @@ const NavProvider = ({ children }) => {
                   component: CNavItem,
                   name: 'Costos Productos',
                   to: '/reportes/CostosProductos',
+                },
+              ],
+            },
+            {
+              component: CNavGroup,
+              name: 'Ventas',
+              to: '/Ventas',
+              icon: <CIcon icon={cilFile} customClassName="nav-icon" />,
+              items: [
+                {
+                  component: CNavItem,
+                  name: 'Cotizaciones',
+                  to: '/reportes/RCotizacionesP',
+                  icon:<CIcon icon={cilCash} customClassName="nav-icon" />,
                 },
               ],
             },

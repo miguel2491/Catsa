@@ -1091,7 +1091,7 @@ export  async function getCotizacionId(idCotizacion)
             },
         };
         //------------------------------------------------------------------------------------------------------------------------------------------------------
-        const response = await axios.get(baseUrl2+'Comercial/GetCotizacionId/'+idCotizacion, confi_ax);
+        const response = await axios.get(baseUrl+'Comercial/GetCotizacionId/'+idCotizacion, confi_ax);
         var obj = response.data;
         if(obj.length > 0)
         {
@@ -1116,7 +1116,7 @@ export  async function getCotizacionPedido(idCotizacion)
             },
         };
         //------------------------------------------------------------------------------------------------------------------------------------------------------
-        const response = await axios.get(baseUrl2+'Comercial/GetCotizacionPedidos/'+idCotizacion, confi_ax);
+        const response = await axios.get(baseUrl+'Comercial/GetCotizacionPedidos/'+idCotizacion, confi_ax);
         var obj = response.data;
         if(obj.length > 0)
         {
@@ -1141,7 +1141,7 @@ export  async function setStatus(idCotizacion, estatus)
             },
         };
         //------------------------------------------------------------------------------------------------------------------------------------------------------
-        const response = await axios.get(baseUrl2+'Comercial/SetStatus/'+idCotizacion+','+estatus, confi_ax);
+        const response = await axios.get(baseUrl+'Comercial/SetStatus/'+idCotizacion+','+estatus, confi_ax);
         var obj = response.data;
         if(obj)
         {
@@ -1166,7 +1166,7 @@ export  async function getCotizacionExtra(idCotizacion)
             },
         };
         //------------------------------------------------------------------------------------------------------------------------------------------------------
-        const response = await axios.get(baseUrl2+'Comercial/GetCotizacionExtras/'+idCotizacion, confi_ax);
+        const response = await axios.get(baseUrl+'Comercial/GetCotizacionExtras/'+idCotizacion, confi_ax);
         var obj = response.data;
         if(obj)
         {
@@ -1191,7 +1191,7 @@ export  async function getCotizacionLog(idCotizacion)
             },
         };
         //------------------------------------------------------------------------------------------------------------------------------------------------------
-        const response = await axios.get(baseUrl2+'Comercial/GetCotizacionLog/'+idCotizacion, confi_ax);
+        const response = await axios.get(baseUrl+'Comercial/GetCotizacionLog/'+idCotizacion, confi_ax);
         var obj = response.data;
         if(obj)
         {
@@ -1216,7 +1216,7 @@ export  async function getSegmentos()
             },
         };
         //------------------------------------------------------------------------------------------------------------------------------------------------------
-        const response = await axios.get(baseUrl2+'Comercial/GetAcciones', confi_ax);
+        const response = await axios.get(baseUrl+'Comercial/GetAcciones', confi_ax);
         var obj = response.data;
         if(obj)
         {
@@ -1241,7 +1241,7 @@ export  async function getSeguimientos(id)
             },
         };
         //------------------------------------------------------------------------------------------------------------------------------------------------------
-        const response = await axios.get(baseUrl2+'Comercial/GetSeguimientoCot/'+id, confi_ax);
+        const response = await axios.get(baseUrl+'Comercial/GetSeguimientoCot/'+id, confi_ax);
         var obj = response.data;
         if(obj.length > 0)
         {
@@ -1266,7 +1266,7 @@ export  async function getClienteCot(id)
             },
         };
         //------------------------------------------------------------------------------------------------------------------------------------------------------
-        const response = await axios.get(baseUrl2+'Comercial/GetClienteCot/'+id, confi_ax);
+        const response = await axios.get(baseUrl+'Comercial/GetClienteCot/'+id, confi_ax);
         var obj = response.data;
         if(obj.length > 0)
         {
@@ -1291,7 +1291,7 @@ export  async function getObraCot(idC, idO)
             },
         };
         //------------------------------------------------------------------------------------------------------------------------------------------------------
-        const response = await axios.get(baseUrl2+'Comercial/GetObraCot/'+idO+'/'+idC, confi_ax);
+        const response = await axios.get(baseUrl+'Comercial/GetObraCot/'+idO+'/'+idC, confi_ax);
         console.log(response)
         var obj = response.data;
         if(obj.length > 0)
@@ -1317,7 +1317,7 @@ export  async function getCliObras(idC, idO)
             },
         };
         //------------------------------------------------------------------------------------------------------------------------------------------------------
-        const response = await axios.get(baseUrl2+'Comercial/GetObraCot/'+id, confi_ax);
+        const response = await axios.get(baseUrl+'Comercial/GetObraCot/'+id, confi_ax);
         var obj = response.data;
         if(obj.length > 0)
         {
@@ -2093,6 +2093,32 @@ export async function getDetalleComR(mes, periodo, usuario) {
         };
         //------------------------------------------------------------------------------------------------------------------------------------------------------
         const response = await axios.get(baseUrl+'Reportes/GetComisionesR/'+mes+","+periodo+",1,"+usuario, confi_ax);
+        var obj = response.data;
+        if(obj && obj.length > 0)
+        {
+            return obj
+        }else{return false}
+    } 
+    catch(error)
+    {
+        return false;
+    }
+}
+export async function getCotizacionP(FI, FF, planta) {
+    try
+    {
+        let confi_ax = {
+            headers:
+            {
+                'Cache-Control': 'no-cache',
+                'Content-Type': 'application/json',
+                "Authorization": "Bearer "+cookies.get('token'),
+            },
+        };
+        const fcaI = FormatoFca(FI);
+        const fcaF = FormatoFca(FF);
+        //------------------------------------------------------------------------------------------------------------------------------------------------------
+        const response = await axios.get(baseUrl+'Reportes/GetCotPed/'+fcaI+","+fcaF+","+planta, confi_ax);
         var obj = response.data;
         if(obj && obj.length > 0)
         {

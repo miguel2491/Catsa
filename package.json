@@ -57,6 +57,7 @@
     "react-select": "^5.8.1",
     "react-step-wizard": "^5.3.11",
     "react-tabulator": "^0.21.0",
+    "react-vertical-timeline-component": "^3.5.3",
     "redux": "5.0.1",
     "simplebar-react": "^3.2.5",
     "sweetalert2": "^11.14.1",
