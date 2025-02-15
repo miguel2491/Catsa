@@ -12,7 +12,7 @@ import TimePicker from 'rc-time-picker';
 import 'rc-time-picker/assets/index.css';
 import { useNavigate } from "react-router-dom";
 import { GetCotizaciones,convertArrayOfObjectsToCSV, getPedidosCot, getArchivo, setStatus, getCotizacionExtra, getCotizacionLog, getSegmentos,
-  getSeguimientos, getObraCot, getClienteCot
+  getSeguimientos, getObraCot, getClienteCot, setVisitas
  } from '../../Utilidades/Funciones';
 import {
   CButton,
@@ -38,8 +38,11 @@ import {
   cilCheck,
   cilClearAll,
   cilImage,
+  cilMap,
   cilMenu,
   cilPencil,
+  cilPhone,
+  cilPin,
   cilShareAlt,
   cilTag,
   cilTrash
@@ -1046,41 +1049,24 @@ const LCotizacion = () => {
         Swal.fire("Error", "No se pudo obtener la información", "error");
     }
   }
-
-  const handleRegistrarVisita = async (idCotizacion) => {
-    const idUsuario = localStorage.getItem('idUsuario') || 0 // O de donde obtengas tu usuario
-
+  const handleRegistrarVisita = (idCotizacion) => {
+    // Verificamos si el navegador soporta geolocalización
     if (!navigator.geolocation) {
       Swal.fire("Error", "Tu navegador no soporta Geolocalización", "error")
       return
     }
-
+    // Obtenemos la posición actual
     navigator.geolocation.getCurrentPosition(
       (position) => {
-        const lat = position.coords.latitude
-        const lng = position.coords.longitude
-
-        // Guarda localmente en el estado. (Podrías hacer una petición POST a tu backend)
-        setVisitPoints((prevPoints) => [
-          ...prevPoints,
-          { lat, lng, idUsuario, idCotizacion }
-        ])
-
-        Swal.fire(
-          "Visita registrada",
-          `Se guardó la visita en lat: ${lat}, lng: ${lng}`,
-          "success"
-        )
+        const latitud = position.coords.latitude;
+        const longitud = position.coords.longitude;
+        regVisita_(idCotizacion,"Visita",latitud, longitud)
       },
       (error) => {
         Swal.fire("Error al obtener ubicación", error.message, "error")
       }
-    )
-  }
-
-  // -----------------------------------------------------------------
-  // Registrar llamada
-  // -----------------------------------------------------------------
+    );
+  };
   const handleRegistrarLlamada = (idCotizacion) => {
     const idUsuario = localStorage.getItem('idUsuario') || 0
     const fechaHoraActual = new Date().toISOString()
@@ -1105,6 +1091,14 @@ const LCotizacion = () => {
   const handleMapeo = () => {
     setMapeoModal(true)
   }
+  
+  
+      },
+      (error) => {
+        Swal.fire("Error al obtener ubicación", error.message, "error");
+      }
+    );
+  };
   
   
   
@@ -1241,56 +1235,53 @@ const LCotizacion = () => {
                 </CCol>
             </CModalFooter>
         </CModal>
-      <CModal
-        backdrop="static"
-        visible={mAcciones}
-        onClose={() => setMAcciones(false)}
-      >
-        <CModalHeader>
-          <CModalTitle>Acciones adicionales</CModalTitle>
-        </CModalHeader>
-        <CModalBody>
-          <CRow>
-            <CCol xs={12} className="mb-3">
-              <CButton
-                color="primary"
-                className="w-100"
-                onClick={() => handleRegistrarVisita(selectedCotizacion)}
-              >
-                Registrar visita
-              </CButton>
-            </CCol>
+        <CModal
+          backdrop="static"
+          visible={mAcciones}
+          onClose={() => setMAcciones(false)}
+        >
+          <CModalHeader>
+            <CModalTitle>Acciones adicionales</CModalTitle>
+          </CModalHeader>
+          <CModalBody>
+            <CRow>
+              <CCol xs={12} className="mb-3">
+                <CButton
+                  color="primary"
+                  className="w-100"
+                  onClick={() => handleRegistrarVisita(selectedCotizacion)}
+                >
+                  Registrar visita
+                </CButton>
+              </CCol>
 
-            <CCol xs={12} className="mb-3">
-              <CButton
-                color="success"
-                className="w-100"
-                onClick={() => handleRegistrarLlamada(selectedCotizacion)}
-              >
-                Registrar llamada
-              </CButton>
-            </CCol>
+              <CCol xs={12} className="mb-3">
+                <CButton
+                  color="success"
+                  className="w-100"
+                  onClick={() => handleRegistrarLlamada(selectedCotizacion)}
+                >
+                  Registrar llamada
+                </CButton>
+              </CCol>
 
-            <CCol xs={12}>
-              <CButton
-                color="info"
-                className="w-100"
-                onClick={handleMapeo}
-              >
-                Mapeo
-              </CButton>
-            </CCol>
-          </CRow>
-        </CModalBody>
-        <CModalFooter>
-          <CButton
-            color="secondary"
-            onClick={() => setMAcciones(false)}
-          >
-            Cerrar
-          </CButton>
-        </CModalFooter>
-      </CModal>
+              <CCol xs={12}>
+                <CButton
+                  color="info"
+                  className="w-100"
+                  onClick={() => handleMapeo(selectedCotizacion)}
+                >
+                  Mapeo
+                </CButton>
+              </CCol>
+            </CRow>
+          </CModalBody>
+          <CModalFooter>
+            <CButton color="secondary" onClick={() => setMAcciones(false)}>
+              Cerrar
+            </CButton>
+          </CModalFooter>
+        </CModal>
 
       {/* Modal para mostrar el MAPA con TODOS los puntos */}
       <CModal

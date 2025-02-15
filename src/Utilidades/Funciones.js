@@ -1329,6 +1329,51 @@ export  async function getCliObras(idC, idO)
         return false;
     }    
 }
+export  async function setVisitas(idCot, motivo, lat, lon)
+{
+    let usuario = cookies.get('Usuario');
+    let fechaHra = format(new Date(),'yyyy-MM-dd HH:mm:ss');
+    console.log("Registrar visita:", {
+        usuario,
+        motivo,
+        idCot,
+        lat,
+        lon,
+        fechaHra
+    });
+    try
+    {
+        let confi_ax = {
+            headers:
+            {
+                'Cache-Control': 'no-cache',
+                'Content-Type': 'application/json',
+                "Authorization": "Bearer "+cookies.get('token'),
+            },
+        };
+        const data = 
+        {
+            "id": 0,
+            "motivo": motivo,
+            "usuario":usuario,
+            "fecha_visita":fechaHra.toString(),
+            "id_cotizacion":idCot,
+            "latitud":lat.toString(),
+            "longitud":lon.toString()    
+        } 
+        //------------------------------------------------------------------------------------------------------------------------------------------------------
+        const response = await axios.post(baseUrl+'Comercial/setVisitaCot', data, confi_ax);
+        var obj = response.data;
+        if(obj.length > 0)
+        {
+            return obj
+        }else{return false}
+    } 
+    catch(error)
+    {
+        return false;
+    }    
+}
 //--
 export async function getClientesCot(planta) {
     try
@@ -1581,7 +1626,7 @@ export async function getPedidosCot(id) {
             },
         };
         //------------------------------------------------------------------------------------------------------------------------------------------------------
-        const response = await axios.get(baseUrl+'Comercial/GetPedidosCotizacion/'+id, confi_ax);
+        const response = await axios.get(baseUrl2+'Comercial/GetPedidosCotizacion/'+id, confi_ax);
         if (response.data && response.data.length > 0) {
             return response.data;
         }else{
@@ -2139,7 +2184,6 @@ export const formatCurrency = (value) => {
     currency: 'MXN', // Cambia a la moneda que necesites
   }).format(value);
 };
-
 export const downloadCV = (e, dt, nameFile) => {
     const link = document.createElement('a');
     let csv = convertArrayOfObjectsToCSV(dt);
@@ -2155,10 +2199,15 @@ export const downloadCV = (e, dt, nameFile) => {
     link.setAttribute('download', filename);
     link.click();
 };
-
 export const convertArrayOfObjectsToCSV = (array) => {
     if (!array || !array.length) return null;
     const header = Object.keys(array[0]).join(','); // Extrae las claves como cabeceras
     const rows = array.map(obj => Object.values(obj).join(',')); // Mapea los valores en cada fila
     return [header, ...rows].join('\n'); // Une todo en una cadena CSV
+};
+export const fNumber = (value) => {
+    return new Intl.NumberFormat('en-US', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+    }).format(value);
 };

@@ -7,7 +7,7 @@ import "react-datepicker/dist/react-datepicker.css";
 import 'rc-time-picker/assets/index.css';
 import { useNavigate } from "react-router-dom";
 import { convertArrayOfObjectsToCSV, getPedidosCot, getArchivo, setStatus, getCotizacionExtra, getCotizacionLog, getSegmentos,
-  getSeguimientos, getObraCot, getClienteCot, getCotizacionP
+  getSeguimientos, getObraCot, getClienteCot, getCotizacionP, formatCurrency, fNumber
  } from '../../Utilidades/Funciones';
  import { format } from 'date-fns';
 import {
@@ -113,12 +113,17 @@ const RCotizacionesP = () => {
       </div>
       ),
     },{
+      name: 'Planta',
+      selector: row => row.Planta,
+      sortable:true,
+      width:"100px",
+    },{
       name: '# Cotización',
       selector: row => row.IdCotizacion,
       sortable:true,
       width:"100px",
     },{
-      name: 'Fecha Creo Cotización',
+      name: 'Fecha Cotización',
       selector: row => {
         const fecha = row.FechaCreacion;
         if (fecha === null || fecha === undefined) {
@@ -132,24 +137,24 @@ const RCotizacionesP = () => {
       },
       sortable:true,
       width:"200px",
-    },{
-        name: 'Fecha Hora Pedido',
-        selector: row => {
-          const fecha = row.FcaHraP;
-          if (fecha === null || fecha === undefined) {
-            return "No disponible";
-          }
-          if (typeof fecha === 'object') {
-            return "Sin Fecha"; // O cualquier mensaje que prefieras
-          }
-          const [fecha_, hora_] = fecha.split("T");
-          return fecha_+" "+hora_;
-        },
-        sortable:true,
-        width:"200px",
-      },
+    },
     {
-      name: '# Cliente',
+      name: 'Asesor Creo',
+      selector: row => {
+        const vendedor = row.UsuarioCreo
+        if (vendedor === null || vendedor === undefined) {
+          return "No disponible";
+        }
+        if (typeof vendedor === 'object') {
+          return "-"; // O cualquier mensaje que prefieras
+        }
+        return vendedor;
+      },
+      sortable:true,
+      width:"150px",
+    },
+    {
+      name: 'Cliente',
       selector: row => {
         var ncliente = row.NoCliente
         if (ncliente === null || ncliente === undefined) {
@@ -168,28 +173,115 @@ const RCotizacionesP = () => {
         return ncliente+" "+nombreCliente;
       },
       sortable:true,
-      width:"200px",
+      width:"300px",
+    },
+    {
+      name: 'Producto',
+      selector: row => {
+        const producto = row.Producto
+        if (producto === null || producto === undefined) {
+          return "No disponible";
+        }
+        if (typeof producto === 'object') {
+          return "-"; // O cualquier mensaje que prefieras
+        }
+        return producto;
+      },
+      sortable:true,
+      width:"180px",
+    },
+    {
+      name: 'Volumen',
+      selector: row => {
+        const Volumen = row.Vol
+        if (Volumen === null || Volumen === undefined) {
+          return "-";
+        }
+        if (typeof Volumen === 'object') {
+          return "-"; // O cualquier mensaje que prefieras
+        }
+        return Volumen;
+      },
+      sortable:true,
+      width:"150px",
+      style: {
+        textAlign: 'right', // Alineación a la derecha
+      },
+    },
+    {
+      name: 'Cantidad Pedido',
+      selector: row => {
+        const cantidadP = row.CantidadM3P
+        if (cantidadP === null || cantidadP === undefined) {
+          return "-";
+        }
+        if (typeof cantidadP === 'object') {
+          return "-"; // O cualquier mensaje que prefieras
+        }
+        return fNumber(cantidadP);
+      },
+      sortable:true,
+      width:"150px",
+      style: {
+        textAlign: 'left', // Alineación a la derecha
+      },
+    },
+    {
+      name: 'Precio Cotización',
+      selector: row => {
+          const precioCot = row.PrecioCot
+          if (precioCot === null || precioCot === undefined) {
+          return "No disponible";
+          }
+          if (typeof precioCot === 'object') {
+          return "-"; // O cualquier mensaje que prefieras
+          }
+          return formatCurrency(precioCot);
+      },
+      sortable:true,
+      width:"150px",
+      style: {
+        textAlign: 'right', // Alineación a la derecha
+      },
+    },
+    // {
+    //   name: 'Total',
+    //   selector: row => {
+    //       const autorizo = row.PrecioCot
+    //       if (autorizo === null || autorizo === undefined) {
+    //       return "-";
+    //       }
+    //       if (typeof autorizo === 'object') {
+    //       return "-"; // O cualquier mensaje que prefieras
+    //       }
+    //       return fNumber(autorizo);
+    //   },
+    //   sortable:true,
+    //   width:"150px",
+    //   style: {
+    //     textAlign: 'right', // Alineación a la derecha
+    //   },
+    // },
+    {
+      name: 'Libero',
+      selector: row => {
+        const libera = row.Libera
+        if (libera === null || libera === undefined) {
+          return "No disponible";
+        }
+        if (typeof libera === 'object') {
+          return "-"; // O cualquier mensaje que prefieras
+        }
+        return libera;
+      },
+      sortable:true,
+      width:"150px",
     },
     {
       name: 'Estatus',
       selector: row => row.Estatus,
       sortable:true,
       width:"150px",
-    },
-    {
-      name: 'Dirección',
-      selector: row => {
-        var Direccion = row.Direccion
-        if (Direccion === null || Direccion === undefined) {
-          Direccion = "-";
-        }
-        if (typeof Direccion === 'object') {
-          Direccion = "-"; // O cualquier mensaje que prefieras
-        }
-        return Direccion;
-      },
-      sortable:true,
-      width:"250px",
     },
     {
       name: 'Obra',
@@ -211,250 +303,64 @@ const RCotizacionesP = () => {
         return nobra+" "+obra;
       },
       sortable:true,
-      width:"250px",
+      width:"300px",
     },
     {
-      name: 'Usuario Creo',
+      name: 'Cantidad Pedido',
       selector: row => {
-        const vendedor = row.UsuarioCreo
-        if (vendedor === null || vendedor === undefined) {
-          return "No disponible";
+        var canP = row.CantidadPedido
+        if (canP === null || canP === undefined) {
+          canP = "-";
         }
-        if (typeof vendedor === 'object') {
-          return "-"; // O cualquier mensaje que prefieras
+        if (typeof canP === 'object') {
+          canP = "-"; // O cualquier mensaje que prefieras
         }
-        return vendedor;
+        return canP;
       },
       sortable:true,
       width:"150px",
+      style: {
+        textAlign: 'right', // Alineación a la derecha
+      },
     },
     {
-      name: 'Actualizo',
+      name: 'Cantidad Suministrada',
       selector: row => {
-        const actualizo = row.UsuarioActualizo
-        if (actualizo === null || actualizo === undefined) {
-          return "No disponible";
+        var canSum = row.CantidadSumin
+        if (canSum === null || canSum === undefined) {
+          canSum = "-";
         }
-        if (typeof actualizo === 'object') {
-          return "-"; // O cualquier mensaje que prefieras
+        if (typeof canSum === 'object') {
+          canSum = "-"; // O cualquier mensaje que prefieras
         }
-        return actualizo;
+        return fNumber(canSum);
       },
       sortable:true,
       width:"150px",
+      style: {
+        textAlign: 'right', // Alineación a la derecha
+      },
     },
     {
-      name: 'Observaciones',
+      name: 'Diferencia',
       selector: row => {
-        const autorizo = row.Observaciones
-        if (autorizo === null || autorizo === undefined) {
-          return "No disponible";
+        var canPed = row.CantidadPedido
+        var canSum = row.CantidadSumin
+        if (canSum === null || canSum === undefined) {
+          canSum = "-";
         }
-        if (typeof autorizo === 'object') {
-          return "-"; // O cualquier mensaje que prefieras
+        if (typeof canSum === 'object') {
+          canSum = "-"; // O cualquier mensaje que prefieras
         }
-        return autorizo;
+        let cantTotal = canPed - canSum;
+        return fNumber(cantTotal);
       },
       sortable:true,
-      width:"250px",
-    },
-    {
-        name: 'Fin Vigencia',
-        selector: row => {
-            const autorizo = row.FinVigencia
-            if (autorizo === null || autorizo === undefined) {
-            return "No disponible";
-            }
-            if (typeof autorizo === 'object') {
-            return "-"; // O cualquier mensaje que prefieras
-            }
-            const [fecha_, hora_] = autorizo.split("T");
-            return fecha_+" "+hora_;
-        },
-        sortable:true,
-        width:"250px",
-    },
-    {
-        name: 'Segmento',
-        selector: row => {
-            const autorizo = row.Segmento
-            if (autorizo === null || autorizo === undefined) {
-            return "No disponible";
-            }
-            if (typeof autorizo === 'object') {
-            return "-"; // O cualquier mensaje que prefieras
-            }
-            return autorizo;
-        },
-        sortable:true,
-        width:"200px",
-    },
-    {
-        name: 'Canal',
-        selector: row => {
-          const autorizo = row.Canal
-          if (autorizo === null || autorizo === undefined) {
-            return "No disponible";
-          }
-          if (typeof autorizo === 'object') {
-            return "-"; // O cualquier mensaje que prefieras
-          }
-          return autorizo;
-        },
-        sortable:true,
-        width:"200px",
-    },
-    {
-        name: 'Producto',
-        selector: row => {
-          const autorizo = row.Producto
-          if (autorizo === null || autorizo === undefined) {
-            return "No disponible";
-          }
-          if (typeof autorizo === 'object') {
-            return "-"; // O cualquier mensaje que prefieras
-          }
-          return autorizo;
-        },
-        sortable:true,
-        width:"180px",
-    },
-    {
-        name: 'Cantidad',
-        selector: row => {
-          const autorizo = row.Cantidad
-          if (autorizo === null || autorizo === undefined) {
-            return "No disponible";
-          }
-          if (typeof autorizo === 'object') {
-            return "-"; // O cualquier mensaje que prefieras
-          }
-          return autorizo;
-        },
-        sortable:true,
-        width:"150px",
-    },
-    {
-        name: 'Cantidad M3 Pedido',
-        selector: row => {
-          const autorizo = row.CantidadM3P
-          if (autorizo === null || autorizo === undefined) {
-            return "No disponible";
-          }
-          if (typeof autorizo === 'object') {
-            return "-"; // O cualquier mensaje que prefieras
-          }
-          return autorizo;
-        },
-        sortable:true,
-        width:"150px",
-    },
-    {
-        name: 'Viaje M3 Pedido',
-        selector: row => {
-          const autorizo = row.M3ViajeP
-          if (autorizo === null || autorizo === undefined) {
-            return "No disponible";
-          }
-          if (typeof autorizo === 'object') {
-            return "-"; // O cualquier mensaje que prefieras
-          }
-          return autorizo;
-        },
-        sortable:true,
-        width:"150px",
-    },
-    {
-        name: 'Precio',
-        selector: row => {
-            const autorizo = row.Precio
-            if (autorizo === null || autorizo === undefined) {
-            return "No disponible";
-            }
-            if (typeof autorizo === 'object') {
-            return "-"; // O cualquier mensaje que prefieras
-            }
-            return autorizo;
-        },
-        sortable:true,
-        width:"150px",
-    },
-      {
-        name: 'Precio Pedido',
-        selector: row => {
-          const autorizo = row.PrecioP
-          if (autorizo === null || autorizo === undefined) {
-            return "No disponible";
-          }
-          if (typeof autorizo === 'object') {
-            return "-"; // O cualquier mensaje que prefieras
-          }
-          return autorizo;
-        },
-        sortable:true,
-        width:"150px",
+      width:"150px",
+      style: {
+        textAlign: 'right', // Alineación a la derecha
       },
-      {
-        name: 'Pago Pedido',
-        selector: row => {
-          const autorizo = row.PagoP
-          if (autorizo === null || autorizo === undefined) {
-            return "No disponible";
-          }
-          if (typeof autorizo === 'object') {
-            return "-"; // O cualquier mensaje que prefieras
-          }
-          return autorizo;
-        },
-        sortable:true,
-        width:"150px",
-      },
-      {
-        name: 'M3Bomba',
-        selector: row => {
-          const autorizo = row.M3Bomba
-          if (autorizo === null || autorizo === undefined) {
-            return "No disponible";
-          }
-          if (typeof autorizo === 'object') {
-            return "-"; // O cualquier mensaje que prefieras
-          }
-          return autorizo;
-        },
-        sortable:true,
-        width:"150px",
-      },
-    {
-        name: 'Bomba',
-        selector: row => {
-            const autorizo = row.Bomba
-            if (autorizo === null || autorizo === undefined) {
-            return "No disponible";
-            }
-            if (typeof autorizo === 'object') {
-            return "-"; // O cualquier mensaje que prefieras
-            }
-            return autorizo;
-        },
-        sortable:true,
-        width:"150px",
     },
-    {
-        name: 'Elemento',
-        selector: row => {
-            const autorizo = row.ElementoP
-            if (autorizo === null || autorizo === undefined) {
-            return "No disponible";
-            }
-            if (typeof autorizo === 'object') {
-            return "-"; // O cualquier mensaje que prefieras
-            }
-            return autorizo;
-        },
-        sortable:true,
-        width:"150px",
-    },
-
   ];
   const colPed = [
     {
@@ -1022,8 +928,8 @@ const RCotizacionesP = () => {
   };
   const fCotizacion = dtCotizacion.filter(item => {
       // Filtrar por planta, interfaz y texto de búsqueda
-      return item.IdCotizacion.toString().includes(fText) || item.Cliente.toString().includes(fText) || item.Estatus.includes(fText) || item.Obra.toString().includes(fText) || 
-      item.UsuarioCreo.toString().includes(fText);
+      return item.IdCotizacion.toString().includes(fText) || item.Cliente.toString().includes(fText) || item.NoCliente.toString().includes(fText) || item.Estatus.includes(fText) 
+      || item.Obra.toString().includes(fText) || item.NoObra.toString().includes(fText) || item.UsuarioCreo.toString().includes(fText) || item.Producto.toString().includes(fText);
   });
   //**********************************MODALES**************************************************** */
   const mEstatus = async(id, estatus) =>{
