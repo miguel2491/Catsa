@@ -1,0 +1,88 @@
+.search-container h2 {
+    text-align: left;
+    margin-bottom: 20px;
+  }
+  
+  /* Contenedor de filtros */
+  .filters {
+    display: flex;
+    flex-wrap: wrap; /* Permite que los elementos hagan wrap en pantallas pequeñas */
+    gap: 16px;
+    margin-bottom: 20px;
+  }
+  
+  /* Cada grupo de filtro */
+  .filter-group {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-width: 150px; /* Para que no se haga demasiado pequeño */
+  }
+  
+  .filter-group label {
+    font-weight: bold;
+    margin-bottom: 8px;
+  }
+  
+  .filter-group input,
+  .filter-group select {
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+  }
+  
+  /* Botón de búsqueda */
+  button {
+    background-color: #e62a43;
+    border: none;
+    color: white;
+    font-weight: bold;
+    padding: 10px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    align-self: flex-end; /* Alinea el botón al final en su columna */
+  }
+  
+  button:hover {
+    background-color: #0056b3;
+  }
+  
+  /* Contenedor de la tabla */
+  .table-container {
+    margin-top: 20px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    overflow-x: auto; /* Scrolleable en pantallas pequeñas */
+  }
+  
+  /* Ajustes generales para react-data-table-component */
+  .rdt_Table {
+    border-radius: 4px;
+  }
+  
+  .rdt_TableHead {
+    background-color: #e62a43 !important;
+    color: white;
+  }
+  
+  .rdt_TableRow:hover {
+    background-color: #f5f5f5;
+  }
+  
+  /* Reglas responsivas */
+  @media (max-width: 768px) {
+    .filters {
+      flex-direction: column;
+    }
+  
+    .filter-group {
+      width: 100%;
+      margin-bottom: 12px;
+    }
+  
+    button {
+      width: 100%;
+      margin-top: 8px;
+      align-self: auto; /* Que ocupe todo el ancho */
+    }
+  }

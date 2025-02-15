@@ -73,6 +73,17 @@ const LCotizacion = () => {
     month: '2-digit',   // 'numeric', '2-digit', 'short', 'long', 'narrow'
     day: '2-digit'   // 'numeric', '2-digit'
   };
+
+  // Nuevo modal para las 3 opciones (Visita, Llamada, Mapeo)
+const [mAcciones, setMAcciones] = useState(false);
+// Guardamos el ID de la cotización para usarlo al registrar visita/llamada
+const [selectedCotizacion, setSelectedCotizacion] = useState(null);
+// Función para abrir el modal de las 3 opciones
+const handleExtraActions = (idCotizacion) => {
+  setSelectedCotizacion(idCotizacion);
+  setMAcciones(true);
+};
+
   //------------ FROMS CLIENTE/OBRAS ------------------------------------------
   const [RazonTxtC, setRazonC] = useState('');
   const [RFCTxtC, setRFCC] = useState('');
@@ -153,6 +164,7 @@ const LCotizacion = () => {
                 </CButton>
               </CCol>
             )}
+            
             {userIsAdmin && (
               <CCol xs={6} md={3} lg={3}>
                 <CButton
@@ -166,6 +178,7 @@ const LCotizacion = () => {
                 </CButton>
               </CCol>
             )}
+            
             {userIsAdmin && (
               <CCol xs={6} md={3} lg={3}>
                 <CButton
@@ -177,8 +190,9 @@ const LCotizacion = () => {
                 >
                   <CIcon icon={cilTrash} style={{'color':'white'}} />
                 </CButton>
-                </CCol>
+              </CCol>
             )}
+            
             {userIsAdmin && (
               <CCol xs={6} md={3} lg={3}>
                 <CButton
@@ -192,21 +206,25 @@ const LCotizacion = () => {
                 </CButton>
               </CCol>
             )}
-              <CCol xs={6} md={3} lg={3}>
-                <CButton
-                  color="info"
-                  onClick={() => openMOpciones(row.IdCotizacion)}
-                  size="sm"
-                  className="me-2"
-                  title="Opciones"
-                >
-                  <CIcon icon={cilMenu} style={{'color':'white'}} />
-                </CButton>
-              </CCol>
+    
+            {/* Aquí agregas tu nuevo botón para las 3 opciones */}
+            <CCol xs={6} md={3} lg={3}>
+              <CButton
+                color="secondary"
+                onClick={() => handleExtraActions(row.IdCotizacion)}
+                size="sm"
+                className="me-2"
+                title="Acciones adicionales"
+              >
+                <CIcon icon={cilMenu} />
+              </CButton>
+            </CCol>
           </CRow>
-      </div>
+        </div>
       ),
-    },{
+    },
+    
+    {
       name: 'ID',
       selector: row => row.IdCotizacion,
       sortable:true,
@@ -1018,6 +1036,100 @@ const LCotizacion = () => {
         Swal.fire("Error", "No se pudo obtener la información", "error");
     }
   }
+  const handleRegistrarVisita = (idCotizacion) => {
+    // Aquí podrías obtener el idUsuario de tu lógica de autenticación
+    const idUsuario = localStorage.getItem('idUsuario') || 0;
+  
+    // Verificamos si el navegador soporta geolocalización
+    if (!navigator.geolocation) {
+      Swal.fire("Error", "Tu navegador no soporta Geolocalización", "error");
+      return;
+    }
+  
+    // Obtenemos la posición actual
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const latitud = position.coords.latitude;
+        const longitud = position.coords.longitude;
+  
+        // Aquí podrías guardar en tu backend con Axios/Fetch, por ejemplo:
+        // axios.post('/api/registrarVisita', { idUsuario, idCotizacion, latitud, longitud })
+        //   .then(...)
+        //   .catch(...)
+  
+        console.log("Registrar visita:", {
+          idUsuario,
+          idCotizacion,
+          latitud,
+          longitud
+        });
+  
+        Swal.fire(
+          "Visita registrada",
+          `Visita registrada con lat: ${latitud}, lng: ${longitud}`,
+          "success"
+        );
+  
+        // Cerrar modal si así lo deseas
+        // setMAcciones(false);
+      },
+      (error) => {
+        Swal.fire("Error al obtener ubicación", error.message, "error");
+      }
+    );
+  };
+  const handleRegistrarLlamada = (idCotizacion) => {
+    const idUsuario = localStorage.getItem('idUsuario') || 0;
+    const fechaHoraActual = new Date().toISOString(); 
+    // o formato local: new Date().toLocaleString() / ajusta según requieras
+  
+    // Enviar al backend
+    // axios.post('/api/registrarLlamada', { idUsuario, idCotizacion, fechaHora: fechaHoraActual })
+    //   .then(...)
+    //   .catch(...)
+  
+    console.log("Registrar llamada:", {
+      idUsuario,
+      idCotizacion,
+      fechaHoraActual
+    });
+  
+    Swal.fire(
+      "Llamada registrada",
+      `Se registró la llamada en la fecha/hora: ${fechaHoraActual}`,
+      "success"
+    );
+    
+    // setMAcciones(false);
+  };
+  const handleMapeo = (idCotizacion) => {
+    // 1. Obtenemos ubicación actual (similar a Registrar Visita)
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const lat = position.coords.latitude;
+        const lng = position.coords.longitude;
+        
+        // 2. Abres otro modal con un <MapContainer> de react-leaflet, por ejemplo,
+        //    centrado en [lat, lng].
+        //    O bien, podrías setear un estado con lat/lng y mostrar el mapa dentro de este mismo modal.
+  
+        console.log("Mapeo para cotización:", idCotizacion, "Ubicación:", lat, lng);
+        Swal.fire(
+          "Mapeo",
+          `Tu ubicación actual es lat: ${lat}, lng: ${lng}.\nAquí podrías renderizar un mapa en un modal.`,
+          "info"
+        );
+  
+      },
+      (error) => {
+        Swal.fire("Error al obtener ubicación", error.message, "error");
+      }
+    );
+  };
+  
+  
+  
+  
   //************************* HANDLE*************************************************************** */
   const hDSeg = (e) =>{
     setDSeg(e.target.value)
@@ -1150,6 +1262,54 @@ const LCotizacion = () => {
                 </CCol>
             </CModalFooter>
         </CModal>
+        <CModal
+          backdrop="static"
+          visible={mAcciones}
+          onClose={() => setMAcciones(false)}
+        >
+          <CModalHeader>
+            <CModalTitle>Acciones adicionales</CModalTitle>
+          </CModalHeader>
+          <CModalBody>
+            <CRow>
+              <CCol xs={12} className="mb-3">
+                <CButton
+                  color="primary"
+                  className="w-100"
+                  onClick={() => handleRegistrarVisita(selectedCotizacion)}
+                >
+                  Registrar visita
+                </CButton>
+              </CCol>
+
+              <CCol xs={12} className="mb-3">
+                <CButton
+                  color="success"
+                  className="w-100"
+                  onClick={() => handleRegistrarLlamada(selectedCotizacion)}
+                >
+                  Registrar llamada
+                </CButton>
+              </CCol>
+
+              <CCol xs={12}>
+                <CButton
+                  color="info"
+                  className="w-100"
+                  onClick={() => handleMapeo(selectedCotizacion)}
+                >
+                  Mapeo
+                </CButton>
+              </CCol>
+            </CRow>
+          </CModalBody>
+          <CModalFooter>
+            <CButton color="secondary" onClick={() => setMAcciones(false)}>
+              Cerrar
+            </CButton>
+          </CModalFooter>
+        </CModal>
+
         <CModal 
           backdrop="static"
           visible={mOpciones}

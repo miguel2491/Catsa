@@ -16,12 +16,11 @@ function SearchFilters() {
   //Buscador
   const [fText, setFText] = useState(''); // Estado para el filtro de búsqueda
   const [vBPlanta, setBPlanta] = useState('');
-  // Ejemplo de columnas para la DataTable
   const columns = [
     {
       name: 'Planta',
       selector: (row) => row.Planta,
-      sortable: true, // Podemos habilitar el ordenamiento
+      sortable: true,
     },
     {
       name: 'Mezcla',
@@ -72,7 +71,7 @@ function SearchFilters() {
         {
           setPlantas_(ocList);
         }
-        Swal.close();  // Cerramos el loading
+        Swal.close();
     }catch(error){
         Swal.close();
         Swal.fire("Error", "No se pudo obtener la información", "error");
@@ -80,14 +79,12 @@ function SearchFilters() {
   }
 
   const handleSearch = () => {
-    // Aquí puedes manejar la lógica de búsqueda con los 3 parámetros
-    // Por ejemplo, hacer un fetch a tu API con {searchTerm, selectedDate, selectedPlant}
     console.log('Búsqueda con:', selectedDate, selectedPlant);
     Swal.fire({
         title: 'Cargando...',
         text: 'Estamos obteniendo la información...',
         didOpen: () => {
-            Swal.showLoading();  // Muestra la animación de carga
+            Swal.showLoading();
             getCostosPV_()
         }
     });
@@ -101,7 +98,7 @@ function SearchFilters() {
             setDTDesigns(ocList);
             setExDes(ocList);
         }
-        Swal.close();  // Cerramos el loading
+        Swal.close();
     }catch(error){
         Swal.close();
         Swal.fire("Error", "No se pudo obtener la información", "error");

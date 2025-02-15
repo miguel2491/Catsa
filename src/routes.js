@@ -35,6 +35,7 @@ const RComision = React.lazy(() => import('./views/reportes/RComision'))
 const RProyeccion = React.lazy(() => import('./views/reportes/RProyeccion'))
 //=========================================> Calidad <===================================
 const CostosPV = React.lazy(() => import('./views/Calidad/CostosPV'))
+const Formulaciones = React.lazy(() => import('./views/Calidad/Formulaciones'))
 //=========================================> EXTRAS <===================================
 const PreCierre = React.lazy(() => import('./views/utils/PreCierre'))
 const InterfazInt = React.lazy(() => import('./views/utils/InterfazInt'))
@@ -86,6 +87,7 @@ const routes = [
   { path: '/utils/QR', name: 'QR', element: QR },
   { path: '/permisos/Permisos', name: 'Permisos', element: Permisos},
   { path: '/Calidad/CostosPV', name: 'Calidad', element: CostosPV},
+  { path: '/Calidad/Formulaciones', name: 'Calidad', element: Formulaciones},
 ]
 
 export default routes

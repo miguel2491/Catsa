@@ -284,6 +284,12 @@ const NavProvider = ({ children }) => {
                     to: '/Calidad/CostosPV',
                     icon: <CIcon icon={cilDollar} customClassName="nav-icon" />,
                   },
+                  {
+                    component: CNavItem,
+                    name: 'Formulaciones',
+                    to: '/Calidad/Formulaciones',
+                    icon: <CIcon icon={cilDollar} customClassName="nav-icon" />,
+                  },
               ]:[]),
             ]
           : []),
