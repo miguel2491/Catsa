@@ -1,6 +1,9 @@
 import React, {useEffect, useState, useRef} from 'react'
 import '../../estilos.css';
 import Swal from "sweetalert2";
+import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet'
+import L from 'leaflet'
+import 'leaflet/dist/leaflet.css'
 import "sweetalert2/dist/sweetalert2.min.css";
 import DataTable from 'react-data-table-component';
 import DatePicker from 'react-datepicker';
@@ -47,6 +50,10 @@ import Plantas from '../base/parametros/Plantas'
 import FechaI from '../base/parametros/FechaInicio'
 import FechaF from '../base/parametros/FechaFinal'
 import { Rol } from '../../Utilidades/Roles'
+
+
+
+
 const LCotizacion = () => {    
   const navigate = useNavigate();
   const [plantasSel , setPlantas] = useState('');
@@ -74,15 +81,19 @@ const LCotizacion = () => {
     day: '2-digit'   // 'numeric', '2-digit'
   };
 
-  // Nuevo modal para las 3 opciones (Visita, Llamada, Mapeo)
-const [mAcciones, setMAcciones] = useState(false);
-// Guardamos el ID de la cotización para usarlo al registrar visita/llamada
-const [selectedCotizacion, setSelectedCotizacion] = useState(null);
-// Función para abrir el modal de las 3 opciones
-const handleExtraActions = (idCotizacion) => {
-  setSelectedCotizacion(idCotizacion);
-  setMAcciones(true);
-};
+  // Almacena los puntos de las visitas
+  const [visitPoints, setVisitPoints] = useState([])
+  // Modal para acciones (Registrar visita, Registrar llamada, Mapeo)
+  const [mAcciones, setMAcciones] = useState(false)
+  const [selectedCotizacion, setSelectedCotizacion] = useState(null)
+  // Modal para mostrar el mapa
+  const [mapeoModal, setMapeoModal] = useState(false)
+
+  const handleExtraActions = (idCotizacion) => {
+    setSelectedCotizacion(idCotizacion)
+    setMAcciones(true)
+  }
+
 
   //------------ FROMS CLIENTE/OBRAS ------------------------------------------
   const [RazonTxtC, setRazonC] = useState('');
@@ -207,7 +218,6 @@ const handleExtraActions = (idCotizacion) => {
               </CCol>
             )}
     
-            {/* Aquí agregas tu nuevo botón para las 3 opciones */}
             <CCol xs={6} md={3} lg={3}>
               <CButton
                 color="secondary"
@@ -1036,96 +1046,65 @@ const handleExtraActions = (idCotizacion) => {
         Swal.fire("Error", "No se pudo obtener la información", "error");
     }
   }
-  const handleRegistrarVisita = (idCotizacion) => {
-    // Aquí podrías obtener el idUsuario de tu lógica de autenticación
-    const idUsuario = localStorage.getItem('idUsuario') || 0;
-  
-    // Verificamos si el navegador soporta geolocalización
+
+  const handleRegistrarVisita = async (idCotizacion) => {
+    const idUsuario = localStorage.getItem('idUsuario') || 0 // O de donde obtengas tu usuario
+
     if (!navigator.geolocation) {
-      Swal.fire("Error", "Tu navegador no soporta Geolocalización", "error");
-      return;
+      Swal.fire("Error", "Tu navegador no soporta Geolocalización", "error")
+      return
     }
-  
-    // Obtenemos la posición actual
+
     navigator.geolocation.getCurrentPosition(
       (position) => {
-        const latitud = position.coords.latitude;
-        const longitud = position.coords.longitude;
-  
-        // Aquí podrías guardar en tu backend con Axios/Fetch, por ejemplo:
-        // axios.post('/api/registrarVisita', { idUsuario, idCotizacion, latitud, longitud })
-        //   .then(...)
-        //   .catch(...)
-  
-        console.log("Registrar visita:", {
-          idUsuario,
-          idCotizacion,
-          latitud,
-          longitud
-        });
-  
+        const lat = position.coords.latitude
+        const lng = position.coords.longitude
+
+        // Guarda localmente en el estado. (Podrías hacer una petición POST a tu backend)
+        setVisitPoints((prevPoints) => [
+          ...prevPoints,
+          { lat, lng, idUsuario, idCotizacion }
+        ])
+
         Swal.fire(
           "Visita registrada",
-          `Visita registrada con lat: ${latitud}, lng: ${longitud}`,
+          `Se guardó la visita en lat: ${lat}, lng: ${lng}`,
           "success"
-        );
-  
-        // Cerrar modal si así lo deseas
-        // setMAcciones(false);
+        )
       },
       (error) => {
-        Swal.fire("Error al obtener ubicación", error.message, "error");
+        Swal.fire("Error al obtener ubicación", error.message, "error")
       }
-    );
-  };
+    )
+  }
+
+  // -----------------------------------------------------------------
+  // Registrar llamada
+  // -----------------------------------------------------------------
   const handleRegistrarLlamada = (idCotizacion) => {
-    const idUsuario = localStorage.getItem('idUsuario') || 0;
-    const fechaHoraActual = new Date().toISOString(); 
-    // o formato local: new Date().toLocaleString() / ajusta según requieras
-  
-    // Enviar al backend
-    // axios.post('/api/registrarLlamada', { idUsuario, idCotizacion, fechaHora: fechaHoraActual })
-    //   .then(...)
-    //   .catch(...)
-  
+    const idUsuario = localStorage.getItem('idUsuario') || 0
+    const fechaHoraActual = new Date().toISOString()
+
+    // Aquí podrías hacer una llamada POST a tu backend
     console.log("Registrar llamada:", {
       idUsuario,
       idCotizacion,
       fechaHoraActual
-    });
-  
+    })
+
     Swal.fire(
       "Llamada registrada",
       `Se registró la llamada en la fecha/hora: ${fechaHoraActual}`,
       "success"
-    );
-    
-    // setMAcciones(false);
-  };
-  const handleMapeo = (idCotizacion) => {
-    // 1. Obtenemos ubicación actual (similar a Registrar Visita)
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        const lat = position.coords.latitude;
-        const lng = position.coords.longitude;
-        
-        // 2. Abres otro modal con un <MapContainer> de react-leaflet, por ejemplo,
-        //    centrado en [lat, lng].
-        //    O bien, podrías setear un estado con lat/lng y mostrar el mapa dentro de este mismo modal.
-  
-        console.log("Mapeo para cotización:", idCotizacion, "Ubicación:", lat, lng);
-        Swal.fire(
-          "Mapeo",
-          `Tu ubicación actual es lat: ${lat}, lng: ${lng}.\nAquí podrías renderizar un mapa en un modal.`,
-          "info"
-        );
-  
-      },
-      (error) => {
-        Swal.fire("Error al obtener ubicación", error.message, "error");
-      }
-    );
-  };
+    )
+  }
+
+  // -----------------------------------------------------------------
+  // Mapeo: Mostrar el modal con el mapa de todas las visitas
+  // -----------------------------------------------------------------
+  const handleMapeo = () => {
+    setMapeoModal(true)
+  }
   
   
   
@@ -1262,53 +1241,99 @@ const handleExtraActions = (idCotizacion) => {
                 </CCol>
             </CModalFooter>
         </CModal>
-        <CModal
-          backdrop="static"
-          visible={mAcciones}
-          onClose={() => setMAcciones(false)}
-        >
-          <CModalHeader>
-            <CModalTitle>Acciones adicionales</CModalTitle>
-          </CModalHeader>
-          <CModalBody>
-            <CRow>
-              <CCol xs={12} className="mb-3">
-                <CButton
-                  color="primary"
-                  className="w-100"
-                  onClick={() => handleRegistrarVisita(selectedCotizacion)}
-                >
-                  Registrar visita
-                </CButton>
-              </CCol>
+      <CModal
+        backdrop="static"
+        visible={mAcciones}
+        onClose={() => setMAcciones(false)}
+      >
+        <CModalHeader>
+          <CModalTitle>Acciones adicionales</CModalTitle>
+        </CModalHeader>
+        <CModalBody>
+          <CRow>
+            <CCol xs={12} className="mb-3">
+              <CButton
+                color="primary"
+                className="w-100"
+                onClick={() => handleRegistrarVisita(selectedCotizacion)}
+              >
+                Registrar visita
+              </CButton>
+            </CCol>
 
-              <CCol xs={12} className="mb-3">
-                <CButton
-                  color="success"
-                  className="w-100"
-                  onClick={() => handleRegistrarLlamada(selectedCotizacion)}
-                >
-                  Registrar llamada
-                </CButton>
-              </CCol>
+            <CCol xs={12} className="mb-3">
+              <CButton
+                color="success"
+                className="w-100"
+                onClick={() => handleRegistrarLlamada(selectedCotizacion)}
+              >
+                Registrar llamada
+              </CButton>
+            </CCol>
 
-              <CCol xs={12}>
-                <CButton
-                  color="info"
-                  className="w-100"
-                  onClick={() => handleMapeo(selectedCotizacion)}
-                >
-                  Mapeo
-                </CButton>
-              </CCol>
-            </CRow>
-          </CModalBody>
-          <CModalFooter>
-            <CButton color="secondary" onClick={() => setMAcciones(false)}>
-              Cerrar
-            </CButton>
-          </CModalFooter>
-        </CModal>
+            <CCol xs={12}>
+              <CButton
+                color="info"
+                className="w-100"
+                onClick={handleMapeo}
+              >
+                Mapeo
+              </CButton>
+            </CCol>
+          </CRow>
+        </CModalBody>
+        <CModalFooter>
+          <CButton
+            color="secondary"
+            onClick={() => setMAcciones(false)}
+          >
+            Cerrar
+          </CButton>
+        </CModalFooter>
+      </CModal>
+
+      {/* Modal para mostrar el MAPA con TODOS los puntos */}
+      <CModal
+        backdrop="static"
+        visible={mapeoModal}
+        onClose={() => setMapeoModal(false)}
+        size="lg"
+      >
+        <CModalHeader>
+          <CModalTitle>Mapa de Visitas</CModalTitle>
+        </CModalHeader>
+        <CModalBody>
+          <MapContainer
+            center={[23.634501, -102.552784]} // Centro de México como ejemplo
+            zoom={5}
+            style={{ height: '400px', width: '100%' }}
+          >
+            <TileLayer
+              attribution='&copy; <a href="https://www.openstreetmap.org/copyright">
+              OpenStreetMap</a> contributors'
+              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+            />
+
+            {visitPoints.map((point, index) => (
+              <Marker
+                key={index}
+                position={[point.lat, point.lng]}
+              >
+                <Popup>
+                  <b>Visita {index + 1}</b><br/>
+                  Usuario: {point.idUsuario}<br/>
+                  Cotización: {point.idCotizacion}
+                </Popup>
+              </Marker>
+            ))}
+          </MapContainer>
+        </CModalBody>
+        <CModalFooter>
+          <CButton color="secondary" onClick={() => setMapeoModal(false)}>
+            Cerrar
+          </CButton>
+        </CModalFooter>
+      </CModal>
 
         <CModal 
           backdrop="static"
