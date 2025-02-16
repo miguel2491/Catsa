@@ -1364,6 +1364,32 @@ export  async function setVisitas(idCot, motivo, lat, lon)
         //------------------------------------------------------------------------------------------------------------------------------------------------------
         const response = await axios.post(baseUrl+'Comercial/setVisitaCot', data, confi_ax);
         var obj = response.data;
+        console.log(obj, obj.message)
+        if(obj.message == "Creación exitosa.")
+        {
+            return true
+        }else{return false}
+    } 
+    catch(error)
+    {
+        return false;
+    }    
+}
+export  async function getVisitas(idC, motivo)
+{
+    try
+    {
+        let confi_ax = {
+            headers:
+            {
+                'Cache-Control': 'no-cache',
+                'Content-Type': 'application/json',
+                "Authorization": "Bearer "+cookies.get('token'),
+            },
+        };
+        //------------------------------------------------------------------------------------------------------------------------------------------------------
+        const response = await axios.get(baseUrl+'Comercial/GetVsistas/'+idC+','+motivo, confi_ax);
+        var obj = response.data;
         if(obj.length > 0)
         {
             return obj
