@@ -1,9 +1,10 @@
 import React, {useEffect, useState, useRef} from 'react'
 import '../../estilos.css';
 import Swal from "sweetalert2";
-import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet'
+import { MapContainer, TileLayer, Marker, Popup, Circle } from 'react-leaflet'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
+import 'leaflet-routing-machine'; 
 import "sweetalert2/dist/sweetalert2.min.css";
 import DataTable from 'react-data-table-component';
 import DatePicker from 'react-datepicker';
@@ -12,7 +13,7 @@ import TimePicker from 'rc-time-picker';
 import 'rc-time-picker/assets/index.css';
 import { useNavigate } from "react-router-dom";
 import { GetCotizaciones,convertArrayOfObjectsToCSV, getPedidosCot, getArchivo, setStatus, getCotizacionExtra, getCotizacionLog, getSegmentos,
-  getSeguimientos, getObraCot, getClienteCot
+  getSeguimientos, getObraCot, getClienteCot, setVisitas, getVisitas
  } from '../../Utilidades/Funciones';
 import {
   CButton,
@@ -38,21 +39,22 @@ import {
   cilCheck,
   cilClearAll,
   cilImage,
+  cilMap,
   cilMenu,
   cilPencil,
+  cilPhone,
+  cilPin,
   cilShareAlt,
   cilTag,
   cilTrash
 } from '@coreui/icons'
+
 import BuscadorDT from '../base/parametros/BuscadorDT'
 //import TabulatorTest from '../base/tables/Tabulator'
 import Plantas from '../base/parametros/Plantas'
 import FechaI from '../base/parametros/FechaInicio'
 import FechaF from '../base/parametros/FechaFinal'
 import { Rol } from '../../Utilidades/Roles'
-
-
-
 
 const LCotizacion = () => {    
   const navigate = useNavigate();
@@ -68,13 +70,16 @@ const LCotizacion = () => {
   const [chkFT, setChkFT] = useState('Cliente');
   //------------------Shows----------------------------
   const [shCO, setShCO] = useState('Cliente');
+
   //Arrays
   const [dtCotizacion, setDTCotizacion] = useState([]);
   const [dtPedidos, setDTPedidos] = useState([]);
   const [dtExtras, setDTExtras] = useState([]);
   const [dtLog, setDTLog] = useState([]);
   const [dtSeg, setDTSeg] = useState([]);
+  const [dtRuta, setDTRuta] = useState([]);
   const [cmbSeg, setCmbSeg] = useState([]);
+
   const opcionesFca = {
     year: 'numeric', // '2-digit' para el año en dos dígitos
     month: '2-digit',   // 'numeric', '2-digit', 'short', 'long', 'narrow'
@@ -88,13 +93,12 @@ const LCotizacion = () => {
   const [selectedCotizacion, setSelectedCotizacion] = useState(null)
   // Modal para mostrar el mapa
   const [mapeoModal, setMapeoModal] = useState(false)
-
+  const [mapCenter, setMapCenter] = useState([19.023968543290614,-98.2954168461941])
+  const [zoom, setZoom] = useState(10);
   const handleExtraActions = (idCotizacion) => {
     setSelectedCotizacion(idCotizacion)
     setMAcciones(true)
   }
-
-
   //------------ FROMS CLIENTE/OBRAS ------------------------------------------
   const [RazonTxtC, setRazonC] = useState('');
   const [RFCTxtC, setRFCC] = useState('');
@@ -1047,68 +1051,122 @@ const LCotizacion = () => {
     }
   }
 
-  const handleRegistrarVisita = async (idCotizacion) => {
-    const idUsuario = localStorage.getItem('idUsuario') || 0 // O de donde obtengas tu usuario
-
+  const handleRegistrarVisita = (idCotizacion) => {
     if (!navigator.geolocation) {
       Swal.fire("Error", "Tu navegador no soporta Geolocalización", "error")
       return
     }
-
+        // Guarda localmente en el estado. (Podrías hacer una petición POST a tu backend)
+        // setVisitPoints((prevPoints) => [
+        //   ...prevPoints,
+        //   { lat, lng, idUsuario, idCotizacion }
+        // ])
+    // Obtenemos la posición actual
     navigator.geolocation.getCurrentPosition(
       (position) => {
-        const lat = position.coords.latitude
-        const lng = position.coords.longitude
-
-        // Guarda localmente en el estado. (Podrías hacer una petición POST a tu backend)
-        setVisitPoints((prevPoints) => [
-          ...prevPoints,
-          { lat, lng, idUsuario, idCotizacion }
-        ])
-
-        Swal.fire(
-          "Visita registrada",
-          `Se guardó la visita en lat: ${lat}, lng: ${lng}`,
-          "success"
-        )
+        const latitud = position.coords.latitude;
+        const longitud = position.coords.longitude;
+        regVisita_(idCotizacion,"Visita",latitud, longitud)
       },
       (error) => {
         Swal.fire("Error al obtener ubicación", error.message, "error")
       }
     )
-  }
+  };
 
-  // -----------------------------------------------------------------
-  // Registrar llamada
-  // -----------------------------------------------------------------
+  const regVisita_ = async(idCot,motivo,lat,lon) => {
+    Swal.fire({
+      title: 'Cargando...',
+      text: 'Registrando...',
+      didOpen: () => {
+          Swal.showLoading();  // Muestra la animación de carga
+      }
+    });
+    try{
+      const ocList = await setVisitas(idCot, motivo, lat, lon);
+      if(ocList)
+      {
+        Swal.close();
+        Swal.fire(
+          `${motivo} registrada`,
+          `${motivo} registrada`,
+          "success"
+        );
+      }
+    }catch(error){
+      Swal.close();
+      Swal.fire("Error al guardar", error.message, "error");
+    }
+  };
+
   const handleRegistrarLlamada = (idCotizacion) => {
-    const idUsuario = localStorage.getItem('idUsuario') || 0
-    const fechaHoraActual = new Date().toISOString()
-
-    // Aquí podrías hacer una llamada POST a tu backend
-    console.log("Registrar llamada:", {
-      idUsuario,
-      idCotizacion,
-      fechaHoraActual
-    })
-
-    Swal.fire(
-      "Llamada registrada",
-      `Se registró la llamada en la fecha/hora: ${fechaHoraActual}`,
-      "success"
-    )
+    regVisita_(idCotizacion,"Llamada",0.0, 0.0)
   }
 
   // -----------------------------------------------------------------
   // Mapeo: Mostrar el modal con el mapa de todas las visitas
   // -----------------------------------------------------------------
-  const handleMapeo = () => {
-    setMapeoModal(true)
+  const handleMapeo = (idCotizacion) => {
+    // 1. Obtenemos ubicación actual (similar a Registrar Visita)
+    Swal.fire({
+        title: 'Cargando...',
+        text: 'Estamos obteniendo la información...',
+        didOpen: () => {
+            Swal.showLoading();  // Muestra la animación de carga
+            mMapa(idCotizacion)
+        }
+    });
+  };
+  const mMapa = async(idc) =>{
+    try{
+      const ocList = await getVisitas(idc, "Visita");
+      if(ocList)
+      {
+        Swal.close();
+        console.log(ocList)
+        setMAcciones(false)
+        setMapeoModal(true)
+        setDTRuta(ocList)
+        //setTimeout(function(){trazarRuta(ocList)},8000);
+      }
+    }catch(error){
+      Swal.close();
+      Swal.fire("Error al guardar", error.message, "error");
+    }
   }
+  const trazarRuta = (map,ocList) =>{
+    const waypoints = ocList
+    .map((point) => {
+      if (point.latitud && point.longitud) {
+        return L.latLng(point.latitud, point.longitud);
+      }
+      return null;
+    }).filter((point) => point !== null);
+    console.log(waypoints);
+    if(waypoints.length > 1) {
+      // Eliminar rutas anteriores
+      map.eachLayer((layer) => {
+        if (layer instanceof L.Routing.Control) {
+          map.removeLayer(layer); // Eliminar la ruta anterior
+        }
+      });
+      // Crear y añadir la nueva ruta
+      const routeControl = L.Routing.control({
+        waypoints: waypoints,
+        lineOptions: {
+          styles: [{ color: "#6FA1EC", weight: 4 }]
+        },
+        routeWhileDragging: true,
+        createMarker: function () {
+          return null; // No mostrar marcadores
+        },
+      }).addTo(map);
+      map.fitBounds(L.latLngBounds(waypoints));
+    } else {
+      Swal.fire("No hay suficientes puntos", "Se necesitan al menos dos puntos para trazar una ruta.", "info");
+    }
   
-  
-  
-  
+  }
   //************************* HANDLE*************************************************************** */
   const hDSeg = (e) =>{
     setDSeg(e.target.value)
@@ -1179,6 +1237,30 @@ const LCotizacion = () => {
     setEstado(e.target.value);
   };
   //********************************************************************************************** */
+  // const calculateRoute = useCallback(() => {
+  //   if (location.latitude && location.longitude) {
+  //     const origin = { lat: location.latitude, lng: location.longitude };
+  //     const destination = { lat: 40.748817, lng: -73.985428 }; // Cambia esto por tu destino deseado
+
+  //     const directionsService = new window.google.maps.DirectionsService();
+
+  //     directionsService.route(
+  //       {
+  //         origin,
+  //         destination,
+  //         travelMode: window.google.maps.TravelMode.DRIVING,
+  //       },
+  //       (result, status) => {
+  //         if (status === window.google.maps.DirectionsStatus.OK) {
+  //           setDirections(result);
+  //         } else {
+  //           console.error('Error al calcular la ruta', status);
+  //         }
+  //       }
+  //     );
+  //   }
+  // }, [location]);
+  //********************************************************************************************** */
   return (
     <>
     <CContainer fluid>
@@ -1241,11 +1323,11 @@ const LCotizacion = () => {
                 </CCol>
             </CModalFooter>
         </CModal>
-      <CModal
-        backdrop="static"
-        visible={mAcciones}
-        onClose={() => setMAcciones(false)}
-      >
+        <CModal
+          backdrop="static"
+          visible={mAcciones}
+          onClose={() => setMAcciones(false)}
+        >
         <CModalHeader>
           <CModalTitle>Acciones adicionales</CModalTitle>
         </CModalHeader>
@@ -1304,27 +1386,43 @@ const LCotizacion = () => {
         </CModalHeader>
         <CModalBody>
           <MapContainer
-            center={[23.634501, -102.552784]} // Centro de México como ejemplo
-            zoom={5}
+            center={mapCenter} // Centro de México como ejemplo
+            zoom={zoom}
             style={{ height: '400px', width: '100%' }}
+            id="map"
+            whenCreated={(map) =>{
+              map.on('moveend', () =>{
+                setMapCenter(map.getCenter());
+              });
+              if (dtRuta && dtRuta.length > 0) {
+                trazarRuta(map, dtRuta); // Llamamos a la función para trazar la ruta
+              }
+            }}
           >
             <TileLayer
               attribution='&copy; <a href="https://www.openstreetmap.org/copyright">
               OpenStreetMap</a> contributors'
               url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
             />
-
-            {visitPoints.map((point, index) => (
-              <Marker
-                key={index}
-                position={[point.lat, point.lng]}
-              >
-                <Popup>
-                  <b>Visita {index + 1}</b><br/>
-                  Usuario: {point.idUsuario}<br/>
-                  Cotización: {point.idCotizacion}
-                </Popup>
-              </Marker>
+            <Circle
+              center={mapCenter} // Usamos el centro actualizado
+              radius={30000} // Radio de 1000 metros (ajustar según lo necesites)
+              color="blue"   // Color del borde
+              fillColor="blue" // Color de relleno
+              fillOpacity={0.1} // Opacidad del relleno
+            />
+            {dtRuta.map((point, index) => (
+            <>
+            <Marker key={index} position={[point.latitud, point.longitud]}>
+              <Popup>
+                <b>Visita {index + 1}</b><br />
+                Usuario: {point.usuario}<br />
+                Cotización: {point.id_cotizacion}<br />
+                Fecha: {point.fecha_visita}
+              </Popup>
+            </Marker>
+            
+            </>          
             ))}
           </MapContainer>
         </CModalBody>
@@ -1334,216 +1432,264 @@ const LCotizacion = () => {
           </CButton>
         </CModalFooter>
       </CModal>
+      <CModal
+        backdrop="static"
+        visible={mAcciones}
+        onClose={() => setMAcciones(false)}
+      >
+        <CModalHeader>
+          <CModalTitle>Acciones adicionales</CModalTitle>
+        </CModalHeader>
+        <CModalBody>
+          <CRow>
+            <CCol xs={12} className="mb-3">
+              <CButton
+                color="primary"
+                className="w-100"
+                onClick={() => handleRegistrarVisita(selectedCotizacion)}
+              >
+              <CIcon icon={cilPin} />  Registrar visita
+              </CButton>
+            </CCol>
 
-        <CModal 
-          backdrop="static"
-          visible={mOpciones}
-          onClose={() => setMOpciones(false)}
-          className='c-modal-80'
-        >
-          <CModalHeader>
-            <CModalTitle>Opciones</CModalTitle>
-          </CModalHeader>
-            <CModalBody>
-              <CTabs activeItemKey={1}>
-                <CTabList variant="tabs" layout="fill">
-                    <CTab aria-controls="Extras" itemKey={1}>Extras</CTab>
-                    <CTab aria-controls="Seguimiento" itemKey={2}>Seguimiento</CTab>
-                    <CTab aria-controls="ClienteObra" itemKey={3}>Cliente</CTab>
-                    <CTab aria-controls="Log" itemKey={4}>Log de Modificaciones</CTab>
-                </CTabList>
-                <CTabContent>
-                    <CTabPanel className="py-3" aria-labelledby="Extras" itemKey={1}>
-                      <DataTable
-                        columns={colExtras}
-                        data={dtExtras}
-                        pagination
-                        persistTableHead
-                        subHeader
-                      />
-                    </CTabPanel>
-                    <CTabPanel className="py-3" aria-labelledby="Seguimiento" itemKey={2}>
-                        <CRow className='mt-2 mb-2'>
-                          <CCol xs={4} md={3}>
-                            <label className='mb-2'>Descripción del Seguimiento</label>
-                            <CFormSelect size="sm" className="mb-3" value={dSeg} onChange={(e) => hDSeg(e)}>
-                              <option value="-">-</option>
-                              {cmbSeg.map((m) => (
-                                <option key={m.IdAccion} value={m.IdAccion}>
-                                  {m.Descripcion}
-                                </option>
-                              ))}
-                            </CFormSelect>
-                          </CCol>
-                          <CCol xs={4} md={3}>
-                            <FechaI 
-                              vFechaI={vFechaI} 
-                              cFechaI={cFechaI} 
-                            />
-                          </CCol>
-                          <CCol xs={4} md={3}>
-                            <label>Hora</label><br/>
-                            <TimePicker
-                              className='clockSel'
-                              showSecond={false}  // Deshabilitar la selección de segundos
-                              value={time}
-                              onChange={handleClockCh}
-                              format="HH:mm"
-                              minuteStep={5}  // Configura los minutos a intervalos de 5 minutos
-                            />
-                          </CCol>
-                          <CCol xs={4} md={3}>
-                            <CButton color='primary' className='mt-2' style={{'margin-top':'3px'}}> Agregar</CButton>
-                          </CCol>
-                        </CRow>
-                        <CRow className='mt-2 mb-2'>
-                          <DataTable
-                            columns={colSeg}
-                            data={dtSeg}
-                            pagination
-                            persistTableHead
-                            subHeader
-                          />        
-                        </CRow>
-                    </CTabPanel>
-                    <CTabPanel className="py-3" aria-labelledby="Log" itemKey={3}>
-                      <CRow className='mt-4 mb-4'>
-                        <CCol xs={2} md={2}>
-                          <CFormCheck
-                            type="radio"
-                            name="fRT"
-                            id="fR"
-                            label="Cliente"
-                            value="Cliente"
-                            checked={chkFT === 'Cliente'}
-                            onChange={hRadioCh}
+            <CCol xs={12} className="mb-3">
+              <CButton
+                color="success"
+                style={{'color':'white'}}
+                className="w-100"
+                onClick={() => handleRegistrarLlamada(selectedCotizacion)}
+              >
+              <CIcon icon={cilPhone} />  Registrar llamada
+              </CButton>
+            </CCol>
+
+            <CCol xs={12}>
+              <CButton
+                color="info"
+                style={{'color':'white'}}
+                className="w-100"
+                onClick={() => handleMapeo(selectedCotizacion)}
+              >
+              <CIcon icon={cilMap} />  Mapeo
+              </CButton>
+            </CCol>
+          </CRow>
+        </CModalBody>
+        <CModalFooter>
+          <CButton color="secondary" onClick={() => setMAcciones(false)}>
+            Cerrar
+          </CButton>
+        </CModalFooter>
+      </CModal>
+      <CModal 
+        backdrop="static"
+        visible={mOpciones}
+        onClose={() => setMOpciones(false)}
+        className='c-modal-80'
+      >
+        <CModalHeader>
+          <CModalTitle>Opciones</CModalTitle>
+        </CModalHeader>
+          <CModalBody>
+            <CTabs activeItemKey={1}>
+              <CTabList variant="tabs" layout="fill">
+                  <CTab aria-controls="Extras" itemKey={1}>Extras</CTab>
+                  <CTab aria-controls="Seguimiento" itemKey={2}>Seguimiento</CTab>
+                  <CTab aria-controls="ClienteObra" itemKey={3}>Cliente</CTab>
+                  <CTab aria-controls="Log" itemKey={4}>Log de Modificaciones</CTab>
+              </CTabList>
+              <CTabContent>
+                  <CTabPanel className="py-3" aria-labelledby="Extras" itemKey={1}>
+                    <DataTable
+                      columns={colExtras}
+                      data={dtExtras}
+                      pagination
+                      persistTableHead
+                      subHeader
+                    />
+                  </CTabPanel>
+                  <CTabPanel className="py-3" aria-labelledby="Seguimiento" itemKey={2}>
+                      <CRow className='mt-2 mb-2'>
+                        <CCol xs={4} md={3}>
+                          <label className='mb-2'>Descripción del Seguimiento</label>
+                          <CFormSelect size="sm" className="mb-3" value={dSeg} onChange={(e) => hDSeg(e)}>
+                            <option value="-">-</option>
+                            {cmbSeg.map((m) => (
+                              <option key={m.IdAccion} value={m.IdAccion}>
+                                {m.Descripcion}
+                              </option>
+                            ))}
+                          </CFormSelect>
+                        </CCol>
+                        <CCol xs={4} md={3}>
+                          <FechaI 
+                            vFechaI={vFechaI} 
+                            cFechaI={cFechaI} 
                           />
                         </CCol>
-                        <CCol xs={6} md={2}>
-                          <CFormCheck
-                            type="radio"
-                            name="fRT"
-                            id="fR1"
-                            label="Obra"
-                            value="Obra"
-                            checked={chkFT === 'Obra'}
-                            onChange={hRadioCh}
-                            defaultChecked
+                        <CCol xs={4} md={3}>
+                          <label>Hora</label><br/>
+                          <TimePicker
+                            className='clockSel'
+                            showSecond={false}  // Deshabilitar la selección de segundos
+                            value={time}
+                            onChange={handleClockCh}
+                            format="HH:mm"
+                            minuteStep={5}  // Configura los minutos a intervalos de 5 minutos
                           />
+                        </CCol>
+                        <CCol xs={4} md={3}>
+                          <CButton color='primary' className='mt-2' style={{'margin-top':'3px'}}> Agregar</CButton>
                         </CCol>
                       </CRow>
-                        {shCO && (
-                        <CRow>
-                          <CCol xs={6} md={4}>
-                            <label>Nombre de Razón Social</label>
-                            <CFormInput type="text" placeholder="Nombre de Cliente" aria-label="Nombre" value={RazonTxtC} onChange={hRazon} />
-                          </CCol>
-                          <CCol xs={6} md={4}>
-                            <label>RFC</label>
-                            <CFormInput type="text" placeholder="RFC" value={RFCTxtC} onChange={hRFC} />
-                          </CCol>
-                          <CCol xs={6} md={4}>
-                            <label>Metodo de Pago</label>
-                            <CFormInput type="text" placeholder="Metodo de Pago" value={PagoTxtC} onChange={hMPago} />
-                          </CCol>
-                          <CCol xs={6} md={4}>
-                            <label>4 Últimos Dígitos Cuenta</label>
-                            <CFormInput type="text" placeholder="****" value={DigitosTxtC} onChange={hDigCue} />
-                          </CCol>
-                          <CCol xs={6} md={4}>
-                            <label>Dirección Fiscal</label>
-                            <CFormInput type="text" placeholder="Dirección Fiscal" value={DFiscalTxtC} onChange={hDirF} />
-                          </CCol>
-                          <hr/>
-                          <h4>DIRECCIÓN FISCAL</h4>
-                          <br />
-                          <CCol xs={6} md={4}>
-                            <label>Calle</label>
-                            <CFormInput type="text" placeholder="Calle" value={CalleTxtC} onChange={hCalleC} />
-                          </CCol>
-                          <CCol xs={6} md={4}>
-                            <label>No. Exterior</label>
-                            <CFormInput type="text" placeholder="No. Exterior" value={nExtTxtC} onChange={hNExtC} />
-                          </CCol>
-                          <CCol xs={6} md={4}>
-                            <label>COLONIA</label>
-                            <CFormInput type="text" placeholder="Colonia" value={ColTxtC} onChange={hColC}/>
-                          </CCol>
-                          <CCol xs={6} md={4}>
-                            <label>MUNICIPIO</label>
-                            <CFormInput type="text" placeholder="Municipio" value={MunTxtC} onChange={hMunC}/>
-                          </CCol>
-                          <CCol xs={6} md={4}>
-                            <label>ESTADO</label>
-                            <CFormInput type="text" placeholder="Estado" value={EdoTxtC} onChange={hEdoC} />
-                          </CCol>
-                          <CCol xs={6} md={4}>
-                            <label>TELÉFONO</label>
-                            <CFormInput type="text" placeholder="Telefono" value={TelTxtC} onChange={hTelC} />
-                          </CCol>
-                          <CCol xs={6} md={4}>
-                            <label>PERSONA CONTACTO</label>
-                            <CFormInput type="text" placeholder="Persona Contacto" />
-                          </CCol>
-                          <CCol xs={6} md={4}>
-                            <label>CLAVE CFDI</label>
-                            <CFormInput type="text" placeholder="Clave CFDI" value={CFDITxtC} onChange={hCFDI}/>
-                          </CCol>
-                        </CRow>
-                        )}
-                      {!shCO && (
-                        <CRow>
-                          <CCol xs={6} md={4}>
-                            <label>Nombre de Obra</label>
-                            <CFormInput type="text" value={nObraTxt} onChange={hNObra} placeholder="Nombre de Obra" aria-label="Nombre" />
-                          </CCol>
-                          <CCol xs={6} md={4}>
-                            <label>NÚMERO CLIENTE</label>
-                            <CFormInput type="text" value={nClienteTxt} onChange={hNCliente} placeholder="NÚMERO CLIENTE" />
-                          </CCol>
-                          <h4>UBICACIÓN</h4>
-                          <CCol xs={6} md={4}>
-                            <label>DIRECCIÓN</label>
-                            <CFormInput type="text" value={DirTxtO} onChange={hDirO} placeholder="DIRECCIÓN" />
-                          </CCol>
-                          <CCol xs={6} md={4}>
-                            <label>COLONIA</label>
-                            <CFormInput type="text" value={ColTxtO} onChange={hColO} placeholder="COLONIA" />
-                          </CCol>
-                          <CCol xs={6} md={4}>
-                            <label>MUNICIPIO</label>
-                            <CFormInput type="text" value={MunTxtO} onChange={hMunO} placeholder="MUNICIPIO" />
-                          </CCol>
-                          <CCol xs={6} md={4}>
-                            <label>ESTADO</label>
-                            <CFormInput type="text" value={EstadoTxtO} onChange={hEdoO} placeholder="ESTADO" />
-                          </CCol>
-                          <CCol xs={6} md={4}>
-
-                          </CCol>
-                        </CRow>
+                      <CRow className='mt-2 mb-2'>
+                        <DataTable
+                          columns={colSeg}
+                          data={dtSeg}
+                          pagination
+                          persistTableHead
+                          subHeader
+                        />        
+                      </CRow>
+                  </CTabPanel>
+                  <CTabPanel className="py-3" aria-labelledby="Log" itemKey={3}>
+                    <CRow className='mt-4 mb-4'>
+                      <CCol xs={2} md={2}>
+                        <CFormCheck
+                          type="radio"
+                          name="fRT"
+                          id="fR"
+                          label="Cliente"
+                          value="Cliente"
+                          checked={chkFT === 'Cliente'}
+                          onChange={hRadioCh}
+                        />
+                      </CCol>
+                      <CCol xs={6} md={2}>
+                        <CFormCheck
+                          type="radio"
+                          name="fRT"
+                          id="fR1"
+                          label="Obra"
+                          value="Obra"
+                          checked={chkFT === 'Obra'}
+                          onChange={hRadioCh}
+                          defaultChecked
+                        />
+                      </CCol>
+                    </CRow>
+                      {shCO && (
+                      <CRow>
+                        <CCol xs={6} md={4}>
+                          <label>Nombre de Razón Social</label>
+                          <CFormInput type="text" placeholder="Nombre de Cliente" aria-label="Nombre" value={RazonTxtC} onChange={hRazon} />
+                        </CCol>
+                        <CCol xs={6} md={4}>
+                          <label>RFC</label>
+                          <CFormInput type="text" placeholder="RFC" value={RFCTxtC} onChange={hRFC} />
+                        </CCol>
+                        <CCol xs={6} md={4}>
+                          <label>Metodo de Pago</label>
+                          <CFormInput type="text" placeholder="Metodo de Pago" value={PagoTxtC} onChange={hMPago} />
+                        </CCol>
+                        <CCol xs={6} md={4}>
+                          <label>4 Últimos Dígitos Cuenta</label>
+                          <CFormInput type="text" placeholder="****" value={DigitosTxtC} onChange={hDigCue} />
+                        </CCol>
+                        <CCol xs={6} md={4}>
+                          <label>Dirección Fiscal</label>
+                          <CFormInput type="text" placeholder="Dirección Fiscal" value={DFiscalTxtC} onChange={hDirF} />
+                        </CCol>
+                        <hr/>
+                        <h4>DIRECCIÓN FISCAL</h4>
+                        <br />
+                        <CCol xs={6} md={4}>
+                          <label>Calle</label>
+                          <CFormInput type="text" placeholder="Calle" value={CalleTxtC} onChange={hCalleC} />
+                        </CCol>
+                        <CCol xs={6} md={4}>
+                          <label>No. Exterior</label>
+                          <CFormInput type="text" placeholder="No. Exterior" value={nExtTxtC} onChange={hNExtC} />
+                        </CCol>
+                        <CCol xs={6} md={4}>
+                          <label>COLONIA</label>
+                          <CFormInput type="text" placeholder="Colonia" value={ColTxtC} onChange={hColC}/>
+                        </CCol>
+                        <CCol xs={6} md={4}>
+                          <label>MUNICIPIO</label>
+                          <CFormInput type="text" placeholder="Municipio" value={MunTxtC} onChange={hMunC}/>
+                        </CCol>
+                        <CCol xs={6} md={4}>
+                          <label>ESTADO</label>
+                          <CFormInput type="text" placeholder="Estado" value={EdoTxtC} onChange={hEdoC} />
+                        </CCol>
+                        <CCol xs={6} md={4}>
+                          <label>TELÉFONO</label>
+                          <CFormInput type="text" placeholder="Telefono" value={TelTxtC} onChange={hTelC} />
+                        </CCol>
+                        <CCol xs={6} md={4}>
+                          <label>PERSONA CONTACTO</label>
+                          <CFormInput type="text" placeholder="Persona Contacto" />
+                        </CCol>
+                        <CCol xs={6} md={4}>
+                          <label>CLAVE CFDI</label>
+                          <CFormInput type="text" placeholder="Clave CFDI" value={CFDITxtC} onChange={hCFDI}/>
+                        </CCol>
+                      </CRow>
                       )}
-                    </CTabPanel>
-                    <CTabPanel className="py-3" aria-labelledby="Log" itemKey={4}>
-                      <DataTable
-                        columns={colLog}
-                        data={dtLog}
-                        pagination
-                        persistTableHead
-                        subHeader
-                      />
-                    </CTabPanel>
-                </CTabContent>
-              </CTabs>
-            </CModalBody>
-            <CModalFooter>
-                <CCol xs={4} md={2}>
-                    <CButton color='danger' onClick={() => setMOpciones(false)} style={{'color':'white'}} > 
-                        <CIcon icon={cilClearAll} /> Cerrar
-                    </CButton>
-                </CCol>
-            </CModalFooter>
-        </CModal>
+                    {!shCO && (
+                      <CRow>
+                        <CCol xs={6} md={4}>
+                          <label>Nombre de Obra</label>
+                          <CFormInput type="text" value={nObraTxt} onChange={hNObra} placeholder="Nombre de Obra" aria-label="Nombre" />
+                        </CCol>
+                        <CCol xs={6} md={4}>
+                          <label>NÚMERO CLIENTE</label>
+                          <CFormInput type="text" value={nClienteTxt} onChange={hNCliente} placeholder="NÚMERO CLIENTE" />
+                        </CCol>
+                        <h4>UBICACIÓN</h4>
+                        <CCol xs={6} md={4}>
+                          <label>DIRECCIÓN</label>
+                          <CFormInput type="text" value={DirTxtO} onChange={hDirO} placeholder="DIRECCIÓN" />
+                        </CCol>
+                        <CCol xs={6} md={4}>
+                          <label>COLONIA</label>
+                          <CFormInput type="text" value={ColTxtO} onChange={hColO} placeholder="COLONIA" />
+                        </CCol>
+                        <CCol xs={6} md={4}>
+                          <label>MUNICIPIO</label>
+                          <CFormInput type="text" value={MunTxtO} onChange={hMunO} placeholder="MUNICIPIO" />
+                        </CCol>
+                        <CCol xs={6} md={4}>
+                          <label>ESTADO</label>
+                          <CFormInput type="text" value={EstadoTxtO} onChange={hEdoO} placeholder="ESTADO" />
+                        </CCol>
+                        <CCol xs={6} md={4}>
+
+                        </CCol>
+                      </CRow>
+                    )}
+                  </CTabPanel>
+                  <CTabPanel className="py-3" aria-labelledby="Log" itemKey={4}>
+                    <DataTable
+                      columns={colLog}
+                      data={dtLog}
+                      pagination
+                      persistTableHead
+                      subHeader
+                    />
+                  </CTabPanel>
+              </CTabContent>
+            </CTabs>
+          </CModalBody>
+          <CModalFooter>
+              <CCol xs={4} md={2}>
+                  <CButton color='danger' onClick={() => setMOpciones(false)} style={{'color':'white'}} > 
+                      <CIcon icon={cilClearAll} /> Cerrar
+                  </CButton>
+              </CCol>
+          </CModalFooter>
+      </CModal>
       </CRow>
     </CContainer>
     </>

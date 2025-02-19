@@ -43,6 +43,7 @@
     "js-cookie": "^3.0.5",
     "jspdf": "^2.5.2",
     "leaflet": "^1.9.4",
+    "leaflet-routing-machine": "^3.2.12",
     "prop-types": "^15.8.1",
     "rc-time-picker": "^3.7.3",
     "react": "^18.3.1",
