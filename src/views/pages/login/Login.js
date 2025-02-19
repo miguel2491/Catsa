@@ -258,115 +258,125 @@ export default function Login() {
 /* ------------------------------------------------------------------
                   FORMULARIO DE LOGIN 
    ------------------------------------------------------------------ */
-function LoginForm({ onRegister, onRecover, onLoginSubmit }) {
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
-
-  // Clases para la animación
-  const [usernameSectionClass, setUsernameSectionClass] = useState(
-    "input-section email-section"
-  );
-  const [passwordSectionClass, setPasswordSectionClass] = useState(
-    "input-section password-section folded"
-  );
-  const [successClass, setSuccessClass] = useState("success");
-
-  // Handlers
-  const handleUsernameChange = (e) => setUsername(e.target.value);
-  const handlePasswordChange = (e) => setPassword(e.target.value);
-
-  // Avanzar a la sección de contraseña
-  const handleUsernameNext = () => {
-    setUsernameSectionClass((prev) => prev + " fold-up");
-    setPasswordSectionClass("input-section password-section");
-  };
-
-  // Intentar login al dar clic en el botón de la contraseña
-  const handlePasswordNext = async () => {
-    const isOk = await onLoginSubmit(username, password);
-    if (isOk) {
-      setPasswordSectionClass((prev) => prev + " fold-up");
-      setSuccessClass("success show");
-    }
-  };
-
-  return (
-    <div className="registration-form">
-      <header>
-        <h1>Inicia sesión</h1>
-        <p>Somos CATSA, somos FUTURO</p>
-      </header>
-
-      <form>
-        {/* Sección "usuario" */}
-        <div className={usernameSectionClass}>
-          <input
-            type="text"
-            placeholder="Ingresa tu usuario"
-            autoComplete="off"
-            className="email"
-            value={username}
-            onChange={handleUsernameChange}
-          />
-          <div className="animated-button">
-            {username.trim() === "" ? (
-              <span className="icon-paper-plane">
-                <i className="fa fa-user"></i>
-              </span>
-            ) : (
-              <button
-                type="button"
-                className="next-button email"
-                onClick={handleUsernameNext}
-              >
-                <i className="fa fa-arrow-up"></i>
-              </button>
-            )}
+   function LoginForm({ onRegister, onRecover, onLoginSubmit }) {
+    const [username, setUsername] = useState("");
+    const [password, setPassword] = useState("");
+  
+    // Clases para la animación
+    const [usernameSectionClass, setUsernameSectionClass] = useState(
+      "input-section email-section"
+    );
+    const [passwordSectionClass, setPasswordSectionClass] = useState(
+      "input-section password-section folded"
+    );
+    const [successClass, setSuccessClass] = useState("success");
+  
+    // Handlers de cambio
+    const handleUsernameChange = (e) => setUsername(e.target.value);
+    const handlePasswordChange = (e) => setPassword(e.target.value);
+  
+    // Cuando el usuario presiona la flecha en la sección "usuario"
+    const handleUsernameNext = () => {
+      setUsernameSectionClass((prev) => prev + " fold-up");
+      setPasswordSectionClass("input-section password-section");
+    };
+  
+    // Cuando el usuario presiona la flecha en la sección "contraseña"
+    const handlePasswordNext = async () => {
+      const isOk = await onLoginSubmit(username, password);
+  
+      if (isOk) {
+        // Si el login fue exitoso => animación de fold-up + "BIENVENIDO"
+        setPasswordSectionClass((prev) => prev + " fold-up");
+        setSuccessClass("success show");
+      } else {
+        setUsername("");           
+        setPassword("");           
+  
+        // restauramos las clases para que se muestre la sección de usuario
+        setUsernameSectionClass("input-section email-section");
+        setPasswordSectionClass("input-section password-section folded");
+      }
+    };
+  
+    return (
+      <div className="registration-form">
+        <header>
+          <h1>Inicia sesión</h1>
+          <p>Somos CATSA, somos FUTURO</p>
+        </header>
+  
+        <form>
+          {/* Sección "usuario" */}
+          <div className={usernameSectionClass}>
+            <input
+              type="text"
+              placeholder="Ingresa tu usuario"
+              autoComplete="off"
+              className="email"
+              value={username}
+              onChange={handleUsernameChange}
+            />
+            <div className="animated-button">
+              {username.trim() === "" ? (
+                <span className="icon-paper-plane">
+                  <i className="fa fa-user"></i>
+                </span>
+              ) : (
+                <button
+                  type="button"
+                  className="next-button email"
+                  onClick={handleUsernameNext}
+                >
+                  <i className="fa fa-arrow-up"></i>
+                </button>
+              )}
+            </div>
           </div>
-        </div>
-
-        {/* Sección Password */}
-        <div className={passwordSectionClass}>
-          <input
-            type="password"
-            placeholder="Coloca tu contraseña aquí"
-            className="password"
-            value={password}
-            onChange={handlePasswordChange}
-          />
-          <div className="animated-button">
-            {password.trim() === "" ? (
-              <span className="icon-lock">
-                <i className="fa fa-lock"></i>
-              </span>
-            ) : (
-              <button
-                type="button"
-                className="next-button password"
-                onClick={handlePasswordNext}
-              >
-                <i className="fa fa-arrow-up"></i>
-              </button>
-            )}
+  
+          {/* Sección Password */}
+          <div className={passwordSectionClass}>
+            <input
+              type="password"
+              placeholder="Coloca tu contraseña aquí"
+              className="password"
+              value={password}
+              onChange={handlePasswordChange}
+            />
+            <div className="animated-button">
+              {password.trim() === "" ? (
+                <span className="icon-lock">
+                  <i className="fa fa-lock"></i>
+                </span>
+              ) : (
+                <button
+                  type="button"
+                  className="next-button password"
+                  onClick={handlePasswordNext}
+                >
+                  <i className="fa fa-arrow-up"></i>
+                </button>
+              )}
+            </div>
           </div>
-        </div>
-
-        {/* Mensaje de éxito */}
-        <div className={successClass}>
-          <p>BIENVENIDO</p>
-        </div>
-      </form>
-
-      {/* Links para cambiar de modo */}
-      <span className="togglee-link" onClick={onRegister}>
-        ¿No tienes cuenta? Regístrate
-      </span>
-      <span className="toggle-link" onClick={onRecover}>
-        ¿Olvidaste la contraseña?
-      </span>
-    </div>
-  );
-}
+  
+          {/* Mensaje de éxito */}
+          <div className={successClass}>
+            <p>BIENVENIDO</p>
+          </div>
+        </form>
+  
+        {/* Links para cambiar de modo */}
+        <span className="togglee-link" onClick={onRegister}>
+          ¿No tienes cuenta? Regístrate
+        </span>
+        <span className="toggle-link" onClick={onRecover}>
+          ¿Olvidaste la contraseña?
+        </span>
+      </div>
+    );
+  }
+  
 
 /* ------------------------------------------------------------------
                  FORMULARIO DE REGISTRO
