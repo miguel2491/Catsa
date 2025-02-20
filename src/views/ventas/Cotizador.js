@@ -9,7 +9,7 @@ import FechaI from '../base/parametros/FechaInicio'
 import Step1 from '../ventas/Cotizador/Step1'
 import Step2 from '../ventas/Cotizador/Step2'
 import Step3 from '../ventas/Cotizador/Step3'
-import { getCostoP, getClientesCot, getDatosPlanta, getCotizacionId, getCotizacionPedido } from '../../Utilidades/Funciones';
+import { getCostoP, getClientesCartera, getDatosPlanta, getCotizacionId, getCotizacionPedido } from '../../Utilidades/Funciones';
 import { Rol } from '../../Utilidades/Roles'
 import { IMaskMixin } from 'react-imask'
 import IMask from 'imask'
@@ -83,12 +83,48 @@ const Cotizador = () => {
   const [aProducto, setProducto] = useState([]);
   const [aClientes, setClientes] = useState([]);
   const [aObras, setObras] = useState([]);
-  const [pData, setPData] = useState([]);
   const [coordsO, setCoordsO] = useState("");
+  const [pData, setPData] = useState([]);
+  const [pDataC, setCData] = useState([]);
   //********************************************************************* */
   const updPData = (newData) => {
     setPData((prevData) => [...prevData, ...newData]);
   };
+  const updFData = (newFData) => {
+    setFData((prevData) => ({
+      ...prevData,
+      ...newFData
+    }));
+  };
+  const updFCData = (newFData) => {
+    setCData((prevData) => ({
+      ...prevData,
+      ...newFData
+    }));
+  };
+  const [fDataC, setFDataC] = useState({
+    idCotizacion:null,
+    planta:null,
+    noCliente:null,
+    noObra:null,
+    Cliente:null,
+    Obra:null,
+    Direccion:null,
+    contacto:null,
+    idVendedor:null,
+    usuarioCreo:null,
+    flagIVA:null,
+    flagTotal:null,
+    flagCondiciones:null,
+    estatus:null,
+    cotAnterior:null,
+    fuente:null,
+    coordenadaR:null,
+    coordenada:null,
+    flagObservaciones:null,
+    segmento:null,
+    canal:null
+  });
   const [fData, setFData] = useState({
     planta:plantasSel,
     fecha:vFechaI,
@@ -219,12 +255,7 @@ const Cotizador = () => {
     }
 
   //******************************************************************** */
-  const updFData = (newFData) => {
-    setFData((prevData) => ({
-      ...prevData,
-      ...newFData
-    }));
-  };
+  
   const [fProductos, setfProductos] = useState({
     producto:null,
     m3:0,
@@ -292,11 +323,12 @@ const Cotizador = () => {
   async function getClientes(planta)
   {
     try{
-      const clientes = await getClientesCot(planta);
+      const clientes = await getClientesCartera(planta);
       if(clientes){
+        console.log(clientes)
           const clientesTransformados = clientes.map((clientes, index) => ({
               id: index,            // Asignar un ID único (en este caso, usamos el índice)
-              name: clientes.Nombre, // Usamos la propiedad 'Producto' como 'name'
+              name: clientes.Nombre+"("+clientes.RFC+")", // Usamos la propiedad 'Producto' como 'name'
               NoCliente: clientes.NoCliente,
           }));
           setClientes(clientesTransformados);
@@ -351,9 +383,9 @@ const Cotizador = () => {
       </CRow>
       {shSteps && (
       <StepWizard>
-        <Step1 fijos={dFijos} corpo={dCorpo} mop={dMop} cdiesel={dDiesel} sucursal={plantasSel} clientes_={aClientes} obras_={aObras} coords={coordsO} nCot={noCotizacion} onUpdateFData={updFData} />
+        <Step1 sucursal={plantasSel} clientes_={aClientes} obras_={aObras} coords={coordsO} nCot={noCotizacion} onUpdateFCData={updFCData} onUpdateFData={updFData} />
         <Step2 fuente={aFuente} segmento={aSegmento} canal={aTC} productos={aProducto} fData={fData} updPData={updPData} />
-        <Step3 fData={fData} pData={pData} />
+        <Step3 fData={pDataC} pData={pData} />
       </StepWizard>
       )}
       <CModal

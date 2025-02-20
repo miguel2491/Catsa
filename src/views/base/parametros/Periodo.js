@@ -2,7 +2,9 @@ import React,{useEffect, useState, useRef} from 'react';
 const ap = [];
 const Periodo = ({periodoSel, mPeriodo}) => {
     const [periodo_, setperiodo_] = useState([]);
-    const years = Array.from({ length: 6 }, (_, index) => 2019 + index);
+    const currentYear = new Date().getFullYear(); // Obtiene el año actual
+    const startYear = 2019; // Año de inicio (2019)
+    const years = Array.from({ length: currentYear - startYear + 1 }, (_, index) => startYear + index);
 
     const [selectedOption, setSelectedOption] = useState('');
     const handleChange = (event) => {

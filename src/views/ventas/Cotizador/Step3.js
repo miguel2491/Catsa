@@ -36,156 +36,34 @@ import { cilCheck, cilX, cilSearch, cilTrash, cilPlus } from '@coreui/icons'
 import { Rol } from '../../../Utilidades/Roles'
 import '../../../estilos.css'
 
-const Step3 = ({ previousStep, formData, pData, onSave }) => {
+const Step3 = ({ previousStep, fData, pData, onSave }) => {
     const navigate = useNavigate();
+    //******************************************************************** VARS **************************************************************************************** */
     const [maskedValue, setMaskedValue] = useState('');
     const [price, setPrice] = useState('');
     const inputRef = useRef(null);
     const [startDate, setStartDate] = useState(new Date());
     const [time, setTime] = useState(null);
     const [elementos, setElementos] = useState([]);
-    //******************* VARS **************************** */
     const [sFPago, setFPago] = useState("-");
     const [cM3, setCM3] = useState("-");
-    //******************* HANDLE ************************
-    const handleClockCh = (value) => {
-      setTime(value);
-      console.log('Hora seleccionada:', value ? value.format('HH:mm') : 'No seleccionada');
-    }
-    const handleSave = () => {
-      // Aquí puedes manejar la lógica para guardar los datos
-      console.log("Guardando datos...", formData, pData);
-
-      // Aquí iría la llamada a la API o la lógica de persistencia que necesites
-        Swal.fire({
-            title: 'Cargando...',
-            text: 'Estamos obteniendo la información...',
-            didOpen: () => {
-                Swal.showLoading();  // Muestra la animación de carga
-            }
-        });
-        setTimeout(() => { Swal.close(); navigate('/ventas/LCotizacion');},3000)
-    };
-    const hFPago = (e, index) => {
-      const updatedData = [...pData];
-      updatedData[index].Pago = e.target.value;  // Actualizamos el valor de FormaPago
-      setPData(updatedData);  // Actualizamos el estado
-    }
-    const hCantidadM3 = (e, index) => {
-      const updatedData = [...pData];
-      updatedData[index].CantidadM3 = e.target.value;  // Actualizamos el valor de FormaPago
-      setPData(updatedData);  // Actualizamos el estado
-    }
-    const hSolicitante = (e, index) => {
-      const updatedData = [...pData];
-      updatedData[index].Recibe = e.target.value;  // Actualizamos el valor de FormaPago
-      setPData(updatedData);  // Actualizamos el estado
-    }
-    const hTelefono = (e, index) => {
-      const updatedData = [...pData];
-      updatedData[index].Telefono = e.target.value;  // Actualizamos el valor de FormaPago
-      setPData(updatedData);  // Actualizamos el estado
-    }
-    
-    const hElementoColar = (e, index) => {
-      const updatedData = [...pData];
-      updatedData[index].Elemento = e.target.value;  // Actualizamos el valor de FormaPago
-      setPData(updatedData);  // Actualizamos el estado
-    }
-    const hTBomba = (e, index) => {
-      const updatedData = [...pData];
-      updatedData[index].CodBomba = e.target.value;  // Actualizamos el valor de FormaPago
-      setPData(updatedData);  // Actualizamos el estado
-    }
-    const hPrecioConcreto = (e, index) => {
-      const updatedData = [...pData];
-      updatedData[index].PrecioProducto = e.target.value;  // Actualizamos el valor de FormaPago
-      setPData(updatedData);  // Actualizamos el estado
-    }
-    const hPrecioExtra = (e, index) => {
-      const updatedData = [...pData];
-      updatedData[index].PrecioExtra = e.target.value;  // Actualizamos el valor de FormaPago
-      setPData(updatedData);  // Actualizamos el estado
-    }
-    const hPrecioBomba = (e, index) => {
-      const updatedData = [...pData];
-      updatedData[index].PrecioBomba = e.target.value;  // Actualizamos el valor de FormaPago
-      setPData(updatedData);  // Actualizamos el estado
-    }
-    const hSubtotal = (e, index) => {
-      const updatedData = [...pData];
-      updatedData[index].PrecioProducto = e.target.value;  // Actualizamos el valor de FormaPago
-      setPData(updatedData);  // Actualizamos el estado
-    }
-    const hTotal = (e, index) => {
-      const updatedData = [...pData];
-      updatedData[index].PrecioProducto = e.target.value;  // Actualizamos el valor de FormaPago
-      setPData(updatedData);  // Actualizamos el estado
-    }
-    const hFcaEntrega = (e, index) => {
-      const fca = e.target.value;
-      const [fecha_, hora_] = fca.split("T");
-      const updatedData = [...pData];
-      updatedData[index].FechaHoraPedido = fca; 
-      setPData(updatedData);  // Actualizamos el estado
-    }
-    const hMViaje = (e, index) => {
-      const updatedData = [...pData];
-      updatedData[index].M3Viaje = e.target.value; 
-      setPData(updatedData); 
-    }
-    const hTRecorrido = (e, index) => {
-      const updatedData = [...pData];
-      updatedData[index].TRecorrido = e.target.value; 
-      setPData(updatedData); 
-    }
-    const hTDescarga = (e, index) => {
-      const updatedData = [...pData];
-      updatedData[index].TDescarga = e.target.value; 
-      setPData(updatedData); 
-    }
-    const hFEnvio = (e, index) => {
-      const updatedData = [...pData];
-      updatedData[index].Espaciado = e.target.value; 
-      setPData(updatedData); 
-    }
-    const hObservaciones = (e, index) => {
-      const updatedData = [...pData];
-      updatedData[index].Observaciones = e.target.value; 
-      setPData(updatedData); 
-    }
-    const hRecibeObra = (e, index) => {
-      const updatedData = [...pData];
-      updatedData[index].Recibe = e.target.value; 
-      setPData(updatedData); 
-    }
-
-    // Configuración de la máscara
-    const priceMask = {
-      mask: Number,  // Solo números permitidos
-      thousandsSeparator: ',',  // Separador de miles
-      radix: '.',  // Separador decimal
-      scale: 2,  // Para permitir 2 decimales
-      normalizeZeros: true,  // Normaliza los ceros decimales
-      padFractionalZeros: true,  // Agrega ceros después de la coma decimal si es necesario
-      min: 0, // Asegura que el número no sea negativo
-    };
-    
-    const handleChangeMK = (e) => {
-      const value = e.target.value.replace(/[^0-9.,]/g, '');  // Reemplazar cualquier carácter no numérico
-      setMaskedValue(value);
-    };
-  
-    const handleBlurMK = () => {
-      if (inputRef.current) {
-        const masked = IMask(inputRef.current, priceMask);
-        const maskedValue = masked.value;
-        setMaskedValue(maskedValue);
-        // Aquí convertimos el valor a número para que puedas usarlo para guardarlo
-        const numericValue = masked.unmaskedValue;
-        setPrice(numericValue); // Guardamos el valor numérico sin formato
-      }
-    };
+    const [productos, setProductos] = useState(pData);
+    const [cotizacion, setCotizacion] = useState(fData);
+    const [aPedido,setAPedido] = useState({
+      Pago:'-'
+    })
+    //***************************************************************************************************************************************************************** */
+    useEffect(() => {
+      getElementos_();
+      const updCot = fData.map(coti => ({
+        ...cotizacion
+      }));
+      const updData = pData.map(producto => ({
+        ...producto
+      }));
+      console.log(updData, updCot)
+    },[pData]);
+    //***************************************************************** FUNCIONES ***************************************************************************************** */
     async function getElementos_()
     {
       try{
@@ -198,17 +76,163 @@ const Step3 = ({ previousStep, formData, pData, onSave }) => {
         //Swal.fire("Error", "No se pudo obtener la información de Elementos a colar", "error");
       }
     }
+    //***************************************************************************************************************************************************************** */
+    const handleSave = () => {
+      // Aquí puedes manejar la lógica para guardar los datos
+      console.log("Guardando datos...", productos);
+
+      // Aquí iría la llamada a la API o la lógica de persistencia que necesites
+        Swal.fire({
+            title: 'Cargando...',
+            text: 'Estamos obteniendo la información...',
+            didOpen: () => {
+                Swal.showLoading();  // Muestra la animación de carga
+            }
+        });
+        setTimeout(() => { 
+          Swal.close(); 
+          //navigate('/ventas/LCotizacion');
+          console.log(formData, pData)
+        },3000)
+    };
+    //******************************************************************** HANDLE ****************************************************************************************
+    const hFPago = (e, index) => {
+      // const updatedData = [...pData];
+      // updatedData[index].Pago = e.target.value;  // Actualizamos el valor de FormaPago
+      // setPData(updatedData);  // Actualizamos el estado
+      const newProductos = [...pData];
+      newProductos[index].Pago = e.target.value;
+      setProductos(newProductos);
+    }
+    const hSolicitante = (e, index) => {
+      const newProductos = [...pData];
+      newProductos[index].Recibe = e.target.value;  // Actualizamos el valor de FormaPago
+      setProductos(newProductos);  // Actualizamos el estado
+    }
+    const hTelefono = (e, index) => {
+      const newProductos = [...pData];
+      newProductos[index].Telefono = e.target.value;  // Actualizamos el valor de FormaPago
+      setProductos(newProductos);  // Actualizamos el estado
+    }
+    const hCantidadM3 = (e, index) => {
+      const newProductos = [...pData];
+      newProductos[index].CantidadM3 = e.target.value;  // Actualizamos el valor de FormaPago
+      setProductos(newProductos);  // Actualizamos el estado
+    }
+    const hElementoColar = (e, index) => {
+      const newProductos = [...pData];
+      newProductos[index].Elemento = e.target.value;  // Actualizamos el valor de FormaPago
+      setProductos(newProductos);  // Actualizamos el estado
+    }
+    const hTBomba = (e, index) => {
+      const newProductos = [...pData];
+      newProductos[index].CodBomba = e.target.value;  // Actualizamos el valor de FormaPago
+      setProductos(newProductos);  // Actualizamos el estado
+    }
+    const hPrecioConcreto = (e, index) => {
+      const newProductos = [...pData];
+      newProductos[index].PrecioProducto = e.target.value;  // Actualizamos el valor de FormaPago
+      setProductos(newProductos);  // Actualizamos el estado
+    }
+    const hPrecioExtra = (e, index) => {
+      const updatedData = [...pData];
+      updatedData[index].PrecioExtra = e.target.value;  // Actualizamos el valor de FormaPago
+      setProductos(updatedData);  // Actualizamos el estado
+    }
+    const hPrecioBomba = (e, index) => {
+      const updatedData = [...pData];
+      updatedData[index].PrecioBomba = e.target.value;  // Actualizamos el valor de FormaPago
+      setProductos(updatedData);  // Actualizamos el estado
+    }
+    const hSubtotal = (e, index) => {
+      const updatedData = [...pData];
+      updatedData[index].PrecioProducto = e.target.value;  // Actualizamos el valor de FormaPago
+      setProductos(updatedData);  // Actualizamos el estado
+    }
+    const hTotal = (e, index) => {
+      const updatedData = [...pData];
+      updatedData[index].PrecioProducto = e.target.value;  // Actualizamos el valor de FormaPago
+      setProductos(updatedData);  // Actualizamos el estado
+    }
+    const hFcaEntrega = (e, index) => {
+      const fca = e.target.value;
+      const [fecha_, hora_] = fca.split("T");
+      const updatedData = [...pData];
+      updatedData[index].FechaHoraPedido = fca; 
+      setProductos(updatedData);  // Actualizamos el estado
+    }
+    const hHraEntrega = (e, index) => {
+      const fca = e.target.value;
+      const [fecha_, hora_] = fca.split("T");
+      const updatedData = [...pData];
+      updatedData[index].HoraPedido = fcahora_; 
+      setProductos(updatedData);  // Actualizamos el estado
+    }
+    const hMViaje = (e, index) => {
+      const updatedData = [...pData];
+      updatedData[index].M3Viaje = e.target.value; 
+      setProductos(updatedData); 
+    }
+    const hTRecorrido = (e, index) => {
+      const updatedData = [...pData];
+      updatedData[index].TRecorrido = e.target.value; 
+      setProductos(updatedData); 
+    }
+    const hTDescarga = (e, index) => {
+      const updatedData = [...pData];
+      updatedData[index].TDescarga = e.target.value; 
+      setProductos(updatedData); 
+    }
+    const hFEnvio = (e, index) => {
+      const updatedData = [...pData];
+      updatedData[index].Espaciado = e.target.value; 
+      setProductos(updatedData); 
+    }
+    const hObservaciones = (e, index) => {
+      const updatedData = [...pData];
+      updatedData[index].Observaciones = e.target.value; 
+      setProductos(updatedData); 
+    }
+    const hRecibeObra = (e, index) => {
+      const updatedData = [...pData];
+      updatedData[index].Recibe = e.target.value; 
+      setProductos(updatedData); 
+    }
+    const handleClockCh = (value) => {
+      const newProductos = [...pData];
+      newProductos[index].Hora = value;
+      setTime(value);
+      console.log('Hora seleccionada:', value ? value.format('HH:mm') : 'No seleccionada');
+    }
+    const handleChangeMK = (e) => {
+      const value = e.target.value.replace(/[^0-9.,]/g, '');  // Reemplazar cualquier carácter no numérico
+      setMaskedValue(value);
+    };
+    const handleBlurMK = () => {
+      if (inputRef.current) {
+        const masked = IMask(inputRef.current, priceMask);
+        const maskedValue = masked.value;
+        setMaskedValue(maskedValue);
+        // Aquí convertimos el valor a número para que puedas usarlo para guardarlo
+        const numericValue = masked.unmaskedValue;
+        setPrice(numericValue); // Guardamos el valor numérico sin formato
+      }
+    };
+    //****************************************************************************************************************************************************************************** */
+    // Configuración de la máscara
+    const priceMask = {
+      mask: Number,  // Solo números permitidos
+      thousandsSeparator: ',',  // Separador de miles
+      radix: '.',  // Separador decimal
+      scale: 2,  // Para permitir 2 decimales
+      normalizeZeros: true,  // Normaliza los ceros decimales
+      padFractionalZeros: true,  // Agrega ceros después de la coma decimal si es necesario
+      min: 0, // Asegura que el número no sea negativo
+    };
     const CFormInputWithMask = IMaskMixin(({ inputRef, ...props }) => (
       <CFormInput {...props} ref={inputRef} />
     ))
-    useEffect(() => {
-      getElementos_();
-      const updData = pData.map(producto => ({
-        ...producto
-      }));
-      console.log(updData)
-    },[pData]);
-    
+    //*********************************************************************************************************************************************************************************** */
     return(
       <div>
         <CCard>
@@ -242,6 +266,8 @@ const Step3 = ({ previousStep, formData, pData, onSave }) => {
                           <label>Teléfono</label>
                           <CFormInputWithMask 
                             mask="000 000 0000"
+                            value={producto2.Telefono}
+                            onChange={(e) => hTelefono(e, index)}
                           />
                         </CCol>
                         <CCol xs={6} md={4} className='p-4'>

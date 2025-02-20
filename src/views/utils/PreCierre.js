@@ -65,7 +65,7 @@ const PreCierre = () => {
 
     const sendPC = () =>{
         setPreCierre(plantasSel, periodoSel, mesSel)
-    }
+    };
 
     async function setPreCierre(planta, periodo, mes)
     {

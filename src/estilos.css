@@ -100,7 +100,9 @@ h3, label{
 	box-shadow: 0 2px 4px rgba;
 	color:black;
   }	
-
+  .jiMOeR{
+	z-index: 1000 !important;
+  }
   .c-modal .modal-dialog{
 	max-width: 60%;
   }

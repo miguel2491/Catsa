@@ -1,8 +1,7 @@
 import React, {useEffect, useState, useRef} from 'react'
 import Swal from 'sweetalert2';
 import DataTable from 'react-data-table-component';
-import { LoadScript } from '@react-google-maps/api';
-import MyMap from '../../ventas/Cotizador/Mapa'
+import MyMap from './Mapa'
 import { formatCurrency, getClientesCot, getObrasCot, getProspectos_ } from '../../../Utilidades/Funciones';
 import { ReactSearchAutocomplete} from 'react-search-autocomplete';
 import "react-datepicker/dist/react-datepicker.css";
@@ -29,7 +28,7 @@ import { cilCheck, cilX, cilSearch, cilTrash, cilPlus } from '@coreui/icons'
 import { Rol } from '../../../Utilidades/Roles'
 import '../../../estilos.css'
 
-const Step1 = ({ nextStep, fijos, corpo, mop, cdiesel, sucursal, clientes_, obras_, coords, nCot, onUpdateFData }) => {
+const Step1 = ({ nextStep, fijos, corpo, mop, cdiesel, sucursal, clientes_, obras_, coords, nCot, onUpdateFCData, onUpdateFData }) => {
   const [visible, setVisible] = useState(false);// Modal Cargando
   const [isScriptLoaded, setIsScriptLoaded] = useState(false);
   const [mMapa, setMMapa] = useState(false);
@@ -47,15 +46,10 @@ const Step1 = ({ nextStep, fijos, corpo, mop, cdiesel, sucursal, clientes_, obra
   const [aObrasB, setObrasB] = useState([]);
   const [fText, setFText] = useState(''); // Estado para el filtro de búsqueda
   const userIsAsesor = Rol('Vendedor');
+  const [mPos, setMPos] = useState([{latitud:0,longitud:0}]);
+  const [mPosC, setMPosC] = useState([{latitud:0,longitud:0}]);
   //**************************************************************** */
   useEffect(() => {
-    // Si la API de Google Maps ya está cargada, no la cargamos de nuevo
-    if (window.google) {
-      setIsScriptLoaded(true);
-    } else {
-      setIsScriptLoaded(false);
-    }
-    console.log(nCot)
   }, []);
   //**************************************************************** */
   const handleChange = selectedOption => {
@@ -238,12 +232,22 @@ const Step1 = ({ nextStep, fijos, corpo, mop, cdiesel, sucursal, clientes_, obra
   }
   const hOnSelectObras = (item) =>{
     setObraTxt(item.name)
+    onUpdateFData({ obra: item.name});
+    onUpdateFCData({ coord: mPos, coordR:mPosC});
   }
+  const hMakerPosCh = (newPosition) => {
+    setMPos(newPosition)
+  };
+  const hMakerPosCCh = (newPosition) => {
+    setMPosC(newPosition);
+  };
   //-----------------------------------------------------
   async function getObras(cliente, sucursal)
   {
+    console.log(cliente,sucursal)
     try{
       const obras = await getObrasCot(sucursal, cliente);
+      console.log(obras)
       if(obras){
           const obrasTransformados = obras.map((obras, index) => ({
               id: index,            // Asignar un ID único (en este caso, usamos el índice)
@@ -335,14 +339,7 @@ const Step1 = ({ nextStep, fijos, corpo, mop, cdiesel, sucursal, clientes_, obra
         </CRow>
         <CRow className='mt-2 mb-2'>
           <CCol>
-            <MyMap coords={"0,0"} />
-            {/* {isScriptLoaded ? (
-              <MyMap coords={"0,0"} />
-            ):(
-              <LoadScript googleMapsApiKey="AIzaSyCxaRbEHBInFto-cnzDgPzqZuaVmllksOE">
-                <MyMap coords={"0,0"} />
-              </LoadScript>
-            )} */}
+            <MyMap coords={"0,0"} markerPositionO={mPos} markerPositionR={mPosC} onMarkerPositionO={hMakerPosCh} onMarkerPositionR={hMakerPosCCh} />
           </CCol>
         </CRow>
         <CRow className='mt-2 mb-2'>

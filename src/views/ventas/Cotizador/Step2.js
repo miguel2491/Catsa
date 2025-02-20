@@ -46,6 +46,7 @@ const Step2 = ({ nextStep, previousStep, fuente, segmento, canal, productos, fDa
     // FILTROS ARRAY 
     const [filteredProductos, setFilteredProductos] = useState([]);
     const [fProductos, setFProductos] = useState([]);
+    const [sOProductos, setOProductos] = useState([]);
     const { cliente } = fData;
     const btnExtras = (Producto) => {
       setMExtras(true);
@@ -269,8 +270,6 @@ const Step2 = ({ nextStep, previousStep, fuente, segmento, canal, productos, fDa
           console.log(fData.producto)
         },[]);
     //************************************************************************************* */
-    const [sOProductos, setOProductos] = useState([]);
-    
     const sProductos = (selected) =>{
       setOProductos(selected);
       if (Array.isArray(selected)) {
@@ -282,14 +281,12 @@ const Step2 = ({ nextStep, previousStep, fuente, segmento, canal, productos, fDa
         console.log('Valor seleccionado:', selected.value);
       }
     }
-  
     function getFindPro(pro)
     {
       const productoBuscado = productos.filter(producto => producto.Producto === pro);
       setProductos(prevProductos => [...prevProductos, ...productoBuscado]);
       updPData(productoBuscado);
     }
-  
     const oProductos = productos.map(item => ({
       value:item.Producto,
       label:item.Producto

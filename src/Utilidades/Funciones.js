@@ -3,10 +3,55 @@ import {FormatoFca, Fnum} from './Tools'
 import { format } from 'date-fns';
 import Cookies from 'universal-cookie'
 const cookies = new Cookies();
+import Swal from "sweetalert2";
+const baseUrlS="https://apicatsa.catsaconcretos.mx:2544/api/";
 const baseUrl="http://apicatsa.catsaconcretos.mx:2543/api/";
 const baseUrl2="http://localhost:2548/api/";
+const baseUrl2S="https://localhost:5001/api/";
 //****************************************************************************************************************************************************************************** */
 // LOGIN
+// =================================================================
+  //             OBTENER TOKEN GENÉRICO
+  // =================================================================
+  export async function GetToken() {
+    const postData = { UserName: "ProCatsa", Password: "ProCatsa2024$." };
+    const confi_ax = {
+      headers: {
+        "Content-Type": "application/json;charset=UTF-8",
+        "Access-Control-Allow-Origin": "*",
+      },
+    };
+    try {
+      const response = await axios.post(baseUrl2 + "Login/Login", postData, confi_ax);
+      cookies.set("token", response.data, { path: "/" });
+    } catch (error) {
+      console.error("Error obteniendo token", error);
+    }
+  }
+  // =================================================================
+  //                      INICIAR SESIÓN
+  // =================================================================
+  export async function Sesion(username, password) {
+    
+    try {
+      const postData = { usuario: username, pass: password };
+      const confi_ax = {
+        headers: {
+          "Cache-Control": "no-cache",
+          "Content-Type": "application/json",
+          Authorization: "Bearer " + cookies.get("token"),
+        },
+      };
+      const response = await axios.post(baseUrl2 + "Login/GetUsuario", postData, confi_ax);
+      const userInfo = response.data;
+      return userInfo;
+    } catch (error) {
+      console.error(error);
+      Swal.close();
+      Swal.fire("Error", "Usuario/Contraseña incorrecta, vuelve a intentar", "error");
+      return false;
+    }
+  }
 export async function getRol()
     {
       try{
@@ -1401,6 +1446,31 @@ export  async function getVisitas(idC, motivo)
     }    
 }
 //--
+export async function getClientesCartera(planta) {
+    try
+    {
+        let confi_ax = {
+            headers:
+            {
+                'Cache-Control': 'no-cache',
+                'Content-Type': 'application/json',
+                "Authorization": "Bearer "+cookies.get('token'),
+            },
+        };
+        //------------------------------------------------------------------------------------------------------------------------------------------------------
+        const response = await axios.get(baseUrl2+'Catalogo/GetClienteCartera/'+planta, confi_ax);
+        if (response.data && response.data.length > 0) {
+            return response.data;
+        }else{
+            return false
+        }
+    } 
+    catch(error)
+    {
+        console.log(error);
+        return false
+    }
+}
 export async function getClientesCot(planta) {
     try
     {
@@ -1438,7 +1508,7 @@ export async function getObrasCot(planta, nocliente) {
             },
         };
         //------------------------------------------------------------------------------------------------------------------------------------------------------
-        const response = await axios.get(baseUrl+'Comercial/GetObraCot/'+planta+','+nocliente, confi_ax);
+        const response = await axios.get(baseUrl2+'Catalogo/GetObraCartera/'+nocliente+','+planta, confi_ax);
         if (response.data && response.data.length > 0) {
                 return response.data;
         }else{

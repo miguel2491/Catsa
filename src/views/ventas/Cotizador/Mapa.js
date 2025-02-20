@@ -1,125 +1,104 @@
 import React, {useEffect, useState} from 'react'
-import { GoogleMap, Marker, LoadScript } from '@react-google-maps/api';
-import "react-datepicker/dist/react-datepicker.css";
-import 'rc-time-picker/assets/index.css';
+import { MapContainer, TileLayer, Marker, Popup, Circle } from 'react-leaflet'
+import L from 'leaflet'
+import 'leaflet/dist/leaflet.css'
+import 'leaflet-routing-machine';
 import {
   CRow,
 } from '@coreui/react'
 import '../../../estilos.css'
 
-const Mapa = ({coords}) => {
-    const [location, setLocation] = useState({
-      latitude: null,
-      longitude: null,
-      error: null
-    });
-    const [markerPosition, setMarkerPosition] = useState({
-      lat: null,
-      lng: null,
-    });
-    const [aDatos, setSave] = useState({
-      cliente:null,
-      obra:null,
-      coords:null
-    });
-    const [isScriptLoaded, setIsScriptLoaded] = useState(false)
-    useEffect(() => {
-      if ("geolocation" in navigator) {
-        navigator.geolocation.getCurrentPosition(
-          (position) => {
-            const lat = position.coords.latitude;
-            const lon = position.coords.longitude;
-            setLocation({
-                latitude: parseFloat(lat),//lat,
-                longitude: parseFloat(lon),//lon
-                error: null
-              });
-            },
-            (error) => {
-              setLocation({
-                latitude: null,
-                longitude: null,
-                error: error.message
-              });
-            }
-          );
-        } else {
-          setLocation({
-            latitude: null,
-            longitude: null,
-            error: "Geolocation is not supported by this browser."
-          });
+const Mapa = ({coords, markerPositionO, markerPositionR, onMarkerPositionO, onMarkerPositionR}) => {
+    const [markerPosition, setPosition] = useState([{latitud:0,longitud:0}]);
+    const [markerCotizacion, setCotizacion] = useState([{latitud:0,longitud:0}]);
+    const [markerPC, setMarkerP] = useState([{latitud:0,longitud:0}]);
+    const [mapCenter, setMapCenter] = useState([19.023968543290614,-98.2954168461941])
+    const [zoom, setZoom] = useState(14);
+    const [locMarkerPosition, setLocMarkPos] = useState(markerPositionO)
+    const [locMarkerCotizacion, setLocMarkCot] = useState(markerPositionR)
+    
+      useEffect(() => {
+        if (!navigator.geolocation) {
+            Swal.fire("Error", "Tu navegador no soporta Geolocalización", "error")
+            return
         }
+        // Obtenemos la posición actual
+        navigator.geolocation.getCurrentPosition(
+        (position) => {
+            const latitud = position.coords.latitude;
+            const longitud = position.coords.longitude;
+            setMapCenter([latitud, longitud])
+            // setPosition(prevState =>[
+            //     ...prevState,
+            //     {latitud, longitud}
+            // ])
+            // setCotizacion(prevState=>[
+            //     ...prevState,
+            //     {latitud, longitud}
+            // ])
+            // setMarkerP(prevState=>[
+            //     ...prevState,
+            //     {latitud, longitud}
+            // ])
+            setCotizacion([{latitud, longitud}])
+            setPosition([{latitud, longitud}])
+            setMarkerP([{latitud, longitud}])
+            setLocMarkPos([{latitud, longitud}])
+            setLocMarkCot([{latitud, longitud}])
+            onMarkerPositionO([{latitud, longitud}])
+            onMarkerPositionR([{latitud, longitud}])
+            console.log("COORDS 1",latitud, longitud)
+        },
+        (error) => {
+            Swal.fire("Error al obtener ubicación", error.message, "error")
+        }
+        )
     }, []);
-    
-    useEffect(() => {
-      if (coords && coords.length > 5) {
-        const [lat, lon] = coords.split(',');
-        setLocation({
-          latitude: parseFloat(lat),
-          longitude: parseFloat(lon),
-          error: null,
-        });
-      }
-    },[coords]);
-
-    useEffect(() =>{
-      if (window.google && window.google.maps) {
-        setIsScriptLoaded(true);  // La API ya está cargada
-      }else{
-        const script = document.createElement("script");
-      script.src = `https://maps.googleapis.com/maps/api/js?key=AIzaSyCxaRbEHBInFto-cnzDgPzqZuaVmllksOE&libraries=places`;
-      script.async = true;
-      script.onload = () => setIsScriptLoaded(true);
-      document.body.appendChild(script);
-      }
-    }, [])
-
-    const onMarkerDragEnd = (e) => {
-      const lat = e.latLng.lat();
-      const lng = e.latLng.lng();
-      //setMarkerPosition({ lat, lng });
-      setLocation({
-        latitude: lat,
-        longitude: lng,
-        error: null
-      });
-      console.log("Nuevo marcador en:", lat, lng);
-      //console.log(locationO);
-    };
-    
-    if (location.error) {
-      return <p>Error: {location.error}</p>;
+    //==============================================================
+    //--   AGREGAR MARCADOR CON LA LOCALIZACION               ------
+    //==============================================================
+    const handleDragEnd = (e) =>{
+        const { lat, lng } = e.target.getLatLng();  // Obtener la nueva latitud y longitud
+        setCotizacion([{latitud:lat, longitud:lng}]);  // Actualizar el estado de cotización 
+        console.log(markerPosition, markerCotizacion)
+        setLocMarkCot([{latitud:lat, longitud:lng}]);
+        onMarkerPositionR([{latitud:lat, longitud:lng}])
     }
-    //AIzaSyCmR8S151uu3BTA7Mgtpl6-TBA3_U8HjGQ
-    if(!location.latitude || !location.longitude){
-      return <p>cargando...</p>;
-    }
-
-    return isScriptLoaded ? (
-          <GoogleMap
-            mapContainerStyle={{ width: '100%', height: '400px' }}
-            center={{ lat: location.latitude, lng: location.longitude }}
-            zoom={14}
-          >
-            <Marker 
-              position={{ lat: location.latitude, lng: location.longitude }} 
-              draggable={true}  // Hacer que el marcador sea arrastrable
-              onDragEnd={onMarkerDragEnd} />
-          </GoogleMap>
-        ):(
-          <LoadScript googleMapsApiKey="AIzaSyCxaRbEHBInFto-cnzDgPzqZuaVmllksOE" onLoad={() => setIsScriptLoaded(true)}>
-          <GoogleMap
-            mapContainerStyle={{ width: '100%', height: '400px' }}
-            center={{ lat: location.latitude, lng: location.longitude }}
-            zoom={14}
-          >
-            <Marker 
-              position={{ lat: location.latitude, lng: location.longitude }} 
-              draggable={true}  // Hacer que el marcador sea arrastrable
-              onDragEnd={onMarkerDragEnd} />
-          </GoogleMap>
-          </LoadScript>
-      );
+    //==============================================================
+    return (
+        <MapContainer
+            center={mapCenter} // Centro de México como ejemplo
+            zoom={zoom}
+            style={{ height: '400px', width: '100%' }}
+            id="map"
+            whenCreated={(map) =>{
+                map.on('moveend', () =>{
+                setMapCenter(map.getCenter());
+                });
+            }}
+            >
+            <TileLayer
+                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">
+                OpenStreetMap</a> contributors'
+                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+            />
+            <Circle
+                center={mapCenter} // Usamos el centro actualizado
+                radius={30000} // Radio de 1000 metros (ajustar según lo necesites)
+                color="blue"   // Color del borde
+                fillColor="blue" // Color de relleno
+                fillOpacity={0.1} // Opacidad del relleno
+            />
+            {markerCotizacion.map((point, index) => (
+                <Marker key={index} position={[point.latitud, point.longitud]} draggable={true} eventHandlers={{dragend:handleDragEnd,}}>
+                    <Popup>
+                        <b>Visita {index + 1}</b><br />
+                        Latitud: {point.latitud}<br />
+                        Longitud: {point.longitud}
+                    </Popup>
+                </Marker>
+            ))}
+        </MapContainer>        
+    )
   };
   export default Mapa;
