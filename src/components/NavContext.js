@@ -188,81 +188,92 @@ const NavProvider = ({ children }) => {
               component: CNavTitle,
               name: 'Operaciones',
             },
-
-            {
-              component: CNavGroup,
-              name: 'Inventarios',
-              to: '/Inventario',
-              icon: <CIcon icon={cilUser} customClassName="nav-icon" />,
-              items: [
+            ...(userIsAdmin || userIsOperacion || userIsGerenteP || userIsJP || userIsAdminTI || userIsAuxGer
+              ? [
                 {
-                  component: CNavItem,
-                  name: 'CICAT Resumen',
-                  to: '/Cicat/Resumen',
+                  component: CNavGroup,
+                  name: 'Inventarios',
+                  to: '/Inventario',
+                  icon: <CIcon icon={cilUser} customClassName="nav-icon" />,
+                  items: [
+                    {
+                      component: CNavItem,
+                      name: 'CICAT Resumen',
+                      to: '/Cicat/Resumen',
+                    },
+                    ...(userIsOperacion || userIsAdmin || userIsGerenteP
+                      ? [
+                        {
+                          component: CNavItem,
+                          name: 'Remisión Faltante',
+                          to: '/Cicat/Remisiones',
+                          icon: <CIcon icon={cilBusAlt} customClassName="nav-icon" />
+                        },
+                      ]:[]),
+                    ...(userIsAdminTI  
+                    ?[
+                      {
+                        component: CNavItem,
+                        name: 'Simulador',
+                        to: '/Operaciones/Simulador',
+                        icon: <CIcon icon={cilGraph} customClassName="nav-icon" />
+                      },
+                    ]:[])
+                  ],
                 },
-                ...(userIsOperacion || userIsAdmin || userIsGerenteP
-                  ? [
-                    {
-                      component: CNavItem,
-                      name: 'Remisión Faltante',
-                      to: '/Cicat/Remisiones',
-                      icon: <CIcon icon={cilBusAlt} customClassName="nav-icon" />
-                    },
-                  ]:[]),
-                ...(userIsAdminTI  
-                ?[
-                  {
-                    component: CNavItem,
-                    name: 'Simulador',
-                    to: '/Operaciones/Simulador',
-                    icon: <CIcon icon={cilGraph} customClassName="nav-icon" />
-                  },
-                ]:[])
-              ],
-            },
-            {
-              component: CNavGroup,
-              name: 'Mantenimiento',
-              to: '/Mantenimiento',
-              icon: <CIcon icon={cilCog} customClassName="nav-icon" />,
-              items: [
-                ...(userIsOperacion || userIsAdmin || userIsGerenteP || userIsJP
-                  ? [
-                    {
-                      component: CNavItem,
-                      name: 'Orden Compra',
-                      to: '/Operaciones/Mantenimiento/OrdenCompra',
-                      icon: <CIcon icon={cilGarage} customClassName="nav-icon" />,
-                    },
-                  ]:[]),
-                ...(userIsOperacion || userIsAdmin || userIsGerenteP
-                ? [
-                  {
-                    component: CNavItem,
-                    name: 'Reporte Orden Compra',
-                    to: '/Operaciones/Mantenimiento/ReporteOC',
-                    icon: <CIcon icon={cilBarChart} customClassName="nav-icon" />,
-                  },
-                ]:[]),
-              ],
-            },
-            {
-              component: CNavGroup,
-              name: 'Pedidos',
-              to: '/Pedidos',
-              icon: <CIcon icon={cilUser} customClassName="nav-icon" />,
-              items: [
-                ...(userIsOperacion || userIsAdmin || userIsGerenteP || userIsJP
-                  ? [
-                    {
-                      component: CNavItem,
-                      name: 'Pedidos Cancelados',
-                      to: '/Operaciones/Pedidos/Cancelados',
-                      icon: <CIcon icon={cilBan} customClassName="nav-icon" />
-                    },
-                  ]:[]),
-              ],
-            },
+              ]
+            :[]),
+            ...(userIsOperacion || userIsAdmin || userIsGerenteP || userIsJP || userIsAdminTI
+              ? [
+                {
+                  component: CNavGroup,
+                  name: 'Mantenimiento',
+                  to: '/Mantenimiento',
+                  icon: <CIcon icon={cilCog} customClassName="nav-icon" />,
+                  items: [
+                    ...(userIsOperacion || userIsAdmin || userIsGerenteP || userIsJP
+                      ? [
+                        {
+                          component: CNavItem,
+                          name: 'Orden Compra',
+                          to: '/Operaciones/Mantenimiento/OrdenCompra',
+                          icon: <CIcon icon={cilGarage} customClassName="nav-icon" />,
+                        },
+                      ]:[]),
+                    ...(userIsOperacion || userIsAdmin || userIsGerenteP
+                    ? [
+                      {
+                        component: CNavItem,
+                        name: 'Reporte Orden Compra',
+                        to: '/Operaciones/Mantenimiento/ReporteOC',
+                        icon: <CIcon icon={cilBarChart} customClassName="nav-icon" />,
+                      },
+                    ]:[]),
+                  ],
+                },
+              ]
+            :[]),
+            ...(userIsOperacion || userIsAdmin || userIsAdminTI || userIsAuxGer
+              ? [
+                {
+                  component: CNavGroup,
+                  name: 'Pedidos',
+                  to: '/Pedidos',
+                  icon: <CIcon icon={cilUser} customClassName="nav-icon" />,
+                  items: [
+                    ...(userIsOperacion || userIsAdmin || userIsGerenteP || userIsJP || userIsAuxGer
+                      ? [
+                        {
+                          component: CNavItem,
+                          name: 'Pedidos Cancelados',
+                          to: '/Operaciones/Pedidos/Cancelados',
+                          icon: <CIcon icon={cilBan} customClassName="nav-icon" />
+                        },
+                      ]:[]),
+                  ],
+                },
+              ]
+              :[]),
           ]
         : []),
         ...(userIsAdminTI

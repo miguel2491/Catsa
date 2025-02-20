@@ -1398,7 +1398,7 @@ export  async function setVisitas(idCot, motivo, lat, lon)
         };
         const data = 
         {
-            "id": 0,
+            "idReg": 0,
             "motivo": motivo,
             "usuario":usuario,
             "fecha_visita":fechaHra.toString(),
