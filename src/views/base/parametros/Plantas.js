@@ -96,7 +96,7 @@ const Plantas = ({plantasSel, mCambio}) => {
     return (
       <div>
         <label>Seleccione Planta</label>
-        <div>
+        <div className='mt-2'>
           <CFormSelect aria-label="Selecciona" id="cmbPlanta" value={plantasSel} onChange={mCambio}>
             <option value="" >Selecciona...</option>
             {plantas_.map((planta, index) =>(

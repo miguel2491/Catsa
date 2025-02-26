@@ -1,11 +1,10 @@
 import React, {useEffect, useState, useRef} from 'react'
 import Swal from "sweetalert2";
 import { CChart, CChartPolarArea, CChartRadar } from '@coreui/react-chartjs'
-import FechaI from '../../../base/parametros/FechaInicio';
-import FechaF from '../../../base/parametros/FechaFinal';
-import Plantas from '../../../base/parametros/Plantas';
-import '../../../../estilos.css';
-import { getOC, getPlantasList } from '../../../../Utilidades/Funciones';
+import FechaI from '../base/parametros/FechaInicio';
+import FechaF from '../base/parametros/FechaFinal';
+import '../../estilos.css';
+import { getOC, getPlantasList } from '../../Utilidades/Funciones';
 import {
     CContainer,
     CButton,
@@ -19,13 +18,14 @@ import {
 import {CIcon} from '@coreui/icons-react'
 import { cilCheck } from '@coreui/icons'
 import { format } from 'date-fns';
-import { Rol } from '../../../../Utilidades/Roles'
+import { Rol } from '../../Utilidades/Roles'
 import DatePicker,{registerLocale, setDefaultLocale} from 'react-datepicker';
 import {es} from 'date-fns/locale/es';
 registerLocale('es', es)
 import "react-datepicker/dist/react-datepicker.css"
 const currentDate = new Date();
-const ReporteOC = () => {
+
+const RProductosV = () => {    
     //************************************************************************************************************************************************************************** */
     const [plantasSelF , setPlantasF] = useState('');
     const [vFechaI, setFechaIni] = useState(new Date());
@@ -278,10 +278,10 @@ const ReporteOC = () => {
         });
     };
     //************************************************************************************************************************************************************************************* */
-    return (
+  return (
     <>
-        <CContainer fluid>
-            <h3>Orden Compra </h3>
+    <CContainer fluid>
+            <h3>Productos Venta </h3>
             <CRow className='mt-2 mb-2'>
                 <CCol xs={6} md={2} lg={2}>
                     <FechaI 
@@ -301,37 +301,9 @@ const ReporteOC = () => {
                     <label>Planta</label>
                     <CFormSelect aria-label="Selecciona" value={plantasSelF} onChange={mCambio}>
                         <option value="" >Selecciona...</option>
-                        <option value="CORP" >COORPORATIVO</option>
                         {dtPlantas.map((planta, index) =>(
                             <option value={planta.IdPlanta} key={index}>{planta.Planta}</option>
                         ))}
-                    </CFormSelect>
-                </CCol>
-                <CCol xs={6} md={3} lg={3}>
-                    <label>Tipo de mantenimiento</label>
-                    <CFormSelect size="lg" aria-label="Interfaz"
-                        value={tipoMantenimiento}
-                        onChange={handleTipoMantenimientoChange}
-                    >
-                        <option value="-">-</option>
-                        <option value="PLANTAS">PLANTAS</option>
-                        <option value="TR">TR</option>
-                        <option value="TB">TB</option>
-                        <option value="TX">TX</option>
-                        <option value="GN">GN</option>
-                        <option value="AU">AU</option>
-                        <option value="PC">PC</option>
-                        <option value="REHABILITACIÓN">REHABILITACIÓN</option>
-                    </CFormSelect>
-                </CCol>
-                <CCol xs={6} md={2} lg={2}>
-                    <label>Estatus</label>
-                    <CFormSelect size="lg" className="mb-3" aria-label="Estatus" value={tEstatus} onChange={hEstatusCh}>
-                        <option value="-">-</option>
-                        <option value="0">Eliminadas</option>
-                        <option value="1">En Proceso</option>
-                        <option value="2">Aprobadas</option>
-                        <option value="3">Finalizadas</option>
                     </CFormSelect>
                 </CCol>
             </CRow>
@@ -352,6 +324,7 @@ const ReporteOC = () => {
             <br />
         </CContainer>
     </>
-    )
+  )
 }
-export default ReporteOC
+
+export default RProductosV

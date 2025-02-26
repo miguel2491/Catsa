@@ -188,12 +188,10 @@ const Cotizador = () => {
           });
       }
     },[]);
-
     const getCotizacion = async(id) =>{
       try{
         const ocList = await getCotizacionId(id);
         if(ocList){
-          console.log(ocList)
           setPlantas(ocList[0].Planta);
           getCostoPlanta(ocList[0].Planta);
           const fecha = ocList[0].FechaCreacion;
@@ -227,8 +225,7 @@ const Cotizador = () => {
             fpago:null,
             nombre_sol:null,
             telefono:null,
-          }));          
-          console.log(ocList)
+          }));
           getPedidosCot(id)
         }
       }catch(error){
@@ -236,14 +233,12 @@ const Cotizador = () => {
           Swal.fire("Error", "No se pudo obtener la información", "error");
       }
     }
-
     const getPedidosCot = async(id) => {
       try{
         Swal.close();
         const ocList = await getCotizacionPedido(id);
         if(ocList){
           setShSteps(true)
-          console.log(ocList)
           setFData(prevState => ({
             ...prevState,
             producto:ocList
@@ -253,9 +248,7 @@ const Cotizador = () => {
         Swal.fire("Error", "No se pudo obtener la información", "error");
       }
     }
-
   //******************************************************************** */
-  
   const [fProductos, setfProductos] = useState({
     producto:null,
     m3:0,
@@ -317,7 +310,6 @@ const Cotizador = () => {
     } catch (error) {
       Swal.close();
       console.log(error);
-      //Swal.fire("Error", "No se pudo obtener la información", "error");
     }
   };  
   async function getClientes(planta)
@@ -325,7 +317,6 @@ const Cotizador = () => {
     try{
       const clientes = await getClientesCartera(planta);
       if(clientes){
-        console.log(clientes)
           const clientesTransformados = clientes.map((clientes, index) => ({
               id: index,            // Asignar un ID único (en este caso, usamos el índice)
               name: clientes.Nombre+"("+clientes.RFC+")", // Usamos la propiedad 'Producto' como 'name'
@@ -364,12 +355,14 @@ const Cotizador = () => {
         </CCol>
         <CCol xs={12} md={2} lg={2}>
           <label>No. Cotización</label>
-          <CInputGroup className="mb-3">
-          <CFormInput placeholder="" value={noCotizacion} onChange={onFindCotizacion} aria-label="Example text with two button addons"/>
-            <CButton type="button" color="success" className='btn-primary' onClick={fCotizacion} style={{'color':'white'}} variant="outline">
-              <CIcon icon={cilSearch} className="me-2" />
-            </CButton>
-          </CInputGroup>
+          <div className='mt-2'>
+            <CInputGroup className="mb-3">
+            <CFormInput placeholder="" value={noCotizacion} onChange={onFindCotizacion} aria-label="Example text with two button addons"/>
+              <CButton type="button" color="success" className='btn-primary' onClick={fCotizacion} style={{'color':'white'}} variant="outline">
+                <CIcon icon={cilSearch} className="me-2" />
+              </CButton>
+            </CInputGroup>
+          </div>
         </CCol>
         <CCol xs={4} md={1} lg={1} className='mt-4'>
           <CButton color="success" className='txtTitleBtn'>Limpiar</CButton>
@@ -383,9 +376,9 @@ const Cotizador = () => {
       </CRow>
       {shSteps && (
       <StepWizard>
-        <Step1 sucursal={plantasSel} clientes_={aClientes} obras_={aObras} coords={coordsO} nCot={noCotizacion} onUpdateFCData={updFCData} onUpdateFData={updFData} />
-        <Step2 fuente={aFuente} segmento={aSegmento} canal={aTC} productos={aProducto} fData={fData} updPData={updPData} />
-        <Step3 fData={pDataC} pData={pData} />
+        <Step1 idC={id} fijos={dFijos} corpo={dCorpo} mop={dMop} cdiesel={dDiesel} sucursal={plantasSel} clientes_={aClientes} obras_={aObras} coords={coordsO} nCot={noCotizacion} onUpdateFCData={updFCData} onUpdateFData={updFData} />
+        <Step2 fuente={aFuente} segmento={aSegmento} canal={aTC} productos={aProducto} fData={fData} updPData={updPData} onUpdateFCData={updFCData} />
+        <Step3 fData={pDataC} pData={pData} sucursal={plantasSel} />
       </StepWizard>
       )}
       <CModal

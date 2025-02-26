@@ -11,7 +11,7 @@ const FechaFinal = ({vFcaF, mFcaF}) => {
     return (
       <div>
         <label>Fecha Final</label>
-        <div>
+        <div className='mt-2'>
             <DatePicker 
               id='fcaF'
               selected={vFcaF} 

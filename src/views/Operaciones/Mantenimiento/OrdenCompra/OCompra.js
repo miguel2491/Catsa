@@ -7,7 +7,7 @@ import FechaF from '../../../base/parametros/FechaFinal';
 import Plantas from '../../../base/parametros/Plantas';
 import '../../../../estilos.css';
 import BuscadorDT from '../../../base/parametros/BuscadorDT'
-import { convertArrayOfObjectsToCSV, getOCompras, setOCompra, delOCompra, getOComprasInd, setStatusOC, getVehiculos, addNFac } from '../../../../Utilidades/Funciones';
+import { convertArrayOfObjectsToCSV, getOCompras, setOCompra, delOCompra, getOComprasInd, setStatusOC, getVehiculos, addNFac, getPlantasList } from '../../../../Utilidades/Funciones';
 import {
     CContainer,
     CFormInput,
@@ -48,6 +48,7 @@ const OCompra = () => {
     // ROLES
     const userIsOperacion = Rol('Operaciones');
     const userIsJP = Rol('JefePlanta');
+    const userIsMantenimiento = Rol('Mantenimiento');
     //Buscador
     const [fText, setFText] = useState(''); // Estado para el filtro de búsqueda
     const [vBPlanta, setBPlanta] = useState('');
@@ -55,6 +56,7 @@ const OCompra = () => {
     const [dtOrdenes, setDTOrdenes] = useState([]);
     const [cmbVehiculo, setVehiculo] = useState([]);
     const [exOC, setExOc] = useState([]);
+    const [dtPlantas, setDTPlantas] = useState([]);
     // FROMS
     const [nOrden, setNorden] = useState("");
     const [fechaOC, setFechaOC] = useState(new Date());
@@ -249,7 +251,7 @@ const OCompra = () => {
     const gOC = async () => {
         var planta = plantasSel;
         if(plantasSel == undefined || plantasSel.length == 0 || plantasSel === ""){
-            if(userIsJP && !userIsOperacion)
+            if(userIsJP && !userIsOperacion && !userIsMantenimiento)
             {
                 Swal.close();
                 Swal.fire("Error", "Debes seleccionar alguna planta", "error");
@@ -544,7 +546,7 @@ const OCompra = () => {
             cell: (row) => (
                 <div>
                     <CRow>
-                    {(userIsOperacion || userIsJP) && row.estatus === '1' && (
+                    {(userIsOperacion || userIsJP || userIsMantenimiento) && row.estatus === '1' && (
                         <CCol xs={6} md={2} lg={2}>
                         <CButton
                             color="primary"
@@ -557,7 +559,7 @@ const OCompra = () => {
                         </CButton>
                         </CCol>
                     )}
-                    {(userIsOperacion || userIsJP) && (row.estatus === '2' || row.estatus === '3') && (
+                    {(userIsOperacion || userIsJP || userIsMantenimiento) && (row.estatus === '2' || row.estatus === '3') && (
                         <CCol xs={6} md={2} lg={2}>
                         <CButton
                             color="info"
@@ -570,7 +572,7 @@ const OCompra = () => {
                         </CButton>
                         </CCol>
                     )}
-                    {userIsOperacion && row.estatus === '2' && (
+                    {userIsOperacion || userIsMantenimiento && row.estatus === '2' && (
                         <CCol xs={6} md={2}>
                         <CButton
                             color="dark"
@@ -583,7 +585,7 @@ const OCompra = () => {
                         </CButton>
                         </CCol>
                     )}
-                    {userIsOperacion && row.estatus === '1' &&( 
+                    {userIsOperacion || userIsMantenimiento && row.estatus === '1' &&( 
                         <CCol xs={6} md={2}>
                         <CButton
                             color="warning"
@@ -597,7 +599,7 @@ const OCompra = () => {
                         </CButton>
                         </CCol>
                     )}
-                    {...((userIsOperacion || !userIsJP) && row.estatus !== '3'
+                    {...((userIsOperacion || userIsMantenimiento || !userIsJP) && row.estatus !== '3'
                         ? [
                         <CCol xs={6} md={2}>
                             <CButton
@@ -760,6 +762,7 @@ const OCompra = () => {
     //------------
     useEffect(() => {
         //getProductosInt_(null);
+        getPlantas();
     }, []);
     const downloadCSV = (e) => {
         const auxFcaI = format(vFechaI, 'yyyy/MM/dd');
@@ -778,6 +781,17 @@ const OCompra = () => {
         link.setAttribute('download', filename);
         link.click();
     };
+    const getPlantas = async()=>{
+        try{
+            const ocList = await getPlantasList();
+            if(ocList)
+            {
+                setDTPlantas(ocList)
+            }
+        }catch(error){
+            console.log("Ocurrio un problema cargando Plantas....")
+        }
+    }
     //************************************************************************************************************************************************************************** */
     // Función de búsqueda
     const onFindBusqueda = (e) => {
@@ -921,10 +935,16 @@ const OCompra = () => {
                     />
                 </CCol>
                 <CCol xs={6} md={2}>
-                    <Plantas  
-                        mCambio={mCambio}
-                        plantasSel={plantasSel}
-                    />
+                    <label>Planta</label>
+                    <CFormSelect aria-label="Selecciona" value={plantasSel} onChange={mCambio} className='mt-2'>
+                        <option value="" >Selecciona...</option>
+                        {userIsMantenimiento && (
+                            <option value="CORP" >COORPORATIVO</option>
+                        )}
+                        {dtPlantas.map((planta, index) =>(
+                            <option value={planta.IdPlanta} key={index}>{planta.Planta}</option>
+                        ))}
+                    </CFormSelect>
                 </CCol>
                 <CCol xs={6} md={2} lg={2} className='mt-3'>
                     <CButton color='primary' onClick={getOComprasBtn}> 
@@ -973,7 +993,7 @@ const OCompra = () => {
                 </CModalHeader>
                 <CModalBody>
                     <CRow className='mt-2 mb-2'>
-                        <CCol xs={6} md={2}>
+                        <CCol xs={6} md={3}>
                             <CFormInput
                                 type="text"
                                 label="Número de Orden"
@@ -983,11 +1003,17 @@ const OCompra = () => {
                                 disabled
                             />
                         </CCol>
-                        <CCol xs={6} md={2}>
-                            <Plantas  
-                                mCambio={mCambioF}
-                                plantasSel={plantasSelF}
-                            />
+                        <CCol xs={6} md={3}>
+                            <label>Planta</label>
+                            <CFormSelect aria-label="Selecciona" value={plantasSelF} onChange={mCambioF} className='mt-2'>
+                                <option value="" >Selecciona...</option>
+                                {userIsMantenimiento && (
+                                    <option value="CORP" >COORPORATIVO</option>
+                                )}
+                                {dtPlantas.map((planta, index) =>(
+                                    <option value={planta.IdPlanta} key={index}>{planta.Planta}</option>
+                                ))}
+                            </CFormSelect>
                         </CCol>
                         <CCol xs={6} md={2}>
                             <label>Fecha</label>
@@ -997,10 +1023,11 @@ const OCompra = () => {
                                     selected={fechaOC} 
                                     onChange={ocFca} 
                                     placeholderText='Selecciona Fecha' 
-                                    dateFormat="yyyy/MM/dd" />
+                                    dateFormat="yyyy/MM/dd"
+                                    className='form-control' />
                             </div>
                         </CCol>
-                        <CCol xs={6} md={2}>
+                        <CCol xs={6} md={3}>
                             <CFormInput
                                 type="text"
                                 label="Número Factura"
@@ -1011,10 +1038,10 @@ const OCompra = () => {
                             />
                         </CCol>
                     </CRow>
-                    <CRow className='mt-2 mb-2'>
+                    <CRow className='mt-4 mb-4'>
                         <CCol xs={12} md={3}>
                             <label>Tipo de mantenimiento</label>
-                            <CFormSelect size="lg" className="mb-3" aria-label="Interfaz"
+                            <CFormSelect size="lg" className="mb-3 mt-2" aria-label="Interfaz"
                                 value={tipoMantenimiento}
                                 onChange={handleTipoMantenimientoChange}
                             >
@@ -1031,7 +1058,7 @@ const OCompra = () => {
                         </CCol>
                         <CCol xs={12} md={4}>
                             <label>Vehículo</label>
-                            <CFormSelect size="lg" className="mb-3" aria-label="Descripción" value={vehiculo} onChange={hVehiculo}>
+                            <CFormSelect size="lg" className="mb-3 mt-2" aria-label="Descripción" value={vehiculo} onChange={hVehiculo}>
                             <option value='-'>-</option>
                             {cmbVehiculo.map((item, index) => (
                                 <option key={index} value={item.IdRegistro}>({item.NoEconomico}) {item.Modelo} ({item.Placas})</option>
@@ -1040,7 +1067,7 @@ const OCompra = () => {
                         </CCol>
                         <CCol xs={12} md={5}>
                             <label>Descripción</label>
-                            <CFormSelect size="lg" className="mb-3" aria-label="Descripción" value={descMan} onChange={handleDescMant}>
+                            <CFormSelect size="lg" className="mb-3 mt-2" aria-label="Descripción" value={descMan} onChange={handleDescMant}>
                             <option value='-'>-</option>
                             {categoriasFiltradas.map((item, index) => (
                                 <option key={index} value={item.descripcion}>{item.descripcion}</option>
@@ -1048,7 +1075,7 @@ const OCompra = () => {
                             </CFormSelect>
                         </CCol>
                     </CRow>
-                    <CRow className='mt-2 mb-2'>
+                    <CRow className='mt-2 mb-4'>
                         <CCol xs={12} md={12}>
                             <CFormTextarea
                                 className="mb-3"

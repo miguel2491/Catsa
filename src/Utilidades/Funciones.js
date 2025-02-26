@@ -22,7 +22,7 @@ const baseUrl2S="https://localhost:5001/api/";
       },
     };
     try {
-      const response = await axios.post(baseUrl2 + "Login/Login", postData, confi_ax);
+      const response = await axios.post(baseUrl + "Login/Login", postData, confi_ax);
       cookies.set("token", response.data, { path: "/" });
     } catch (error) {
       console.error("Error obteniendo token", error);
@@ -42,7 +42,7 @@ const baseUrl2S="https://localhost:5001/api/";
           Authorization: "Bearer " + cookies.get("token"),
         },
       };
-      const response = await axios.post(baseUrl2 + "Login/GetUsuario", postData, confi_ax);
+      const response = await axios.post(baseUrl + "Login/GetUsuario", postData, confi_ax);
       const userInfo = response.data;
       return userInfo;
     } catch (error) {
@@ -107,6 +107,33 @@ export function findLogin()
       }
       // Si está logueado, renderiza el componente
       return true;
+}
+export async function getIdVendedor()
+{
+    try
+    {
+        let confi_ax = {
+            headers:
+            {
+                'Cache-Control': 'no-cache',
+                'Content-Type': 'application/json',
+                "Authorization": "Bearer "+cookies.get('token'),
+            },
+        };
+        //------------------------------------------------------------------------------------------------------------------------------------------------------
+        const response = await axios.get(baseUrl+'Comercial/FindVendedor/'+cookies.get('idUsuario'), confi_ax);
+        if (response.data && response.data.length > 0) {
+            const obj = response.data;
+            if(obj.length > 0)
+            {
+                return obj;
+            }else{return false}
+        }else{return false}
+    } 
+    catch(error)
+    {
+        return false
+    }
 }
 export async function getNotificaciones()
 {
@@ -812,6 +839,7 @@ export async function getVehiculos(planta, grupo) {
         };
         //------------------------------------------------------------------------------------------------------------------------------------------------------
         const response = await axios.get(baseUrl+'Operaciones/GetVehiculo/'+planta+','+grupo+',0', confi_ax);
+        console.log(response)
         if (response.data && response.data.length > 0) {
             const obj = response.data;
             if(obj.length > 0)
@@ -1458,7 +1486,7 @@ export async function getClientesCartera(planta) {
             },
         };
         //------------------------------------------------------------------------------------------------------------------------------------------------------
-        const response = await axios.get(baseUrl2+'Catalogo/GetClienteCartera/'+planta, confi_ax);
+        const response = await axios.get(baseUrl+'Catalogo/GetClienteCartera/'+planta, confi_ax);
         if (response.data && response.data.length > 0) {
             return response.data;
         }else{
@@ -1508,7 +1536,7 @@ export async function getObrasCot(planta, nocliente) {
             },
         };
         //------------------------------------------------------------------------------------------------------------------------------------------------------
-        const response = await axios.get(baseUrl2+'Catalogo/GetObraCartera/'+nocliente+','+planta, confi_ax);
+        const response = await axios.get(baseUrl+'Catalogo/GetObraCartera/'+nocliente+','+planta, confi_ax);
         if (response.data && response.data.length > 0) {
                 return response.data;
         }else{
@@ -1722,7 +1750,7 @@ export async function getPedidosCot(id) {
             },
         };
         //------------------------------------------------------------------------------------------------------------------------------------------------------
-        const response = await axios.get(baseUrl2+'Comercial/GetPedidosCotizacion/'+id, confi_ax);
+        const response = await axios.get(baseUrl+'Comercial/GetPedidosCotizacion/'+id, confi_ax);
         if (response.data && response.data.length > 0) {
             return response.data;
         }else{
@@ -1760,6 +1788,58 @@ export async function getArchivo(id)
         console.log(error);
         return false
     }
+}
+export  async function setCotizacion(json)
+{
+    try
+    {
+        let confi_ax = {
+            headers:
+            {
+                'Cache-Control': 'no-cache',
+                'Content-Type': 'application/json',
+                "Authorization": "Bearer "+cookies.get('token'),
+            },
+        };
+        //------------------------------------------------------------------------------------------------------------------------------------------------------
+        const response = await axios.post(baseUrl+'Comercial/RecibirCotizacion', json, confi_ax);
+        var obj = response.data;
+        console.log(obj, obj.noCotizacion)
+        if(obj.noCotizacion)
+        {
+            return obj.noCotizacion
+        }else{return false}
+    } 
+    catch(error)
+    {
+        return false;
+    }    
+}
+export  async function setPedidosCot(json)
+{
+    try
+    {
+        let confi_ax = {
+            headers:
+            {
+                'Cache-Control': 'no-cache',
+                'Content-Type': 'application/json',
+                "Authorization": "Bearer "+cookies.get('token'),
+            },
+        };
+        //------------------------------------------------------------------------------------------------------------------------------------------------------
+        const response = await axios.post(baseUrl+'Comercial/RecibirPedidos', json, confi_ax);
+        var obj = response.data;
+        console.log(obj.length, obj)
+        if(obj.length > 0)
+        {
+            return true
+        }else{return false}
+    } 
+    catch(error)
+    {
+        return false;
+    }    
 }
 //****************************************************************************************************************************************************************************** */
 // INTERFAZ
@@ -2041,6 +2121,112 @@ export async function getMaterialesI(Producto)
     }
 }  
 //****************************************************************************************************************************************************************************** */
+// EXTRAS
+export async function setIncidencia(incidencia, tipo) {
+    try
+    {
+        let confi_ax = {
+            headers:
+            {
+                'Cache-Control': 'no-cache',
+                'Content-Type': 'application/json',
+                "Authorization": "Bearer "+cookies.get('token'),
+            },
+        };
+        //------------------------------------------------------------------------------------------------------------------------------------------------------
+        const response = await axios.post(baseUrl2+'ProCatsa/setIncidencias', incidencia,confi_ax);
+        var obj = response.data;
+        console.log(obj)
+        if(obj.length > 0)
+        {
+            return obj
+        }else{return false}
+    } 
+    catch(error)
+    {
+        return false;
+    }
+}
+export async function getIncidencias(FI, FF) {
+    try
+    {
+        let confi_ax = {
+            headers:
+            {
+                'Cache-Control': 'no-cache',
+                'Content-Type': 'application/json',
+                "Authorization": "Bearer "+cookies.get('token'),
+            },
+        };
+        // const fcaI = FormatoFca(FI);
+        // const fcaF = FormatoFca(FF);
+        //------------------------------------------------------------------------------------------------------------------------------------------------------
+        const response = await axios.get(baseUrl2+'ProCatsa/GetIncidencias/'+FI+','+FF, confi_ax);
+        var obj = response.data;
+        console.log(obj)
+        if(obj.length > 0)
+        {
+            return obj
+        }else{return false}
+    } 
+    catch(error)
+    {
+        return false;
+    }
+}
+export async function getIncidenciasId(id) {
+    try
+    {
+        let confi_ax = {
+            headers:
+            {
+                'Cache-Control': 'no-cache',
+                'Content-Type': 'application/json',
+                "Authorization": "Bearer "+cookies.get('token'),
+            },
+        };
+        // const fcaI = FormatoFca(FI);
+        // const fcaF = FormatoFca(FF);
+        //------------------------------------------------------------------------------------------------------------------------------------------------------
+        const response = await axios.get(baseUrl2+'ProCatsa/GetIncidenciaId/'+id, confi_ax);
+        var obj = response.data;
+        if(obj.length > 0)
+        {
+            return obj
+        }else{return false}
+    } 
+    catch(error)
+    {
+        return false;
+    }
+}
+export async function delInci(id) {
+    try
+    {
+        let confi_ax = {
+            headers:
+            {
+                'Cache-Control': 'no-cache',
+                'Content-Type': 'application/json',
+                "Authorization": "Bearer "+cookies.get('token'),
+            },
+        };
+        // const fcaI = FormatoFca(FI);
+        // const fcaF = FormatoFca(FF);
+        //------------------------------------------------------------------------------------------------------------------------------------------------------
+        const response = await axios.get(baseUrl2+'ProCatsa/DelIncidencia/'+id, confi_ax);
+        var obj = response.data[0].Rows;
+        if(obj.length > 0)
+        {
+            return obj
+        }else{return false}
+    } 
+    catch(error)
+    {
+        return false;
+    }
+}
+//****************************************************************************************************************************************************************************** */
 // Configuraciones
 export async function getPlantasCon()
 {
@@ -2273,6 +2459,30 @@ export async function getCotizacionP(FI, FF, planta) {
 }
 //****************************************************************************************************************************************************************************** */
 //UTILITIES
+export async function getPlantasList() {
+    try
+    {
+        let confi_ax = {
+            headers:
+            {
+                'Cache-Control': 'no-cache',
+                'Content-Type': 'application/json',
+                "Authorization": "Bearer "+cookies.get('token'),
+            },
+        };
+        //------------------------------------------------------------------------------------------------------------------------------------------------------
+        const response = await axios.get(baseUrl+'Administracion/GetPlantas/'+cookies.get('Usuario'), confi_ax);
+        var obj = response.data;
+        if(obj && obj.length > 0)
+        {
+            return obj
+        }else{return false}
+    } 
+    catch(error)
+    {
+        return false;
+    }
+}
 // Función para formatear el número a formato de dinero
 export const formatCurrency = (value) => {
   return new Intl.NumberFormat('es-MX', {
@@ -2307,3 +2517,8 @@ export const fNumber = (value) => {
         maximumFractionDigits: 2,
     }).format(value);
 };
+export const opcionesFca = {
+    year: 'numeric', // '2-digit' para el año en dos dígitos
+    month: '2-digit',   // 'numeric', '2-digit', 'short', 'long', 'narrow'
+    day: '2-digit'   // 'numeric', '2-digit'
+  };

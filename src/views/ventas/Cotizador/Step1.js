@@ -2,7 +2,7 @@ import React, {useEffect, useState, useRef} from 'react'
 import Swal from 'sweetalert2';
 import DataTable from 'react-data-table-component';
 import MyMap from './Mapa'
-import { formatCurrency, getClientesCot, getObrasCot, getProspectos_ } from '../../../Utilidades/Funciones';
+import { formatCurrency, getClientesCot, getObrasCot, getProspectos_, getIdVendedor } from '../../../Utilidades/Funciones';
 import { ReactSearchAutocomplete} from 'react-search-autocomplete';
 import "react-datepicker/dist/react-datepicker.css";
 import 'rc-time-picker/assets/index.css';
@@ -27,12 +27,15 @@ import {CIcon} from '@coreui/icons-react'
 import { cilCheck, cilX, cilSearch, cilTrash, cilPlus } from '@coreui/icons'
 import { Rol } from '../../../Utilidades/Roles'
 import '../../../estilos.css'
+import Cookies from 'universal-cookie'
 
-const Step1 = ({ nextStep, fijos, corpo, mop, cdiesel, sucursal, clientes_, obras_, coords, nCot, onUpdateFCData, onUpdateFData }) => {
+const Step1 = ({ nextStep, idC, fijos, corpo, mop, cdiesel, sucursal, clientes_, obras_, coords, nCot, onUpdateFCData, onUpdateFData }) => {
+  const cookies = new Cookies();
   const [visible, setVisible] = useState(false);// Modal Cargando
   const [isScriptLoaded, setIsScriptLoaded] = useState(false);
   const [mMapa, setMMapa] = useState(false);
   const [vProspecto, setVProspecto] = useState(false);
+  const [idVendedor, setIDvendedor] = useState('');
   const [noCliente, setNoCliente] = useState('');
   const [clienteTxt, setClienteTxt] = useState('');
   const [municipio, setMunicipio] = useState('');
@@ -50,8 +53,22 @@ const Step1 = ({ nextStep, fijos, corpo, mop, cdiesel, sucursal, clientes_, obra
   const [mPosC, setMPosC] = useState([{latitud:0,longitud:0}]);
   //**************************************************************** */
   useEffect(() => {
+      getIdVendedor_()
   }, []);
   //**************************************************************** */
+  const getIdVendedor_ = async () => {
+    try {
+        const vendedor = await getIdVendedor();
+        let idV = vendedor[0].CODIGOVENDEDOR
+        if (idV) {  
+          setIDvendedor(idV) 
+        } else {
+            Swal.fire("Error", "Comunicate con el área de sistemas para verificar tu código de Vendedor", "error");
+        }
+    } catch (error) {
+        Swal.fire("Error", "No se pudo obtener ID VENDEDOR", "error");
+    }
+  };
   const handleChange = selectedOption => {
     setSelectedCity(selectedOption);
     
@@ -60,13 +77,14 @@ const Step1 = ({ nextStep, fijos, corpo, mop, cdiesel, sucursal, clientes_, obra
     setLoading(true);
     setVisible(true); // Muestra el modal de carga
 
-  }
+  };
   const vCliente = async() =>{
     setLoading(true);
     setVisible(true); // Muestra el modal
     try {
       const cliente = await getClientesCot(sucursal, noCliente);
       if (cliente) {
+        console.log(cliente)
         const objCliente = cliente;
         setCliente(objCliente[0].Nombre);
         setMunicipio(objCliente[0].Municipio);
@@ -77,8 +95,7 @@ const Step1 = ({ nextStep, fijos, corpo, mop, cdiesel, sucursal, clientes_, obra
     } catch (error) {
         Swal.fire("Error", "No se pudo obtener la información", "error");
     }
-  }
-  
+  };
   const onFindCliente = (e) => {
     setNoCliente(e.target.value); // Actualiza el texto del filtro
   };
@@ -232,8 +249,9 @@ const Step1 = ({ nextStep, fijos, corpo, mop, cdiesel, sucursal, clientes_, obra
   }
   const hOnSelectObras = (item) =>{
     setObraTxt(item.name)
+    setNoObra(item.idObra)
     onUpdateFData({ obra: item.name});
-    onUpdateFCData({ coord: mPos, coordR:mPosC});
+    console.log(item)
   }
   const hMakerPosCh = (newPosition) => {
     setMPos(newPosition)
@@ -244,10 +262,9 @@ const Step1 = ({ nextStep, fijos, corpo, mop, cdiesel, sucursal, clientes_, obra
   //-----------------------------------------------------
   async function getObras(cliente, sucursal)
   {
-    console.log(cliente,sucursal)
+    setNoCliente(cliente)
     try{
       const obras = await getObrasCot(sucursal, cliente);
-      console.log(obras)
       if(obras){
           const obrasTransformados = obras.map((obras, index) => ({
               id: index,            // Asignar un ID único (en este caso, usamos el índice)
@@ -263,7 +280,34 @@ const Step1 = ({ nextStep, fijos, corpo, mop, cdiesel, sucursal, clientes_, obra
   const getMMap = ()=>{
     setMMapa(true)
   }
-  
+  const hnextStep = async() => {
+    const cR = mPos[0].latitud+","+mPos[0].longitud;
+    const cC = mPosC[0].latitud+","+mPosC[0].longitud;
+    onUpdateFCData({ 
+      idCotizacion:idC,
+      planta:sucursal,
+      noCliente:noCliente,
+      noObra:noObra,
+      Cliente:clienteTxt,
+      Obra:obraTxt,
+      Direccion:oDir,
+      contacto:contacto,
+      idVendedor:idVendedor,
+      usuarioCreo:cookies.get('Usuario'),
+      flagIVA:0,
+      flagTotal:0,
+      flagCondiciones:0,
+      estatus:'Negociando',
+      cotAnterior:'',
+      fuente:null,
+      coordenadaR: cR, 
+      coordenada:cC, 
+      flagObservaciones:0,
+      segmento:null,
+      canal:null
+    });
+    nextStep();
+  }
   //-----------------------------------------------------
   return(
     <div>
@@ -470,7 +514,7 @@ const Step1 = ({ nextStep, fijos, corpo, mop, cdiesel, sucursal, clientes_, obra
         <CCardFooter>
           <CRow className='mt-2 mb-2'>
             <CCol xs={3}>
-              <button className='btn btn-success' onClick={nextStep}>Siguiente </button>
+              <button className='btn btn-success' style={{'color':'white'}} onClick={hnextStep}>Siguiente </button>
             </CCol>
           </CRow>
         </CCardFooter>

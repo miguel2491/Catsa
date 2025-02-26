@@ -47,7 +47,6 @@ const Mapa = ({coords, markerPositionO, markerPositionR, onMarkerPositionO, onMa
             setLocMarkCot([{latitud, longitud}])
             onMarkerPositionO([{latitud, longitud}])
             onMarkerPositionR([{latitud, longitud}])
-            console.log("COORDS 1",latitud, longitud)
         },
         (error) => {
             Swal.fire("Error al obtener ubicación", error.message, "error")
@@ -60,7 +59,6 @@ const Mapa = ({coords, markerPositionO, markerPositionR, onMarkerPositionO, onMa
     const handleDragEnd = (e) =>{
         const { lat, lng } = e.target.getLatLng();  // Obtener la nueva latitud y longitud
         setCotizacion([{latitud:lat, longitud:lng}]);  // Actualizar el estado de cotización 
-        console.log(markerPosition, markerCotizacion)
         setLocMarkCot([{latitud:lat, longitud:lng}]);
         onMarkerPositionR([{latitud:lat, longitud:lng}])
     }

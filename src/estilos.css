@@ -24,6 +24,9 @@ h3, label{
 		cursor: pointer;
 	}
 }
+.btnW{
+	color:white
+}
 .btnBuscar{
     border-top-left-radius: 0;
 	border-bottom-left-radius: 0;

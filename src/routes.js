@@ -33,6 +33,7 @@ const RCotizacionesP = React.lazy(() => import('./views/reportes/RCotizacionesP'
 const RBPedido = React.lazy(() => import('./views/reportes/RBPedido'))
 const RComision = React.lazy(() => import('./views/reportes/RComision'))
 const RProyeccion = React.lazy(() => import('./views/reportes/RProyeccion'))
+const RProductosV = React.lazy(() => import('./views/reportes/RProductosV'))
 //=========================================> Calidad <===================================
 const CostosPV = React.lazy(() => import('./views/Calidad/CostosPV'))
 const Formulaciones = React.lazy(() => import('./views/Calidad/Formulaciones'))
@@ -43,6 +44,7 @@ const UpdateProd = React.lazy(() => import('./views/utils/UpdateProd'))
 const UpdateMB = React.lazy(() => import('./views/utils/UpdateMB'))
 const QR = React.lazy(() => import('./views/utils/QR'))
 const Permisos = React.lazy(() => import('./views/permisos/Permisos'))
+const Incidencias = React.lazy(() => import('./views/Admin/Usuarios/Usuarios'))
 //==================================================================================================================================
 
 const routes = [
@@ -56,7 +58,6 @@ const routes = [
   { path: '/ventas/Cotizador/:id', name: 'Cotizador', element:Cotizador },
   { path: '/reportes/RComision', name: 'Comisiones', element:RComision },
   { path: '/ventas/Cartera', name: 'Cartera', element:RCartera },
-  { path: '/reportes/RProyeccion', name: 'Proyeccion', element:RProyeccion },
   //------------------------------> OPERACIONES <------------------------------------------
   { path: '/Cicat/Resumen', name: 'Resumen', element:RCicat },
   { path: '/Cicat/Remisiones', name: 'Remisiones', element:RemiFal },
@@ -88,6 +89,11 @@ const routes = [
   { path: '/permisos/Permisos', name: 'Permisos', element: Permisos},
   { path: '/Calidad/CostosPV', name: 'Calidad', element: CostosPV},
   { path: '/Calidad/Formulaciones', name: 'Calidad', element: Formulaciones},
+  //--------------------------------------------> EXTRAS <-------------------------------
+  { path: '/Admin/Usuarios', name: 'Incidencias', element: Incidencias},
+  //--------------------------------------------> REPORTES <-------------------------------
+  { path: '/reportes/RProyeccion', name: 'Proyeccion', element:RProyeccion },
+  { path: '/reportes/RProductosV', name: 'RProductosV', element:RProductosV },
 ]
 
 export default routes

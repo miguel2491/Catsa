@@ -209,24 +209,6 @@ const RCotizacionesP = () => {
       },
     },
     {
-      name: 'Cantidad Pedido',
-      selector: row => {
-        const cantidadP = row.CantidadM3P
-        if (cantidadP === null || cantidadP === undefined) {
-          return "-";
-        }
-        if (typeof cantidadP === 'object') {
-          return "-"; // O cualquier mensaje que prefieras
-        }
-        return fNumber(cantidadP);
-      },
-      sortable:true,
-      width:"150px",
-      style: {
-        textAlign: 'left', // Alineación a la derecha
-      },
-    },
-    {
       name: 'Precio Cotización',
       selector: row => {
           const precioCot = row.PrecioCot
@@ -244,24 +226,43 @@ const RCotizacionesP = () => {
         textAlign: 'right', // Alineación a la derecha
       },
     },
-    // {
-    //   name: 'Total',
-    //   selector: row => {
-    //       const autorizo = row.PrecioCot
-    //       if (autorizo === null || autorizo === undefined) {
-    //       return "-";
-    //       }
-    //       if (typeof autorizo === 'object') {
-    //       return "-"; // O cualquier mensaje que prefieras
-    //       }
-    //       return fNumber(autorizo);
-    //   },
-    //   sortable:true,
-    //   width:"150px",
-    //   style: {
-    //     textAlign: 'right', // Alineación a la derecha
-    //   },
-    // },
+    {
+      name: 'Total',
+      selector: row => {
+          const autorizo = row.PrecioCot * row.Vol;
+          if (autorizo === null || autorizo === undefined) {
+          return "-";
+          }
+          if (typeof autorizo === 'object') {
+          return "-"; // O cualquier mensaje que prefieras
+          }
+          return formatCurrency(autorizo);
+      },
+      sortable:true,
+      width:"150px",
+      style: {
+        textAlign: 'right', // Alineación a la derecha
+      },
+    },
+    {
+      name: 'Cantidad Pedido',
+      selector: row => {
+        const cantidadP = row.CantidadM3P
+        if (cantidadP === null || cantidadP === undefined) {
+          return "-";
+        }
+        if (typeof cantidadP === 'object') {
+          return "-"; // O cualquier mensaje que prefieras
+        }
+        return fNumber(cantidadP);
+      },
+      sortable:true,
+      width:"150px",
+      style: {
+        textAlign: 'left', // Alineación a la derecha
+      },
+    },
+    
     {
       name: 'Libero',
       selector: row => {
@@ -1013,7 +1014,7 @@ const RCotizacionesP = () => {
           />
         </CCol>
         <CCol sm="auto">
-            <CButton color='primary' onClick={fCotizaciones} style={{'margin-top':'22%'}}>
+            <CButton color='primary' onClick={fCotizaciones} className='mt-4'>
                 <CIcon icon={cilSearch} className='mt-2' />
                     Buscar
             </CButton>
@@ -1022,7 +1023,7 @@ const RCotizacionesP = () => {
           <BuscadorDT value={vBPlanta} onChange={onFindBusqueda} onSearch={fBusqueda} />
         </CCol>
         <CCol sm="auto">
-            <CButton color='warning' style={{'margin-top':'10%'}} onClick={downloadCSV}>
+            <CButton color='warning' className='mt-4' onClick={downloadCSV}>
                 <CIcon icon={cilCloudDownload} className='mt-2' />
                     Descargar
             </CButton>

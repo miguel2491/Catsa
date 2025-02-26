@@ -24,6 +24,8 @@ import {
   cilBarChart,
   cilFile,
   cilCash,
+  cilTrash,
+  cilCart,
 } from '@coreui/icons'
 import { CNavGroup, CNavItem, CNavTitle } from '@coreui/react'
 import CIcon from '@coreui/icons-react'
@@ -331,6 +333,12 @@ const NavProvider = ({ children }) => {
                         name: 'Permisos',
                         to: '/permisos/Permisos',
                       },
+                      {
+                        component: CNavItem,
+                        name: 'Incidencias',
+                        to: '/Admin/Usuarios',
+                        icon: <CIcon icon={cilTrash} customClassName="nav-icon" />,
+                      },
                     ],
                   },
                 ]
@@ -511,6 +519,12 @@ const NavProvider = ({ children }) => {
                   name: 'Cotizaciones',
                   to: '/reportes/RCotizacionesP',
                   icon:<CIcon icon={cilCash} customClassName="nav-icon" />,
+                },
+                {
+                  component: CNavItem,
+                  name: 'Ventas por Productos',
+                  to: '/reportes/RProductosV',
+                  icon:<CIcon icon={cilCart} customClassName="nav-icon" />,
                 },
               ],
             },

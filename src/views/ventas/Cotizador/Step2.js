@@ -26,7 +26,7 @@ import { cilCheck, cilX, cilPlus } from '@coreui/icons'
 import { Rol } from '../../../Utilidades/Roles'
 import '../../../estilos.css'
 
-const Step2 = ({ nextStep, previousStep, fuente, segmento, canal, productos, fData, updPData }) => {
+const Step2 = ({ nextStep, previousStep, fuente, segmento, canal, productos, fData, updPData, onUpdateFCData }) => {
     const animatedComponents = makeAnimated();
     const [dDetalle, setDataD] = useState([]); // Estado para almacenar los datos de Detalle
     const [productoBuscado, setProductoBuscado] = useState(""); 
@@ -267,7 +267,6 @@ const Step2 = ({ nextStep, previousStep, fuente, segmento, canal, productos, fDa
           setProductos(fData.producto)
           setFilteredProductos(fData.producto)
           setFProductos(fData.producto)
-          console.log(fData.producto)
         },[]);
     //************************************************************************************* */
     const sProductos = (selected) =>{
@@ -367,6 +366,15 @@ const Step2 = ({ nextStep, previousStep, fuente, segmento, canal, productos, fDa
         console.log(fProd)
         setFilteredProductos(fProd)
     };
+    const hnextStep = ()=>{
+      onUpdateFCData({
+        fuente:selectedFuente,
+        segmento:selectedSegmento,
+        canal:selectedTCliente,
+      });
+      
+      nextStep();
+    }
     //*********************************************************************************************** */
     return(
       <div>
@@ -534,10 +542,10 @@ const Step2 = ({ nextStep, previousStep, fuente, segmento, canal, productos, fDa
           <CCardFooter>
             <CRow className='mt-2 mb-2'>
               <CCol xs={4} md={4}>
-                <button className='btn btn-warning' onClick={previousStep}>Anterior</button>
+                <button className='btn btn-warning btnW' onClick={previousStep}>Anterior</button>
               </CCol>
               <CCol xs={6} md={6}>
-                <button className='btn btn-success' onClick={nextStep}>Siguiente </button>
+                <button className='btn btn-success btnW' onClick={hnextStep}>Siguiente </button>
               </CCol>
             </CRow>
           </CCardFooter>

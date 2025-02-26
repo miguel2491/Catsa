@@ -30,14 +30,16 @@ import TimePicker from 'rc-time-picker';
 import 'rc-time-picker/assets/index.css';
 import { useNavigate } from "react-router-dom";
 import moment from 'moment';
-import { getElementos } from '../../../Utilidades/Funciones';
+import { getElementos, setCotizacion, setPedidosCot } from '../../../Utilidades/Funciones';
 import {CIcon} from '@coreui/icons-react'
 import { cilCheck, cilX, cilSearch, cilTrash, cilPlus } from '@coreui/icons'
 import { Rol } from '../../../Utilidades/Roles'
 import '../../../estilos.css'
+import Cookies from 'universal-cookie'
 
-const Step3 = ({ previousStep, fData, pData, onSave }) => {
+const Step3 = ({ previousStep, fData, pData, sucursal, onSave }) => {
     const navigate = useNavigate();
+    const cookies = new Cookies();
     //******************************************************************** VARS **************************************************************************************** */
     const [maskedValue, setMaskedValue] = useState('');
     const [price, setPrice] = useState('');
@@ -48,20 +50,21 @@ const Step3 = ({ previousStep, fData, pData, onSave }) => {
     const [sFPago, setFPago] = useState("-");
     const [cM3, setCM3] = useState("-");
     const [productos, setProductos] = useState(pData);
-    const [cotizacion, setCotizacion] = useState(fData);
+    const [idCot_, setIdCot_] = useState("-");
+    //const [cotizacion, setCotizacion] = useState(fData);
     const [aPedido,setAPedido] = useState({
       Pago:'-'
     })
     //***************************************************************************************************************************************************************** */
     useEffect(() => {
       getElementos_();
-      const updCot = fData.map(coti => ({
-        ...cotizacion
-      }));
-      const updData = pData.map(producto => ({
-        ...producto
-      }));
-      console.log(updData, updCot)
+      // const updCot = fData.map(coti => ({
+      //   ...cotizacion
+      // }));
+      // const updData = pData.map(producto => ({
+      //   ...producto
+      // }));
+      console.log(fData)
     },[pData]);
     //***************************************************************** FUNCIONES ***************************************************************************************** */
     async function getElementos_()
@@ -79,22 +82,144 @@ const Step3 = ({ previousStep, fData, pData, onSave }) => {
     //***************************************************************************************************************************************************************** */
     const handleSave = () => {
       // Aquí puedes manejar la lógica para guardar los datos
-      console.log("Guardando datos...", productos);
-
+      console.log("Guardando datos...", fData);
+      const resulSend = {
+        cP:{
+          "idCotizacion": fData.idCotizacion,
+          "planta": fData.planta,
+          "noCliente":fData.noCliente,
+          "noObra":fData.noObra,
+          "Cliente":fData.Cliente,
+          "Obra":fData.Obra,
+          "Direccion":fData.Direccion,
+          "contacto":fData.contacto,
+          "idVendedor":fData.idVendedor,
+          "usuarioCreo":fData.usuarioCreo,
+          "flagIVA":0,
+          "flagTotal":0,
+          "flagCondiciones":0,
+          "estatus":fData.estatus,
+          "cotAnterior":fData.cotAnterior,
+          "fuente":1,
+          "coordenadaR":fData.coordenadaR,
+          "coordenada":fData.coordenada,
+          "flagObservaciones":0,
+          "segmento":fData.segmento,
+          "canal":fData.canal
+        },
+        td:{
+          Cantidad:0,
+          Producto:pData[0].Producto,
+          MOP:0.0,
+          M3Bomba:0.0,
+          Bomba:0.0,
+          Precio:0.0,
+          MB:0.0,
+          FlagVoBo:false,
+          UsuarioAutoriza:null,
+          Autoriza:0,
+          Comentario:'-',
+          FlagImprimir:false,
+        },
+        tE:{
+          Producto: "",
+          IdExtra: 0,
+          Cantidad: 0.0,
+          PrecioUser: 0.0
+        }
+      };
+      const jsonCot =  JSON.stringify(resulSend,null,2);
       // Aquí iría la llamada a la API o la lógica de persistencia que necesites
-        Swal.fire({
-            title: 'Cargando...',
-            text: 'Estamos obteniendo la información...',
-            didOpen: () => {
-                Swal.showLoading();  // Muestra la animación de carga
-            }
-        });
-        setTimeout(() => { 
-          Swal.close(); 
-          //navigate('/ventas/LCotizacion');
-          console.log(formData, pData)
-        },3000)
+      Swal.fire({
+          title: 'Cargando...',
+          text: 'Estamos obteniendo la información...',
+          didOpen: () => {
+              Swal.showLoading();  // Muestra la animación de carga
+              saveCotizacion(jsonCot)
+          }
+      });
     };
+    const saveCotizacion = async(jsonCot) =>{
+      try{
+        const ocList = await setCotizacion(jsonCot);
+        console.log(ocList)
+        if(ocList)
+        {
+          setIdCot_(parseInt(ocList))
+          const rSendPList = pData.map((producto, index) =>{
+            const rSendP = {
+              "IdPedido": 0,
+              "Planta": sucursal,
+              "NoObra":producto.NoObra,
+              "Producto":producto.Producto,
+              "PrecioProducto":producto.PrecioProducto,
+              "CantidadM3":producto.CantidadM3,
+              "CodBomba":producto.CodBomba,
+              "PrecioBomba":producto.PrecioBomba,
+              "FechaHoraPedido":"2025-02-26T08:35:00",
+              "TRecorrido":producto.TRecorrido,
+              "M3Viaje":producto.M3Viaje,
+              "Espaciado":producto.Espaciado,
+              "UsuarioCreo":cookies.get('Usuario'),
+              "UsuarioActualizo":producto.UsuarioActualizo,
+              "FechaCreacion":"2025-02-21T08:35:00",
+              "FechaActualizacion":"2025-02-21T01:00:00",
+              "eliminar":0,
+              "TDescarga":0,
+              "Seguridad":1,
+              "hrSalida":"2025-02-21T08:25:59",
+              "PrecioExtra":0.0,
+              "Observaciones":"-",
+              "Crear":1,
+              "Recibe":producto.Recibe,
+              "Elemento":producto.Elemento,
+              "Pago":producto.Pago,
+              "Aumento":0,
+              "activo":0,
+              "AumentoMayor10":0,
+              "CambioPrecio":0,
+              "UTM":"19.26093,-98.89102",
+              "PlantaEnvio":sucursal,
+              "S_Bomba":0,
+              "Archivos":0, 
+              "TReal":"0",
+              "Distancia":"0",
+              "idCotizacion":parseInt(ocList)
+            };
+            return rSendP;
+          });
+          savePedidos(rSendPList);
+        }
+        //console.log(pData)
+      }catch(error){
+        Swal.close();
+        Swal.fire("Error", "No se pudo obtener la información", "error");
+      }
+    }
+    const savePedidos = async(jsP) =>{
+      const jsonPed =  JSON.stringify(jsP,null,2);
+      console.log(jsonPed)
+      try{
+          const ocList = await setPedidosCot(jsonPed);
+          if(ocList)
+          {
+            Swal.close();
+            Swal.fire({
+              title: "Correcto",
+              text: "Se creo la Cotización #"+idCot_,
+              icon: "success"
+            });
+            navigate('/ventas/LCotizacion');
+          }
+      }catch(error){
+        Swal.close();
+        Swal.fire({
+            title: "ERROR",
+            text: "Ocurrio un error, vuelve a intentarlo",
+            icon: "error"
+        });
+      }
+    }
     //******************************************************************** HANDLE ****************************************************************************************
     const hFPago = (e, index) => {
       // const updatedData = [...pData];
@@ -449,10 +574,10 @@ const Step3 = ({ previousStep, fData, pData, onSave }) => {
           <CCardFooter>
             <CRow>
               <CCol xs={6} md={6}>
-                <button className='btn btn-warning' onClick={previousStep}>Anterior</button>
+                <button className='btn btn-warning btnW' onClick={previousStep}>Anterior</button>
               </CCol>
               <CCol xs={6} md={6}>
-                <button className='btn btn-success' onClick={handleSave}>Finalizar</button>
+                <button className='btn btn-success btnW' onClick={handleSave}>Finalizar</button>
               </CCol>
             </CRow>
           </CCardFooter>
