@@ -936,7 +936,7 @@ const OCompra = () => {
                 </CCol>
                 <CCol xs={6} md={2}>
                     <label>Planta</label>
-                    <CFormSelect aria-label="Selecciona" value={plantasSel} onChange={mCambio} className='mt-2'>
+                    <CFormSelect aria-label="Selecciona" value={plantasSel} onChange={mCambio} className='mt-4'>
                         <option value="" >Selecciona...</option>
                         {userIsMantenimiento && (
                             <option value="CORP" >COORPORATIVO</option>

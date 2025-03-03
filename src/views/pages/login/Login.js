@@ -10,12 +10,12 @@ import Cookies from "universal-cookie";
 import axios from "axios";
 import Swal from "sweetalert2";
 import load from "../../../../public/loading.gif";
-import { getRol } from "../../../Utilidades/Funciones";
+import { getRol, GetToken } from "../../../Utilidades/Funciones";
 import "./Login.css";
 
 // URL base y endpoint
-const baseUrl = "http://apicatsa.catsaconcretos.mx:2543/api/";
-
+//const baseUrl = "http://apicatsa.catsaconcretos.mx:2543/api/";
+const baseUrl = "https://localhost:5001/api/";
 export default function Login() {
   // authMode: "login" | "register" | "recover"
   const [authMode, setAuthMode] = useState("login");
@@ -40,21 +40,6 @@ export default function Login() {
   // =================================================================
   //             OBTENER TOKEN GENÉRICO
   // =================================================================
-  async function GetToken() {
-    const postData = { UserName: "ProCatsa", Password: "ProCatsa2024$." };
-    const confi_ax = {
-      headers: {
-        "Content-Type": "application/json;charset=UTF-8",
-        "Access-Control-Allow-Origin": "*",
-      },
-    };
-    try {
-      const response = await axios.post(baseUrl + "Login/Login", postData, confi_ax);
-      cookies.set("token", response.data, { path: "/" });
-    } catch (error) {
-      console.error("Error obteniendo token", error);
-    }
-  }
 
   // =================================================================
   //                      INICIAR SESIÓN

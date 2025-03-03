@@ -47,7 +47,7 @@ import {
   cilUser,
   cilUserFemale,
 } from '@coreui/icons'
-import { findLogin } from '../../Utilidades/Funciones';
+import { findLogin, getPedidosD, getPedidosS, getPedidosPS, getPedidosM } from '../../Utilidades/Funciones';
 
 import WidgetsDropdown from '../widgets/WidgetsDropdown'
 
@@ -122,199 +122,28 @@ const Dashboard = () => {
     if(!banderaL){
       navigate('/login')
     }
-    getPedidosD();
-    getPedidosS();
-    getPedidosPS();
-    getPedidosM();
-    getPedidosV();
+    getPedidosD_();
+    getPedidosS_();
+    getPedidosPS_();
+    getPedidosM_();
+    //getPedidosV_();
   }, []);
-  async function getPedidosD()
+  
+  const getPedidosD_ = async() =>
   {
     try
     {
-      let confi_ax = {
-        headers:
-        {
-            'Cache-Control': 'no-cache',
-            'Content-Type': 'application/json',
-            "Authorization": "Bearer "+cookies.get('token'),
-        },
-      };
       //------------------------------------------------------------------------------------------------------------------------------------------------------
-      const response = await axios.get(baseUrl+'Operaciones/GetPedidos/0', confi_ax);
-      const obj = response.data[0].Rows;
-      const labels = [];
-      const dataSet = [];
-      const dataSetR = [];
-      var totalP = 0;
-      var totalPR = 0;
-      obj.forEach(item => {
-        if (item.TPA !== null && !(typeof item.TPA === 'object' && Object.keys(item.TPA).length === 0)) {
-          totalP += item.P_TotalPedidos;
-          totalPR += item.TPA;
-          labels.push(item.Planta);
-          dataSet.push(item.P_TotalPedidos);
-          dataSetR.push(item.TPA);
-        }
-      });
-      // Actualiza el estado con los nuevos datos
-      setChartDataD({
-        labels: labels,
-        datasets: [
-          {
-            label: totalP+' Pedidos Totales',
-            data: dataSet,
-            backgroundColor: ['#FF6384', '#4BC0C0', '#FFCE56', '#E7E9ED', '#36A2EB'],
-          },
-          {
-            label: totalPR+' Pedidos Realizados',
-            data: dataSetR,
-            borderWidth:1,
-            backgroundColor: ['rgba(153, 102, 255, 0.2)', 'rgba(153, 102, 255, 0.2)', 'rgba(153, 102, 255, 0.2)', 'rgba(153, 102, 255, 0.2)', 'rgba(153, 102, 255, 0.2)'],
-            borderColor:['rgb(255, 99, 132)','rgb(255, 99, 132)','rgb(255, 99, 132)','rgb(255, 99, 132)','rgb(255, 99, 132)']
-          }
-        ],
-      });
-    }
-    catch(error)
-    {
-      Swal.fire("Error", "Ocurrio un error, vuelva a intentarlo Pedidos", "error");
-    }finally{
-
-    }
-  }
-  async function getPedidosS()
-  {
-    try
-    {
-      let confi_ax = {
-        headers:
-        {
-            'Cache-Control': 'no-cache',
-            'Content-Type': 'application/json',
-            "Authorization": "Bearer "+cookies.get('token'),
-        },
-      };
-      //------------------------------------------------------------------------------------------------------------------------------------------------------
-      const response = await axios.get(baseUrl+'Operaciones/GetPedidos/1', confi_ax);
-      const obj = response.data[0].Rows;
-      const rango = format(obj[0].FcaIni, 'yyyy/MM/dd')+"-"+format(obj[0].FcaFin, 'yyyy/MM/dd');
-      setPSemana(rango);
-      const labels = [];
-      const dataSet = [];
-      const dataSetR = [];
-      var totalP = 0;
-      var totalPR = 0;
-      obj.forEach(item => {
-        if (item.TPA !== null && !(typeof item.TPA === 'object' && Object.keys(item.TPA).length === 0)) {
-          totalP += item.P_TotalPedidos;
-          totalPR += item.TPA;
-          labels.push(item.Planta);
-          dataSet.push(item.P_TotalPedidos);
-          dataSetR.push(item.TPA);
-        }
-      });
-      // Actualiza el estado con los nuevos datos
-      setChartDataS({
-        labels: labels,
-        datasets: [
-          {
-            label: 'Total de Pedidos',
-            data: dataSet,
-            backgroundColor: ['#FF6384', '#4BC0C0', '#FFCE56', '#E7E9ED', '#36A2EB'],
-          },
-          {
-            label: totalPR+' Pedidos Realizados',
-            data: dataSetR,
-            borderWidth:1,
-            backgroundColor: ['rgba(153, 102, 255, 0.2)', 'rgba(153, 102, 255, 0.2)', 'rgba(153, 102, 255, 0.2)', 'rgba(153, 102, 255, 0.2)', 'rgba(153, 102, 255, 0.2)'],
-            borderColor:['rgb(255, 99, 132)','rgb(255, 99, 132)','rgb(255, 99, 132)','rgb(255, 99, 132)','rgb(255, 99, 132)']
-          }
-        ],
-      });
-    }
-    catch(error)
-    {
-      Swal.fire("Error", "Ocurrio un error, vuelva a intentarlo Pedidos1", "error");
-    }finally{
-
-    }
-  }
-  async function getPedidosPS()
-  {
-    try
-    {
-      let confi_ax = {
-        headers:
-        {
-            'Cache-Control': 'no-cache',
-            'Content-Type': 'application/json',
-            "Authorization": "Bearer "+cookies.get('token'),
-        },
-      };
-      //------------------------------------------------------------------------------------------------------------------------------------------------------
-      const response = await axios.get(baseUrl+'Operaciones/GetPedidos/2', confi_ax);
-      const obj = response.data[0].Rows;
-      const labels = [];
-      const dataSet = [];
-      if(obj.data){
-        const rango = format(obj[0].FcaIni, 'yyyy/MM/dd')+"-"+format(obj[0].FcaFin, 'yyyy/MM/dd');
-        setPSemanaP(rango);
-        var totalP = 0;
-        obj.forEach(item => {
-          if (item.P_TotalPedidos !== null && !(typeof item.P_TotalPedidos === 'object' && Object.keys(item.P_TotalPedidos).length === 0)) {
-            totalP += item.P_TotalPedidos;
-            labels.push(item.Planta);
-            dataSet.push(item.P_TotalPedidos);
-          }
-        });
-        // Actualiza el estado con los nuevos datos
-        setChartDataPS({
-          labels: labels,
-          datasets: [
-            {
-              label:'Total de Pedidos('+totalP+')',
-              data: dataSet,
-              backgroundColor: ['#FF6384', '#4BC0C0', '#FFCE56', '#E7E9ED', '#36A2EB'],
-            },
-          ],
-        });
-      }
-    }
-    catch(error)
-    {
-      //Swal.fire("Error", "Ocurrio un error, vuelva a intentarlo PED2", "error");
-      console.error("Ocurrio un error, vuelva a intentarlo PED2")
-    }finally{
-
-    } 
-  }
-  async function getPedidosM()
-  {
-    try
-    {
-      let confi_ax = {
-        headers:
-        {
-            'Cache-Control': 'no-cache',
-            'Content-Type': 'application/json',
-            "Authorization": "Bearer "+cookies.get('token'),
-        },
-      };
-      //------------------------------------------------------------------------------------------------------------------------------------------------------
-      const response = await axios.get(baseUrl+'Operaciones/GetPedidos/3', confi_ax);
-      const obj = response.data[0].Rows;
-      const labels = [];
-      const dataSet = [];
-      const dataSetR = [];
-      if(obj)
-      {
-        const rango = format(obj[0].FcaIni, 'yyyy/MM/dd')+"-"+format(obj[0].FcaFin, 'yyyy/MM/dd');
-        setPMes(rango);
+      const response = await getPedidosD();
+      if(response){
+        const obj = response;
+        const labels = [];
+        const dataSet = [];
+        const dataSetR = [];
         var totalP = 0;
         var totalPR = 0;
         obj.forEach(item => {
-          if (item.P_TotalPedidos !== null && !(typeof item.P_TotalPedidos === 'object' && Object.keys(item.P_TotalPedidos).length === 0)) {
+          if (item.TPA !== null && !(typeof item.TPA === 'object' && Object.keys(item.TPA).length === 0)) {
             totalP += item.P_TotalPedidos;
             totalPR += item.TPA;
             labels.push(item.Planta);
@@ -323,11 +152,11 @@ const Dashboard = () => {
           }
         });
         // Actualiza el estado con los nuevos datos
-        setChartDataM({
+        setChartDataD({
           labels: labels,
           datasets: [
             {
-              label: 'Total de Pedidos: '+totalP,
+              label: totalP+' Pedidos Totales',
               data: dataSet,
               backgroundColor: ['#FF6384', '#4BC0C0', '#FFCE56', '#E7E9ED', '#36A2EB'],
             },
@@ -344,56 +173,46 @@ const Dashboard = () => {
     }
     catch(error)
     {
-      //Swal.fire("Error", "Ocurrio un error, vuelva a intentarlo", "error");
-      console.error("Ocurrio un error, vuelva a intentarlo");
+      Swal.fire("Error", "Ocurrio un error, vuelva a intentarlo Pedidos", "error");
     }finally{
 
-    } 
+    }
   }
-  async function getPedidosV()
+  const getPedidosS_ = async() =>
   {
     try
     {
-      let confi_ax = {
-        headers:
-        {
-            'Cache-Control': 'no-cache',
-            'Content-Type': 'application/json',
-            "Authorization": "Bearer "+cookies.get('token'),
-        },
-      };
       //------------------------------------------------------------------------------------------------------------------------------------------------------
-      const response = await axios.get(baseUrl+'Logistica/GetPedidosVenta/2025-02-01,2025-02-15,PUE1', confi_ax);
-      const obj = response.data;
-      const labels = [];
-      const dataSet = [];
-      const dataSetR = [];
-
-      if(obj)
-      {
+      const response = await getPedidosS();
+      if(response){
+        const obj = response;
+        const rango = format(obj[0].FcaIni, 'yyyy/MM/dd')+"-"+format(obj[0].FcaFin, 'yyyy/MM/dd');
+        setPSemana(rango);
+        const labels = [];
+        const dataSet = [];
+        const dataSetR = [];
         var totalP = 0;
         var totalPR = 0;
-        console.log(obj)
         obj.forEach(item => {
-          if (item.Producto.length > 0) {
-            totalP += item.Total;
-            totalPR += item.TotalM3;
-            labels.push(item.Producto);
-            dataSet.push(item.Total);
-            dataSetR.push(item.TotalM3);
+          if (item.TPA !== null && !(typeof item.TPA === 'object' && Object.keys(item.TPA).length === 0)) {
+            totalP += item.P_TotalPedidos;
+            totalPR += item.TPA;
+            labels.push(item.Planta);
+            dataSet.push(item.P_TotalPedidos);
+            dataSetR.push(item.TPA);
           }
         });
         // Actualiza el estado con los nuevos datos
-        setChartDataPM({
+        setChartDataS({
           labels: labels,
           datasets: [
             {
-              label: 'Total de Productos: '+totalP,
+              label: 'Total de Pedidos',
               data: dataSet,
               backgroundColor: ['#FF6384', '#4BC0C0', '#FFCE56', '#E7E9ED', '#36A2EB'],
             },
             {
-              label: totalPR+' M3 Completos',
+              label: totalPR+' Pedidos Realizados',
               data: dataSetR,
               borderWidth:1,
               backgroundColor: ['rgba(153, 102, 255, 0.2)', 'rgba(153, 102, 255, 0.2)', 'rgba(153, 102, 255, 0.2)', 'rgba(153, 102, 255, 0.2)', 'rgba(153, 102, 255, 0.2)'],
@@ -405,8 +224,105 @@ const Dashboard = () => {
     }
     catch(error)
     {
+      Swal.fire("Error", "Ocurrio un error, vuelva a intentarlo Pedidos1", "error");
+    }finally{
+
+    }
+  }
+  const getPedidosPS_ = async()=>
+  {
+    try
+    {
+      //------------------------------------------------------------------------------------------------------------------------------------------------------
+      const response = await getPedidosPS()
+      if(response){
+        const obj = response;
+        const labels = [];
+        const dataSet = [];
+        if(obj.data){
+          const rango = format(obj[0].FcaIni, 'yyyy/MM/dd')+"-"+format(obj[0].FcaFin, 'yyyy/MM/dd');
+          setPSemanaP(rango);
+          var totalP = 0;
+          obj.forEach(item => {
+            if (item.P_TotalPedidos !== null && !(typeof item.P_TotalPedidos === 'object' && Object.keys(item.P_TotalPedidos).length === 0)) {
+              totalP += item.P_TotalPedidos;
+              labels.push(item.Planta);
+              dataSet.push(item.P_TotalPedidos);
+            }
+          });
+          // Actualiza el estado con los nuevos datos
+          setChartDataPS({
+            labels: labels,
+            datasets: [
+              {
+                label:'Total de Pedidos('+totalP+')',
+                data: dataSet,
+                backgroundColor: ['#FF6384', '#4BC0C0', '#FFCE56', '#E7E9ED', '#36A2EB'],
+              },
+            ],
+          });
+        }
+      }
+    }
+    catch(error)
+    {
+      //Swal.fire("Error", "Ocurrio un error, vuelva a intentarlo PED2", "error");
+      console.error("Ocurrio un error, vuelva a intentarlo PED2")
+    }finally{
+
+    } 
+  }
+  const getPedidosM_ = async() =>
+  {
+    try
+    {
+      //------------------------------------------------------------------------------------------------------------------------------------------------------
+      const response = await getPedidosM();
+      if(response){
+        const obj = response;
+        const labels = [];
+        const dataSet = [];
+        const dataSetR = [];
+        if(obj)
+        {
+          const rango = format(obj[0].FcaIni, 'yyyy/MM/dd')+"-"+format(obj[0].FcaFin, 'yyyy/MM/dd');
+          setPMes(rango);
+          var totalP = 0;
+          var totalPR = 0;
+          obj.forEach(item => {
+            if (item.P_TotalPedidos !== null && !(typeof item.P_TotalPedidos === 'object' && Object.keys(item.P_TotalPedidos).length === 0)) {
+              totalP += item.P_TotalPedidos;
+              totalPR += item.TPA;
+              labels.push(item.Planta);
+              dataSet.push(item.P_TotalPedidos);
+              dataSetR.push(item.TPA);
+            }
+          });
+          // Actualiza el estado con los nuevos datos
+          setChartDataM({
+            labels: labels,
+            datasets: [
+              {
+                label: 'Total de Pedidos: '+totalP,
+                data: dataSet,
+                backgroundColor: ['#FF6384', '#4BC0C0', '#FFCE56', '#E7E9ED', '#36A2EB'],
+              },
+              {
+                label: totalPR+' Pedidos Realizados',
+                data: dataSetR,
+                borderWidth:1,
+                backgroundColor: ['rgba(153, 102, 255, 0.2)', 'rgba(153, 102, 255, 0.2)', 'rgba(153, 102, 255, 0.2)', 'rgba(153, 102, 255, 0.2)', 'rgba(153, 102, 255, 0.2)'],
+                borderColor:['rgb(255, 99, 132)','rgb(255, 99, 132)','rgb(255, 99, 132)','rgb(255, 99, 132)','rgb(255, 99, 132)']
+              }
+            ],
+          });
+        }
+      }
+    }
+    catch(error)
+    {
       //Swal.fire("Error", "Ocurrio un error, vuelva a intentarlo", "error");
-      console.error("Ocurrio un error, vuelva a intentarlo $");
+      console.error("Ocurrio un error, vuelva a intentarlo");
     }finally{
 
     } 
@@ -455,19 +371,6 @@ const Dashboard = () => {
               <CChart
                 type="bar"
                 data={chartDataM}
-              />
-            </CCardBody>
-          </CCard>
-        </CCol>
-      </CRow>
-      <CRow>
-        <CCol xs={12} md={12}>
-          <CCard className="mb-4">
-            <CCardHeader>Productos $ por Mes <b>{rPMes}</b></CCardHeader>
-            <CCardBody>
-              <CChart
-                type="pie"
-                data={chartDataPM}
               />
             </CCardBody>
           </CCard>

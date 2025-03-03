@@ -41,13 +41,19 @@ export default defineConfig(() => {
       extensions: ['.mjs', '.js', '.ts', '.jsx', '.tsx', '.json', '.scss'],
     },
     server: {
-      // https:{
-      //   key: fs.readFileSync(path.resolve(__dirname, 'Catsa.xyz-key.pem')),
-      //   cert: fs.readFileSync(path.resolve(__dirname, 'Catsa.xyz.pem')),
-      // },
+      host:'10.20.2.54',
+      https:{
+        key: fs.readFileSync(path.resolve(__dirname, './certs/key.pem')),
+        cert: fs.readFileSync(path.resolve(__dirname, './certs/cert.pem')),
+      },
       port: 3000,
+      open:true,
       proxy: {
-        // https://vitejs.dev/config/server-options.html
+        '/api': {
+          target: 'https://10.20.2.54:5001',  // La URL de tu servidor ASP.NET Core
+          changeOrigin: true,
+          secure: false,
+        },
       },
     },
   }

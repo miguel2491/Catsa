@@ -11,18 +11,15 @@ import {
   CWidgetStatsA,
 } from '@coreui/react'
 import { getStyle } from '@coreui/utils'
-import { CChart, CChartBar, CChartLine, CChartPolarArea } from '@coreui/react-chartjs'
+import { CChart } from '@coreui/react-chartjs'
 import CIcon from '@coreui/icons-react'
-import { cilArrowBottom, cilArrowTop, cilOptions } from '@coreui/icons'
-import Cookies from "universal-cookie";
-import axios from 'axios'
+import { cilArrowBottom, cilArrowTop } from '@coreui/icons'
+import {GetCotizacionesR} from '../../Utilidades/Funciones'
 
 const WidgetsDropdown = (props) => {
   const widgetChartRef1 = useRef(null)
   const widgetChartRef2 = useRef(null)
-  const cookies = new Cookies();
   const navigate = useNavigate();
-  const baseUrl="http://apicatsa.catsaconcretos.mx:2543/api/";
   const [tCotizacionA, setTotalA] = useState(0);
   const [tCotizacionCA, setTotalCA] = useState(0);
   const [tCotizacionP, setTotalCP] = useState(0);
@@ -59,59 +56,53 @@ const WidgetsDropdown = (props) => {
         })
       }
     })
-    getCotizaciones();
+    getCotizaciones_();
   }, [widgetChartRef1, widgetChartRef2])
 
-  async function getCotizaciones()
+  const getCotizaciones_ = async() =>
   {
     try
     {
-      let confi_ax = {
-        headers:
-        {
-            'Cache-Control': 'no-cache',
-            'Content-Type': 'application/json',
-            "Authorization": "Bearer "+cookies.get('token'),
-        },
-      };
       //------------------------------------------------------------------------------------------------------------------------------------------------------
-      const response = await axios.get(baseUrl+'Comercial/GetCotizacionesR', confi_ax);
-      const obj = response.data[0].Rows;
-      const labels = [];
-      const dataSet = [];
-      var totalA = 0;
-      var totalCA = 0;
-      var totalP = 0;// TOTAL PEDIDOS
-      var totalP = 0;
-      var totalPROS = 0;
-      var totalN = 0;
-      var totalPR = 0;
-      obj.forEach(item => {
-        totalA += item.TA;
-        totalCA+=item.TCA;
-        totalP += item.TC;
-        totalPROS += item.TP;
-        totalN += item.TN;
-        totalPR += item.TPRD;
-        labels.push(item.Planta);
-        dataSet.push(item.TC);
-      });
-      setTotalA(totalA);
-      setTotalCA(totalCA);
-      setTotalCP(totalP);
-      setTotalCPRO(totalPROS);
-      setTotalCPER(totalPR);
-      setTotalCNEG(totalN);
-      // Actualiza el estado con los nuevos datos
-      setChartDataD({
-        labels: labels,
-        datasets: [
-          {
-            data: dataSet,
-            backgroundColor: ['#FF6384', '#4BC0C0', '#FFCE56', '#E7E9ED', '#36A2EB','#042940','#005C53'],
-          },
-        ],
-      });
+      const ocList = await GetCotizacionesR();
+      if(ocList){
+        const obj = ocList;
+        const labels = [];
+        const dataSet = [];
+        var totalA = 0;
+        var totalCA = 0;
+        var totalP = 0;// TOTAL PEDIDOS
+        var totalP = 0;
+        var totalPROS = 0;
+        var totalN = 0;
+        var totalPR = 0;
+        obj.forEach(item => {
+          totalA += item.TA;
+          totalCA+=item.TCA;
+          totalP += item.TC;
+          totalPROS += item.TP;
+          totalN += item.TN;
+          totalPR += item.TPRD;
+          labels.push(item.Planta);
+          dataSet.push(item.TC);
+        });
+        setTotalA(totalA);
+        setTotalCA(totalCA);
+        setTotalCP(totalP);
+        setTotalCPRO(totalPROS);
+        setTotalCPER(totalPR);
+        setTotalCNEG(totalN);
+        // Actualiza el estado con los nuevos datos
+        setChartDataD({
+          labels: labels,
+          datasets: [
+            {
+              data: dataSet,
+              backgroundColor: ['#FF6384', '#4BC0C0', '#FFCE56', '#E7E9ED', '#36A2EB','#042940','#005C53'],
+            },
+          ],
+        });
+      }
     }
     catch(error)
     {

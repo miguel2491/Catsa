@@ -13,7 +13,7 @@ import TimePicker from 'rc-time-picker';
 import 'rc-time-picker/assets/index.css';
 import { useNavigate } from "react-router-dom";
 import { GetCotizaciones,convertArrayOfObjectsToCSV, getPedidosCot, getArchivo, setStatus, getCotizacionExtra, getCotizacionLog, getSegmentos,
-  getSeguimientos, getObraCot, getClienteCot, setVisitas, getVisitas
+  getSeguimientos, getObraCot, getClienteCot, setVisitas, getVisitas, getCotizacionId
  } from '../../Utilidades/Funciones';
 import {
   CButton,
@@ -139,6 +139,7 @@ const LCotizacion = () => {
     {
       setPlantas(pla);
       if(posts.length>0){
+        console.log(posts)
         const filteredCotizaciones = posts.filter(item => item.IdPlanta === pla);
         setDTCotizacion(filteredCotizaciones);
       }else{
@@ -231,6 +232,17 @@ const LCotizacion = () => {
                 title="Acciones adicionales"
               >
                 <CIcon icon={cilMenu} />
+              </CButton>
+            </CCol>
+            <CCol xs={6} md={3} lg={3}>
+              <CButton
+                color="success"
+                onClick={() => hMapasOR(row.IdCotizacion)}
+                size="sm"
+                className="me-2"
+                title="Captura Posición"
+              >
+                <CIcon icon={cilMap} style={{'color':'white'}} />
               </CButton>
             </CCol>
           </CRow>
@@ -723,6 +735,7 @@ const LCotizacion = () => {
       // Llamada a la API
         const cotI = await GetCotizaciones(vFechaI, vFcaF, planta);
         Swal.close();  // Cerramos el loading
+        console.log(cotI)
         if (cotI) {
           console.log(cotI)
           const filteredCotizaciones = cotI.filter(item => item.IdPlanta === planta);
@@ -1050,7 +1063,6 @@ const LCotizacion = () => {
         Swal.fire("Error", "No se pudo obtener la información", "error");
     }
   }
-
   const handleRegistrarVisita = (idCotizacion) => {
     if (!navigator.geolocation) {
       Swal.fire("Error", "Tu navegador no soporta Geolocalización", "error")
@@ -1073,7 +1085,6 @@ const LCotizacion = () => {
       }
     )
   };
-
   const regVisita_ = async(idCot,motivo,lat,lon) => {
     Swal.fire({
       title: 'Cargando...',
@@ -1098,11 +1109,9 @@ const LCotizacion = () => {
       Swal.fire("Error al guardar", error.message, "error");
     }
   };
-
   const handleRegistrarLlamada = (idCotizacion) => {
     regVisita_(idCotizacion,"Llamada",0.0, 0.0)
   }
-
   // -----------------------------------------------------------------
   // Mapeo: Mostrar el modal con el mapa de todas las visitas
   // -----------------------------------------------------------------
@@ -1120,14 +1129,17 @@ const LCotizacion = () => {
   const mMapa = async(idc) =>{
     try{
       const ocList = await getVisitas(idc, "Visita");
+      console.log(ocList)
       if(ocList)
       {
         Swal.close();
-        console.log(ocList)
         setMAcciones(false)
         setMapeoModal(true)
         setDTRuta(ocList)
         //setTimeout(function(){trazarRuta(ocList)},8000);
+      }else{
+        Swal.close();
+        Swal.fire("AVISO", "No se cuentan con visitas registradas", "error");  
       }
     }catch(error){
       Swal.close();
@@ -1166,6 +1178,45 @@ const LCotizacion = () => {
       Swal.fire("No hay suficientes puntos", "Se necesitan al menos dos puntos para trazar una ruta.", "info");
     }
   
+  }
+  const hMapasOR = (idCotizacion) =>{
+    Swal.fire({
+      title: 'Cargando...',
+      text: 'Estamos obteniendo la información...',
+      didOpen: () => {
+          Swal.showLoading();  // Muestra la animación de carga
+          mMapaOR(idCotizacion)
+      }
+    });
+  }
+  const mMapaOR = async(idc) =>{
+    try{
+      const ocList = await getCotizacionId(idc);
+      console.log(ocList)
+      if(ocList)
+      {
+        Swal.close();
+        setMapeoModal(true)
+        console.log(ocList[0].coordenada.length, ocList[0].coordenadaR.length)
+        if(ocList[0].coordenada.length > 0 && ocList[0].coordenadaR.length > 10)
+        {
+          const rutas = {
+            latitud:ocList[0].coordenada,
+            longitud:ocList[0].coordenadaR,
+          }
+          setDTRuta(rutas)
+        }else{
+          Swal.fire("AVISO", "Sin Coordenadas", "error");  
+        }
+        //setTimeout(function(){trazarRuta(ocList)},8000);
+      }else{
+        Swal.close();
+        Swal.fire("AVISO", "Sin Coordenadas", "error");  
+      }
+    }catch(error){
+      Swal.close();
+      Swal.fire("Ocurrio un problema", "Vuelva a intentar", "error");
+    }
   }
   //************************* HANDLE*************************************************************** */
   const hDSeg = (e) =>{
@@ -1236,6 +1287,7 @@ const LCotizacion = () => {
   const hEdoO = (e) => {
     setEstado(e.target.value);
   };
+  
   //********************************************************************************************** */
   // const calculateRoute = useCallback(() => {
   //   if (location.latitude && location.longitude) {

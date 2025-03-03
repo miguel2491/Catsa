@@ -5,8 +5,8 @@ import Cookies from 'universal-cookie'
 const cookies = new Cookies();
 import Swal from "sweetalert2";
 const baseUrlS="https://apicatsa.catsaconcretos.mx:2544/api/";
-const baseUrl="http://apicatsa.catsaconcretos.mx:2543/api/";
-const baseUrl2="http://localhost:2548/api/";
+const baseUrl2="http://apicatsa.catsaconcretos.mx:2543/api/";
+const baseUrl="https://10.20.2.54:5001/api/";
 const baseUrl2S="https://localhost:5001/api/";
 //****************************************************************************************************************************************************************************** */
 // LOGIN
@@ -28,6 +28,7 @@ const baseUrl2S="https://localhost:5001/api/";
       console.error("Error obteniendo token", error);
     }
   }
+  
   // =================================================================
   //                      INICIAR SESIÓN
   // =================================================================
@@ -229,6 +230,143 @@ export async function makeNotificacion(userDestino, categoria, titulo, desc, url
     }
 }
 //****************************************************************************************************************************************************************************** */
+// DASHBOARD
+export async function getPedidosD()
+{
+    try
+    {
+        let confi_ax = {
+            headers:
+            {
+                'Cache-Control': 'no-cache',
+                'Content-Type': 'application/json',
+                "Authorization": "Bearer "+cookies.get('token'),
+            },
+        };
+        //------------------------------------------------------------------------------------------------------------------------------------------------------
+        const response = await axios.get(baseUrl+'Operaciones/GetPedidos/0', confi_ax);
+        if (response.data && response.data.length > 0) {
+            const obj = response.data[0].Rows;
+            if(obj.length > 0)
+            {
+                return obj;
+            }else{return false}
+        }else{return false}
+    } 
+    catch(error)
+    {
+        return false
+    }
+}
+export async function GetCotizacionesR()
+{
+    try
+    {
+        let confi_ax = {
+            headers:
+            {
+                'Cache-Control': 'no-cache',
+                'Content-Type': 'application/json',
+                "Authorization": "Bearer "+cookies.get('token'),
+            },
+        };
+        //------------------------------------------------------------------------------------------------------------------------------------------------------
+        const response = await axios.get(baseUrl+'Comercial/GetCotizacionesR', confi_ax);
+        if (response.data && response.data.length > 0) {
+            const obj = response.data[0].Rows;
+            if(obj.length > 0)
+            {
+                return obj;
+            }else{return false}
+        }else{return false}
+    } 
+    catch(error)
+    {
+        return false
+    }
+}
+export async function getPedidosS()
+{
+    try
+    {
+        let confi_ax = {
+            headers:
+            {
+                'Cache-Control': 'no-cache',
+                'Content-Type': 'application/json',
+                "Authorization": "Bearer "+cookies.get('token'),
+            },
+        };
+        //------------------------------------------------------------------------------------------------------------------------------------------------------
+        const response = await axios.get(baseUrl+'Operaciones/GetPedidos/1', confi_ax);
+        if (response.data && response.data.length > 0) {
+            const obj = response.data[0].Rows;
+            if(obj.length > 0)
+            {
+                return obj;
+            }else{return false}
+        }else{return false}
+    } 
+    catch(error)
+    {
+        return false
+    }
+}
+export async function getPedidosPS()
+{
+    try
+    {
+        let confi_ax = {
+            headers:
+            {
+                'Cache-Control': 'no-cache',
+                'Content-Type': 'application/json',
+                "Authorization": "Bearer "+cookies.get('token'),
+            },
+        };
+        //------------------------------------------------------------------------------------------------------------------------------------------------------
+        const response = await axios.get(baseUrl+'Operaciones/GetPedidos/2', confi_ax);
+        if (response.data && response.data.length > 0) {
+            const obj = response.data[0].Rows;
+            if(obj.length > 0)
+            {
+                return obj;
+            }else{return false}
+        }else{return false}
+    } 
+    catch(error)
+    {
+        return false
+    }
+}
+export async function getPedidosM()
+{
+    try
+    {
+        let confi_ax = {
+            headers:
+            {
+                'Cache-Control': 'no-cache',
+                'Content-Type': 'application/json',
+                "Authorization": "Bearer "+cookies.get('token'),
+            },
+        };
+        //------------------------------------------------------------------------------------------------------------------------------------------------------
+        const response = await axios.get(baseUrl+'Operaciones/GetPedidos/3', confi_ax);
+        if (response.data && response.data.length > 0) {
+            const obj = response.data[0].Rows;
+            if(obj.length > 0)
+            {
+                return obj;
+            }else{return false}
+        }else{return false}
+    } 
+    catch(error)
+    {
+        return false
+    }
+}
+//****************************************************************************************************************************************************************************** */
 // CATALOGOS
 export async function getElementos() {
     try
@@ -354,32 +492,32 @@ export async function setVideoUpload(data) {
 //****************************************************************************************************************************************************************************** */
 //LOGISTICA
     // Pedidos
-    export async function getPedidos(planta) {
-        try
-        {
-            let confi_ax = {
-                headers:
-                {
-                    'Cache-Control': 'no-cache',
-                    'Content-Type': 'application/json',
-                    "Authorization": "Bearer "+cookies.get('token'),
-                },
-            };
-            //------------------------------------------------------------------------------------------------------------------------------------------------------
-            const response = await axios.get(baseUrl+'Logistica/GetPedidosAc/'+planta+","+cookies.get('Usuario')+"?Tipo=S", confi_ax);
-            if (response.data && response.data.length > 0 && response.data[0].Rows) {
-                const obj = response.data[0].Rows;
-                if(obj.length > 0)
-                {
-                    return obj;
-                }else{return false}
+export async function getPedidos(planta) {
+    try
+    {
+        let confi_ax = {
+            headers:
+            {
+                'Cache-Control': 'no-cache',
+                'Content-Type': 'application/json',
+                "Authorization": "Bearer "+cookies.get('token'),
+            },
+        };
+        //------------------------------------------------------------------------------------------------------------------------------------------------------
+        const response = await axios.get(baseUrl+'Logistica/GetPedidosAc/'+planta+","+cookies.get('Usuario')+"?Tipo=S", confi_ax);
+        if (response.data && response.data.length > 0 && response.data[0].Rows) {
+            const obj = response.data[0].Rows;
+            if(obj.length > 0)
+            {
+                return obj;
             }else{return false}
-        } 
-        catch(error)
-        {
-            return false
-        }
+        }else{return false}
+    } 
+    catch(error)
+    {
+        return false
     }
+}
 //****************************************************************************************************************************************************************************** */
 // OPERACIONES
     // CICAT 
@@ -1013,7 +1151,7 @@ export async function addNFac(id, nFac) {
     }
 }
  //REPORTES
- export async function getOC(FI, FF) {
+export async function getOC(FI, FF) {
     try
     {
         let confi_ax = {
@@ -1028,6 +1166,34 @@ export async function addNFac(id, nFac) {
         const fcaF = FormatoFca(FF);
         //------------------------------------------------------------------------------------------------------------------------------------------------------
         const response = await axios.get(baseUrl+'Reportes/GetOCompras/'+fcaI+','+fcaF, confi_ax);
+        if (response.data && response.data.length > 0) {
+            const obj = response.data;
+            if(obj.length > 0)
+            {
+                return obj;
+            }else{return false}
+        }else{return false}
+    } 
+    catch(error)
+    {
+        return false
+    }
+}
+export async function getPV(FI, FF, PL) {
+    try
+    {
+        let confi_ax = {
+            headers:
+            {
+                'Cache-Control': 'no-cache',
+                'Content-Type': 'application/json',
+                "Authorization": "Bearer "+cookies.get('token'),
+            },
+        };
+        //const fcaI = FormatoFca(FI);
+        //const fcaF = FormatoFca(FF);
+        //------------------------------------------------------------------------------------------------------------------------------------------------------
+        const response = await axios.get(baseUrl+'Logistica/GetPedidosVenta/'+FI+','+FF+','+PL, confi_ax);
         if (response.data && response.data.length > 0) {
             const obj = response.data;
             if(obj.length > 0)
@@ -1426,7 +1592,7 @@ export  async function setVisitas(idCot, motivo, lat, lon)
         };
         const data = 
         {
-            "idReg": 0,
+            "id": 0,
             "motivo": motivo,
             "usuario":usuario,
             "fecha_visita":fechaHra.toString(),
@@ -2134,7 +2300,7 @@ export async function setIncidencia(incidencia, tipo) {
             },
         };
         //------------------------------------------------------------------------------------------------------------------------------------------------------
-        const response = await axios.post(baseUrl2+'ProCatsa/setIncidencias', incidencia,confi_ax);
+        const response = await axios.post(baseUrl+'ProCatsa/setIncidencias', incidencia,confi_ax);
         var obj = response.data;
         console.log(obj)
         if(obj.length > 0)
@@ -2161,7 +2327,7 @@ export async function getIncidencias(FI, FF) {
         // const fcaI = FormatoFca(FI);
         // const fcaF = FormatoFca(FF);
         //------------------------------------------------------------------------------------------------------------------------------------------------------
-        const response = await axios.get(baseUrl2+'ProCatsa/GetIncidencias/'+FI+','+FF, confi_ax);
+        const response = await axios.get(baseUrl+'ProCatsa/GetIncidencias/'+FI+','+FF, confi_ax);
         var obj = response.data;
         console.log(obj)
         if(obj.length > 0)
@@ -2188,7 +2354,7 @@ export async function getIncidenciasId(id) {
         // const fcaI = FormatoFca(FI);
         // const fcaF = FormatoFca(FF);
         //------------------------------------------------------------------------------------------------------------------------------------------------------
-        const response = await axios.get(baseUrl2+'ProCatsa/GetIncidenciaId/'+id, confi_ax);
+        const response = await axios.get(baseUrl+'ProCatsa/GetIncidenciaId/'+id, confi_ax);
         var obj = response.data;
         if(obj.length > 0)
         {
@@ -2214,7 +2380,7 @@ export async function delInci(id) {
         // const fcaI = FormatoFca(FI);
         // const fcaF = FormatoFca(FF);
         //------------------------------------------------------------------------------------------------------------------------------------------------------
-        const response = await axios.get(baseUrl2+'ProCatsa/DelIncidencia/'+id, confi_ax);
+        const response = await axios.get(baseUrl+'ProCatsa/DelIncidencia/'+id, confi_ax);
         var obj = response.data[0].Rows;
         if(obj.length > 0)
         {
