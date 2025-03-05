@@ -64,7 +64,7 @@ const Step3 = ({ previousStep, fData, pData, sucursal, onSave }) => {
       // const updData = pData.map(producto => ({
       //   ...producto
       // }));
-      console.log(fData)
+      //console.log(fData)
     },[pData]);
     //***************************************************************** FUNCIONES ***************************************************************************************** */
     async function getElementos_()
@@ -142,7 +142,6 @@ const Step3 = ({ previousStep, fData, pData, sucursal, onSave }) => {
     const saveCotizacion = async(jsonCot) =>{
       try{
         const ocList = await setCotizacion(jsonCot);
-        console.log(ocList)
         if(ocList)
         {
           setIdCot_(parseInt(ocList))
@@ -198,7 +197,6 @@ const Step3 = ({ previousStep, fData, pData, sucursal, onSave }) => {
     }
     const savePedidos = async(jsP) =>{
       const jsonPed =  JSON.stringify(jsP,null,2);
-      console.log(jsonPed)
       try{
           const ocList = await setPedidosCot(jsonPed);
           if(ocList)

@@ -14,8 +14,7 @@ import { getRol, GetToken } from "../../../Utilidades/Funciones";
 import "./Login.css";
 
 // URL base y endpoint
-//const baseUrl = "http://apicatsa.catsaconcretos.mx:2543/api/";
-const baseUrl = "https://localhost:5001/api/";
+const baseUrl = "https://apicatsa2.catsaconcretos.mx:2533/api/";
 export default function Login() {
   // authMode: "login" | "register" | "recover"
   const [authMode, setAuthMode] = useState("login");

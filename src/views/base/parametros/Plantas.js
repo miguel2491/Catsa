@@ -1,14 +1,12 @@
 import React,{useEffect, useState, useRef} from 'react';
-
+import Swal from "sweetalert2";
 import Cookies from 'universal-cookie';
-import axios from 'axios';
 import {
   CFormSelect,
 } from '@coreui/react'
-
+import { getPlantas } from '../../../Utilidades/Funciones';
 const cookies = new Cookies();
-const baseUrl="http://apicatsa.catsaconcretos.mx:2543/api/";
-const baseUrl2="http://localhost:2548/api/";
+const baseUrl="https://apicatsa2.catsaconcretos.mx:2533/api/";
 const ap = [];
 cookies.set('plantas', [], {path: '/'});
 const Plantas = ({plantasSel, mCambio}) => {
@@ -36,61 +34,21 @@ const Plantas = ({plantasSel, mCambio}) => {
             }
             setaplantas_(ap);
         }else{
-            getPlantas();
+            getPlantas_();
         }
     },[]);
-    function getPlantas()
+    const getPlantas_ = async()=>
     {
       try{
-          let confi_ax = 
-            {
-              headers:
-              {
-                'Cache-Control': 'no-cache',
-                'Content-Type': 'application/json',
-                "Authorization": "Bearer "+cookies.get('token'),
-              }
-            }
-            //=======================================================
-            axios.get(baseUrl+'Administracion/GetPlantas/'+cookies.get('Usuario'),confi_ax)
-            .then(response=>{
-              const objPlantas = response.data;
-              if(objPlantas.length > 0){
-                cookies.set('plantas', JSON.stringify(response.data), {path: '/'});
-                //setaplantas_(JSON.stringify(response.data));
-                var obj = response.data;
-                for(var x = 0; x < obj.length; x++)
-                {
-                    ap.push({
-                        "ID":x,
-                        "IdPlanta":obj[x].IdPlanta,
-                        "Planta":obj[x].Planta
-                    });
-                }
-                setaplantas_(ap);
-                return response.data;
-              }
-
-            }).then(response=>{
-              //console.log("=>");
-            })
-            .catch(err=>{
-              if (err.response) {
-                // El servidor respondió con un código de estado fuera del rango de 2xx
-                console.error('Error de Respuesta:', err.response.data);
-                //setError(`Error: ${err.response.status} - ${err.response.data.message || err.response.statusText}`);
-              } else if (err.request) {
-                // La solicitud fue realizada pero no se recibió respuesta
-                //setError('Error: No se recibió respuesta del servidor.');
-              } else {
-                // Algo sucedió al configurar la solicitud
-                console.error('Error:', err.message);
-                //setError(`Error: ${err.message}`);
-              }
-            })
-            //=======================================================
+        const ocList = await getPlantas();
+        if(ocList)
+        {
+            setaplantas_(ocList)
+        }
+        Swal.close();  // Cerramos el loading
       }catch(error){
-          console.log(error);
+        Swal.close();
+        Swal.fire("Error", "No se pudo obtener la información", "error");
       }
     }
     return (

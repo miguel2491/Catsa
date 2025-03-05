@@ -1,9 +1,8 @@
 import React, {useImperativeHandle, forwardRef, useState} from 'react'
-import Cookies from 'universal-cookie'
-import axios from 'axios'
 import Swal from "sweetalert2";
 import ProgressBar from "@ramonak/react-progress-bar";
 import {FormatoFca, Fnum} from '../../../Utilidades/Tools.js'
+import {setEntradas} from '../../../Utilidades/Funciones' 
 import { format } from 'date-fns';
 
 import {
@@ -26,10 +25,6 @@ import {
 import {CIcon} from '@coreui/icons-react'
 import { cilLoopCircular, cilSearch } from '@coreui/icons'
 
-const cookies = new Cookies();
-const baseUrl="http://apicatsa.catsaconcretos.mx:2543/api/";
-const baseUrl2="http://localhost:2548/api/";
-
 const ResEntradas = forwardRef((props, ref) => {
     const [loading, setLoading] = useState(false);
     const [percentage, setPercentage] = useState(0);
@@ -38,38 +33,30 @@ const ResEntradas = forwardRef((props, ref) => {
     const [dEntradas, putEntradas] = useState([]);
     const [dHeaders, putHeaders] = useState([]);
     const getEntradas = () => {
-        setEntradas(props.planta, props.fechaI, props.fechaF);
+        setEntradas_(props.planta, props.fechaI, props.fechaF);
     };
     useImperativeHandle(ref, () => ({
         getEntradas,
     }));
     
-    async function setEntradas(planta, FI, FF) {
-        try
-        {
-            let confi_ax = {
-                headers:
-                {
-                    'Cache-Control': 'no-cache',
-                    'Content-Type': 'application/json',
-                    "Authorization": "Bearer "+cookies.get('token'),
-                },
-            };
-            const fcaI = format(FI, 'yyyy-MM-dd');
-            const fcaF = format(FF, 'yyyy-MM-dd');
-            //------------------------------------------------------------------------------------------------------------------------------------------------------
-            const response = await axios.get(baseUrl+'Operaciones/GetResumen/'+planta+','+fcaI+','+fcaF+',DE', confi_ax);
-            var obj =  response.data[0].Rows;
-            //console.log(obj)
-            putEntradas(obj);
-            putHeaders(Object.keys(obj[0]));
-        } 
-        catch(error)
-        {
-            console.log(error)
-        }finally{
-            
+    const setEntradas_ = async(planta, FI, FF)=>{
+        try{
+            const ocList = await setEntradas(planta, auxFcaI, auxFcaF);
+            if(ocList)
+            {
+                setDTOrdenes(ocList);
+                setExOc(ocList);
+            }
+            // Cerrar el loading al recibir la respuesta
+            Swal.close();  // Cerramos el loading
+        }catch(error){
+            Swal.close();
+            Swal.fire("Error", "No se pudo obtener la información", "error");
         }
+        var obj =  response.data[0].Rows;
+        //console.log(obj)
+        putEntradas(obj);
+        putHeaders(Object.keys(obj[0]));
     }
     return (
         <>

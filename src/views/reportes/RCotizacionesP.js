@@ -742,7 +742,7 @@ const RCotizacionesP = () => {
           Swal.fire({
             title: "Peido #"+id,
             text: "Pedido",
-            imageUrl: "http://apicatsa.catsaconcretos.mx:2543/Uploads/DocPedidos/"+id+"/"+extFile,
+            imageUrl: "https://apicatsa2.catsaconcretos.mx:2533/Uploads/DocPedidos/"+id+"/"+extFile,
             imageWidth: 600,
             imageHeight: 400,
             imageAlt: "Pedido"

@@ -3,8 +3,8 @@ import Cookies from 'universal-cookie';
 import axios from 'axios';
 
 const cookies = new Cookies();
-const baseUrl2="http://apicatsa.catsaconcretos.mx:2543/api/";
-const baseUrl="https://10.20.2.39:5001/api/";
+const baseUrl="https://apicatsa2.catsaconcretos.mx:2533/api/";
+const baseUrl2="https://10.20.2.39:5001/api/";
 const plantas_ = [];
 
 

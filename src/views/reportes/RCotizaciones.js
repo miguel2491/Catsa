@@ -28,7 +28,7 @@ import { format } from 'date-fns';
 import {FormatoFca} from '../../Utilidades/Tools.js'
 
 const cookies = new Cookies();
-const baseUrl="http://apicatsa.catsaconcretos.mx:2543/api/";
+const baseUrl="https://apicatsa2.catsaconcretos.mx:2533/api/";
 const baseUrl2="http://localhost:2548/api/";
 
 const currentDate = new Date();

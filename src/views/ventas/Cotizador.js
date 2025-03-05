@@ -84,6 +84,7 @@ const Cotizador = () => {
   const [aClientes, setClientes] = useState([]);
   const [aObras, setObras] = useState([]);
   const [coordsO, setCoordsO] = useState("");
+  const [coordsPla, setCoordsPla] = useState({Lat:null, Lon:null});
   const [pData, setPData] = useState([]);
   const [pDataC, setCData] = useState([]);
   //********************************************************************* */
@@ -188,6 +189,9 @@ const Cotizador = () => {
           });
       }
     },[]);
+    useEffect(() => {
+      //console.log('CoordsPla actualizado:', coordsPla);  // Aquí verificas si el estado ha cambiado
+    }, [coordsPla]);
     const getCotizacion = async(id) =>{
       try{
         const ocList = await getCotizacionId(id);
@@ -275,7 +279,7 @@ const Cotizador = () => {
             getCostoPlanta(planta);
             setShSteps(true)     
         }
-    });
+      });
     }else{
       setShSteps(false);
     } 
@@ -294,6 +298,7 @@ const Cotizador = () => {
           const fcaIni = fecha.split('/');
           let auxFcaI = fcaIni[2]+"-"+fcaIni[0]+"-"+fcaIni[1];
           const datosPla = await getDatosPlanta(planta, auxFcaI, cpc);
+          //console.log(datosPla.autoriza.data[0])
           setDFijos(datosPla.autoriza.data[0].FIJOS);
           setDCorpo(datosPla.autoriza.data[0].CORPORATIVO);
           setDMop(datosPla.autoriza.data[0].MOP);
@@ -301,6 +306,8 @@ const Cotizador = () => {
           setFuente(datosPla.origen.data);
           setSegmento(datosPla.segmento.data);
           setTC(datosPla.canal.data);
+          setCoordsPla({Lat:datosPla.autoriza.data[0].Lat, Lon:datosPla.autoriza.data[0].Lon,})
+          
           setPlantas(planta);
           getClientes(planta);
       } else {
@@ -312,7 +319,7 @@ const Cotizador = () => {
       console.log(error);
     }
   };  
-  async function getClientes(planta)
+  const getClientes = async(planta)=>
   {
     try{
       const clientes = await getClientesCartera(planta);
@@ -376,7 +383,7 @@ const Cotizador = () => {
       </CRow>
       {shSteps && (
       <StepWizard>
-        <Step1 idC={id} fijos={dFijos} corpo={dCorpo} mop={dMop} cdiesel={dDiesel} sucursal={plantasSel} clientes_={aClientes} obras_={aObras} coords={coordsO} nCot={noCotizacion} onUpdateFCData={updFCData} onUpdateFData={updFData} />
+        <Step1 idC={id} fijos={dFijos} corpo={dCorpo} mop={dMop} cdiesel={dDiesel} sucursal={plantasSel} clientes_={aClientes} obras_={aObras} coords={coordsO} coordsPla={coordsPla} nCot={noCotizacion} onUpdateFCData={updFCData} onUpdateFData={updFData} />
         <Step2 fuente={aFuente} segmento={aSegmento} canal={aTC} productos={aProducto} fData={fData} updPData={updPData} onUpdateFCData={updFCData} />
         <Step3 fData={pDataC} pData={pData} sucursal={plantasSel} />
       </StepWizard>

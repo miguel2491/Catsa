@@ -6,7 +6,7 @@ const cookies = new Cookies();
 import Swal from "sweetalert2";
 const baseUrlS="https://apicatsa.catsaconcretos.mx:2544/api/";
 const baseUrl2="http://apicatsa.catsaconcretos.mx:2543/api/";
-const baseUrl="https://10.20.2.54:5001/api/";
+const baseUrl="https://apicatsa2.catsaconcretos.mx:2533/api/";
 const baseUrl2S="https://localhost:5001/api/";
 //****************************************************************************************************************************************************************************** */
 // LOGIN
@@ -2006,6 +2006,32 @@ export  async function setPedidosCot(json)
     {
         return false;
     }    
+}
+export async function setEntradas(planta, FI, FF){
+    try
+    {
+        let confi_ax = {
+            headers:
+            {
+                'Cache-Control': 'no-cache',
+                'Content-Type': 'application/json',
+                "Authorization": "Bearer "+cookies.get('token'),
+            },
+        };
+        const fcaI = format(FI, 'yyyy-MM-dd');
+        const fcaF = format(FF, 'yyyy-MM-dd');
+        //------------------------------------------------------------------------------------------------------------------------------------------------------
+        const response = await axios.get(baseUrl+'Operaciones/GetResumen/'+planta+','+fcaI+','+fcaF+',DE', confi_ax);
+        var obj = response.data;
+        if(obj.length > 0)
+        {
+            return obj
+        }else{return false}
+    } 
+    catch(error)
+    {
+        return false
+    }
 }
 //****************************************************************************************************************************************************************************** */
 // INTERFAZ

@@ -29,7 +29,8 @@ import { Rol } from '../../../Utilidades/Roles'
 import '../../../estilos.css'
 import Cookies from 'universal-cookie'
 
-const Step1 = ({ nextStep, idC, fijos, corpo, mop, cdiesel, sucursal, clientes_, obras_, coords, nCot, onUpdateFCData, onUpdateFData }) => {
+const Step1 = ({ nextStep, idC, fijos, corpo, mop, cdiesel, sucursal, clientes_, obras_, coords, coordsPla, nCot, onUpdateFCData, onUpdateFData }) => {
+  
   const cookies = new Cookies();
   const [visible, setVisible] = useState(false);// Modal Cargando
   const [isScriptLoaded, setIsScriptLoaded] = useState(false);
@@ -84,7 +85,6 @@ const Step1 = ({ nextStep, idC, fijos, corpo, mop, cdiesel, sucursal, clientes_,
     try {
       const cliente = await getClientesCot(sucursal, noCliente);
       if (cliente) {
-        console.log(cliente)
         const objCliente = cliente;
         setCliente(objCliente[0].Nombre);
         setMunicipio(objCliente[0].Municipio);
@@ -251,7 +251,6 @@ const Step1 = ({ nextStep, idC, fijos, corpo, mop, cdiesel, sucursal, clientes_,
     setObraTxt(item.name)
     setNoObra(item.idObra)
     onUpdateFData({ obra: item.name});
-    console.log(item)
   }
   const hMakerPosCh = (newPosition) => {
     setMPos(newPosition)
@@ -383,7 +382,7 @@ const Step1 = ({ nextStep, idC, fijos, corpo, mop, cdiesel, sucursal, clientes_,
         </CRow>
         <CRow className='mt-2 mb-2'>
           <CCol>
-            <MyMap coords={"0,0"} markerPositionO={mPos} markerPositionR={mPosC} onMarkerPositionO={hMakerPosCh} onMarkerPositionR={hMakerPosCCh} />
+            <MyMap coords={"0,0"} cordsPlanta={coordsPla} markerPositionO={mPos} markerPositionR={mPosC} onMarkerPositionO={hMakerPosCh} onMarkerPositionR={hMakerPosCCh} />
           </CCol>
         </CRow>
         <CRow className='mt-2 mb-2'>

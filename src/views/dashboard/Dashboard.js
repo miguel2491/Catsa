@@ -52,7 +52,7 @@ import { findLogin, getPedidosD, getPedidosS, getPedidosPS, getPedidosM } from '
 import WidgetsDropdown from '../widgets/WidgetsDropdown'
 
 const cookies = new Cookies();
-const baseUrl="http://apicatsa.catsaconcretos.mx:2543/api/";
+const baseUrl="https://apicatsa2.catsaconcretos.mx:2533/api/";
 const currentDate = new Date();
 
 const Dashboard = () => {

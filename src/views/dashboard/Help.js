@@ -101,7 +101,7 @@ const Help = () => {
             });
             setTimeout(function(){
                 Swal.close()
-                setVActual('http://apicatsa.catsaconcretos.mx:2543/Uploads/'+tutorial.url_video);
+                setVActual('https://apicatsa2.catsaconcretos.mx:2533/Uploads/'+tutorial.url_video);
                 setInfoVideo(tutorial.descripcion)
             },1000)            
             console.log('Tutorial encontrado:', tutorial);

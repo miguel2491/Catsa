@@ -3,7 +3,7 @@ import Cookies from 'universal-cookie';
 import axios from 'axios';
 
 const cookies = new Cookies();
-const baseUrl = "http://apicatsa.catsaconcretos.mx:2543/api/";
+const baseUrl = "https://apicatsa2.catsaconcretos.mx:2533/api/";
 
 const Usuarios = ({ usuarioSel, onCambioUsuario }) => {
   const [usuarios, setUsuarios] = useState([]);

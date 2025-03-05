@@ -1,5 +1,5 @@
 
-export const baseUrl="http://apicatsa.catsaconcretos.mx:2543/api/";
+export const baseUrl="https://apicatsa2.catsaconcretos.mx:2533/api/";
 export const baseUrl2="http://localhost:2548/api/";
 
 export function FormatoFca(fca){

@@ -16,8 +16,8 @@ import FechaI from '../base/parametros/FechaInicio'
 import FechaF from '../base/parametros/FechaFinal'
 
 const cookies = new Cookies();
-const baseUrl="http://apicatsa.catsaconcretos.mx:2543/api/";
-const baseUrl2="http://localhost:2548/api/";
+const baseUrl2="https://apicatsa2.catsaconcretos.mx:2533/api/";
+const baseUrl="http://localhost:2548/api/";
 
 const LPreCotizacion = () => {
   const [plantasSel , setPlantas] = useState('');

@@ -268,6 +268,30 @@ const Step2 = ({ nextStep, previousStep, fuente, segmento, canal, productos, fDa
           setFilteredProductos(fData.producto)
           setFProductos(fData.producto)
         },[]);
+
+        useEffect(()=>{
+          filterProductos(selectedConcreto);
+        },[selectedConcreto])
+        
+        useEffect(()=>{
+          filterProductos(selectedResistencia);
+        },[selectedResistencia])
+
+        useEffect(()=>{
+          filterProductos(selectedEdad);
+        },[selectedEdad])
+
+        useEffect(()=>{
+          filterProductos(selectedRev);
+        },[selectedRev])
+        
+        useEffect(()=>{
+          filterProductos(selectedTMA);
+        },[selectedTMA])
+        
+        useEffect(()=>{
+          filterProductos(selectedCol);
+        },[selectedCol])
     //************************************************************************************* */
     const sProductos = (selected) =>{
       setOProductos(selected);
@@ -322,11 +346,9 @@ const Step2 = ({ nextStep, previousStep, fuente, segmento, canal, productos, fDa
       },900)
     }
     const hEdad = (event) =>{
-      setSelectedEdad(event.target.value);
       const aux = event.target.value;
-      setTimeout(function(){
-        filterProductos(aux)
-      },900)
+      setSelectedEdad(aux);
+      filterProductos(aux);
     }
     const hReve = (event) =>{
       setSelectedRev(event.target.value);
@@ -351,20 +373,26 @@ const Step2 = ({ nextStep, previousStep, fuente, segmento, canal, productos, fDa
     }
     //************************************************************************************************ */
     const filterProductos = (aux) =>{
-        const fProd = oProductos.filter(item => {
-          console.log(selectedResistencia, selectedEdad, selectedRev, selectedTMA, selectedCol, aux)
-          // Filtrar por planta, interfaz y texto de búsqueda
-          return (
-            (!selectedResistencia || selectedResistencia === "-" || item.value.includes(selectedResistencia)) &&
-            (!selectedEdad || selectedEdad === "-" || item.value.includes(selectedEdad)) &&
-            (!selectedRev || selectedRev === "-" || item.value.includes(selectedRev)) &&
-            (!selectedTMA || selectedTMA === "-" || item.value.includes(selectedTMA)) &&
-            (!selectedCol || selectedCol === "-" || item.value.includes(selectedCol)) &&
-            item.value.includes(aux) // Siempre se filtra por `aux`
-          );
-        });        
-        console.log(fProd)
-        setFilteredProductos(fProd)
+      if(aux == "-")
+      {
+        console.log("Reiniciria oProductos")
+        setFilteredProductos(productos)
+      }
+      console.log(oProductos)
+      console.log(selectedConcreto,selectedResistencia, selectedEdad, selectedRev, selectedTMA, selectedCol, aux)
+      const fProd = oProductos.filter(item => {
+        // Filtrar por planta, interfaz y texto de búsqueda
+        return (
+          (!selectedResistencia || selectedResistencia === "-" || (item.value && item.value.toString().includes(selectedResistencia))) &&
+          (!selectedEdad || selectedEdad === "-" || (item.value && item.value.toString().includes(selectedEdad))) &&
+          (!selectedRev || selectedRev === "-" || (item.value && item.value.toString().includes(selectedRev))) &&
+          (!selectedTMA || selectedTMA === "-" || (item.value && item.value.toString().includes(selectedTMA))) &&
+          (!selectedCol || selectedCol === "-" || (item.value && item.value.toString().includes(selectedCol))) &&
+          (item.value && item.value.toString().includes(aux)) // Siempre se filtra por `aux`
+        );
+      });        
+      console.log(fProd)
+      setFilteredProductos(fProd)
     };
     const hnextStep = ()=>{
       onUpdateFCData({

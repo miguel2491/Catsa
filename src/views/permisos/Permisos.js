@@ -5,7 +5,7 @@ import Usuarios from '../base/parametros/Usuarios.js';
 
 function App() {
   // ENDPOINTS
-  const baseUrl = "http://apicatsa.catsaconcretos.mx:2543/api/";
+  const baseUrl = "https://apicatsa2.catsaconcretos.mx:2533/api/";
   const getRolesUser = (userId) => axios.get(`${baseUrl}Usuarios/GetRolesUser/${userId}`);
   const getPermisosUser = (userId) => axios.get(`${baseUrl}Usuarios/GetPermisosUser/${userId}`);
 
