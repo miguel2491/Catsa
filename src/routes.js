@@ -8,6 +8,7 @@ const LCotizaciones = React.lazy(() => import('./views/ventas/LCotizaciones'))
 const LPreCotizaciones = React.lazy(() => import('./views/ventas/LPreCotizaciones'))
 const Cotizador = React.lazy(() => import('./views/ventas/Cotizador'))
 const RCartera = React.lazy(() => import('./views/ventas/Cartera'))
+const AddObjCom = React.lazy(() => import('./views/ventas/ObjCom/AddObjCom'))
 //=========================================> OPERACIONES <===============================
 const RCicat = React.lazy(() => import('./views/cicat/Resumen/Resumen'))
 const RemiFal = React.lazy(() => import('./views/cicat/Remisiones/RemiFal'))
@@ -34,6 +35,7 @@ const RBPedido = React.lazy(() => import('./views/reportes/RBPedido'))
 const RComision = React.lazy(() => import('./views/reportes/RComision'))
 const RProyeccion = React.lazy(() => import('./views/reportes/RProyeccion'))
 const RProductosV = React.lazy(() => import('./views/reportes/RProductosV'))
+const RObjCom = React.lazy(() => import('./views/reportes/ObjCom'))
 //=========================================> Calidad <===================================
 const CostosPV = React.lazy(() => import('./views/Calidad/CostosPV'))
 const Formulaciones = React.lazy(() => import('./views/Calidad/Formulaciones'))
@@ -45,6 +47,8 @@ const UpdateMB = React.lazy(() => import('./views/utils/UpdateMB'))
 const QR = React.lazy(() => import('./views/utils/QR'))
 const Permisos = React.lazy(() => import('./views/permisos/Permisos'))
 const Incidencias = React.lazy(() => import('./views/Admin/Usuarios/Usuarios'))
+const CatObjCom = React.lazy(() => import('./views/Admin/ObjCom/Categoria'))
+const PlaObjCom = React.lazy(() => import('./views/Admin/ObjCom/PlantaObjCom'))
 //==================================================================================================================================
 
 const routes = [
@@ -58,6 +62,8 @@ const routes = [
   { path: '/ventas/Cotizador/:id', name: 'Cotizador', element:Cotizador },
   { path: '/reportes/RComision', name: 'Comisiones', element:RComision },
   { path: '/ventas/Cartera', name: 'Cartera', element:RCartera },
+  { path: '/ventas/ObjCom', name: 'ObjCom', element:AddObjCom },
+  { path: '/reportes/RepObjCom', name: 'RObjCom', element:RObjCom },
   //------------------------------> OPERACIONES <------------------------------------------
   { path: '/Cicat/Resumen', name: 'Resumen', element:RCicat },
   { path: '/Cicat/Remisiones', name: 'Remisiones', element:RemiFal },
@@ -91,6 +97,8 @@ const routes = [
   { path: '/Calidad/Formulaciones', name: 'Calidad', element: Formulaciones},
   //--------------------------------------------> EXTRAS <-------------------------------
   { path: '/Admin/Usuarios', name: 'Incidencias', element: Incidencias},
+  { path: '/Admin/Catalogos/Categorias', name: 'CategoriaOC', element: CatObjCom},
+  { path: '/Admin/Catalogos/PlaObjCom', name: 'PlaOC', element: PlaObjCom},
   //--------------------------------------------> REPORTES <-------------------------------
   { path: '/reportes/RProyeccion', name: 'Proyeccion', element:RProyeccion },
   { path: '/reportes/RProductosV', name: 'RProductosV', element:RProductosV },

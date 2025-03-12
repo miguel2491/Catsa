@@ -87,7 +87,7 @@ const AppHeaderDropdown = () => {
         const newPassword = result.value
 
         // 2) Petición POST al endpoint para cambiar la contraseña
-        return fetch('https://apicatsa2.catsaconcretos.mx:2533/api/Login/ResetPass', {
+        return fetch('https://apicatsa.catsaconcretos.mx:2543/api/Login/ResetPass', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

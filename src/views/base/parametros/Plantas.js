@@ -6,7 +6,6 @@ import {
 } from '@coreui/react'
 import { getPlantas } from '../../../Utilidades/Funciones';
 const cookies = new Cookies();
-const baseUrl="https://apicatsa2.catsaconcretos.mx:2533/api/";
 const ap = [];
 cookies.set('plantas', [], {path: '/'});
 const Plantas = ({plantasSel, mCambio}) => {

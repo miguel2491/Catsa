@@ -24,7 +24,7 @@ import TabulatorG from '../base/tabs/TabulatorP'
 import FechaI from '../base/parametros/FechaInicio'
 
 const cookies = new Cookies();
-const baseUrl="https://apicatsa2.catsaconcretos.mx:2533/api/";
+const baseUrl="http://apicatsa.catsaconcretos.mx:2543/api/";
 const baseUrl2="http://localhost:2548/api/";
 
 

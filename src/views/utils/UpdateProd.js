@@ -16,8 +16,8 @@ import {CIcon} from '@coreui/icons-react'
 import { cilLoopCircular, cilSearch } from '@coreui/icons'
 
 const cookies = new Cookies();
-const baseUrl="https://apicatsa2.catsaconcretos.mx:2533/api/";
-const baseUrl2="http://localhost:2548/api/";
+const baseUrl2="http://apicatsa.catsaconcretos.mx:2543/api/";
+const baseUrl="http://localhost:2548/api/";
 
 
 const UpdateProd = () => {

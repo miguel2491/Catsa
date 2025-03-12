@@ -87,12 +87,16 @@ const Cotizador = () => {
   const [coordsPla, setCoordsPla] = useState({Lat:null, Lon:null});
   const [pData, setPData] = useState([]);
   const [pDataC, setCData] = useState([]);
+  const [cExtras, setcExtras] = useState([]);
   //********************************************************************* */
   const updPData = (newData) => {
     setPData((prevData) => [...prevData, ...newData]);
   };
+  const updDPData = (newData) => {
+    set((prevData) => [...prevData, ...newData]);
+  };
   const updFData = (newFData) => {
-    setFData((prevData) => ({
+    setDPlanta((prevData) => ({
       ...prevData,
       ...newFData
     }));
@@ -153,6 +157,12 @@ const Cotizador = () => {
     nombre_sol:null,
     telefono:null,
   });
+  const [fDPlanta, setDPlanta] = useState({
+    fijos:dFijos,
+    corporativo:dCorpo,
+    MOP:dMop,
+    diesel:dDiesel,
+  });
   const [pedData, setPedData] = useState({
     IdPedido:null,
     FechaCreacion:null,
@@ -175,6 +185,7 @@ const Cotizador = () => {
     Producto:null,
     Recibe:null,
   });
+
   //********************************************************************* */
   useEffect(()=>{    
       if(noCotizacion != 0)
@@ -192,6 +203,12 @@ const Cotizador = () => {
     useEffect(() => {
       //console.log('CoordsPla actualizado:', coordsPla);  // Aquí verificas si el estado ha cambiado
     }, [coordsPla]);
+    useEffect(() => {
+      //console.log("fDPlanta Updated:", fDPlanta)
+    }, [fDPlanta]);
+    useEffect(() => {
+      //console.log("fDPlanta Updated:", fDPlanta)
+    }, [cExtras]);
     const getCotizacion = async(id) =>{
       try{
         const ocList = await getCotizacionId(id);
@@ -298,7 +315,7 @@ const Cotizador = () => {
           const fcaIni = fecha.split('/');
           let auxFcaI = fcaIni[2]+"-"+fcaIni[0]+"-"+fcaIni[1];
           const datosPla = await getDatosPlanta(planta, auxFcaI, cpc);
-          //console.log(datosPla.autoriza.data[0])
+          setcExtras(datosPla.costo_extra.data)
           setDFijos(datosPla.autoriza.data[0].FIJOS);
           setDCorpo(datosPla.autoriza.data[0].CORPORATIVO);
           setDMop(datosPla.autoriza.data[0].MOP);
@@ -307,7 +324,13 @@ const Cotizador = () => {
           setSegmento(datosPla.segmento.data);
           setTC(datosPla.canal.data);
           setCoordsPla({Lat:datosPla.autoriza.data[0].Lat, Lon:datosPla.autoriza.data[0].Lon,})
-          
+          const nDPlanta = {
+            fijos:datosPla.autoriza.data[0].FIJOS,
+            corporativo:datosPla.autoriza.data[0].CORPORATIVO,
+            MOP:datosPla.autoriza.data[0].MOP,
+            diesel:datosPla.autoriza.data[0].DISEL
+          };
+          setDPlanta(nDPlanta)
           setPlantas(planta);
           getClientes(planta);
       } else {
@@ -344,6 +367,9 @@ const Cotizador = () => {
   const fCotizacion = async() =>{
     console.log(noCotizacion)
   };
+  const limpiar = ()=>{
+    window.location.reload();
+  }
   //***************************************************************** */
   return(
     <CContainer fluid>
@@ -371,12 +397,14 @@ const Cotizador = () => {
             </CInputGroup>
           </div>
         </CCol>
+      </CRow>
+      <CRow className='mt-1 mb-3'>
         <CCol xs={4} md={1} lg={1} className='mt-4'>
-          <CButton color="success" className='txtTitleBtn'>Limpiar</CButton>
+          <CButton color="success" className='txtTitleBtn' onClick={()=>limpiar()}>Limpiar</CButton>
         </CCol>
-        <CCol xs={4} md={1} lg={1} className='mt-4'>
+        {/* <CCol xs={4} md={1} lg={1} className='mt-4'>
           <CButton color="danger" className='txtTitleBtn'>Exportar</CButton>
-        </CCol>
+        </CCol> */}
         <CCol xs={4} md={1} lg={1} className='mt-4'>
           <CButton color="primary" className='txtTitleBtn'>Guardar</CButton>
         </CCol>
@@ -384,7 +412,7 @@ const Cotizador = () => {
       {shSteps && (
       <StepWizard>
         <Step1 idC={id} fijos={dFijos} corpo={dCorpo} mop={dMop} cdiesel={dDiesel} sucursal={plantasSel} clientes_={aClientes} obras_={aObras} coords={coordsO} coordsPla={coordsPla} nCot={noCotizacion} onUpdateFCData={updFCData} onUpdateFData={updFData} />
-        <Step2 fuente={aFuente} segmento={aSegmento} canal={aTC} productos={aProducto} fData={fData} updPData={updPData} onUpdateFCData={updFCData} />
+        <Step2 fuente={aFuente} segmento={aSegmento} canal={aTC} productos={aProducto} extras={cExtras} fDPlanta={fDPlanta} fData={fData} updPData={updPData} onUpdateFCData={updFCData} />
         <Step3 fData={pDataC} pData={pData} sucursal={plantasSel} />
       </StepWizard>
       )}

@@ -26,6 +26,11 @@ import {
   cilCash,
   cilTrash,
   cilCart,
+  cilApps,
+  cilAirplay,
+  cilBank,
+  cilIndentIncrease,
+  cilPlaylistAdd,
 } from '@coreui/icons'
 import { CNavGroup, CNavItem, CNavTitle } from '@coreui/react'
 import CIcon from '@coreui/icons-react'
@@ -182,6 +187,30 @@ const NavProvider = ({ children }) => {
                   },
                 ]
               : []),
+              ...(userIsVentas || userIsAdminTI || userIsDirector
+                ? [
+                    {
+                      component: CNavGroup,
+                      name: 'Objetivos Comerciales',
+                      to: '/theme/admin',
+                      icon: <CIcon icon={cilIndentIncrease} customClassName="nav-icon" />,
+                      items: [
+                        {
+                          component: CNavItem,
+                          name: 'Agregar Objetivo Comercial',
+                          to: '/ventas/ObjCom',
+                          icon: <CIcon icon={cilPlaylistAdd} customClassName="nav-icon" />,
+                        },
+                        {
+                          component: CNavItem,
+                          name: 'Reporte Objetivo Comercial',
+                          to: '/reportes/RepObjCom',
+                          icon: <CIcon icon={cilBarChart} customClassName="nav-icon" />,
+                        },
+                      ],
+                    },
+                  ]
+                : []),  
           ]
         : []),
       ...(userIsAdmin || userIsOperacion || userIsGerenteP || userIsJP || userIsAdminTI || userIsAuxGer
@@ -442,6 +471,29 @@ const NavProvider = ({ children }) => {
                   : []),
               ],
             },
+            {
+              component: CNavGroup,
+              name: 'Catalogos',
+              to: '/catalogos',
+              icon: <CIcon icon={cilApps} customClassName="nav-icon" />,
+              items: [
+                ...(userIsAdminTI
+                  ? [
+                      {
+                        component: CNavItem,
+                        name: 'Categorias Obj Com',
+                        icon: <CIcon icon={cilAirplay} customClassName="nav-icon" />,
+                        to: '/Admin/Catalogos/Categorias',
+                      },{
+                        component: CNavItem,
+                        name: 'Plantas Obj Com',
+                        icon: <CIcon icon={cilBank} customClassName="nav-icon" />,
+                        to: '/Admin/Catalogos/PlaObjCom',
+                      },
+                    ]
+                  : []),
+              ],
+            },
           ]
         : []),
       ...(userIsAdminTI || userIsDirector || userIsAdmin || userIsGerenteP
@@ -506,7 +558,7 @@ const NavProvider = ({ children }) => {
             },
             ]
             :[]),
-            ...(userIsAdminTI
+            ...(userIsAdminTI || userIsAdmin
               ? [
             {
               component: CNavGroup,

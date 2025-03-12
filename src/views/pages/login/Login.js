@@ -2,9 +2,6 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   CModal,
-  CModalHeader,
-  CModalBody,
-  CModalFooter
 } from "@coreui/react";
 import Cookies from "universal-cookie";
 import axios from "axios";
@@ -14,13 +11,10 @@ import { getRol, GetToken } from "../../../Utilidades/Funciones";
 import "./Login.css";
 
 // URL base y endpoint
-const baseUrl = "https://apicatsa2.catsaconcretos.mx:2533/api/";
+const baseUrl = "http://apicatsa.catsaconcretos.mx:2543/api/";
 export default function Login() {
   // authMode: "login" | "register" | "recover"
   const [authMode, setAuthMode] = useState("login");
-
-  // Para modal de carga
-  const [visible, setVisible] = useState(false);
 
   // Cookies y navegación
   const cookies = new Cookies();
@@ -52,11 +46,9 @@ export default function Login() {
         }
     });
     // Retornaremos true o false según éxito/fracaso
-    setVisible(true); // Mostrar modal de carga
     if (username === "" || password === "") {
       Swal.close();
       Swal.fire("Error", "Revise Usuario/Contraseña y vuelva a intentar", "error");
-      setVisible(false);
       return false; 
     }
     try {
@@ -74,7 +66,6 @@ export default function Login() {
       if (!userInfo.id) {
         Swal.close();
         Swal.fire("Error", "Usuario/Contraseña incorrecta", "error");
-        setVisible(false);
         return false;
       }
 
@@ -98,7 +89,7 @@ export default function Login() {
       Swal.fire("Error", "Usuario/Contraseña incorrecta, vuelve a intentar", "error");
       return false;
     } finally {
-      setVisible(false);
+      //setVisible(false);
     }
   }
 
@@ -111,7 +102,6 @@ export default function Login() {
       return false;
     }
 
-    setVisible(true);
     const postData = {
       UserName: newUser,
       Password: newPassword,
@@ -142,7 +132,7 @@ export default function Login() {
       Swal.fire("Error", "Ocurrió un problema al registrar", "error");
       return false;
     } finally {
-      setVisible(false);
+      //setVisible(false);
     }
   }
 
@@ -151,12 +141,10 @@ export default function Login() {
   // =================================================================
   async function handleRecoverSubmit(email) {
     // Retornar true o false según éxito/fracaso
-    setVisible(true);
-
+    
     // Validar email vacio
     if (!email || email.trim() === "") {
       Swal.fire("Advertencia", "El correo está vacío", "warning");
-      setVisible(false);
       return false;
     }
 
@@ -181,38 +169,15 @@ export default function Login() {
       Swal.fire("Error", "Ocurrió un problema al enviar el correo", "error");
       return false;
     } finally {
-      setVisible(false);
+      //setVisible(false);
     }
   }
-
-  // =================================================================
-  //             RENDER DEL MODAL DE CARGA (SPINNER)
-  // =================================================================
-  const renderLoadingModal = (
-    <CModal
-      className="mLogin"
-      backdrop="static"
-      visible={visible}
-      onClose={() => setVisible(false)}
-      aria-labelledby="StaticBackdropExampleLabel"
-    >
-      <CModalHeader>
-        <br />
-      </CModalHeader>
-      <CModalBody className="centered-content">
-        <img src={load} alt="Cargando" width={60} />
-        <p>Cargando...</p>
-      </CModalBody>
-      <CModalFooter />
-    </CModal>
-  );
 
   // =================================================================
   //                           RENDER PRINCIPAL
   // =================================================================
   return (
     <div className="back">
-      {renderLoadingModal}
 
       {authMode === "login" && (
         <LoginForm

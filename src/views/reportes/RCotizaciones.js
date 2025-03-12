@@ -28,7 +28,7 @@ import { format } from 'date-fns';
 import {FormatoFca} from '../../Utilidades/Tools.js'
 
 const cookies = new Cookies();
-const baseUrl="https://apicatsa2.catsaconcretos.mx:2533/api/";
+const baseUrl="http://apicatsa.catsaconcretos.mx:2543/api/";
 const baseUrl2="http://localhost:2548/api/";
 
 const currentDate = new Date();
@@ -95,15 +95,6 @@ const PedidosMetro = () => {
     setPlantas(event.target.value);
   };
   const getRepos = () =>{
-    // setVisible(!visible)
-    // setLoading(true);
-    // setPercentage(0);
-    // const interval = setInterval(() => {
-    //   setPercentage(prev => {
-    //   if (prev < 90) return prev + 10;
-    //   return prev;
-    //   });
-    // }, 1000);
     getDiario();
   }
   const mFcaF = (fcaF) => {

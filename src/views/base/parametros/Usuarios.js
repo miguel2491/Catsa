@@ -3,8 +3,8 @@ import Cookies from 'universal-cookie';
 import axios from 'axios';
 
 const cookies = new Cookies();
-const baseUrl = "https://apicatsa2.catsaconcretos.mx:2533/api/";
 
+import { GetUsuarios } from '../../../Utilidades/Funciones';
 const Usuarios = ({ usuarioSel, onCambioUsuario }) => {
   const [usuarios, setUsuarios] = useState([]);
   const [filtro, setFiltro] = useState('');
@@ -16,35 +16,18 @@ const Usuarios = ({ usuarioSel, onCambioUsuario }) => {
       const parsedUsuarios = JSON.parse(savedUsuarios);
       setUsuarios(parsedUsuarios);
     } else {
-      getUsuarios();
+      getUsuarios_();
     }
   }, []);
 
-  const getUsuarios = () => {
+  const getUsuarios_ = async() => {
     try {
-      let confi_ax = {
-        headers: {
-          'Cache-Control': 'no-cache',
-          'Content-Type': 'application/json'
-          // "Authorization": "Bearer " + cookies.get('token') si se requiere
-        }
-      };
-
-      axios.get(baseUrl + 'Usuarios/GetUsers', confi_ax)
-        .then(response => {
-          const data = response.data;
-          cookies.set('usuarios', JSON.stringify(data), { path: '/' });
-          setUsuarios(data);
-        })
-        .catch(err => {
-          if (err.response) {
-            console.error('Error de Respuesta:', err.response.data);
-          } else if (err.request) {
-            console.error('Error: No se recibió respuesta del servidor.');
-          } else {
-            console.error('Error:', err.message);
-          }
-        });
+      const ocList = await GetUsuarios();
+      if(ocList)
+      {
+        cookies.set('usuarios', JSON.stringify(data), { path: '/' });
+        setUsuarios(data); 
+      }
     } catch (error) {
       console.log(error);
     }

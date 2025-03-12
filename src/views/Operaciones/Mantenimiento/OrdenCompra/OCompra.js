@@ -308,7 +308,7 @@ const OCompra = () => {
             if(ocList[0].urlImg.length > 0){
                 setVFile(false)
                 setVImg(true)
-                setUrlImg("https://apicatsa2.catsaconcretos.mx:2533/Uploads/OC/"+ocList[0].urlImg)
+                setUrlImg("http://apicatsa.catsaconcretos.mx:2543/Uploads/OC/"+ocList[0].urlImg)
             }
             setshRespuesta(true);
             setResp(ocList[0].respuesta)

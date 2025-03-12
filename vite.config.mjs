@@ -41,16 +41,16 @@ export default defineConfig(() => {
       extensions: ['.mjs', '.js', '.ts', '.jsx', '.tsx', '.json', '.scss'],
     },
     server: {
-      host:'10.20.2.54',
-      https:{
-        key: fs.readFileSync(path.resolve(__dirname, './certs/key.pem')),
-        cert: fs.readFileSync(path.resolve(__dirname, './certs/cert.pem')),
-      },
+      host:'localhost',
+      https:false,//{
+      //   key: fs.readFileSync(path.resolve(__dirname, './certs/key.pem')),
+      //   cert: fs.readFileSync(path.resolve(__dirname, './certs/cert.pem')),
+      // },
       port: 3000,
       open:true,
       proxy: {
         '/api': {
-          target: 'https://10.20.2.54:5001',  // La URL de tu servidor ASP.NET Core
+          target: 'http://apicatsa.catsaconcretos.mx:2543',//'https://apicatsa2.catsaconcretos.mx:2533/api/',  // La URL de tu servidor ASP.NET Core
           changeOrigin: true,
           secure: false,
         },

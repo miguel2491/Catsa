@@ -167,7 +167,7 @@ const DCancelados = () => {
                     }else{
                         setshFile(false);
                         setshImg(true)
-                        setUrlImg("https://apicatsa2.catsaconcretos.mx:2533/Uploads"+imagen)
+                        setUrlImg("http://apicatsa.catsaconcretos.mx:2543/Uploads"+imagen)
                     }
                     setRCantidad(ocList[0].cantidad ? ocList[0].cantidad : '0');
                     setRPrecioConcreto(ocList[0].precioConcreto ? ocList[0].precioConcreto:'0');

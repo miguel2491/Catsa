@@ -4,6 +4,7 @@ import axios from 'axios'
 import Swal from "sweetalert2";
 import ProgressBar from "@ramonak/react-progress-bar";
 import {FormatoFca, Fnum} from '../../../Utilidades/Tools.js'
+import {setEntradasD} from '../../../Utilidades/Funciones.js'
 import { format } from 'date-fns';
 
 import {
@@ -24,8 +25,6 @@ import {CIcon} from '@coreui/icons-react'
 import { cilLoopCircular, cilSearch } from '@coreui/icons'
 
 const cookies = new Cookies();
-const baseUrl="https://apicatsa2.catsaconcretos.mx:2533/api/";
-const baseUrl2="http://localhost:2548/api/";
 
 const ResEntradasD = forwardRef((props, ref) => {
     const [loading, setLoading] = useState(false);
@@ -36,38 +35,27 @@ const ResEntradasD = forwardRef((props, ref) => {
     const [dHeaders, putHeaders] = useState([]);
 
     const getEntradasD = () => {
-        setEntradasD(props.planta, props.fechaI, props.fechaF);
+        setEntradasD_(props.planta, props.fechaI, props.fechaF);
     };
     
     useImperativeHandle(ref, () => ({
         getEntradasD,
     }));
 
-    async function setEntradasD(planta, FI, FF) {
+    const setEntradasD_ = async(planta, FI, FF) => {
         try
         {
-            let confi_ax = {
-                headers:
-                {
-                    'Cache-Control': 'no-cache',
-                    'Content-Type': 'application/json',
-                    "Authorization": "Bearer "+cookies.get('token'),
-                },
-            };
             //------------------------------------------------------------------------------------------------------------------------------------------------------
-            const fcaI = format(FI, 'yyyy-MM-dd');
-            const fcaF = format(FF, 'yyyy-MM-dd');
-            //------------------------------------------------------------------------------------------------------------------------------------------------------
-            const response = await axios.get(baseUrl+'Operaciones/GetResumen/'+planta+','+fcaI+','+fcaF+',ED', confi_ax);
-            var obj =  response.data[0].Rows;
-            setEntradasDv(obj);
-            putHeaders(Object.keys(obj[0]));
+            const ocList = await setEntradasD(planta, auxFcaI, auxFcaF);
+            if(ocList)
+            {
+                setEntradasDv(ocList);
+                putHeaders(Object.keys(ocList[0]));
+            }
         } 
         catch(error)
         {
             console.log(error)
-        }finally{
-            
         }
     }
 

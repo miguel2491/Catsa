@@ -826,7 +826,7 @@ const LCotizacion = () => {
           Swal.fire({
             title: "Peido #"+id,
             text: "Pedido",
-            imageUrl: "https://apicatsa2.catsaconcretos.mx:2533/Uploads/DocPedidos/"+id+"/"+extFile,
+            imageUrl: "http://apicatsa.catsaconcretos.mx:2543/Uploads/DocPedidos/"+id+"/"+extFile,
             imageWidth: 600,
             imageHeight: 400,
             imageAlt: "Pedido"
@@ -1318,24 +1318,24 @@ const LCotizacion = () => {
     <CContainer fluid>
       <h1>Cotizaciones</h1>
       <CRow className='mt-3 mb-3'>
-        <CCol sm="auto">
+        <CCol xs={6} md={4}>
           <FechaI 
             vFechaI={vFechaI} 
             cFechaI={cFechaI} 
           /></CCol>
-        <CCol sm="auto">
+        <CCol xs={6} md={4}>
           <FechaF 
             vFcaF={vFcaF} 
             mFcaF={mFcaF}
           />
         </CCol>
-        <CCol sm="auto">
+        <CCol xs={12} md={4}>
           <Plantas  
             mCambio={mCambio}
             plantasSel={plantasSel}
           />
         </CCol>
-        <CCol sm="auto">
+        <CCol xs={12} md={12}>
           <BuscadorDT value={vBPlanta} onChange={onFindBusqueda} onSearch={fBusqueda} />
         </CCol>
       </CRow>

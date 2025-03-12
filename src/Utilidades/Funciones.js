@@ -4,9 +4,9 @@ import { format } from 'date-fns';
 import Cookies from 'universal-cookie'
 const cookies = new Cookies();
 import Swal from "sweetalert2";
-const baseUrlS="https://apicatsa.catsaconcretos.mx:2544/api/";
-const baseUrl2="http://apicatsa.catsaconcretos.mx:2543/api/";
-const baseUrl="https://apicatsa2.catsaconcretos.mx:2533/api/";
+const baseUrl="http://apicatsa.catsaconcretos.mx:2543/api/";
+const baseUrl2="http://localhost:5001/api/";
+const baseUrlS="https://apicatsa2.catsaconcretos.mx:2533/api/";
 const baseUrl2S="https://localhost:5001/api/";
 //****************************************************************************************************************************************************************************** */
 // LOGIN
@@ -16,9 +16,14 @@ const baseUrl2S="https://localhost:5001/api/";
   export async function GetToken() {
     const postData = { UserName: "ProCatsa", Password: "ProCatsa2024$." };
     const confi_ax = {
-      headers: {
-        "Content-Type": "application/json;charset=UTF-8",
-        "Access-Control-Allow-Origin": "*",
+    //   headers: {
+    //     "Content-Type": "application/json;charset=UTF-8",
+    //     "Access-Control-Allow-Origin": "*",
+    //   },
+        headers: {
+        "Cache-Control": "no-cache",
+        "Content-Type": "application/json",
+        Authorization: "Bearer " + cookies.get("token"),
       },
     };
     try {
@@ -28,7 +33,28 @@ const baseUrl2S="https://localhost:5001/api/";
       console.error("Error obteniendo token", error);
     }
   }
-  
+  export async function  GetUsuarios() {
+    let confi_ax = {
+        headers: {
+          'Cache-Control': 'no-cache',
+          'Content-Type': 'application/json'
+        }
+    };
+    try {
+      const response = await axios.post(baseUrl + "Usuarios/GetUsers", confi_ax);
+        if (response.data && response.data.length > 0) {
+            const obj = response.data;
+            if(obj.length > 0)
+            {
+                return obj;
+            }else{
+                return false
+            }
+        }else{return false}
+    } catch (error) {
+      console.error("Ocurrio un Error", error);
+    }
+  }
   // =================================================================
   //                      INICIAR SESIÓN
   // =================================================================
@@ -489,6 +515,232 @@ export async function setVideoUpload(data) {
         return false
     }
 }
+export async function getCategoriasOC() {
+    try
+    {
+        let confi_ax = {
+            headers:
+            {
+                'Cache-Control': 'no-cache',
+                'Content-Type': 'application/json',
+                "Authorization": "Bearer "+cookies.get('token'),
+            },
+        };
+        //------------------------------------------------------------------------------------------------------------------------------------------------------
+        const response = await axios.get(baseUrl2+'Comercial/GetCategoriasVentas', confi_ax);
+        if (response.data && response.data.length > 0) {
+            const obj = response.data;
+            if(obj.length > 0)
+            {
+                return obj;
+            }else{return false}
+        }else{return false}
+    } 
+    catch(error)
+    {
+        return false
+    }
+}
+export async function setCategorias(data) {
+    try
+    {
+        let confi_ax = {
+            headers:
+            {
+                'Cache-Control': 'no-cache',
+                'Content-Type': 'application/json',
+                "Authorization": "Bearer "+cookies.get('token'),
+            },
+        };
+        const fData = new FormData();
+        fData.append("vC", JSON.stringify({
+            id: data.id,
+            categoria: data.categoria,
+            cantidad_min: data.cantidad_min,
+            cantidad_max: data.cantidad_max,
+            estatus: data.estatus
+        }));
+        //------------------------------------------------------------------------------------------------------------------------------------------------------
+        const response = await axios.post(baseUrl2+'Comercial/setCategoriaVen', data, confi_ax);
+        if (response.data && response.data.length > 0) {
+            const obj = response.data;
+            if(obj.length > 0)
+            {
+                return obj;
+            }else{return false}
+        }else{return false}
+    } 
+    catch(error)
+    {
+        return false
+    }
+}
+export async function getCatId(id) {
+    try
+    {
+        let confi_ax = {
+            headers:
+            {
+                'Cache-Control': 'no-cache',
+                'Content-Type': 'application/json',
+                "Authorization": "Bearer "+cookies.get('token'),
+            },
+        };
+        //------------------------------------------------------------------------------------------------------------------------------------------------------
+        const response = await axios.get(baseUrl2+'Comercial/GetCategoriaId/'+id, confi_ax);
+        if (response.data && response.data.length > 0) {
+            const obj = response.data;
+            if(obj.length > 0)
+            {
+                return obj;
+            }else{return false}
+        }else{return false}
+    } 
+    catch(error)
+    {
+        return false
+    }
+}
+export async function delCatId(id) {
+    try
+    {
+        let confi_ax = {
+            headers:
+            {
+                'Cache-Control': 'no-cache',
+                'Content-Type': 'application/json',
+                "Authorization": "Bearer "+cookies.get('token'),
+            },
+        };
+        //------------------------------------------------------------------------------------------------------------------------------------------------------
+        const response = await axios.delete(baseUrl2+'Comercial/GetDeleteCV/'+id, confi_ax);
+        if (response.data && response.data.length > 0) {
+            const obj = response.data;
+            if(obj.length > 0)
+            {
+                return obj;
+            }else{return false}
+        }else{return false}
+    } 
+    catch(error)
+    {
+        return false
+    }
+}
+export async function getPlantasOC(mes,periodo) {
+    try
+    {
+        let confi_ax = {
+            headers:
+            {
+                'Cache-Control': 'no-cache',
+                'Content-Type': 'application/json',
+                "Authorization": "Bearer "+cookies.get('token'),
+            },
+        };
+        //------------------------------------------------------------------------------------------------------------------------------------------------------
+        const response = await axios.get(baseUrl2+'Comercial/GetObjComPlaGn/'+mes+','+periodo, confi_ax);
+        console.log(response)
+        if (response.data && response.data.length > 0) {
+            const obj = response.data;
+            if(obj.length > 0)
+            {
+                return obj;
+            }else{return false}
+        }else{return false}
+    } 
+    catch(error)
+    {
+        return false
+    }
+}
+export async function getPlantasOCId(planta,mes,periodo) {
+    try
+    {
+        let confi_ax = {
+            headers:
+            {
+                'Cache-Control': 'no-cache',
+                'Content-Type': 'application/json',
+                "Authorization": "Bearer "+cookies.get('token'),
+            },
+        };
+        //------------------------------------------------------------------------------------------------------------------------------------------------------
+        const response = await axios.get(baseUrl2+'Comercial/GetObjComPlanta/'+planta+','+mes+','+periodo, confi_ax);
+        if (response.data && response.data.length > 0) {
+            const obj = response.data;
+            if(obj.length > 0)
+            {
+                return obj;
+            }else{return false}
+        }else{return false}
+    } 
+    catch(error)
+    {
+        return false
+    }
+}
+export async function savePlaOC(data) {
+    try
+    {
+        let confi_ax = {
+            headers:
+            {
+                'Cache-Control': 'no-cache',
+                'Content-Type': 'application/json',
+                "Authorization": "Bearer "+cookies.get('token'),
+            },
+        };
+        const fData = new FormData();
+        fData.append("vC", JSON.stringify({
+            id: data.id,
+            categoria: data.categoria,
+            cantidad_min: data.cantidad_min,
+            cantidad_max: data.cantidad_max,
+            estatus: data.estatus
+        }));
+        //------------------------------------------------------------------------------------------------------------------------------------------------------
+        const response = await axios.post(baseUrl2+'Comercial/setObjComPla', data, confi_ax);
+        if (response.data && response.data.length > 0) {
+            const obj = response.data;
+            if(obj.length > 0)
+            {
+                return obj;
+            }else{return false}
+        }else{return false}
+    } 
+    catch(error)
+    {
+        return false
+    }
+}
+export async function delPlaOC(id) {
+    try
+    {
+        let confi_ax = {
+            headers:
+            {
+                'Cache-Control': 'no-cache',
+                'Content-Type': 'application/json',
+                "Authorization": "Bearer "+cookies.get('token'),
+            },
+        };
+        //------------------------------------------------------------------------------------------------------------------------------------------------------
+        const response = await axios.delete(baseUrl2+'Comercial/GetDeleteObjComPla/'+id, confi_ax);
+        if (response.data && response.data.length > 0) {
+            const obj = response.data;
+            if(obj.length > 0)
+            {
+                return obj;
+            }else{return false}
+        }else{return false}
+    } 
+    catch(error)
+    {
+        return false
+    }
+}
+
 //****************************************************************************************************************************************************************************** */
 //LOGISTICA
     // Pedidos
@@ -520,7 +772,36 @@ export async function getPedidos(planta) {
 }
 //****************************************************************************************************************************************************************************** */
 // OPERACIONES
-    // CICAT 
+    // CICAT
+export async function  setEntradasD(planta, FI, FF) {
+    try
+    {
+        let confi_ax = {
+            headers:
+            {
+                'Cache-Control': 'no-cache',
+                'Content-Type': 'application/json',
+                "Authorization": "Bearer "+cookies.get('token'),
+            },
+        };
+        const fcaI = FormatoFca(FI);
+        const fcaF = FormatoFca(FF);
+        //------------------------------------------------------------------------------------------------------------------------------------------------------
+        const response = await axios.get(baseUrl+'Operaciones/GetResumen/'+planta+','+fcaI+','+fcaF+',ED', confi_ax);
+        if (response.data && response.data.length > 0 && response.data[0].Rows) {
+            const obj = response.data[0].Rows;
+            if(obj.length > 0)
+            {
+                return obj;
+            }else{return false}
+        }else{return false}
+    } 
+    catch(error)
+    {
+        return false
+    }
+}
+
 export async function getMovs(plantas, FI, FF)
 {
     try
@@ -1639,6 +1920,31 @@ export  async function getVisitas(idC, motivo)
         return false;
     }    
 }
+export  async function getVolComision(planta,obra)
+{
+    try
+    {
+        let confi_ax = {
+            headers:
+            {
+                'Cache-Control': 'no-cache',
+                'Content-Type': 'application/json',
+                "Authorization": "Bearer "+cookies.get('token'),
+            },
+        };
+        //------------------------------------------------------------------------------------------------------------------------------------------------------
+        const response = await axios.get(baseUrl+'Comercial/GetVolumenComision/'+planta+','+obra+','+cookies.get('Usuario'), confi_ax);
+        var obj = response.data;
+        if(obj.length > 0)
+        {
+            return obj
+        }else{return false}
+    } 
+    catch(error)
+    {
+        return false;
+    }    
+}
 //--
 export async function getClientesCartera(planta) {
     try
@@ -2714,3 +3020,6 @@ export const opcionesFca = {
     month: '2-digit',   // 'numeric', '2-digit', 'short', 'long', 'narrow'
     day: '2-digit'   // 'numeric', '2-digit'
   };
+export const fNumberCad = (number) => {
+    return number.toString().padStart(2, '0');
+};

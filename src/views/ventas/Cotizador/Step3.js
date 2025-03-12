@@ -551,14 +551,14 @@ const Step3 = ({ previousStep, fData, pData, sucursal, onSave }) => {
                           <CFormInput type="text" id="robra" placeholder="-" value={producto2.Recibe} onChange={(e)=>hRecibeObra(e, index)} />
                         </CCol>
                         {(!producto2.Archivos) && (
-                        <CCol xs={6} md={3}>
+                        <CCol xs={12} md={3}>
                           <div className="mb-3">
                             <CFormInput type="file" id="formFile" label="Examinar" />
                           </div>
                         </CCol>
                         )}
                         {(producto2.Archivos) && (
-                        <CCol xs={6} md={3}>
+                        <CCol xs={12} md={3}>
                           {/* <CImage rounded thumbnail src={`http://apicatsa.catsaconcretos.mx:2543/Uploads/DocPedidos/${producto2.IdPedido}/${producto2.IdPedido}.png`} width={500} height={320} /> */}
                         </CCol>
                         )}

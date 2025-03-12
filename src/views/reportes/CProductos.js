@@ -22,7 +22,7 @@ import {CIcon} from '@coreui/icons-react'
 import { cilSearch } from '@coreui/icons';
 
 const cookies = new Cookies();
-const baseUrl="https://apicatsa2.catsaconcretos.mx:2533/api/";
+const baseUrl="http://apicatsa.catsaconcretos.mx:2543/api/";
 
 const CProductos = () => {
   const [loading, setLoading] = useState(false);

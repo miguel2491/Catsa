@@ -3,7 +3,7 @@ import Swal from 'sweetalert2';
 import Select from 'react-select';
 import makeAnimated from 'react-select/animated';
 import DataTable from 'react-data-table-component';
-import { formatCurrency } from '../../../Utilidades/Funciones';
+import { formatCurrency, fNumber, getVolComision } from '../../../Utilidades/Funciones';
 import "react-datepicker/dist/react-datepicker.css";
 import 'rc-time-picker/assets/index.css';
 import {
@@ -26,7 +26,7 @@ import { cilCheck, cilX, cilPlus } from '@coreui/icons'
 import { Rol } from '../../../Utilidades/Roles'
 import '../../../estilos.css'
 
-const Step2 = ({ nextStep, previousStep, fuente, segmento, canal, productos, fData, updPData, onUpdateFCData }) => {
+const Step2 = ({ nextStep, previousStep, fuente, segmento, canal, productos, extras, fDPlanta, fData, updPData, onUpdateFCData }) => {
     const animatedComponents = makeAnimated();
     const [dDetalle, setDataD] = useState([]); // Estado para almacenar los datos de Detalle
     const [productoBuscado, setProductoBuscado] = useState(""); 
@@ -43,10 +43,26 @@ const Step2 = ({ nextStep, previousStep, fuente, segmento, canal, productos, fDa
     const [selectedRev, setSelectedRev] = useState("-");
     const [selectedTMA, setSelectedTMA] = useState("-");
     const [selectedCol, setSelectedCol] = useState("-");
+    const [selectedProductos, setSelectedProductos] = useState([]);
+    //Costos
+    const [MOP1, setCMOP] = useState();
+    const [CMP, setCMP] = useState();
+    const [Cindirectos, setCIndirectos] = useState();
+    const [CTotal, setCTotal] = useState();
+    const [M3Bomba, setM3Bomba] = useState();
+    const [PBomba, setPBomba] = useState();
+    const [PVenta, setPVenta] = useState();
+    const [PorcVenta, setPorcVenta] = useState();
+    const [comision, setComision] = useState();
+    const [MB, setMB] = useState();
+    const [cExtras, setcExtras] = useState([]);
+    const [sExtra, setSExtra] = useState();
+    const [dtExtras, setDTExtras] = useState([]);
     // FILTROS ARRAY 
     const [filteredProductos, setFilteredProductos] = useState([]);
     const [fProductos, setFProductos] = useState([]);
     const [sOProductos, setOProductos] = useState([]);
+    const [sComisiones, setComisiones] = useState([]);
     const { cliente } = fData;
     const btnExtras = (Producto) => {
       setMExtras(true);
@@ -61,7 +77,7 @@ const Step2 = ({ nextStep, previousStep, fuente, segmento, canal, productos, fDa
                         <CButton
                             color="danger"
                             size="sm"
-                            onClick={() => getDetalle(1)}
+                            onClick={() => DeletePro(row.Producto)}
                             className="me-2"
                             title="Eliminar"
                         >
@@ -76,7 +92,7 @@ const Step2 = ({ nextStep, previousStep, fuente, segmento, canal, productos, fDa
                 cell: (row, index) => (
                   <input
                     type="number"
-                    value={row.CPC}
+                    value="1.0"
                     onChange={(e) => handleEdit(e, index)} // Maneja el cambio de valor
                     style={{ width: '100%' }}
                   />
@@ -96,56 +112,80 @@ const Step2 = ({ nextStep, previousStep, fuente, segmento, canal, productos, fDa
             {
               name: 'Cemento',
               width:"100px",
-              selector: row => row.CPC,
+              selector: row => fNumber(row.CPC),
             },
             {
               name: 'Agua',
-              width:"150px",
-              selector: row => row.H2O,
+              width:"100px",
+              selector: row => fNumber(row.H2O),
             },
             {
               name: 'Gravas',
-              width:"150px",
-              selector: row => row.GRAVAS,
+              width:"100px",
+              selector: row => fNumber(row.GRAVAS),
             },
             {
               name: 'Arenas',
-              width:"150px",
-              selector: row => row.ARENAS,
+              width:"100px",
+              selector: row => fNumber(row.ARENAS),
             },
             {
               name: 'Aditivos',
-              width:"150px",
-              selector: row => row.ADITIVOS,
+              width:"100px",
+              selector: row => fNumber(row.ADITIVOS),
             },
             {
               name: 'Costo MP',
-              width:"150px",
-              selector: row => row.COSTO,
+              width:"120px",
+              selector: row => {
+                const auxcp = row.COSTO;
+                const CP = formatCurrency(auxcp);
+                setCMP(CP)
+                return CP
+              },
             },
             {
               name: 'MB Mínimo',
-              width:"150px",
-              selector: row => row.CPC,
+              width:"120px",
+              selector: row => formatCurrency(Cindirectos),
             },
             {
               name: 'Costo Total',
               width:"150px",
-              selector: row => row.COSTO,
+              selector: row => {
+                const aux = row.COSTO + Cindirectos;
+                setCTotal(aux);
+                const auxT = formatCurrency(aux);
+                return auxT;
+              },
             },
             {
               name: 'M3 Bomba',
-              width:"150px",
-              selector: row => row.CPC,
+              width:"120px",
+              cell: (row, index) => (
+                <input
+                  type="number"
+                  value="0.0"
+                  onChange={(e) => handleEdit(e, index)} // Maneja el cambio de valor
+                  style={{ width: '100%' }}
+                />
+              ),
             },
             {
               name: 'Precio Bomba',
-              width:"150px",
-              selector: row => row.CPC,
+              width:"100px",
+              cell: (row, index) => (
+                <input
+                  type="number"
+                  value="0.0"
+                  onChange={(e) => handleEdit(e, index)} // Maneja el cambio de valor
+                  style={{ width: '100%' }}
+                />
+              ),
             },
             {
               name: 'Extras',
-              width:"150px",
+              width:"80px",
               selector: row => row.CPC,
               cell: (row) => (
                 <div>
@@ -163,38 +203,58 @@ const Step2 = ({ nextStep, previousStep, fuente, segmento, canal, productos, fDa
             },
             {
               name: 'Importe Extras',
-              width:"150px",
-              selector: row => row.CPC,
+              width:"120px",
+              selector: row => fNumber(row.CPC),
             },
             {
               name: 'Precio Sugerido + Extras',
-              width:"150px",
-              selector: row => row.CPC,
+              width:"120px",
+              selector: row => {
+                const aux = ((row.COSTO + Cindirectos) / (100 - MOP1)) * 100;
+                const psm3 = formatCurrency(aux);
+                return psm3;
+              },
             },
             {
               name: 'Precio Sugerido m3',
-              width:"150px",
-              selector: row => row.CPC,
+              width:"120px",
+              selector: row => {
+                const aux = ((row.COSTO + Cindirectos) / (100 - MOP1)) * 100;
+                const psm3 = formatCurrency(aux);
+                return psm3;
+              },
             },
             {
               name:'Precio Venta m3',
               with:"100px",
-              cell: (row, index) => (
-                <input
-                  type="number"
-                  value={row.CPC}
-                  style={{ width: '100%' }}
-                />
-              ),
+              selector: row=>{
+                const aux = ((row.COSTO + Cindirectos) / (100 - MOP1)) * 100;
+                const psm3 = formatCurrency(aux);
+                return psm3;
+              },
+              cell: (row, index) => {
+                const pv = ((row.COSTO + Cindirectos) / (100 - MOP1)) * 100;
+                const aux = Number(pv.toFixed(2));
+                return(
+                  <input
+                    type="number"
+                    value={aux}
+                    onChange={(e) => handleEdit(e, index)}
+                    style={{ width: '100%' }}
+                  />
+                );
+              },
             },
             {
               name: '% Venta',
-              width:"150px",
-              selector: row => row.CPC,
+              width:"120px",
+              selector: row => {
+                return MOP1;
+              },
               cell: (row, index) => (
                 <input
                   type="number"
-                  value={row.CPC}
+                  value={MOP1}
                   onChange={(e) => handleEdit(e, index)} // Maneja el cambio de valor
                   style={{ width: '100%' }}
                 />
@@ -203,24 +263,26 @@ const Step2 = ({ nextStep, previousStep, fuente, segmento, canal, productos, fDa
             {
               name: 'Comisión',
               width:"150px",
-              selector: row => row.CPC,
+              selector: row => {
+                return comision
+              },
             },
             {
               name: 'Margen Bruto',
               width:"150px",
-              selector: row => row.CPC,
+              selector: row => MB,
             },
     ];
     const columnsEx = [
       {
-        name: 'Acciones',
-        selector: row => row.Id,
+        name: ' ',
+        selector: row => row.IdExtra,
         width:"80px",
         cell: (row) => (
           <div>
               <CButton
                   color="danger"
-                  onClick={() => getDetalle(1)}
+                  onClick={() => deleteExtra(row.IdExtra)}
                   size="sm"
                   className="me-2"
                   title="Eliminar"
@@ -232,27 +294,27 @@ const Step2 = ({ nextStep, previousStep, fuente, segmento, canal, productos, fDa
       },
       {
           name: 'Identificador',
-          selector: row => row.Id,
-          width:"80px",
+          selector: row => row.IdExtra,
+          width:"120px",
       },
       {
         name: 'Concepto',
-        selector: row => row.Id,
-        width:"80px",
+        selector: row => row.Descripcion,
+        width:"250px",
       },
       {
         name: 'Cantidad',
-        selector: row => row.Id,
+        selector: row => row.CantMin,
         width:"80px",
       },
       {
         name: 'Precio',
-        selector: row => row.Id,
-        width:"80px",
+        selector: row => row.Costo,
+        width:"100px",
         cell: (row, index) => (
           <input
             type="number"
-            value={row.Id}
+            value={row.Costo}
             onChange={(e) => handleEdit(e, index)} // Maneja el cambio de valor
             style={{ width: '100%' }}
           />
@@ -267,38 +329,67 @@ const Step2 = ({ nextStep, previousStep, fuente, segmento, canal, productos, fDa
           setProductos(fData.producto)
           setFilteredProductos(fData.producto)
           setFProductos(fData.producto)
-        },[]);
+          setcExtras(extras)
+    },[]);
+    useEffect(()=>{
+      console.log(extras)
+      setcExtras(extras)
+      //filterProductos(selectedConcreto);
+    },[extras])
 
-        useEffect(()=>{
-          filterProductos(selectedConcreto);
-        },[selectedConcreto])
-        
-        useEffect(()=>{
-          filterProductos(selectedResistencia);
-        },[selectedResistencia])
+    useEffect(()=>{
+      filterProductos(selectedConcreto);
+    },[selectedConcreto])
+    
+    useEffect(()=>{
+      filterProductos(selectedResistencia);
+    },[selectedResistencia])
 
-        useEffect(()=>{
-          filterProductos(selectedEdad);
-        },[selectedEdad])
+    useEffect(()=>{
+      filterProductos(selectedEdad);
+    },[selectedEdad])
 
-        useEffect(()=>{
-          filterProductos(selectedRev);
-        },[selectedRev])
-        
-        useEffect(()=>{
-          filterProductos(selectedTMA);
-        },[selectedTMA])
-        
-        useEffect(()=>{
-          filterProductos(selectedCol);
-        },[selectedCol])
-    //************************************************************************************* */
+    useEffect(()=>{
+      filterProductos(selectedRev);
+    },[selectedRev])
+    
+    useEffect(()=>{
+      filterProductos(selectedTMA);
+    },[selectedTMA])
+    
+    useEffect(()=>{
+      filterProductos(selectedCol);
+    },[selectedCol])
+
+    useEffect(() => {
+      let F = fDPlanta.fijos;
+      let C = fDPlanta.corporativo;
+      let D = fDPlanta.diesel;
+      const totalIndirecto = F+C+D; 
+      setCMOP(fDPlanta.MOP)
+      setCIndirectos(totalIndirecto)
+      getComision_();
+      
+    }, [fDPlanta]); 
+    //******************************************************************************************************************** */
+    const getComision_ = async () => {
+        try {
+            const comisiones = await getVolComision('PUE1','-');
+            if (comisiones) {  
+              setComisiones(comisiones)
+            }
+        } catch (error) {
+            console.error("No se pudo obtener ID VENDEDOR");
+        }
+      };
+    //******************************************************************************************************************** */
     const sProductos = (selected) =>{
       setOProductos(selected);
       if (Array.isArray(selected)) {
         // Selección múltiple
         const selectedValues = selected.map(option => option.value);
         getFindPro(selectedValues[selectedValues.length-1]);
+        console.log(selectedValues[selectedValues.length-1])
       } else {
         // Selección única
         console.log('Valor seleccionado:', selected.value);
@@ -306,15 +397,61 @@ const Step2 = ({ nextStep, previousStep, fuente, segmento, canal, productos, fDa
     }
     function getFindPro(pro)
     {
+      setSelectedProductos(pro)
       const productoBuscado = productos.filter(producto => producto.Producto === pro);
+      console.log(productoBuscado)
       setProductos(prevProductos => [...prevProductos, ...productoBuscado]);
       updPData(productoBuscado);
+      const CostoMP = productoBuscado[0].COSTO;
+      const Precio = ((CostoMP + Cindirectos) / (100-MOP1)) * 100;
+      setCMP(Precio);
+      const dtCom2 = sComisiones[1].Rows;
+      const dtCom3 = sComisiones[2].Rows;
+      const MB = Precio - CostoMP;
+      cComision(dtCom2[0], dtCom3[0], MB)
+    }
+    const cComision = async(tCom, tCom2, MB)=>{
+      const auxMB = fNumber(MB.toFixed(2))
+      const MBAux = auxMB
+      setMB(MBAux)
+      console.log(MB, tCom)
+      if(MB >= tCom.P3MAX)
+      {
+        const auxCom = tCom2.P3MIN;
+        const valor = parseFloat(auxCom.toFixed(2)); 
+        setComision(valor)
+      }
+      else if(MB >= tCom.P3MIN)
+      {
+        setComision(tCom2.P2MAX)
+      }
+      else if(MB >= tCom.P2MAX)
+      {
+        setComision(tCom2.P2MIN)
+      }
+      else if(MB >= tCom.P2MIN)
+      {
+        setComision(tCom2.P1MAX)
+      }
+      else if(MB >= tCom.P1MAX)
+      {
+        setComision(tCom2.P1MIN)
+      }
+      else if(MB >= tCom.P1MIN)
+      {
+        setComision(tCom2.MBDIR)
+      }
     }
     const oProductos = productos.map(item => ({
       value:item.Producto,
       label:item.Producto
     }))
-    const [visible, setVisible] = useState(false)
+    const DeletePro = async(producto)=>{
+      setProductos((prevState) => prevState.filter((item) => item.Producto !== producto));
+    };
+    const deleteExtra = async(id)=>{
+      setDTExtras((prevState) => prevState.filter((item) => item.IdExtra !== id))
+    }
     //**************************** HANDLES ********************************************************* */
     const handleEdit = (e, rowIndex) => {
       const updatedProductos = [...productos];
@@ -334,16 +471,12 @@ const Step2 = ({ nextStep, previousStep, fuente, segmento, canal, productos, fDa
     const hConcreto = (event) =>{
       const aux = event.target.value;
       setSelectedConcreto(aux);
-      setTimeout(function(){
-        filterProductos(aux)
-      },900)
+      filterProductos(aux);
     }
     const hResistencia = (event) =>{
-      setSelectedResistencia(event.target.value);
       const aux = event.target.value;
-      setTimeout(function(){
-        filterProductos(aux)
-      },900)
+      setSelectedResistencia(aux);
+      filterProductos(aux);
     }
     const hEdad = (event) =>{
       const aux = event.target.value;
@@ -351,47 +484,48 @@ const Step2 = ({ nextStep, previousStep, fuente, segmento, canal, productos, fDa
       filterProductos(aux);
     }
     const hReve = (event) =>{
-      setSelectedRev(event.target.value);
       const aux = event.target.value;
-      setTimeout(function(){
-        filterProductos(aux)
-      },900);
+      setSelectedRev(aux);
+      filterProductos(aux);
     }
     const hTMA = (event) =>{
-      setSelectedTMA(event.target.value);
       const aux = event.target.value;
-      setTimeout(function(){
-        filterProductos(aux)
-      },900);
+      setSelectedTMA(event.target.value);
+      filterProductos(aux);
     }
     const hColocacion = (event) =>{
-      setSelectedCol(event.target.value);
       const aux = event.target.value;
-      setTimeout(function(){
-        filterProductos(aux)
-      },900);
+      setSelectedCol(aux);
+      filterProductos(aux)
     }
+    const chExtra = (event) => {
+      const id = event.target.value;
+      const vExtra = cExtras.filter(cExtras => 
+        cExtras.IdExtra === parseInt(id) 
+      );
+      setSExtra(vExtra)
+    };
+    const addExtras = () =>{
+      setDTExtras((prevData) => [...prevData, ...sExtra])
+    };
     //************************************************************************************************ */
     const filterProductos = (aux) =>{
-      if(aux == "-")
+      const auxStr = String(aux);
+      if(!auxStr || auxStr === "-")
       {
-        console.log("Reiniciria oProductos")
         setFilteredProductos(productos)
       }
-      console.log(oProductos)
-      console.log(selectedConcreto,selectedResistencia, selectedEdad, selectedRev, selectedTMA, selectedCol, aux)
       const fProd = oProductos.filter(item => {
-        // Filtrar por planta, interfaz y texto de búsqueda
         return (
+          (!selectedConcreto || selectedConcreto === "-" || (item.value && item.value.toString().includes(selectedConcreto))) &&
           (!selectedResistencia || selectedResistencia === "-" || (item.value && item.value.toString().includes(selectedResistencia))) &&
           (!selectedEdad || selectedEdad === "-" || (item.value && item.value.toString().includes(selectedEdad))) &&
           (!selectedRev || selectedRev === "-" || (item.value && item.value.toString().includes(selectedRev))) &&
           (!selectedTMA || selectedTMA === "-" || (item.value && item.value.toString().includes(selectedTMA))) &&
-          (!selectedCol || selectedCol === "-" || (item.value && item.value.toString().includes(selectedCol))) &&
-          (item.value && item.value.toString().includes(aux)) // Siempre se filtra por `aux`
+          (!selectedCol || selectedCol === "-" || (item.value && item.value.toString().includes(selectedCol))) //&&
+          //(item.value && item.value.toString().includes(aux)) // Siempre se filtra por `aux`
         );
       });        
-      console.log(fProd)
       setFilteredProductos(fProd)
     };
     const hnextStep = ()=>{
@@ -409,8 +543,8 @@ const Step2 = ({ nextStep, previousStep, fuente, segmento, canal, productos, fDa
         <CCard>
           <CCardHeader>Paso 2</CCardHeader>
           <CCardBody>
-            <CRow className='mt-2'>
-              <CCol xs={6} md={4}>
+            <CRow className='mt-2 mb-2'>
+              <CCol xs={6} md={4} className='mt-2 mb-2'>
                 <label>Fuente:</label>
                 <CFormSelect aria-label="Fuente" value={selectedFuente} onChange={hFuente}>
                   <option value="-">-</option>
@@ -419,7 +553,7 @@ const Step2 = ({ nextStep, previousStep, fuente, segmento, canal, productos, fDa
                   ))}
                 </CFormSelect>
               </CCol>
-              <CCol xs={6} md={4}>
+              <CCol xs={6} md={4} className='mt-2 mb-2'>
                 <label>Segmento</label>
                 <CFormSelect aria-label="Segmento" value={selectedSegmento} onChange={hSegmento}>
                   <option value="-">-</option>
@@ -428,7 +562,7 @@ const Step2 = ({ nextStep, previousStep, fuente, segmento, canal, productos, fDa
                   ))}
                 </CFormSelect>
               </CCol>
-              <CCol xs={6} md={4}>
+              <CCol xs={6} md={4} className='mt-2 mb-2'>
                 <label>Tipo de Cliente</label>
                 <CFormSelect aria-label="Tipo de Cliente" value={selectedTCliente} onChange={hTCliente}>
                   <option value="-">-</option>
@@ -547,11 +681,12 @@ const Step2 = ({ nextStep, previousStep, fuente, segmento, canal, productos, fDa
                 <Select
                   className='sStyle'
                   styles={{'color':'black'}}
-                  closeMenuOnSelect={false}
+                  closeMenuOnSelect={true}
                   components={animatedComponents}
                   isMulti
                   options={filteredProductos}
                   onChange={sProductos}
+                  value={selectedProductos}
                 />
               </CCol>
             </CRow>
@@ -590,20 +725,22 @@ const Step2 = ({ nextStep, previousStep, fuente, segmento, canal, productos, fDa
           </CModalHeader>
           <CModalBody>
           <CRow>
-            <CCol>
-              <CFormSelect aria-label="Fuente">
+            <CCol xs={10} md={8}>
+              <CFormSelect aria-label="Fuente" onChange={chExtra}>
                 <option>-</option>
-                <option value='1'>FIBRA</option>
+                {cExtras.map((extra, index) =>(
+                  <option value={extra.IdExtra} key={index}>{extra.Descripcion}</option>
+                ))}
               </CFormSelect>
             </CCol>
-            <CCol>
-              <CButton color='primary'>Agregar</CButton>
+            <CCol xs={2} md={4}>
+              <CButton color='primary' onClick={() => addExtras()}>Agregar</CButton>
             </CCol>
           </CRow>
           <CRow className='mt-2'>
             <DataTable
               columns={columnsEx}
-              data={aExtras}  // Usamos los datos filtrados
+              data={dtExtras}  // Usamos los datos filtrados
               pagination
               persistTableHead
               subHeader
@@ -613,10 +750,7 @@ const Step2 = ({ nextStep, previousStep, fuente, segmento, canal, productos, fDa
           <CModalFooter>
             <CRow className='w-100'>
               <CCol xs={6} md={6}>
-                <CButton className='btn btn-primary' style={{'color':'white'}}>Aceptar <CIcon icon={cilCheck} className='me-2' /></CButton>
-              </CCol>
-              <CCol xs={6} md={6}>
-                <CButton className='btn btn-danger' onClick={() => setMExtras(false)} style={{'color':'white'}}>Cerrar <CIcon icon={cilX} className='me-2' /></CButton>
+                <CButton className='btn btn-primary' style={{'color':'white'}} onClick={() => setMExtras(false)}>Aceptar <CIcon icon={cilCheck} className='me-2' /></CButton>
               </CCol>
             </CRow>
           </CModalFooter>
