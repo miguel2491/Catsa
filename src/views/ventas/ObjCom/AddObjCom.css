@@ -1,0 +1,69 @@
+/* Contenedor principal */
+
+  
+  /* Títulos */
+  .heading {
+    text-align: center;
+    margin-bottom: 20px;
+    color: #ffffff;
+  }
+  
+  .sectionTitle {
+    margin: 20px 0 10px;
+    border-bottom: 1px solid #ccc;
+    padding-bottom: 5px;
+    color: #ffffff;
+  }
+  
+  /* Sección de búsqueda (horizontal) */
+  .searchSection {
+    display: flex;
+    flex-wrap: wrap; /* Para que en pantallas pequeñas se vayan acomodando abajo */
+    gap: 15px;
+    align-items: flex-end; /* Alineamos los inputs y el botón en la parte de abajo */
+    margin-bottom: 20px;
+  }
+  
+  /* Grupos de formulario */
+  .formGroup {
+    display: flex;
+    flex-direction: column; /* label arriba, input abajo */
+    min-width: 120px; /* Para que tenga cierto ancho mínimo */
+  }
+  
+  /* Labels e inputs */
+  .label {
+    margin-bottom: 5px;
+    font-weight: bold;
+    color: #ffffff;
+  }
+  
+  .input {
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
+  }
+  
+  /* Botones */
+  .button {
+    padding: 10px 20px;
+    margin-right: 10px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    background-color: #5cb85c;
+    color: #fff;
+    font-weight: bold;
+  }
+  
+  .buttonSearch {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    background-color: #e62a43;
+    color: #fff;
+    font-weight: bold;
+  }
+  

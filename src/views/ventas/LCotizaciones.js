@@ -4,7 +4,7 @@ import Swal from "sweetalert2";
 import { MapContainer, TileLayer, Marker, Popup, Circle } from 'react-leaflet'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
-import 'leaflet-routing-machine'; 
+ 
 import "sweetalert2/dist/sweetalert2.min.css";
 import DataTable from 'react-data-table-component';
 import DatePicker from 'react-datepicker';
