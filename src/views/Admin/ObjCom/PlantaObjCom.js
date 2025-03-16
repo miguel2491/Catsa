@@ -547,7 +547,6 @@ const PlaOC = () => {
                 </CCol>
             </CRow>
             <CRow className='mt-2 mb-2'>
-                
                 <CCol>
                     <DataTable
                         columns={colPlaOC}

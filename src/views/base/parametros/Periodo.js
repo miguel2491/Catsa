@@ -1,4 +1,7 @@
 import React,{useEffect, useState, useRef} from 'react';
+import {
+  CFormSelect,
+} from '@coreui/react'
 const ap = [];
 const Periodo = ({periodoSel, mPeriodo}) => {
     const [periodo_, setperiodo_] = useState([]);
@@ -17,15 +20,15 @@ const Periodo = ({periodoSel, mPeriodo}) => {
     return (
       <div>
         <label>Seleccione Periodo</label>
-        <div>
-        <select id="cmbPeriodo" value={periodoSel} onChange={mPeriodo}>
+        <div className='mt-2'>
+          <CFormSelect aria-label="Selecciona" id="cmbPeriodo" value={periodoSel} onChange={mPeriodo}>
             <option value="" >Selecciona...</option>
-                {years.map(year => (
+              {years.map(year => (
                     <option key={year} value={year}>
                     {year}
                     </option>
-                ))}
-            </select>
+              ))}
+          </CFormSelect>
         </div>
       </div>
     );
