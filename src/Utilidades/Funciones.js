@@ -55,10 +55,10 @@ const baseUrl2S="https://localhost:5001/api/";
       console.error("Ocurrio un Error", error);
     }
   }
-  // =================================================================
-  //                      INICIAR SESIÓN
-  // =================================================================
-  export async function Sesion(username, password) {
+// =================================================================
+//                      INICIAR SESIÓN
+// =================================================================
+export async function Sesion(username, password) {
     
     try {
       const postData = { usuario: username, pass: password };
@@ -78,7 +78,7 @@ const baseUrl2S="https://localhost:5001/api/";
       Swal.fire("Error", "Usuario/Contraseña incorrecta, vuelve a intentar", "error");
       return false;
     }
-  }
+}
 export async function getRol()
     {
       try{
@@ -101,7 +101,7 @@ export async function getRol()
       }finally{
     
       }
-    }
+}
 export async function getPermisos()
 {
     try{
@@ -446,7 +446,58 @@ export async function getPlantas() {
         return false
     }
 }
-
+export async function getVendedores(planta) {
+    try
+    {
+        let confi_ax = {
+            headers:
+            {
+                'Cache-Control': 'no-cache',
+                'Content-Type': 'application/json',
+                "Authorization": "Bearer "+cookies.get('token'),
+            },
+        };
+        //------------------------------------------------------------------------------------------------------------------------------------------------------
+        const response = await axios.get(baseUrl2+'Catalogo/GetVendedores/'+planta,confi_ax);
+        if (response.data && response.data.length > 0) {
+            const obj = response.data;
+            if(obj.length > 0)
+            {
+                return obj;
+            }else{return false}
+        }else{return false}
+    } 
+    catch(error)
+    {
+        return false
+    }
+}
+export async function getCategoriaVenta() {
+    try
+    {
+        let confi_ax = {
+            headers:
+            {
+                'Cache-Control': 'no-cache',
+                'Content-Type': 'application/json',
+                "Authorization": "Bearer "+cookies.get('token'),
+            },
+        };
+        //------------------------------------------------------------------------------------------------------------------------------------------------------
+        const response = await axios.get(baseUrl2+'Catalogo/GetCategoriaVenta',confi_ax);
+        if (response.data && response.data.length > 0) {
+            const obj = response.data;
+            if(obj.length > 0)
+            {
+                return obj;
+            }else{return false}
+        }else{return false}
+    } 
+    catch(error)
+    {
+        return false
+    }
+}
 export async function getTutoriales() {
     try
     {
@@ -2339,6 +2390,59 @@ export async function setEntradas(planta, FI, FF){
         return false
     }
 }
+//---OBJ COMERCIAL
+export async function saveOCAs(data) {
+    try
+    {
+        let confi_ax = {
+            headers:
+            {
+                'Cache-Control': 'no-cache',
+                'Content-Type': 'application/json',
+                "Authorization": "Bearer "+cookies.get('token'),
+            },
+        };
+        //------------------------------------------------------------------------------------------------------------------------------------------------------
+        const response = await axios.post(baseUrl2+'Comercial/setObjComerciales', data, confi_ax);
+        if (response.data && response.data.length > 0) {
+            const obj = response.data;
+            if(obj.length > 0)
+            {
+                return obj;
+            }else{return false}
+        }else{return false}
+    } 
+    catch(error)
+    {
+        return false
+    }
+}
+export async function getObjCom(mes,periodo,planta)
+{
+    try
+    {
+        let confi_ax = {
+            headers:
+            {
+                'Cache-Control': 'no-cache',
+                'Content-Type': 'application/json',
+                "Authorization": "Bearer "+cookies.get('token'),
+            },
+        };
+        //------------------------------------------------------------------------------------------------------------------------------------------------------
+        const response = await axios.get(baseUrl2+'Comercial/GetObjComercial/'+planta+','+mes+','+periodo, confi_ax);
+        if (response.data && response.data.length > 0) {
+            return response.data;
+        }else{
+            return false
+        }
+    } 
+    catch(error)
+    {
+        console.log(error);
+        return false
+    }
+}
 //****************************************************************************************************************************************************************************** */
 // INTERFAZ
   // CB
@@ -3023,3 +3127,10 @@ export const opcionesFca = {
 export const fNumberCad = (number) => {
     return number.toString().padStart(2, '0');
 };
+export const formatResult = (item) => {
+    return (
+        <>
+        <span style={{ display: 'block', textAlign: 'left', color:'black' }}>{item.name}</span>
+        </>
+    )
+}

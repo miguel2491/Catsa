@@ -284,7 +284,7 @@ const NavProvider = ({ children }) => {
                 },
               ]
             :[]),
-            ...(userIsOperacion || userIsAdmin || userIsAdminTI || userIsAuxGer
+            ...(userIsOperacion || userIsAdmin || userIsAdminTI || userIsAuxGer || userIsJP
               ? [
                 {
                   component: CNavGroup,
