@@ -1,4 +1,4 @@
-import React, {useEffect, useState, useRef} from 'react'
+import React, {useEffect, useState} from 'react'
 import Swal from "sweetalert2";
 import ProgressBar from "@ramonak/react-progress-bar";
 import DataTable from 'react-data-table-component';
@@ -17,10 +17,11 @@ import {
     CModalHeader,
     CModalTitle,
     CModalBody,
-    CModalFooter
+    CModalFooter,
+    CFormTextarea
 } from '@coreui/react'
 import {CIcon} from '@coreui/icons-react'
-import { cilCameraControl, cilCloudDownload, cilLoopCircular, cilSave, cilSearch, cilTrash } from '@coreui/icons'
+import { cilCloudDownload, cilSave, cilSearch, cilTrash } from '@coreui/icons'
 import { format } from 'date-fns';
 import { Rol } from '../../../Utilidades/Roles'
 
@@ -30,20 +31,30 @@ const RemiFal = () => {
     const [vFechaF, setFechaFin] = useState(new Date());
     const [loading, setLoading] = useState(false);
     const [percentage, setPercentage] = useState(0);
-    const [visible, setVisible] = useState(false);
+    const [visible, setVisible] = useState(false);      // Modal de "Cargando..."
+
+    // Nuevo: para modal de confirmación de eliminación con comentario
+    const [visibleDelConf, setVisibleDelConf] = useState(false);  // Controla la visibilidad del nuevo modal
+    const [deleteData, setDeleteData] = useState({});             // Guarda temporalmente Id, Planta
+    const [deleteReason, setDeleteReason] = useState('');         // Motivo de la eliminación
+
     const userIsOperacion = Rol('Operaciones');
     const userIsJP = Rol('JefePlanta');
+
     //Arrays
     const [dtRemisiones, setDTRemisiones] = useState([]);
     const [exRemisiones, setExRemisiones] = useState([]);
+
     //Buscador
-    const [fText, setFText] = useState(''); // Estado para el filtro de búsqueda
+    const [fText, setFText] = useState(''); 
     const [vBPlanta, setBPlanta] = useState('');
+
     const opcionesFca = {
-        year: 'numeric', // '2-digit' para el año en dos dígitos
-        month: '2-digit',   // 'numeric', '2-digit', 'short', 'long', 'narrow'
-        day: '2-digit'   // 'numeric', '2-digit'
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit'
     };
+
     const cFechaI = (fecha) => {
         setFechaIni(fecha.toLocaleDateString('en-US',opcionesFca));
     };
@@ -53,13 +64,15 @@ const RemiFal = () => {
     const mCambio = (event) => {
         setPlantas(event.target.value);
     };
+
     const handleEdit = (e, rowIndex) => {
         const newVal = e.target.value;
         const updatedRemisiones = [...dtRemisiones];
-        updatedRemisiones[rowIndex].NoRemision = newVal; // Actualiza el valor de la columna 
+        updatedRemisiones[rowIndex].NoRemision = newVal; 
         setDTRemisiones(updatedRemisiones);
     };
-    //Movimientos
+
+    // Columnas de la tabla
     const colRem = [
         {
             name: 'No. Remisión',
@@ -68,7 +81,7 @@ const RemiFal = () => {
                 <input
                   type="number"
                   value={row.NoRemision}
-                  onChange={(e) => handleEdit(e, index)} // Maneja el cambio de valor
+                  onChange={(e) => handleEdit(e, index)}
                   style={{ width: '100%', color:'black',background:'#DDF6EB' }}
                 />
               ),
@@ -79,33 +92,32 @@ const RemiFal = () => {
             cell: (row) => (
                 <div>
                     <CRow>
-                    <CCol>
-                        <CButton
-                            color="primary"
-                            onClick={() => updRemision(row.IdOperacion, row.NoRemision, row.Planta)}
-                            size="sm"
-                            className="me-2"
-                            title="Actualizar"
-                        >
-                            <CIcon icon={cilSave} />
-                        </CButton>
-                    </CCol>
-                    {...(userIsOperacion 
-                        ? [
                         <CCol>
                             <CButton
-                                color="danger"
-                                onClick={() => delRemision(row.IdOperacion, row.Planta)}
+                                color="primary"
+                                onClick={() => updRemision(row.IdOperacion, row.NoRemision, row.Planta)}
                                 size="sm"
                                 className="me-2"
-                                title="Eliminar"
-                                style={{color:'white'}}
+                                title="Actualizar"
                             >
-                                <CIcon icon={cilTrash} />
+                                <CIcon icon={cilSave} />
                             </CButton>
                         </CCol>
-                        ]:[])
-                    }
+                        {/* Botón de eliminar (ahora llama a delRemisionConf para abrir el modal con comentario) */}
+                        {userIsOperacion && (
+                            <CCol>
+                                <CButton
+                                    color="danger"
+                                    onClick={() => delRemisionConf(row.IdOperacion, row.Planta)}
+                                    size="sm"
+                                    className="me-2"
+                                    title="Eliminar"
+                                    style={{color:'white'}}
+                                >
+                                    <CIcon icon={cilTrash} />
+                                </CButton>
+                            </CCol>
+                        )}
                     </CRow>
                 </div>
             ),
@@ -119,12 +131,11 @@ const RemiFal = () => {
             name: 'Fecha',
             selector: row => {
                 const fecha = row.Fecha;
-                // Verifica si estatus es null, undefined o un objeto
                 if (fecha === null || fecha === undefined) {
                   return "No disponible";
                 }
                 if (typeof fecha === 'object') {
-                  return "Sin Fecha"; // O cualquier mensaje que prefieras
+                  return "Sin Fecha";
                 }
                 const [fecha_, hora] = fecha.split("T");
                 return fecha_;
@@ -165,9 +176,10 @@ const RemiFal = () => {
             grow:1,
         },
     ];
-    //------------
+
+    // Efecto inicial si se requiere
     useEffect(() => {
-        //getProductosInt_(null);
+        // getRemFal() si gustas que cargue al inicio 
     }, []);
 
     const getRemFal = async () => {
@@ -177,17 +189,13 @@ const RemiFal = () => {
             title: 'Cargando...',
             text: 'Estamos obteniendo la información...',
             didOpen: () => {
-                Swal.showLoading();  // Muestra la animación de carga
+                Swal.showLoading();
             }
         });
         try {
-            // Llamada a la API
             const remF = await getRemFaltante(plantasSel, auxFcaI, auxFcaF);
-            console.log(remF);
-            
-            // Cerrar el loading al recibir la respuesta
-            Swal.close();  // Cerramos el loading
-            
+            Swal.close();
+
             if (remF && remF.length > 0) {
                 const arrAux = [];
                 remF.forEach(item=>{
@@ -198,65 +206,68 @@ const RemiFal = () => {
                         "Material":item.Material
                     });
                 })
-                setDTRemisiones(remF);  // Procesar la respuesta
+                setDTRemisiones(remF);
                 setExRemisiones(arrAux);
             } else {
                 Swal.fire("Error", "Ocurrió un error, vuelve a intentar", "error");
             }
         } catch (error) {
-            // Cerrar el loading y mostrar el error
             Swal.close();
             Swal.fire("Error", "No se pudo obtener la información", "error");
         }
-    }
+    };
+
     const updRemision = async (Id, NRem, Planta) => {
-        console.log(Id, NRem, Planta);
         try {
-            const remF = await setRemFaltante(Id, NRem,Planta,'1');
+            const remF = await setRemFaltante(Id, NRem, Planta, '1');
             if (remF) {
-                Swal.fire("Éxito", "Se actualizo correctamente", "success"); 
+                Swal.fire("Éxito", "Se actualizó correctamente", "success"); 
                 getRemFal();
             } else {
-                if(remF.length > 0){
-                    Swal.fire("Error", "Ocurrió un error, vuelve a intentar", "error");
-                }
+                Swal.fire("Error", "Ocurrió un error, vuelve a intentar", "error");
             }
         } catch (error) {
-            Swal.fire("Error", "No se pudo obtener la información", "error");
+            Swal.fire("Error", "No se pudo actualizar la información", "error");
         }
-    }
-    const delRemision = (Id, Planta) => {
-        console.log(Id, Planta);
-        Swal.fire({
-            title: "En verdad quieres eliminarlo?",
-            showDenyButton: true,
-            confirmButtonText: "Eliminar",
-            denyButtonText: `Cancelar`
-        }).then((result) => {
-            /* Read more about isConfirmed, isDenied below */
-            if (result.isConfirmed) {
-              setRemFaltante_(Id, Planta)  
-            } else if (result.isDenied) {
-              Swal.fire("Operación Abortada", "Aviso", "info");
-            }
-        });
-    }
-    const setRemFaltante_ = async(Id, Planta) =>{
+    };
+
+    /**
+     * 1) Abrimos el modal nuevo donde se pide el comentario
+     * 2) Guardamos en deleteData el Id y la Planta
+     * 3) Mostramos la ventana emergente
+     */
+    const delRemisionConf = (Id, Planta) => {
+        setDeleteData({ Id, Planta });
+        setDeleteReason('');         // Limpiamos el motivo al abrir
+        setVisibleDelConf(true);     // Mostramos el modal
+    };
+
+    /**
+     * Llamada final para eliminar (después de que el usuario ingresó el motivo y confirma)
+     */
+    const confirmDelRemision = async() => {
         try {
-            const remF = await setRemFaltante(Id, '0', Planta,'0');
-            console.log(remF);
+            const { Id, Planta } = deleteData;
+            // Aquí pasamos deleteReason como cuarto parámetro
+            const remF = await setRemFaltante(Id, '0', Planta, deleteReason);
             if (remF) {
-                Swal.fire("Éxito", "Se elimino correctamente", "success"); 
+                Swal.fire("Éxito", "Se eliminó correctamente", "success"); 
                 getRemFal();
             } else {
-                if(remF.length > 0){
-                    Swal.fire("Error", "Ocurrió un error, vuelve a intentar", "error");
-                }
+                Swal.fire("Error", "Ocurrió un error, vuelve a intentar", "error");
             }
         } catch (error) {
-            Swal.fire("Error", "No se pudo obtener la información", "error");
+            Swal.fire("Error", "No se pudo eliminar la información", "error");
+        } finally {
+            // Cerramos el modal de confirmación
+            setVisibleDelConf(false);
         }
-    }
+    };
+
+    // (Si no deseas el Swal de confirmación adicional, lo puedes quitar)
+    //-----------------------------------------------------------------------------------
+
+    // Descargar CSV
     const downloadCSV = (e) => {
         const link = document.createElement('a');
         let csv = convertArrayOfObjectsToCSV(exRemisiones);
@@ -273,106 +284,131 @@ const RemiFal = () => {
         link.click();
     };
     
-    //************************************************************************************************************************************************************************** */
-    // Función de búsqueda
+    // Búsqueda en tabla
     const onFindBusqueda = (e) => {
-        //setBPlanta(e.target.value);
         setFText(e.target.value);
     };
     const fBusqueda = () => {
-        if(vBPlanta.length != 0){
-            const valFiltrados = dtPlanta.filter(dtPlanta => 
-            dtPlanta.Planta.includes(vBPlanta) // Filtra los clientes por el número de cliente
-            );
-            setDTPlanta(valFiltrados);
-        }else{
-            getPlantas_()
-        }
+        // Aquí un ejemplo si tienes un array con "Plantas"
+        // O en tu caso, la búsqueda se aplica en dtRemisiones
     };
+
+    // Filtrado rápido por texto
     const fDRemision = dtRemisiones.filter(item => {
-        // Filtrar por planta, interfaz y texto de búsqueda
-        return item.Material.toLowerCase().includes(fText.toLowerCase()) || item.Fecha.includes(fText);
+        return (
+            item.Material.toLowerCase().includes(fText.toLowerCase()) ||
+            item.Fecha.includes(fText)
+        );
     });
-    //************************************************************************************************************************************************************************** */
-return (
-    <>
-        <CContainer fluid>
-        <CModal
-            backdrop="static"
-            visible={visible}
-            onClose={() => setVisible(false)}
-            aria-labelledby="StaticBackdropExampleLabel"
-        >
-            <CModalHeader>
-            <CModalTitle id="StaticBackdropExampleLabel">Cargando...</CModalTitle>
-            </CModalHeader>
-            <CModalBody>
-                {loading && (
-                    <CRow className="mt-3">
-                    <ProgressBar completed={percentage} />
-                    <p>Cargando: {percentage}%</p>
-                    </CRow>
-                )}
-            </CModalBody>
-            <CModalFooter>
-            
-            </CModalFooter>
-        </CModal>
-            <h3>Remisión Faltante </h3>
-            <CRow className='mt-2 mb-2'>
-                <CCol xs={6} md={2}>
-                    <FechaI 
-                        vFechaI={vFechaI} 
-                        cFechaI={cFechaI} 
-                        className='form-control'
-                    />
-                </CCol>
-                <CCol xs={6} md={2}>
-                    <FechaF 
-                        vFcaF={vFechaF} 
-                        mFcaF={mFcaF}
-                        className='form-control'
-                    />
-                </CCol>
-                <CCol xs={6} md={2}>
-                    <Plantas  
-                        mCambio={mCambio}
-                        plantasSel={plantasSel}
-                    />
-                </CCol>
-                <CCol xs={6} md={2} className='mt-3'>
-                    <CButton color='primary' onClick={getRemFal}> 
-                        <CIcon icon={cilSearch} />
-                            Buscar
-                    </CButton>
-                </CCol>
-                <CCol xs={6} md={2} className='mt-3'>
-                    <CButton color='danger' onClick={downloadCSV}>
-                        <CIcon icon={cilCloudDownload} className="me-2" />
-                        Exportar
-                    </CButton>
-                </CCol>
-            </CRow>
-            <CRow className='mt-2 mb-2'>
-                <CCol xs={12} md={12}>
-                    <CCol xs={3} md={3}>
-                        <br />
-                        <BuscadorDT value={vBPlanta} onChange={onFindBusqueda} onSearch={fBusqueda} />
+
+    return (
+        <>
+            <CContainer fluid>
+                {/* Modal de Carga (ya existente) */}
+                <CModal
+                    backdrop="static"
+                    visible={visible}
+                    onClose={() => setVisible(false)}
+                    aria-labelledby="StaticBackdropExampleLabel"
+                >
+                    <CModalHeader>
+                        <CModalTitle id="StaticBackdropExampleLabel">Cargando...</CModalTitle>
+                    </CModalHeader>
+                    <CModalBody>
+                        {loading && (
+                            <CRow className="mt-3">
+                                <ProgressBar completed={percentage} />
+                                <p>Cargando: {percentage}%</p>
+                            </CRow>
+                        )}
+                    </CModalBody>
+                    <CModalFooter>
+                    </CModalFooter>
+                </CModal>
+
+                {/* Nuevo Modal para Confirmar Eliminación con Motivo */}
+                <CModal
+                    visible={visibleDelConf}
+                    onClose={() => setVisibleDelConf(false)}
+                >
+                    <CModalHeader>
+                        <CModalTitle>Confirmar Eliminación</CModalTitle>
+                    </CModalHeader>
+                    <CModalBody>
+                        <p>Por favor, indica el motivo de la eliminación:</p>
+                        <CFormTextarea
+                            rows="3"
+                            value={deleteReason}
+                            onChange={(e) => setDeleteReason(e.target.value)}
+                            placeholder="Motivo de la eliminación"
+                        />
+                    </CModalBody>
+                    <CModalFooter>
+                        <CButton color="secondary" onClick={() => setVisibleDelConf(false)}>
+                            Cancelar
+                        </CButton>
+                        <CButton color="danger" onClick={confirmDelRemision}>
+                            Eliminar
+                        </CButton>
+                    </CModalFooter>
+                </CModal>
+
+                <h3>Remisión Faltante </h3>
+                <CRow className='mt-2 mb-2'>
+                    <CCol xs={6} md={2}>
+                        <FechaI 
+                            vFechaI={vFechaI} 
+                            cFechaI={cFechaI} 
+                            className='form-control'
+                        />
                     </CCol>
-                </CCol>
-                <CCol>
-                    <DataTable
-                        columns={colRem}
-                        data={fDRemision}
-                        pagination
-                        persistTableHead
-                        subHeader
-                    />
-                </CCol>
-            </CRow>
-            <br />
-        </CContainer>
-    </>
+                    <CCol xs={6} md={2}>
+                        <FechaF 
+                            vFcaF={vFechaF} 
+                            mFcaF={mFcaF}
+                            className='form-control'
+                        />
+                    </CCol>
+                    <CCol xs={6} md={2}>
+                        <Plantas  
+                            mCambio={mCambio}
+                            plantasSel={plantasSel}
+                        />
+                    </CCol>
+                    <CCol xs={6} md={2} className='mt-3'>
+                        <CButton color='primary' onClick={getRemFal}> 
+                            <CIcon icon={cilSearch} />
+                            {' '}Buscar
+                        </CButton>
+                    </CCol>
+                    <CCol xs={6} md={2} className='mt-3'>
+                        <CButton color='danger' onClick={downloadCSV}>
+                            <CIcon icon={cilCloudDownload} className="me-2" />
+                            Exportar
+                        </CButton>
+                    </CCol>
+                </CRow>
+                <CRow className='mt-2 mb-2'>
+                    <CCol xs={12} md={12}>
+                        <CCol xs={3} md={3}>
+                            <br />
+                            <BuscadorDT value={vBPlanta} onChange={onFindBusqueda} onSearch={fBusqueda} />
+                        </CCol>
+                    </CCol>
+                    <CCol>
+                        <DataTable
+                            columns={colRem}
+                            data={fDRemision}
+                            pagination
+                            persistTableHead
+                            subHeader
+                        />
+                    </CCol>
+                </CRow>
+                <br />
+            </CContainer>
+        </>
     )
 }
-export default RemiFal
+
+export default RemiFal;
