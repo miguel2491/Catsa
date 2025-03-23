@@ -1,6 +1,7 @@
 import React, {useEffect, useState, useRef} from 'react'
 import Swal from "sweetalert2";
 import DataTable from 'react-data-table-component';
+import { CChart, CChartPolarArea } from '@coreui/react-chartjs'
 import { ReactSearchAutocomplete} from 'react-search-autocomplete';
 import '../../../estilos.css';
 import '../ObjCom/AddObjCom.css'
@@ -8,7 +9,7 @@ import BuscadorDT from '../../base/parametros/BuscadorDT'
 import Plantas from '../../base/parametros/Plantas'
 import Periodo from '../../base/parametros/Periodo'
 import Mes from '../../base/parametros/Mes'
-import { convertArrayOfObjectsToCSV, formatResult, fNumberCad, getVendedores, getCategoriaVenta, saveOCAs, getObjCom } from '../../../Utilidades/Funciones';
+import { convertArrayOfObjectsToCSV, formatResult, fNumberCad, fNumber,getVendedores, getCategoriaVenta, saveOCAs, getObjCom, GetObjComVendedor, GetObjComVId } from '../../../Utilidades/Funciones';
 import {
     CContainer,
     CFormInput,
@@ -17,6 +18,12 @@ import {
     CButton,
     CRow,
     CCol,
+    CTable,
+    CTableHead,
+    CTableRow,
+    CTableHeaderCell,
+    CTableBody,
+    CTableDataCell,
     CModal,
     CModalHeader,
     CModalTitle,
@@ -24,13 +31,16 @@ import {
     CModalFooter
 } from '@coreui/react'
 import {CIcon} from '@coreui/icons-react'
-import { cilPlus, cilSave, cilSearch, cilTrash } from '@coreui/icons'
+import { cilAvTimer, cilEyedropper, cilPen, cilPlus, cilSave, cilSearch, cilTrash } from '@coreui/icons'
 import { format } from 'date-fns';
 import Categoria from '../../Admin/ObjCom/Categoria';
 
 const RObjCom = () => {
     //************************************************************************************************************************************************************************** */
     const [vOC, setVOC] = useState(false);
+    const [vOC2, setVOC2] = useState(false);
+    const [vMHis, setVMHis] = useState(false);
+    const [vMod, setVMod] = useState(false);
     const [btnG, setBtnTxt] = useState('Guardar');
     const [plantasSel , setPlantas] = useState('');
     const [periodoSel , setPeriodoB] = useState('');
@@ -41,7 +51,7 @@ const RObjCom = () => {
     // FORM OBJ COM INDI
     const [TxtId , setIdAs] = useState(0);
     const [TxtAsesor , setAsesor] = useState('');
-    const [TxtCategoria , setCategoriaAs] = useState('');
+    const [TxtCategoria , setCategoriaAs] = useState('-');
     const [TxtObj , setObjetivo] = useState(0);
     const [TxtObjDg , setObjetivoDg] = useState(0);
     const [TxtPerspectiva , setPersp] = useState(0);
@@ -49,6 +59,10 @@ const RObjCom = () => {
     const [TxtProyComDir , setProyComDir] = useState(0);
     const [TxtFaltante , setFaltante] = useState(0);
     const [TxtMinimo , setMinimo] = useState(0);
+    //Auxiliares
+    const [DHabiles , setDHabiles] = useState(0);
+    const [DTrans , setDTrans] = useState(0);
+    const [DFalt , setDFalt] = useState(0);
     //Buscador
     const [fText, setFText] = useState(''); // Estado para el filtro de búsqueda
     const [vBPlanta, setBPlanta] = useState('');
@@ -56,18 +70,137 @@ const RObjCom = () => {
     const [dtObjCom, setDTObjCom] = useState([]);
     const [arrAsesores, setAsesores] = useState([]);
     const [arrCategoriaV, setCategoriaV] = useState([]);
+    const [optCatV, setoptCatV] = useState([]);
+    const [arrPlantaObj, setArrPlaObj] = useState([]);
+    const [dtPlantaObj, setDTPlaObj] = useState([]);
+    const [dtObjComMod, setDTObjComMod] = useState([]);
+    const [dtObjComVen, setDTObjComVen] = useState([]);
     // FROMS
-    const [id, setId] = useState(0);
-    const [planta, setPlanta] = useState("");
-    const [mes, setMes] = useState("");
-    const [periodo, setPeriodo] = useState("");
-    const [TR, setTR] = useState(0);
-    const [TB, setTB] = useState(0);
+    const [oMensualV, setOMV] = useState(0);
+    const [oDiarioV, setODV] = useState(0);
+    const [oMensualP, setOMP] = useState(0);
+    const [oDiarioP, setODP] = useState(0);
+    const [oDiarioDGP, setODGP] = useState(0);
+    const [TxtAvReal, setAvReal] = useState(0);
+    const [TxtProm, setProm] = useState(0);
+    const [TxtProy, setProy] = useState(0);
+    const [TxtProyObj, setProyObj] = useState(0);
+    const [TxtHacer, setHacer] = useState(0);
+    const [TxtPorcAv, setPorcAv] = useState(0);
+    const [showD, setShowD] = useState(false);
     //************************************************************************************************************************************************************************** */    
     useEffect(() => {
         getCategoriaVenta_()
     }, []);
-    
+    useEffect(() => {
+      if(arrPlantaObj.length > 0){
+        const objDg = arrPlantaObj[0].obj_dg;
+        const objOpMax = arrPlantaObj[0].obj_op_max2;
+        const objAjuste = arrPlantaObj[0].obj_aju2;
+        const objMensP = arrPlantaObj[0].obj_men;
+        const objDiaP = arrPlantaObj[0].obj_dia;
+        const objDia_ = arrPlantaObj[0].obj_dia2;
+        let persp = 0;
+        let proy_com = 0;
+        let proy_com_dir = 0;
+        dtObjCom.forEach((item, index) =>{
+          let VolMin = item.objetivo / DHabiles;
+          let objPorc =  item.objetivo_dg / objDg;
+          let porcentaje = objPorc.toFixed(2) * 100;
+          let objOperMax = objOpMax * objPorc;
+          let objAjuste_ = objAjuste * objPorc;
+          let objMenV = objDiaP * objPorc;
+          let objDiaV = objDia_ * objPorc;
+          persp += item.perspectiva_pre_cierre;
+          proy_com += item.proy_comercial;
+          proy_com_dir += item.proy_comercial_Dir;
+          const arrAux = {
+            id:item.id,
+            Asesor:item.Asesor.trim(),
+            codigo_vendedor:item.codigo_vendedor,
+            cantidad_max:item.cantidad_max,
+            categoria:item.categoria,
+            faltante:item.faltante,
+            id_categoria:item.id_categoria,
+            minimo_mas:item.minimo_mas,
+            obj_dg:item.objetivo_dg,
+            objetivo:item.objetivo,
+            perspectiva_pre_cierre:item.perspectiva_pre_cierre,
+            planta:item.planta,
+            proy_comercial:item.proy_comercial,
+            proy_comercial_Dir:item.proy_comercial_Dir,
+            vendedor:item.vendedor,
+            porcentaje:porcentaje,
+            objOpMax:objOperMax.toFixed(2),
+            objAjuste:objAjuste_.toFixed(2),
+            objMensual:objMenV.toFixed(2),
+            objDiario:objDiaV.toFixed(2),
+            faltante:item.faltante,
+            menosMas:item.menosMas,
+          };
+          setDTObjComMod((prevArrObjMod) => [...prevArrObjMod, arrAux]);
+        });
+        setOMP(arrPlantaObj[0].obj_men)
+        setODP(arrPlantaObj[0].obj_dia)
+        setODGP(arrPlantaObj[0].obj_dg)
+        const arrAuxP = [{
+          id:arrPlantaObj[0].id,
+          TB:arrPlantaObj[0].TB,
+          TR:arrPlantaObj[0].TR,
+          mes:arrPlantaObj[0].mes,
+          obj_aju:arrPlantaObj[0].obj_aju,
+          obj_aju2:arrPlantaObj[0].obj_aju2,
+          obj_asesores:arrPlantaObj[0].obj_asesores,
+          obj_dg:arrPlantaObj[0].obj_dg,
+          obj_dia:arrPlantaObj[0].obj_dia,
+          obj_dia2:arrPlantaObj[0].obj_dia2,
+          obj_max_cat:arrPlantaObj[0].obj_max_cat,
+          obj_men:arrPlantaObj[0].obj_men,
+          obj_op_max:arrPlantaObj[0].obj_op_max,
+          obj_op_max2:arrPlantaObj[0].obj_op_max2,
+          periodo:arrPlantaObj[0].periodo,
+          planta:arrPlantaObj[0].planta,
+          perspectiva:persp,
+          proy_com:proy_com,
+          proy_com_dirG:proy_com_dir
+        }];
+        setDTPlaObj(arrAuxP)
+      }
+    }, [arrPlantaObj]);
+    useEffect(() => {
+      //console.log(dtObjComMod)
+    }, [dtObjComMod]);
+    useEffect(() => {
+      //console.log(dtPlantaObj)
+    }, [dtPlantaObj]);
+    useEffect(() => {
+      const { fechas, result, av_real } = transposeData(dtObjComVen);
+      let uaxP = oDiarioP/DHabiles; 
+      let promedio_ = av_real / DHabiles;
+      let proy_ = av_real / DTrans;
+        proy_ = proy_ * DHabiles;
+      let xHacer = oDiarioV * DHabiles;
+        xHacer = xHacer - av_real;
+        xHacer = xHacer / -1;
+      console.log(oDiarioDGP,dtObjComVen)
+      let pAvance = av_real / oMensualV;
+      let pAvance_ = av_real / oMensualV;
+        pAvance = pAvance * 100;
+      let proyObj = oDiarioP * pAvance_;
+          proyObj = proyObj * -1;
+      let proyObjD = uaxP * pAvance_;
+          proyObjD = proyObjD * -1;  
+          console.log(uaxP,pAvance_,proyObj,proyObjD)
+      // Solo actualizar el estado si av_real ha cambiado
+      if (av_real !== TxtAvReal) {
+        setAvReal(av_real);
+        setProm(promedio_.toFixed(2))
+        setProy(proy_.toFixed(2));
+        setProyObj(proyObj.toFixed(2));
+        setHacer(xHacer.toFixed(2));
+        setPorcAv(pAvance.toFixed(2));
+      }
+    }, [dtObjComVen, TxtAvReal]); 
     //************************************************************************************************************************************************************************** */
     const mCambio = (event) => {
         const pla = event.target.value; 
@@ -85,16 +218,20 @@ const RObjCom = () => {
       setPlantasAs(pla);
     };
     const mMesAs = (event) => {
-        setMesBAs(event.target.value);
+      setMesBAs(event.target.value);
     };
     const mPeriodoAs = (event) => {
-        setPeriodoBAs(event.target.value);
+      setPeriodoBAs(event.target.value);
+      let ejercicio = event.target.value; 
+      const valFiltrados = arrCategoriaV.filter(arrCategoriaV => 
+        arrCategoriaV.ejercicio.includes(ejercicio) && arrCategoriaV.periodo.includes(mesSelAs) // Filtra los clientes por el número de cliente
+      );
+      setoptCatV(valFiltrados)
     };
     const mCategoria = (event) => {
       const cat = event.target.value; 
       setCategoriaAs(cat);
     };
-    
     const getVendedores_ = async(p)=>{
       try{
         const ocList = await getVendedores(p);
@@ -109,7 +246,6 @@ const RObjCom = () => {
     const getCategoriaVenta_ = async()=>{
       try{
         const ocList = await getCategoriaVenta();
-        console.log(ocList)
         if(ocList)
         {
           setCategoriaV(ocList)
@@ -120,35 +256,171 @@ const RObjCom = () => {
     };
     //************************************************************************************************************************************************************************** */
     const getAcObjCom_ = async () => {
-        Swal.fire({
-            title: 'Cargando...',
-            text: 'Estamos obteniendo la información...',
-            didOpen: () => {
-                Swal.showLoading();  // Muestra la animación de carga
-            }
-        });
-        try{
-          const pla = plantasSel != '' ? plantasSel:'-';
-          const ocList = await getObjCom(fNumberCad(mesSel),periodoSel, pla);
-          console.log(ocList)
-          if(ocList)
-          {
-            setDTObjCom(ocList)
-          }            
-          // Cerrar el loading al recibir la respuesta
-          Swal.close();  // Cerramos el loading
-        }catch(error){
-          Swal.close();
-          Swal.fire("Error", "No se pudo obtener la información", "error");
+      setDTObjComMod([]);
+      setArrPlaObj([]);
+
+      Swal.fire({
+          title: 'Cargando...',
+          text: 'Estamos obteniendo la información...',
+          didOpen: () => {
+              Swal.showLoading();  // Muestra la animación de carga
+          }
+      });
+      if(plantasSel === '' && mesSel == 0){
+        Swal.close();
+        return false
+      }
+      try{
+        const pla = plantasSel != '' ? plantasSel:'-';
+        const ocList = await getObjCom(fNumberCad(mesSel),periodoSel, pla);
+        const objD = ocList[2].Rows;
+        const objIP = ocList[0].Rows;
+        const objP = ocList[1].Rows;
+        if(objD)
+        {
+          setShowD(true)
+          console.log(objD)
+          setDTObjCom(objD)
+          let obj_acs = 0;
+          let obj_max_cat = 0;
+          let obj_dg = 0;
+          let obj_men = 0;
+          let trP = objP[0].TR;
+          let tbP = objP[0].TB;
+          let obj_op_max = (21*20) + (14*4);
+              obj_op_max = obj_op_max * trP;
+          let obj_ajusteP = objP[0].obj_aju;
+          let obj_oper_max2 = obj_op_max/25;
+          let obj_ajusteP2 = obj_ajusteP/25;
+          
+          objD.forEach((item, index) =>{
+            obj_acs += parseFloat(item.objetivo) || 0;
+            obj_max_cat += parseFloat(item.cantidad_max) || 0;
+            obj_dg += parseFloat(item.objetivo_dg) || 0;
+            obj_men += parseFloat(item.objetivo_dg) || 0;
+          })
+          const obj_diaP = parseFloat(obj_dg) + parseFloat(obj_ajusteP);
+          let obj_diaP2 = (obj_diaP / 2) + 25;
+          let objDiaP = obj_diaP2;
+          let objDiario2 = obj_diaP2 / DHabiles;
+          
+          //console.log(obj_acs, obj_max_cat, obj_dg, trP, tbP, obj_op_max, obj_ajusteP, obj_oper_max2, obj_ajusteP2, obj_diaP2, objDiario2.toFixed(2))
+          const arrAux = {
+            id:objP[0].id,
+            mes:objP[0].mes,
+            periodo:objP[0].periodo,
+            planta:objP[0].planta,
+            TR:trP,
+            TB:tbP,
+            obj_aju:objP[0].obj_aju,
+            obj_asesores:obj_acs,
+            obj_dg:obj_dg,
+            obj_dia:obj_diaP2,
+            obj_max_cat:obj_max_cat,
+            obj_men:objDiaP,
+            obj_op_max:obj_op_max,
+            obj_op_max2:obj_oper_max2,
+            obj_aju2:obj_ajusteP2,
+            obj_dia2:objDiario2.toFixed(2),
+          };
+          setArrPlaObj((prevArrPlaObj) => [...prevArrPlaObj, arrAux]);
         }
+        if(objIP)
+        {
+          setDHabiles(objIP[0].DiaHabil)
+          setDTrans(objIP[0].DiasTrans)
+          const diasFal = parseInt(objIP[0].DiaHabil) - parseInt(objIP[0].DiasTrans) 
+          setDFalt(diasFal)
+        }
+        // Cerrar el loading al recibir la respuesta
+        Swal.close();  // Cerramos el loading
+      }catch(error){
+        Swal.close();
+        Swal.fire("Error", "No se pudo obtener la información", "error");
+      }
+    }
+    const getHisc = async(vendedor,oM,oD)=>{
+      try{
+        setOMV(oM);
+        setODV(oD);
+        const pla = plantasSel != '' ? plantasSel:'-';
+        const ocList = await GetObjComVendedor(fNumberCad(mesSel),periodoSel, pla, vendedor);
+        setDTObjComVen(ocList)
+      }catch(error){
+        console.log(error)
+      }
+    };
+    const transposeData = (data) =>{
+      const result = [];
+      const fechas = [];
+      const cantidades = [];
+      let av_real = 0;
+      // Iteramos sobre los datos originales
+      data.forEach((item) => {
+        const fecha = item.FechaPedido.split('T')[0];  // Extraemos solo la fecha (sin hora)
+        fechas.push(fecha);  // Asignamos la cantidad a la fecha correspondiente
+        cantidades.push(item.TotalCantidad);
+        av_real += item.TotalCantidad;
+      });
+      result.push(cantidades);
+      // Devuelve los datos transpuestos
+      return { fechas, result, av_real };
+    };
+    const getObjComInfo = async(id)=>{
+      try{
+        const ocList = await GetObjComVId(id);
+        if(ocList.length > 0){
+          setIdAs(id);
+          setPersp(ocList[0].perspectiva_pre_cierre);
+          setProyCom(ocList[0].proy_comercial);
+          setProyComDir(ocList[0].proy_comercial_Dir);
+          setCategoriaAs(ocList[0].id_categoria);
+          setAsesor(ocList[0].vendedor)
+        }
+      }catch(error){
+        console.log(error)
+      }
     }
     //************************************************************************************************************************************************************************** */
     //---Movimientos
     const colComObj = [
       {
+        name: '',
+        selector: row => row.id,
+        width:"120px",
+        cell: (row) => (
+            <div>
+              <CRow>
+                <CCol xs={6} md={2} lg={2}>
+                  <CButton
+                      color="warning"
+                      onClick={() => vHist(row.codigo_vendedor,row.objMensual,row.objDiario)}
+                      size="sm"
+                      className="me-2"
+                      title="Ver"
+                  >
+                  <CIcon icon={cilAvTimer} />
+                  </CButton>
+                </CCol>
+                <CCol xs={6} md={2} lg={2} style={{marginLeft:'15%'}}>
+                  <CButton
+                      color="success"
+                      onClick={() => vModObj(row.id)}
+                      size="sm"
+                      className="ml-2 me-2"
+                      title="Modificar"
+                  >
+                  <CIcon icon={cilPen} />
+                  </CButton>
+                </CCol>
+              </CRow>
+            </div>
+        ),
+      },
+      {
         name: '%',
         selector: row => {
-            const aux = 1 / 1;
+            const aux = parseInt(row.porcentaje)+'%';
             if (aux === null || aux === undefined) {
                 return "No disponible";
             }
@@ -178,6 +450,22 @@ const RObjCom = () => {
         grow:1,
       },
       {
+        name: 'ASESOR',
+        selector: row => {
+            const aux = row.Asesor;
+            if (aux === null || aux === undefined) {
+                return "No disponible";
+            }
+            if (typeof aux === 'object') {
+            return "Sin Datos"; // O cualquier mensaje que prefieras
+            }
+            return aux;
+        },
+        width:"200px",
+        sortable:true,
+        grow:1,
+      },
+      {
         name: 'OBJ. AC´S',
         selector: row => {
             const aux = row.objetivo;
@@ -194,9 +482,41 @@ const RObjCom = () => {
         grow:1,
       },
       {
+        name: 'Vol. min. DIARIO',
+        selector: row => {
+            const aux = row.objetivo / DHabiles;
+            if (aux === null || aux === undefined) {
+                return "No disponible";
+            }
+            if (typeof aux === 'object') {
+            return "Sin Datos"; // O cualquier mensaje que prefieras
+            }
+            return aux.toFixed(2);
+        },
+        width:"130px",
+        sortable:true,
+        grow:1,
+      },
+      {
+        name: 'OBJ. MAX. x CAT.',
+        selector: row => {
+            const aux = row.cantidad_max;
+            if (aux === null || aux === undefined) {
+                return "No disponible";
+            }
+            if (typeof aux === 'object') {
+            return "Sin Datos"; // O cualquier mensaje que prefieras
+            }
+            return aux;
+        },
+        width:"150px",
+        sortable:true,
+        grow:1,
+      },
+      {
         name: 'OBJETIVO DG',
         selector: row => {
-            const aux = row.objetivo_dg;
+            const aux = row.obj_dg;
             if (aux === null || aux === undefined) {
                 return "No disponible";
             }
@@ -205,46 +525,46 @@ const RObjCom = () => {
             }
             return aux;
         },
-        width:"120px",
+        width:"130px",
         sortable:true,
         grow:1,
       },
-      {
-        name: 'TR',
-        selector: row => {
-            const aux = row.tr;
-            if (aux === null || aux === undefined) {
-                return "No disponible";
-            }
-            if (typeof aux === 'object') {
-            return "Sin Datos"; // O cualquier mensaje que prefieras
-            }
-            return aux;
-        },
-        width:"80px",
-        sortable:true,
-        grow:1,
-      },
-      {
-        name: 'TB',
-        selector: row => {
-            const aux = row.tb;
-            if (aux === null || aux === undefined) {
-                return "No disponible";
-            }
-            if (typeof aux === 'object') {
-            return "Sin Datos"; // O cualquier mensaje que prefieras
-            }
-            return aux;
-        },
-        width:"80px",
-        sortable:true,
-        grow:1,
-      },
+      // {
+      //   name: 'TR',
+      //   selector: row => {
+      //       const aux = row.tr;
+      //       if (aux === null || aux === undefined) {
+      //           return "No disponible";
+      //       }
+      //       if (typeof aux === 'object') {
+      //       return "Sin Datos"; // O cualquier mensaje que prefieras
+      //       }
+      //       return aux;
+      //   },
+      //   width:"80px",
+      //   sortable:true,
+      //   grow:1,
+      // },
+      // {
+      //   name: 'TB',
+      //   selector: row => {
+      //       const aux = row.tb;
+      //       if (aux === null || aux === undefined) {
+      //           return "No disponible";
+      //       }
+      //       if (typeof aux === 'object') {
+      //       return "Sin Datos"; // O cualquier mensaje que prefieras
+      //       }
+      //       return aux;
+      //   },
+      //   width:"80px",
+      //   sortable:true,
+      //   grow:1,
+      // },
       {
           name: 'OBJ. OPER MAX.',
           selector: row => {
-              const aux = row.obj_max_cat;
+              const aux = row.objOpMax;
               if (aux === null || aux === undefined) {
                   return "No disponible";
               }
@@ -260,7 +580,7 @@ const RObjCom = () => {
       {
           name: 'OBJ. AJUST',
           selector: row => {
-              const aux = row.obj_dg;
+              const aux = row.objAjuste;
               if (aux === null || aux === undefined) {
                   return "No disponible";
               }
@@ -269,14 +589,14 @@ const RObjCom = () => {
               }
               return aux;
           },
-          width:"100px",
+          width:"130px",
           sortable:true,
           grow:1,
       },
       {
           name: 'OBJETIVO MENSUAL',
           selector: row => {
-              const aux = row.TR;
+              const aux = row.objMensual;
               if (aux === null || aux === undefined) {
                   return "No disponible";
               }
@@ -285,14 +605,14 @@ const RObjCom = () => {
               }
               return aux;
           },
-          width:"150px",
+          width:"170px",
           sortable:true,
           grow:1,
       },
       {
           name: 'OBJETIVO DIARIO',
           selector: row => {
-              const aux = row.TB;
+              const aux = row.objDiario;
               if (aux === null || aux === undefined) {
                   return "No disponible";
               }
@@ -306,9 +626,9 @@ const RObjCom = () => {
           grow:1,
       },
       {
-        name: 'AVANCE REAL',
+        name: 'Perspectiva comercial Pre Cierre',
         selector: row => {
-            const aux = row.TB;
+            const aux = row.perspectiva_pre_cierre;
             if (aux === null || aux === undefined) {
                 return "No disponible";
             }
@@ -322,9 +642,9 @@ const RObjCom = () => {
         grow:1,
       },
       {
-        name: 'PROMEDIO',
+        name: 'Proyección Comercial AC',
         selector: row => {
-            const aux = row.TB;
+            const aux = row.proy_comercial;
             if (aux === null || aux === undefined) {
                 return "No disponible";
             }
@@ -338,9 +658,9 @@ const RObjCom = () => {
         grow:1,
       },
       {
-        name: 'PROYECCIÓN',
+        name: 'Proyección Comercial DirG',
         selector: row => {
-            const aux = row.TB;
+            const aux = row.proy_comercial_Dir;
             if (aux === null || aux === undefined) {
                 return "No disponible";
             }
@@ -354,9 +674,9 @@ const RObjCom = () => {
         grow:1,
       },
       {
-        name: 'PROY VS OBJ',
+        name: 'Faltante',
         selector: row => {
-            const aux = row.TB;
+            const aux = row.faltante;
             if (aux === null || aux === undefined) {
                 return "No disponible";
             }
@@ -370,9 +690,9 @@ const RObjCom = () => {
         grow:1,
       },
       {
-        name: '% AVANCE',
+        name: 'Menos Más',
         selector: row => {
-            const aux = row.TB;
+            const aux = row.menosMas;
             if (aux === null || aux === undefined) {
                 return "No disponible";
             }
@@ -386,54 +706,22 @@ const RObjCom = () => {
         grow:1,
       },
     ];
+    // Obtener los datos transpuestos
+    const { fechas, result } = transposeData(dtObjComVen);
+
+    // Crear las columnas para DataTable
+    const columns = fechas.map(fecha => ({
+      name: fecha,
+      selector: row => row[fecha],
+      width: "120px",
+    }));
+    const data = result.map(cantidades => ({
+     ...cantidades.reduce((acc, cantidad, index) => {
+       acc[fechas[index]] = cantidad;  // Asignamos la cantidad a su fecha correspondiente
+       return acc;
+     }, {}),
+   }));
     //************************************************************************************************************************************************************************** */
-    const updPlaOC = (id) =>{
-        setVOC(true)
-        Swal.fire({
-            title: 'Cargando...',
-            text: 'Estamos obteniendo la información...',
-            didOpen: () => {
-                Swal.showLoading();  // Muestra la animación de carga
-                gUpdPlaOC(id);
-            }
-        });
-    }
-    const gUpdPlaOC = async (id) => {
-        try{
-            const ocList = await getPlantasOCId(id);
-            console.log(ocList)
-            // Cerrar el loading al recibir la respuesta
-            Swal.close();  // Cerramos el loading
-            setId(ocList[0].id)
-            setCategoria(ocList[0].categoria)
-            setCanMin(ocList[0].cantidad_min)
-            setCanMax(ocList[0].cantidad_max)
-            setEstatus(ocList[0].estatus)
-            setBtnTxt('Actualizar')
-        }catch(error){
-            Swal.close();
-            Swal.fire("Error", "No se pudo obtener la información", "error");
-        }
-    }
-    const deletePlaOC = async(id) => {
-        try{
-            const ocAutoriza = await delPlaOC(id);
-                Swal.fire({
-                    title: 'Cargando...',
-                    text: 'Estamos obteniendo la información...',
-                    didOpen: () => {
-                        Swal.showLoading();  // Muestra la animación de carga
-                    }
-                });
-                setTimeout(() => { gPlantaOC_();},2000);
-        }catch(error){
-            Swal.fire({
-                title: "ERROR",
-                text: "Ocurrio un error, vuelve a intentarlo",
-                icon: "error"
-            });
-        }
-    }
     const downloadCSV = (e) => {
         const auxFcaI = format(vFechaI, 'yyyy/MM/dd');
         const auxFcaF = format(vFechaF, 'yyyy/MM/dd');
@@ -459,24 +747,34 @@ const RObjCom = () => {
     };
     const fBusqueda = () => {
         if(vBPlanta.length != 0){
-            const valFiltrados = dtObjCom.filter(dtObjCom => 
-            dtObjCom.Planta.includes(vBPlanta) // Filtra los clientes por el número de cliente
+            const valFiltrados = dtObjComMod.filter(dtObjComMod => 
+              dtObjComMod.Planta.includes(vBPlanta) // Filtra los clientes por el número de cliente
             );
             setDTPlaOC(valFiltrados);
         }else{
           getAcObjCom_()
         }
     };
-    const fBComObj = dtObjCom.filter(item => {
+    const fBComObj = dtObjComMod.filter(item => {
         // Filtrar por planta, interfaz y texto de búsqueda
         return item.planta.toLowerCase().includes(fText.toLowerCase()) || item.mes.includes(fText) || item.periodo.includes(fText);
     });
+    
     //************************************************************************************************************************************************************************** */
     const newOAs = () =>{
         setVOC(true)
-        setId(0);
+        setIdAs(0);
         setBtnTxt("Guardar")
-    }
+    };
+    const vHist = (id,oMen, oDia) =>{
+      setVMHis(true);
+      console.log(oMensualP)
+      getHisc(id.trim(),oMensualP,oDiarioP)
+    };
+    const vModObj = (id) =>{
+      setVMod(true);
+      getObjComInfo(id)
+    };
     //************************************************************************************************************************************************************************************** */
     // Maneja el cambio en el select de tipo de mantenimiento
     const hOnSearch = (string, results) => {
@@ -518,6 +816,15 @@ const RObjCom = () => {
     const hMinimo = (e) => {
       setMinimo(e.target.value);
     };
+    const hDHabiles = (e) => {
+      setDHabiles(e.target.value);
+    };
+    const hBlurDhabiles = (e) =>{
+      const objetivo = e.target.value;
+      const aux = objetivo - DTrans;
+      console.log(aux)
+      setDFalt(aux)
+    };
     //************************************************************************************************************************************************************************************* */
     const onSaveOCAs = () =>{
         Swal.fire({
@@ -541,22 +848,23 @@ const RObjCom = () => {
             proy_com:parseFloat(TxtProyCom),
             proy_com_dir:parseFloat(TxtProyComDir),
             faltante:parseFloat(TxtFaltante),
-            minimo_mas:parseFloat(TxtMinimo)
+            menosMas:parseFloat(TxtMinimo)
         };
         saveOCAsesor(formData);
-    }
+    };
     const saveOCAsesor = async (data) => {
         try{
           const ocList = await saveOCAs(data);
           Swal.close();  // Cerramos el loading
           Swal.fire("Éxito", "Se Guardo Correctamente", "success");
           setVOC(false);
-          getAcObjCom_();  
+          setVMod(false);
+          setTimeout(function(){getAcObjCom_();},2000);  
         }catch(error){
             Swal.close();
             Swal.fire("Error", "No se pudo obtener la información", "error");
         }
-    }
+    };
     //************************************************************************************************************************************************************************************** */
     return (
     <>
@@ -594,21 +902,93 @@ const RObjCom = () => {
                             Agregar Objetivo
                     </CButton>
                 </CCol>
-                <CCol xs={6} md={4}>
-                    <CCol xs={12} md={12}>
-                        <BuscadorDT value={vBPlanta} onChange={onFindBusqueda} onSearch={fBusqueda} />
-                    </CCol>
-                </CCol>
             </CRow>
             <CRow className='mt-2 mb-2'>
+              <CCol xs={6} md={4}>
+                <CCol xs={12} md={12}>
+                  <BuscadorDT value={vBPlanta} onChange={onFindBusqueda} onSearch={fBusqueda} />
+                </CCol>
+              </CCol>
+              {showD && (
+              <>
+              <CCol xs={6} md={2}>
+                <div className="pt-3 tCenter"> Días Habiles</div>
+                <div className='tCenter'> {DHabiles}</div>
+              </CCol>
+              <CCol xs={6} md={3}>
+                <div className="pt-3 tCenter">Días Transcurridos</div>
+                <div className='tCenter'>{DTrans}</div>
+              </CCol>
+              <CCol xs={6} md={3}>
+                <div className="pt-3 tCenter">Días Faltantes</div>
+                <div className='tCenter'>{DFalt}</div>
+              </CCol>
+              </>
+              )}
+            </CRow>
+            {showD && (
+            <>
+            <CRow className='mt-2'>
+              <CTable>
+                <CTableHead>
+                  <CTableRow>
+                    <CTableHeaderCell> </CTableHeaderCell>
+                    <CTableHeaderCell>OBJ AC's</CTableHeaderCell>
+                    <CTableHeaderCell>OBJ MAX x CAT</CTableHeaderCell>
+                    <CTableHeaderCell>OBJ OBJ DG</CTableHeaderCell>
+                    <CTableHeaderCell>TR</CTableHeaderCell>
+                    <CTableHeaderCell>TB</CTableHeaderCell>
+                    <CTableHeaderCell>OBJ OP MAX</CTableHeaderCell>
+                    <CTableHeaderCell>OBJ AJUSTE</CTableHeaderCell>
+                    <CTableHeaderCell>OBJ MENSUAL</CTableHeaderCell>
+                    <CTableHeaderCell>OBJ DIARIO</CTableHeaderCell>
+                    <CTableHeaderCell>PERSP. COM. PRE-CIERRE</CTableHeaderCell>
+                    <CTableHeaderCell>PROYECCIÓN COM.</CTableHeaderCell>
+                    <CTableHeaderCell>PROYECCIÓN COM. DIR.</CTableHeaderCell>
+                  </CTableRow>
+                </CTableHead>
+                <CTableBody>
+                {dtPlantaObj.map((row, index) =>(
+                <CTableRow key={index}>
+                  <CTableHeaderCell scope="row">
+                    <CButton
+                      color="primary"
+                      onClick={() => vHist('-',row.obj_men,row.obj_dia)}
+                      size="sm"
+                      className="me-2"
+                      title="Ver"
+                    >
+                      <CIcon icon={cilAvTimer} />
+                    </CButton>
+                  </CTableHeaderCell>
+                  <CTableDataCell className='tCenter'>{fNumber(row.obj_asesores)}</CTableDataCell>
+                  <CTableDataCell className='tCenter'>{fNumber(row.obj_max_cat)}</CTableDataCell>
+                  <CTableDataCell className='tCenter'>{fNumber(row.obj_dg)}</CTableDataCell>
+                  <CTableDataCell className='tCenter'>{parseInt(row.TR)}</CTableDataCell>
+                  <CTableDataCell className='tCenter'>{parseInt(row.TB)}</CTableDataCell>
+                  <CTableDataCell className='tCenter'>{fNumber(row.obj_op_max)}</CTableDataCell>
+                  <CTableDataCell className='tCenter'>{fNumber(row.obj_aju)}</CTableDataCell>
+                  <CTableDataCell className='tCenter'>{fNumber(row.obj_men)}</CTableDataCell>
+                  <CTableDataCell className='tCenter'>{fNumber(row.obj_dia)}</CTableDataCell>
+                  <CTableDataCell className='tCenter'>{fNumber(row.perspectiva)}</CTableDataCell>
+                  <CTableDataCell className='tCenter'>{fNumber(row.proy_com)}</CTableDataCell>
+                  <CTableDataCell className='tCenter'>{fNumber(row.proy_com_dirG)}</CTableDataCell>
+                </CTableRow>
+                ))}
+                </CTableBody>
+              </CTable>
+            </CRow>
+            </>
+            )}
+            <CRow className='mt-2 mb-2'>
                 <CCol>
-                    <DataTable
-                        columns={colComObj}
-                        data={fBComObj}
-                        pagination
-                        persistTableHead
-                        subHeader
-                    />
+                  <DataTable
+                      columns={colComObj}
+                      data={fBComObj}
+                      pagination
+                      persistTableHead
+                      subHeader
+                  />
                 </CCol>
             </CRow>
             <CModal 
@@ -618,7 +998,7 @@ const RObjCom = () => {
                 className='c-modal-80'
             >
                 <CModalHeader>
-                    <CModalTitle id="oc_">Objetivo Comerical</CModalTitle>
+                    <CModalTitle id="oc_" className='tCenter'>Objetivo Comerical</CModalTitle>
                 </CModalHeader>
                 <CModalBody>
                     <CRow className='mt-4 mb-4'>
@@ -646,7 +1026,7 @@ const RObjCom = () => {
                         <div className='mt-2'>
                         <CFormSelect aria-label="Selecciona" id="cmbCategoria" value={TxtCategoria} onChange={mCategoria}>
                           <option value="" >Selecciona...</option>
-                            {arrCategoriaV.map(item => (
+                            {optCatV.map(item => (
                               <option key={item.id} value={item.id}>
                                 {item.categoria}
                               </option>
@@ -669,7 +1049,7 @@ const RObjCom = () => {
                       <CCol xs={6} md={2}>
                         <CFormInput
                             type="text"
-                            label="Objetivo"
+                            label="Objetivo Asesor"
                             placeholder="0"
                             value={TxtObj}
                             onChange={hObjetivo}
@@ -679,12 +1059,39 @@ const RObjCom = () => {
                       <CCol xs={6} md={2}>
                         <CFormInput
                             type="text"
-                            label="Obj DG"
+                            label="Objetivo DG"
                             placeholder="0"
                             value={TxtObjDg}
                             onChange={hObjetivoDG}
                         />
                       </CCol>
+                    </CRow>
+                </CModalBody>
+                <CModalFooter>
+                    <CCol xs={4} md={4}></CCol>
+                    <CCol xs={4} md={2}>
+                        <CButton color='primary' onClick={onSaveOCAs} style={{'color':'white'}} > 
+                            <CIcon icon={cilSave} /> {btnG}
+                        </CButton>
+                    </CCol>
+                    <CCol xs={4} md={2}>
+                        <CButton color='danger' onClick={() => setVOC(false)} style={{'color':'white'}} > 
+                            <CIcon icon={cilTrash} />   Cerrar
+                        </CButton>
+                    </CCol>
+                </CModalFooter>
+            </CModal>
+            <CModal 
+                backdrop="static"
+                visible={vMod}
+                onClose={() => setVMod(false)}
+                className='c-modal-80'
+            >
+                <CModalHeader>
+                    <CModalTitle id="oc_" className='tCenter'>Objetivo Comerical</CModalTitle>
+                </CModalHeader>
+                <CModalBody>
+                    <CRow className='mt-4 mb-4'>
                       <CCol xs={6} md={2}>
                           <CFormInput
                               type="text"
@@ -694,8 +1101,6 @@ const RObjCom = () => {
                               onChange={hPersp}
                           />
                         </CCol>
-                    </CRow>
-                    <CRow className='mt-4 mb-4'>
                       <CCol xs={6} md={2}>
                         <CFormInput
                             type="text"
@@ -742,8 +1147,54 @@ const RObjCom = () => {
                         </CButton>
                     </CCol>
                     <CCol xs={4} md={2}>
-                        <CButton color='danger' onClick={() => setVOC(false)} style={{'color':'white'}} > 
+                        <CButton color='danger' onClick={() => setVMod(false)} style={{'color':'white'}} > 
                             <CIcon icon={cilTrash} />   Cerrar
+                        </CButton>
+                    </CCol>
+                </CModalFooter>
+            </CModal>
+            
+            <CModal 
+                backdrop="static"
+                visible={vMHis}
+                onClose={() => setVMHis(false)}
+                className='c-modal-80'
+            >
+                <CModalHeader>
+                    <CModalTitle id="oc_">Historico</CModalTitle>
+                </CModalHeader>
+                <CModalBody>
+                    <CRow className='mt-4 mb-4'>
+                      <DataTable
+                        columns={columns}
+                        data={data}
+                        pagination
+                        persistTableHead
+                      />
+                    </CRow>
+                    <CRow className='mt-4'>
+                      <CCol sm={4} md={2} className='tCenter'>AVANCE REAL</CCol>
+                      <CCol sm={4} md={2} className='tCenter'>PROM</CCol>
+                      <CCol sm={4} md={2} className='tCenter'>PROYECCIÓN</CCol>
+                      <CCol sm={4} md={2} className='tCenter'>PROY VS OBJ</CCol>
+                      <CCol sm={4} md={2} className='tCenter'>POR HACER</CCol>
+                      <CCol sm={4} md={2} className='tCenter'>% AVANCE</CCol>
+                    </CRow>
+                    <CRow className='mt-1 mb-1'>
+                      <CCol sm={4} md={2} className='tCenter'>{TxtAvReal}</CCol>
+                      <CCol sm={4} md={2} className='tCenter'>{TxtProm}</CCol>
+                      <CCol sm={4} md={2} className='tCenter'>{TxtProy}</CCol>
+                      <CCol sm={4} md={2} className='tCenter'>{TxtProyObj}</CCol>
+                      <CCol sm={4} md={2} className='tCenter'>{TxtHacer}</CCol>
+                      <CCol sm={4} md={2} className='tCenter'>{TxtPorcAv}</CCol>
+                    </CRow>
+                </CModalBody>
+                <CModalFooter>
+                    <CCol xs={4} md={4}></CCol>
+                    <CCol xs={4} md={2}></CCol>
+                    <CCol xs={4} md={2}>
+                        <CButton color='primary' onClick={() => setVMHis(false)} style={{'color':'white'}} > 
+                          Cerrar  
                         </CButton>
                     </CCol>
                 </CModalFooter>

@@ -1,6 +1,6 @@
 import React, { createContext, useState, useEffect } from 'react'
 import Cookies from 'universal-cookie'
-import { Rol } from '../Utilidades/Roles' // Asegúrate de tener este archivo
+import { Rol } from '../Utilidades/Roles'
 import {
   cilCursor,
   cilFilter,
@@ -187,7 +187,7 @@ const NavProvider = ({ children }) => {
                   },
                 ]
               : []),
-              ...(userIsVentas || userIsAdminTI || userIsDirector
+              ...(userIsAdminTI || userIsDirector
                 ? [
                     {
                       component: CNavGroup,
@@ -200,12 +200,6 @@ const NavProvider = ({ children }) => {
                           name: 'Agregar Objetivo Comercial',
                           to: '/ventas/ObjCom',
                           icon: <CIcon icon={cilPlaylistAdd} customClassName="nav-icon" />,
-                        },
-                        {
-                          component: CNavItem,
-                          name: 'Reporte Objetivo Comercial',
-                          to: '/reportes/RepObjCom',
-                          icon: <CIcon icon={cilBarChart} customClassName="nav-icon" />,
                         },
                       ],
                     },

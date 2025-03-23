@@ -458,7 +458,7 @@ export async function getVendedores(planta) {
             },
         };
         //------------------------------------------------------------------------------------------------------------------------------------------------------
-        const response = await axios.get(baseUrl2+'Catalogo/GetVendedores/'+planta,confi_ax);
+        const response = await axios.get(baseUrl+'Catalogo/GetVendedores/'+planta,confi_ax);
         if (response.data && response.data.length > 0) {
             const obj = response.data;
             if(obj.length > 0)
@@ -484,7 +484,7 @@ export async function getCategoriaVenta() {
             },
         };
         //------------------------------------------------------------------------------------------------------------------------------------------------------
-        const response = await axios.get(baseUrl2+'Catalogo/GetCategoriaVenta',confi_ax);
+        const response = await axios.get(baseUrl+'Catalogo/GetCategoriaVenta',confi_ax);
         if (response.data && response.data.length > 0) {
             const obj = response.data;
             if(obj.length > 0)
@@ -578,7 +578,7 @@ export async function getCategoriasOC() {
             },
         };
         //------------------------------------------------------------------------------------------------------------------------------------------------------
-        const response = await axios.get(baseUrl2+'Comercial/GetCategoriasVentas', confi_ax);
+        const response = await axios.get(baseUrl+'Comercial/GetCategoriasVentas', confi_ax);
         if (response.data && response.data.length > 0) {
             const obj = response.data;
             if(obj.length > 0)
@@ -609,10 +609,12 @@ export async function setCategorias(data) {
             categoria: data.categoria,
             cantidad_min: data.cantidad_min,
             cantidad_max: data.cantidad_max,
-            estatus: data.estatus
+            estatus: data.estatus,
+            periodo:data.periodo,
+            ejercicio:data.ejercicio
         }));
         //------------------------------------------------------------------------------------------------------------------------------------------------------
-        const response = await axios.post(baseUrl2+'Comercial/setCategoriaVen', data, confi_ax);
+        const response = await axios.post(baseUrl+'Comercial/setCategoriaVen', data, confi_ax);
         if (response.data && response.data.length > 0) {
             const obj = response.data;
             if(obj.length > 0)
@@ -638,7 +640,7 @@ export async function getCatId(id) {
             },
         };
         //------------------------------------------------------------------------------------------------------------------------------------------------------
-        const response = await axios.get(baseUrl2+'Comercial/GetCategoriaId/'+id, confi_ax);
+        const response = await axios.get(baseUrl+'Comercial/GetCategoriaId/'+id, confi_ax);
         if (response.data && response.data.length > 0) {
             const obj = response.data;
             if(obj.length > 0)
@@ -664,7 +666,7 @@ export async function delCatId(id) {
             },
         };
         //------------------------------------------------------------------------------------------------------------------------------------------------------
-        const response = await axios.delete(baseUrl2+'Comercial/GetDeleteCV/'+id, confi_ax);
+        const response = await axios.delete(baseUrl+'Comercial/GetDeleteCV/'+id, confi_ax);
         if (response.data && response.data.length > 0) {
             const obj = response.data;
             if(obj.length > 0)
@@ -690,7 +692,7 @@ export async function getPlantasOC(mes,periodo) {
             },
         };
         //------------------------------------------------------------------------------------------------------------------------------------------------------
-        const response = await axios.get(baseUrl2+'Comercial/GetObjComPlaGn/'+mes+','+periodo, confi_ax);
+        const response = await axios.get(baseUrl+'Comercial/GetObjComPlaGn/'+mes+','+periodo, confi_ax);
         console.log(response)
         if (response.data && response.data.length > 0) {
             const obj = response.data;
@@ -717,7 +719,8 @@ export async function getPlantasOCId(planta,mes,periodo) {
             },
         };
         //------------------------------------------------------------------------------------------------------------------------------------------------------
-        const response = await axios.get(baseUrl2+'Comercial/GetObjComPlanta/'+planta+','+mes+','+periodo, confi_ax);
+        const response = await axios.get(baseUrl+'Comercial/GetObjComPlanta/'+planta+','+mes+','+periodo, confi_ax);
+        console.log(response)
         if (response.data && response.data.length > 0) {
             const obj = response.data;
             if(obj.length > 0)
@@ -745,13 +748,15 @@ export async function savePlaOC(data) {
         const fData = new FormData();
         fData.append("vC", JSON.stringify({
             id: data.id,
-            categoria: data.categoria,
-            cantidad_min: data.cantidad_min,
-            cantidad_max: data.cantidad_max,
-            estatus: data.estatus
+            planta: data.planta,
+            mes: data.mes,
+            periodo: data.periodo,
+            TR: parseInt(data.TR),
+            TB: parseInt(data.TB),
+            obj_aju: parseFloat(data.obj_aju)
         }));
         //------------------------------------------------------------------------------------------------------------------------------------------------------
-        const response = await axios.post(baseUrl2+'Comercial/setObjComPla', data, confi_ax);
+        const response = await axios.post(baseUrl+'Comercial/setObjComPla', data, confi_ax);
         if (response.data && response.data.length > 0) {
             const obj = response.data;
             if(obj.length > 0)
@@ -777,7 +782,7 @@ export async function delPlaOC(id) {
             },
         };
         //------------------------------------------------------------------------------------------------------------------------------------------------------
-        const response = await axios.delete(baseUrl2+'Comercial/GetDeleteObjComPla/'+id, confi_ax);
+        const response = await axios.delete(baseUrl+'Comercial/GetDeleteObjComPla/'+id, confi_ax);
         if (response.data && response.data.length > 0) {
             const obj = response.data;
             if(obj.length > 0)
@@ -1018,7 +1023,7 @@ export async function getRemFaltante(planta, FI, FF) {
         return false
     }
 }
-export async function setRemFaltante(Id,Nr, planta, tipo) {
+export async function setRemFaltante(Id,Nr, planta, tipo, razon) {
     const usuario = cookies.get('Usuario');
     if(usuario.length == 0)
     {
@@ -1035,7 +1040,7 @@ export async function setRemFaltante(Id,Nr, planta, tipo) {
             },
         };
         //------------------------------------------------------------------------------------------------------------------------------------------------------
-        const response = await axios.get(baseUrl+'Operaciones/SetRemFal/'+Id+','+Nr+','+planta+','+tipo+','+cookies.get('Usuario'), confi_ax);
+        const response = await axios.get(baseUrl+'Operaciones/SetRemFal/'+Id+','+Nr+','+planta+','+tipo+','+cookies.get('Usuario')+','+razon, confi_ax);
         if (response.data && response.data.length > 0) {
             const obj = response.data;
             if(obj.length > 0)
@@ -2430,9 +2435,82 @@ export async function getObjCom(mes,periodo,planta)
             },
         };
         //------------------------------------------------------------------------------------------------------------------------------------------------------
-        const response = await axios.get(baseUrl2+'Comercial/GetObjComercial/'+planta+','+mes+','+periodo, confi_ax);
-        if (response.data && response.data.length > 0) {
-            return response.data;
+        const response = await axios.get(baseUrl+'Comercial/GetObjComercial/'+planta+','+mes+','+periodo, confi_ax);
+        if (response.data && response.data.length > 0 ) {
+            const obj = response.data;
+            
+            if(obj.length > 0)
+            {
+                return obj;
+            }else{
+                return false
+            }
+        }else{
+            return false
+        }
+    } 
+    catch(error)
+    {
+        console.log(error);
+        return false
+    }
+}
+export async function GetObjComVendedor(mes,periodo,planta, vendedor)
+{
+    try
+    {
+        let confi_ax = {
+            headers:
+            {
+                'Cache-Control': 'no-cache',
+                'Content-Type': 'application/json',
+                "Authorization": "Bearer "+cookies.get('token'),
+            },
+        };
+        //------------------------------------------------------------------------------------------------------------------------------------------------------
+        const response = await axios.get(baseUrl+'Comercial/GetObjComVendedor/'+mes+','+periodo+','+planta+','+vendedor, confi_ax);
+        if (response.data && response.data.length > 0 ) {
+            const obj = response.data;
+            
+            if(obj.length > 0)
+            {
+                return obj;
+            }else{
+                return false
+            }
+        }else{
+            return false
+        }
+    } 
+    catch(error)
+    {
+        console.log(error);
+        return false
+    }
+}
+export async function GetObjComVId(id)
+{
+    try
+    {
+        let confi_ax = {
+            headers:
+            {
+                'Cache-Control': 'no-cache',
+                'Content-Type': 'application/json',
+                "Authorization": "Bearer "+cookies.get('token'),
+            },
+        };
+        //------------------------------------------------------------------------------------------------------------------------------------------------------
+        const response = await axios.get(baseUrl+'Comercial/GetObjComVId/'+id, confi_ax);
+        if (response.data && response.data.length > 0 ) {
+            const obj = response.data;
+            
+            if(obj.length > 0)
+            {
+                return obj;
+            }else{
+                return false
+            }
         }else{
             return false
         }

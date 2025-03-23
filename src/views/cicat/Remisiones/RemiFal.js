@@ -108,7 +108,7 @@ const RemiFal = () => {
                             <CCol>
                                 <CButton
                                     color="danger"
-                                    onClick={() => delRemisionConf(row.IdOperacion, row.Planta)}
+                                    onClick={() => delRemisionConf(row.IdOperacion, row.NoRemision, row.Planta)}
                                     size="sm"
                                     className="me-2"
                                     title="Eliminar"
@@ -219,13 +219,9 @@ const RemiFal = () => {
 
     const updRemision = async (Id, NRem, Planta) => {
         try {
-            const remF = await setRemFaltante(Id, NRem, Planta, '1');
-            if (remF) {
-                Swal.fire("Éxito", "Se actualizó correctamente", "success"); 
-                getRemFal();
-            } else {
-                Swal.fire("Error", "Ocurrió un error, vuelve a intentar", "error");
-            }
+            const remF = await setRemFaltante(Id, NRem, Planta, '1','-');
+            Swal.fire("Éxito", "Se Modifico correctamente", "success"); 
+            getRemFal();
         } catch (error) {
             Swal.fire("Error", "No se pudo actualizar la información", "error");
         }
@@ -236,8 +232,8 @@ const RemiFal = () => {
      * 2) Guardamos en deleteData el Id y la Planta
      * 3) Mostramos la ventana emergente
      */
-    const delRemisionConf = (Id, Planta) => {
-        setDeleteData({ Id, Planta });
+    const delRemisionConf = (Id, Nr, Planta) => {
+        setDeleteData({ Id, Nr, Planta });
         setDeleteReason('');         // Limpiamos el motivo al abrir
         setVisibleDelConf(true);     // Mostramos el modal
     };
@@ -247,15 +243,11 @@ const RemiFal = () => {
      */
     const confirmDelRemision = async() => {
         try {
-            const { Id, Planta } = deleteData;
+            const { Id, Nr, Planta } = deleteData;
             // Aquí pasamos deleteReason como cuarto parámetro
-            const remF = await setRemFaltante(Id, '0', Planta, deleteReason);
-            if (remF) {
-                Swal.fire("Éxito", "Se eliminó correctamente", "success"); 
-                getRemFal();
-            } else {
-                Swal.fire("Error", "Ocurrió un error, vuelve a intentar", "error");
-            }
+            const remF = await setRemFaltante(Id, Nr, Planta, '0', deleteReason);
+            Swal.fire("Éxito", remF, "success"); 
+            getRemFal();
         } catch (error) {
             Swal.fire("Error", "No se pudo eliminar la información", "error");
         } finally {

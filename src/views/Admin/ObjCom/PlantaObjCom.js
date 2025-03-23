@@ -40,21 +40,12 @@ const PlaOC = () => {
     const [dtPlaOC, setDTPlaOC] = useState([]);
     // FROMS
     const [id, setId] = useState(0);
-    const [planta, setPlanta] = useState("");
-    const [mes, setMes] = useState("");
-    const [periodo, setPeriodo] = useState("");
-    const [objAs, setObjAs] = useState(0);
-    const [objMaxCat, setObjMaxCat] = useState(0);
-    const [objDg, setObjDg] = useState(0);
+    const [planta, setPlantaP] = useState("");
+    const [mes, setMesP] = useState("");
+    const [periodo, setPeriodoP] = useState("");
     const [TR, setTR] = useState(0);
     const [TB, setTB] = useState(0);
-    const [objOpMax, setObjOpMax] = useState(0);
-    const [objAju, setObjAju] = useState(0);
-    const [objMen, setObjMen] = useState(0);
-    const [objDia, setObjDia] = useState(0);
-    const [perspCom, setObjPersp] = useState(0);
-    const [proyCom, setProyCom] = useState(0);
-    const [proyComDir, setProyComDir] = useState(0);
+    const [obj_aju, setObjAju] = useState(0);
     //************************************************************************************************************************************************************************** */    
     useEffect(() => {
         
@@ -71,6 +62,16 @@ const PlaOC = () => {
     const mPeriodo = (event) => {
         setPeriodoB(event.target.value);
     };
+    const mCambioP = (event) => {
+        const pla = event.target.value; 
+        setPlantaP(pla);
+    };
+    const mMesP = (event) => {
+        setMesP(event.target.value);
+    };
+    const mPeriodoP = (event) => {
+        setPeriodoP(event.target.value);
+    };
     const gPlantaOC_ = async () => {
         Swal.fire({
             title: 'Cargando...',
@@ -82,16 +83,13 @@ const PlaOC = () => {
         try{
             Swal.close()
             if(plantasSel != ""){
-                console.log(plantasSel, periodoSel, fNumberCad(mesSel))
                 const ocList = await getPlantasOCId(plantasSel, fNumberCad(mesSel), periodoSel);
                 if(ocList)
                 {
                     setDTPlaOC(ocList)
                 }
             }else{
-                console.log(periodoSel, fNumberCad(mesSel))
                 const ocList = await getPlantasOC(fNumberCad(mesSel),periodoSel);
-                console.log(ocList)
                 if(ocList)
                 {
                     setDTPlaOC(ocList)
@@ -159,47 +157,33 @@ const PlaOC = () => {
             grow:1,
         },
         {
-            name: 'OBJ. AC´S',
+            name: 'Periodo',
             selector: row => {
-                const aux = row.obj_asesores;
+                const aux = row.mes;
                 if (aux === null || aux === undefined) {
                     return "No disponible";
                 }
                 if (typeof aux === 'object') {
-                return "Sin Datos"; // O cualquier mensaje que prefieras
+                    return "Sin Datos"; // O cualquier mensaje que prefieras
                 }
-                return aux;
+                console.log(aux)
+                let aux_ = aux == 1 ? 'ENERO':aux == 2 ? 'FEBRERO':aux == 3 ? 'MARZO':aux == 4 ?'ABRIL':aux == 5 ?'MAYO':aux == 6 ?'JUNIO':aux == 7 ?'JULIO':aux == 8 ?'AGOSTO':aux == 9 ?'SEPTIEMBRE':aux == 10 ?'OCTUBRE':aux == 11 ?'NOVIEMBRE':'DICIEMBRE';
+                return aux_;
             },
             width:"100px",
             sortable:true,
             grow:1,
         },
         {
-            name: 'OBJ. MAX x CAT.',
+            name: 'Ejercicio',
             selector: row => {
-                const aux = row.obj_max_cat;
+                const aux = row.periodo;
                 if (aux === null || aux === undefined) {
                     return "No disponible";
                 }
                 if (typeof aux === 'object') {
-                return "Sin Datos"; // O cualquier mensaje que prefieras
-                }
-                return aux;
-            },
-            width:"100px",
-            sortable:true,
-            grow:1,
-        },
-        {
-            name: 'OBJ. DG',
-            selector: row => {
-                const aux = row.obj_dg;
-                if (aux === null || aux === undefined) {
-                    return "No disponible";
-                }
-                if (typeof aux === 'object') {
-                return "Sin Datos"; // O cualquier mensaje que prefieras
-                }
+                    return "Sin Datos"; // O cualquier mensaje que prefieras
+                } 
                 return aux;
             },
             width:"100px",
@@ -239,25 +223,9 @@ const PlaOC = () => {
             grow:1,
         },
         {
-            name: 'OBJ. OPER MAX',
-            selector: row => {
-                const aux = row.obj_op_max;
-                if (aux === null || aux === undefined) {
-                    return "No disponible";
-                }
-                if (typeof aux === 'object') {
-                return "Sin Datos"; // O cualquier mensaje que prefieras
-                }
-                return aux;
-            },
-            width:"100px",
-            sortable:true,
-            grow:1,
-        },
-        {
             name: 'OBJ. AJUSTE',
             selector: row => {
-                const aux = row.obj_aju;
+                const aux = fNumberCad(row.obj_aju);
                 if (aux === null || aux === undefined) {
                     return "No disponible";
                 }
@@ -266,87 +234,7 @@ const PlaOC = () => {
                 }
                 return aux;
             },
-            width:"100px",
-            sortable:true,
-            grow:1,
-        },
-        {
-            name: 'OBJ. MENSUAL',
-            selector: row => {
-                const aux = row.obj_men;
-                if (aux === null || aux === undefined) {
-                    return "No disponible";
-                }
-                if (typeof aux === 'object') {
-                return "Sin Datos"; // O cualquier mensaje que prefieras
-                }
-                return aux;
-            },
-            width:"100px",
-            sortable:true,
-            grow:1,
-        },
-        {
-            name: 'OBJ. DIARIO',
-            selector: row => {
-                const aux = row.obj_dia;
-                if (aux === null || aux === undefined) {
-                    return "No disponible";
-                }
-                if (typeof aux === 'object') {
-                return "Sin Datos"; // O cualquier mensaje que prefieras
-                }
-                return aux;
-            },
-            width:"100px",
-            sortable:true,
-            grow:1,
-        },
-        {
-            name: 'Perspectiva Com. Pre Cierre',
-            selector: row => {
-                const aux = row.persp_com_pre_cierre;
-                if (aux === null || aux === undefined) {
-                    return "No disponible";
-                }
-                if (typeof aux === 'object') {
-                return "Sin Datos"; // O cualquier mensaje que prefieras
-                }
-                return aux;
-            },
-            width:"100px",
-            sortable:true,
-            grow:1,
-        },
-        {
-            name: 'Proyección Comercial AC',
-            selector: row => {
-                const aux = row.proy_com_ac;
-                if (aux === null || aux === undefined) {
-                    return "No disponible";
-                }
-                if (typeof aux === 'object') {
-                return "Sin Datos"; // O cualquier mensaje que prefieras
-                }
-                return aux;
-            },
-            width:"100px",
-            sortable:true,
-            grow:1,
-        },
-        {
-            name: 'Proyección Dir. Gn',
-            selector: row => {
-                const aux = row.proy_com_dirG;
-                if (aux === null || aux === undefined) {
-                    return "No disponible";
-                }
-                if (typeof aux === 'object') {
-                return "Sin Datos"; // O cualquier mensaje que prefieras
-                }
-                return aux;
-            },
-            width:"100px",
+            width:"150px",
             sortable:true,
             grow:1,
         },
@@ -370,10 +258,6 @@ const PlaOC = () => {
             // Cerrar el loading al recibir la respuesta
             Swal.close();  // Cerramos el loading
             setId(ocList[0].id)
-            setCategoria(ocList[0].categoria)
-            setCanMin(ocList[0].cantidad_min)
-            setCanMax(ocList[0].cantidad_max)
-            setEstatus(ocList[0].estatus)
             setBtnTxt('Actualizar')
         }catch(error){
             Swal.close();
@@ -449,14 +333,14 @@ const PlaOC = () => {
     }
     //************************************************************************************************************************************************************************************** */
     // Maneja el cambio en el select de tipo de mantenimiento
-    const hCategoria = (e) => {
-        setCategoria(e.target.value);
+    const hTr = (e) => {
+        setTR(e.target.value);
     }
-    const hCanMin = (e) => {
-        setCanMin(e.target.value);
+    const hTb = (e) => {
+        setTB(e.target.value);
     }
-    const hCanMax = (e) => {
-        setCanMax(e.target.value);
+    const hObjAju = (e) => {
+        setObjAju(e.target.value);
     }
     const hEstatus = (e) => {
         setEstatus(e.target.value);
@@ -476,18 +360,9 @@ const PlaOC = () => {
             planta:planta,
             mes:mes,
             periodo:periodo,
-            TR:TR,
-            TB:TB,
-            obj_asesores:obj_asesores,
-            obj_max_cat:obj_max_cat,
-            obj_dg:obj_dg,
-            obj_op_max:obj_op_max,
-            obj_aju:obj_aju,
-            obj_men:obj_men,
-            obj_dia:obj_dia,
-            persp_com_pre_cierre:persp_com_pre_cierre,
-            proy_com_ac:proy_com_ac,
-            proy_com_dirG:proy_com_dirG,
+            TR:parseInt(TR),
+            TB:parseInt(TB),
+            obj_aju:parseFloat(obj_aju)
         };
         savePlantaOC(formData);
     }
@@ -568,31 +443,49 @@ const PlaOC = () => {
                 </CModalHeader>
                 <CModalBody>
                     <CRow className='mt-2 mb-2'>
-                        <CCol xs={6} md={3}>
-                            
-                        </CCol>
-                        <CCol xs={6} md={3}>
-                            
-                        </CCol>
-                        <CCol xs={6} md={3}>
-                            
-                        </CCol>
-                        <CCol xs={6} md={3}>
-                            <CFormInput
-                                type="text"
-                                label="# TR"
-                                placeholder="0"
-                                value={TR}
-                                onChange={hCanMin}
+                        <CCol xs={6} md={2}>
+                            <Mes
+                                mMes={mMesP}
+                                mesSel={mes}
                             />
                         </CCol>
-                        <CCol xs={6} md={3}>
+                        <CCol xs={6} md={2}>
+                            <Periodo
+                                mPeriodo={mPeriodoP}
+                                periodoSel={periodo}
+                            />
+                        </CCol>
+                        <CCol xs={12} md={3}>
+                            <Plantas  
+                                mCambio={mCambioP}
+                                plantasSel={planta}
+                            />
+                        </CCol>
+                        <CCol xs={12} md={1}>
                             <CFormInput
                                 type="text"
-                                label="# TB"
+                                label="TR"
+                                placeholder="0"
+                                value={TR}
+                                onChange={hTr}
+                            />
+                        </CCol>
+                        <CCol xs={12} md={1}>
+                            <CFormInput
+                                type="text"
+                                label="TB"
                                 placeholder="0"
                                 value={TB}
-                                onChange={hCanMin}
+                                onChange={hTb}
+                            />
+                        </CCol>
+                        <CCol xs={12} md={2}>
+                            <CFormInput
+                                type="text"
+                                label="OBJ AJUSTE"
+                                placeholder="0"
+                                value={obj_aju}
+                                onChange={hObjAju}
                             />
                         </CCol>
                     </CRow>

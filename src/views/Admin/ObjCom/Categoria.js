@@ -22,6 +22,8 @@ import {CIcon} from '@coreui/icons-react'
 import { cilPlus, cilSave, cilTrash } from '@coreui/icons'
 import { format } from 'date-fns';
 import { Rol } from '../../../Utilidades/Roles'
+import Periodo from '../../base/parametros/Periodo'
+import Mes from '../../base/parametros/Mes'
 const Categoria = () => {
     //************************************************************************************************************************************************************************** */
     const [vOC, setVOC] = useState(false);
@@ -33,6 +35,8 @@ const Categoria = () => {
     //Buscador
     const [fText, setFText] = useState(''); // Estado para el filtro de búsqueda
     const [vBPlanta, setBPlanta] = useState('');
+    const [periodoSel , setPeriodoB] = useState('');
+    const [mesSel , setMesB] = useState('');        
     //Arrays
     const [dtObjCom, setDTObjCom] = useState([]);
     // FROMS
@@ -44,6 +48,13 @@ const Categoria = () => {
     //************************************************************************************************************************************************************************** */    
     const [shRespuesta, setshRespuesta] = useState(false);
     const shDisR = !userIsJP ? false : true;
+    //************************************************************************************************************************************************************************** */
+    const mMes = (event) => {
+        setMesB(event.target.value);
+    };
+    const mPeriodo = (event) => {
+        setPeriodoB(event.target.value);
+    };
     //************************************************************************************************************************************************************************** */
     useEffect(() => {
         Swal.fire({
@@ -159,6 +170,38 @@ const Categoria = () => {
             name: 'Cantidad Máxima',
             selector: row => {
                 const aux = row.cantidad_max;
+                if (aux === null || aux === undefined) {
+                    return "No disponible";
+                }
+                if (typeof aux === 'object') {
+                return "Sin Datos"; // O cualquier mensaje que prefieras
+                }
+                return aux;
+            },
+            width:"150px",
+            sortable:true,
+            grow:1,
+        },
+        {
+            name: 'Periodo',
+            selector: row => {
+                const aux = row.periodo;
+                if (aux === null || aux === undefined) {
+                    return "No disponible";
+                }
+                if (typeof aux === 'object') {
+                return "Sin Datos"; // O cualquier mensaje que prefieras
+                }
+                return aux;
+            },
+            width:"150px",
+            sortable:true,
+            grow:1,
+        },
+        {
+            name: 'Ejercicio',
+            selector: row => {
+                const aux = row.ejercicio;
                 if (aux === null || aux === undefined) {
                     return "No disponible";
                 }
@@ -297,7 +340,9 @@ const Categoria = () => {
             categoria:categoria,
             cantidad_max:parseFloat(cantidad_max),
             cantidad_min:parseFloat(cantidad_min),
-            estatus:estatus
+            estatus:estatus,
+            periodo:mesSel,
+            ejercicio:periodoSel
         };
         saveCategoria(formData);
     }
@@ -390,6 +435,22 @@ const Categoria = () => {
                                 <option value="0">Inactiva</option>
                             </CFormSelect>
                         </CCol>
+                    </CRow>
+                    <CRow className='mt-2 mb-2'>
+                        <CCol xs={6} md={3}>
+                            <Mes
+                                mMes={mMes}
+                                mesSel={mesSel}
+                                className="input"
+                            />
+                      </CCol>
+                      <CCol xs={6} md={3}>
+                        <Periodo
+                            mPeriodo={mPeriodo}
+                            periodoSel={periodoSel}
+                            className="input"
+                        />
+                      </CCol>
                     </CRow>
                 </CModalBody>
                 <CModalFooter>

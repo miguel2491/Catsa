@@ -48,7 +48,7 @@ import {
   cilUserFemale,
 } from '@coreui/icons'
 import { findLogin, getPedidosD, getPedidosS, getPedidosPS, getPedidosM } from '../../Utilidades/Funciones';
-
+import { Rol } from '../../Utilidades/Roles'
 import WidgetsDropdown from '../widgets/WidgetsDropdown'
 
 const currentDate = new Date();
@@ -56,6 +56,12 @@ const currentDate = new Date();
 const Dashboard = () => {
   const navigate = useNavigate();
   const userIsA = true;
+  const userIsAdminTI = Rol('AdminTI')
+  const userIsAdmin = Rol('Admin')
+  const userIsOperacion = Rol('Operaciones')
+  const userIsMantenimiento = Rol('Mantenimiento')
+  const userIsFinanzas = Rol('Finanzas')
+  const userIsDirector = Rol('Direccion')
   const [aPedidosD, setPedidosD] = useState([]);
   //Diario
   const[fDiaria, setfDiara] = useState(currentDate);
@@ -325,10 +331,13 @@ const Dashboard = () => {
 
     } 
   }
+  let nav = []
+
   return (
     <>
-      {userIsA && <WidgetsDropdown className="mb-4" />}
-      <CRow>
+      {userIsA && userIsAdminTI && userIsDirector && userIsAdmin && <WidgetsDropdown className="mb-4" />}
+      {userIsAdminTI && userIsDirector && userIsAdmin && (
+        <CRow>
         <CCol xs={12} md={6}>
           <CCard className="mb-4">
             <CCardHeader>Pedidos Por Día <b>{format(fDiaria, 'yyyy/MM/dd')}</b></CCardHeader>
@@ -374,6 +383,8 @@ const Dashboard = () => {
           </CCard>
         </CCol>
       </CRow>
+      )}
+      
     </>
   )
 }
