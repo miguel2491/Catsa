@@ -47,11 +47,9 @@ const ResEntradas = forwardRef((props, ref) => {
                 setDTOrdenes(ocList);
                 setExOc(ocList);
             }
-            // Cerrar el loading al recibir la respuesta
-            Swal.close();  // Cerramos el loading
         }catch(error){
-            Swal.close();
-            Swal.fire("Error", "No se pudo obtener la información", "error");
+            //Swal.close();
+            //Swal.fire("Error", "No se pudo obtener la información de Entradas", "error");
         }
         var obj =  response.data[0].Rows;
         //console.log(obj)

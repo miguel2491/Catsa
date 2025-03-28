@@ -106,11 +106,17 @@ h3, label{
   .jiMOeR{
 	z-index: 1000 !important;
   }
+  .c-modal-45 .modal-dialog{
+	max-width: 45%;
+  }
   .c-modal .modal-dialog{
 	max-width: 60%;
   }
   .c-modal-80 .modal-dialog{
 	max-width: 80%;
+  }
+  .c-modal-95 .modal-dialog{
+	max-width: 95%;
   }
   .colBuscador{
 	padding: 0 !important;
@@ -135,5 +141,14 @@ h3, label{
 .tCenter{
 	text-align: center;
 }
-
+.column-hidden {
+	display: none;
+	transition: all 0.3s ease-in-out;
+}
+  
+.column-visible {
+	display: table-cell;
+	transition: all 0.3s ease-in-out;
+}
+  
 

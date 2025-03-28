@@ -1025,6 +1025,7 @@ export async function getRemFaltante(planta, FI, FF) {
 }
 export async function setRemFaltante(Id,Nr, planta, tipo, razon) {
     const usuario = cookies.get('Usuario');
+    let nRe = Nr == '' ? 0:Nr;
     if(usuario.length == 0)
     {
         return false;
@@ -1040,7 +1041,8 @@ export async function setRemFaltante(Id,Nr, planta, tipo, razon) {
             },
         };
         //------------------------------------------------------------------------------------------------------------------------------------------------------
-        const response = await axios.get(baseUrl+'Operaciones/SetRemFal/'+Id+','+Nr+','+planta+','+tipo+','+cookies.get('Usuario')+','+razon, confi_ax);
+        const response = await axios.get(baseUrl+'Operaciones/SetRemFal/'+Id+','+nRe+','+planta+','+tipo+','+cookies.get('Usuario')+','+razon, confi_ax);
+        console.log(nRe,response)
         if (response.data && response.data.length > 0) {
             const obj = response.data;
             if(obj.length > 0)
@@ -2408,7 +2410,7 @@ export async function saveOCAs(data) {
             },
         };
         //------------------------------------------------------------------------------------------------------------------------------------------------------
-        const response = await axios.post(baseUrl2+'Comercial/setObjComerciales', data, confi_ax);
+        const response = await axios.post(baseUrl+'Comercial/setObjComerciales', data, confi_ax);
         if (response.data && response.data.length > 0) {
             const obj = response.data;
             if(obj.length > 0)
@@ -2896,6 +2898,105 @@ export async function delInci(id) {
         //------------------------------------------------------------------------------------------------------------------------------------------------------
         const response = await axios.get(baseUrl+'ProCatsa/DelIncidencia/'+id, confi_ax);
         var obj = response.data[0].Rows;
+        if(obj.length > 0)
+        {
+            return obj
+        }else{return false}
+    } 
+    catch(error)
+    {
+        return false;
+    }
+}
+//****************************************************************************************************************************************************************************** */
+// ESTRUCTURA DE COSTOS
+export async function getECostos(mes,periodo,tipo) {
+    try
+    {
+        let confi_ax = {
+            headers:
+            {
+                'Cache-Control': 'no-cache',
+                'Content-Type': 'application/json',
+                "Authorization": "Bearer "+cookies.get('token'),
+            },
+        };
+        //------------------------------------------------------------------------------------------------------------------------------------------------------
+        const response = await axios.get(baseUrl+'Catalogo/GetECostos/'+mes+','+periodo+','+tipo, confi_ax);
+        var obj = response.data;
+        if(obj.length > 0)
+        {
+            return obj
+        }else{return false}
+    } 
+    catch(error)
+    {
+        return false;
+    }
+}
+export async function setRF(data)
+{
+    try
+    {
+        let confi_ax = {
+            headers:
+            {
+                'Cache-Control': 'no-cache',
+                'Content-Type': 'application/json',
+                "Authorization": "Bearer "+cookies.get('token'),
+            },
+        };
+        //------------------------------------------------------------------------------------------------------------------------------------------------------
+        const response = await axios.post(baseUrl+'Catalogo/SetREF', data, confi_ax);
+        var obj = response.data;
+        if(obj.length > 0)
+        {
+            return obj
+        }else{return false}
+    } 
+    catch(error)
+    {
+        return false;
+    }
+}
+export async function getRFs(ejercicio) {
+    try
+    {
+        let confi_ax = {
+            headers:
+            {
+                'Cache-Control': 'no-cache',
+                'Content-Type': 'application/json',
+                "Authorization": "Bearer "+cookies.get('token'),
+            },
+        };
+        //------------------------------------------------------------------------------------------------------------------------------------------------------
+        const response = await axios.get(baseUrl+'Catalogo/GetREF/'+ejercicio, confi_ax);
+        var obj = response.data;
+        if(obj.length > 0)
+        {
+            return obj
+        }else{return false}
+    } 
+    catch(error)
+    {
+        return false;
+    }
+}
+export async function getRFId(id) {
+    try
+    {
+        let confi_ax = {
+            headers:
+            {
+                'Cache-Control': 'no-cache',
+                'Content-Type': 'application/json',
+                "Authorization": "Bearer "+cookies.get('token'),
+            },
+        };
+        //------------------------------------------------------------------------------------------------------------------------------------------------------
+        const response = await axios.get(baseUrl+'Catalogo/GetREFId/'+id, confi_ax);
+        var obj = response.data;
         if(obj.length > 0)
         {
             return obj

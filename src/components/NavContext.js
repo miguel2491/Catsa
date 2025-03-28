@@ -31,6 +31,7 @@ import {
   cilBank,
   cilIndentIncrease,
   cilPlaylistAdd,
+  cilSpreadsheet,
 } from '@coreui/icons'
 import { CNavGroup, CNavItem, CNavTitle } from '@coreui/react'
 import CIcon from '@coreui/icons-react'
@@ -59,9 +60,8 @@ const NavProvider = ({ children }) => {
     const userIsFinanzas = Rol('Finanzas')
     const userIsAuxGer = Rol('AuxiliarGerencial')
     const userIsDirector = Rol('Direccion')
-
-
     const userIsJP = Rol('JefePlanta')
+    const userIsDosif = Rol('Dosificador')
     nav = [
       ...(userIsVentas || userIsAdminTI || userIsDirector || userIsFinanzas || userIsAdmin || userIsOperacion 
         ? [
@@ -207,13 +207,13 @@ const NavProvider = ({ children }) => {
                 : []),  
           ]
         : []),
-      ...(userIsAdmin || userIsOperacion || userIsGerenteP || userIsJP || userIsAdminTI || userIsAuxGer
+      ...(userIsAdmin || userIsOperacion || userIsGerenteP || userIsJP || userIsAdminTI || userIsAuxGer || userIsDosif
         ? [
             {
               component: CNavTitle,
               name: 'Operaciones',
             },
-            ...(userIsAdmin || userIsOperacion || userIsGerenteP || userIsJP || userIsAdminTI || userIsAuxGer
+            ...(userIsAdmin || userIsOperacion || userIsGerenteP || userIsJP || userIsAdminTI || userIsAuxGer || userIsDosif
               ? [
                 {
                   component: CNavGroup,
@@ -226,7 +226,7 @@ const NavProvider = ({ children }) => {
                       name: 'CICAT Resumen',
                       to: '/Cicat/Resumen',
                     },
-                    ...(userIsOperacion || userIsAdmin || userIsGerenteP
+                    ...(userIsOperacion || userIsAdmin || userIsGerenteP || userIsJP || userIsDosif    
                       ? [
                         {
                           component: CNavItem,
@@ -365,60 +365,70 @@ const NavProvider = ({ children }) => {
                     ],
                   },
                 ]
+            : []),
+            ...(userIsAdminTI && userIsDirector 
+              ? [
+                  {
+                    component: CNavItem,
+                    name: 'Estructura de Costos',
+                    to: '/Admin/Costos',
+                    icon: <CIcon icon={cilWallet} customClassName="nav-icon" />,
+                  },
+                ]
               : []),
-            {
-              component: CNavGroup,
-              name: 'Extras',
-              to: '/utils',
-              icon: <CIcon icon={cilCursor} customClassName="nav-icon" />,
-              items: [
-                ...(userIsAdmin || userIsOperacion || userIsGerenteP || userIsAdminTI
-                  ? [
-                      {
-                        component: CNavItem,
-                        name: 'PreCierres',
-                        to: '/utils/PreCierres',
-                      },
-                    ]
-                  : []),
-                ...(userIsAdminTI
-                  ? [
-                      {
-                        component: CNavItem,
-                        name: 'INTERFAZ INTELISIS',
-                        to: '/utils/InterfazIntelisis',
-                      },
-                    ]
-                  : []),
-                ...(userIsAdmin || userIsOperacion || userIsGerenteP || userIsAdminTI || userIsAuxGer
-                  ? [
-                      {
-                        component: CNavItem,
-                        name: 'Actualizar Producción',
-                        to: '/utils/UpdateProd',
-                      },
-                    ]
-                  : []),
-                ...(userIsAdminTI
-                  ? [
-                      {
-                        component: CNavItem,
-                        name: 'Actualizar MB',
-                        to: '/utils/UpdateMB',
-                      },
-                    ]
-                  : []),
-                ...(userIsAdminTI
-                  ? [
-                      {
-                        component: CNavItem,
-                        name: 'QR',
-                        to: '/utils/QR',
-                      },
-                    ]
-                  : []),
-              ],
-            },
+              {
+                component: CNavGroup,
+                name: 'Extras',
+                to: '/utils',
+                icon: <CIcon icon={cilCursor} customClassName="nav-icon" />,
+                items: [
+                  ...(userIsAdmin || userIsOperacion || userIsGerenteP || userIsAdminTI
+                    ? [
+                        {
+                          component: CNavItem,
+                          name: 'PreCierres',
+                          to: '/utils/PreCierres',
+                        },
+                      ]
+                    : []),
+                  ...(userIsAdminTI
+                    ? [
+                        {
+                          component: CNavItem,
+                          name: 'INTERFAZ INTELISIS',
+                          to: '/utils/InterfazIntelisis',
+                        },
+                      ]
+                    : []),
+                  ...(userIsAdmin || userIsOperacion || userIsGerenteP || userIsAdminTI || userIsAuxGer
+                    ? [
+                        {
+                          component: CNavItem,
+                          name: 'Actualizar Producción',
+                          to: '/utils/UpdateProd',
+                        },
+                      ]
+                    : []),
+                  ...(userIsAdminTI
+                    ? [
+                        {
+                          component: CNavItem,
+                          name: 'Actualizar MB',
+                          to: '/utils/UpdateMB',
+                        },
+                      ]
+                    : []),
+                  ...(userIsAdminTI
+                    ? [
+                        {
+                          component: CNavItem,
+                          name: 'QR',
+                          to: '/utils/QR',
+                        },
+                      ]
+                    : []),
+                ],
+              },
           ]
         : []),
       ...(userIsAdminTI
@@ -483,6 +493,11 @@ const NavProvider = ({ children }) => {
                         name: 'Plantas Obj Com',
                         icon: <CIcon icon={cilBank} customClassName="nav-icon" />,
                         to: '/Admin/Catalogos/PlaObjCom',
+                      },{
+                        component: CNavItem,
+                        name: 'REF Costos',
+                        icon: <CIcon icon={cilSpreadsheet} customClassName="nav-icon" />,
+                        to: '/Admin/Catalogos/REF',
                       },
                     ]
                   : []),

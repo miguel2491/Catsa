@@ -31,7 +31,7 @@ import {
     CModalFooter
 } from '@coreui/react'
 import {CIcon} from '@coreui/icons-react'
-import { cilAvTimer, cilEyedropper, cilPen, cilPlus, cilSave, cilSearch, cilTrash } from '@coreui/icons'
+import { cilAvTimer, cilCloudDownload, cilEyedropper, cilPen, cilPlus, cilSave, cilSearch, cilTrash } from '@coreui/icons'
 import { format } from 'date-fns';
 import Categoria from '../../Admin/ObjCom/Categoria';
 
@@ -75,6 +75,7 @@ const RObjCom = () => {
     const [dtPlantaObj, setDTPlaObj] = useState([]);
     const [dtObjComMod, setDTObjComMod] = useState([]);
     const [dtObjComVen, setDTObjComVen] = useState([]);
+    const [exOC, setExOc] = useState([]);
     // FROMS
     const [oMensualV, setOMV] = useState(0);
     const [oDiarioV, setODV] = useState(0);
@@ -172,6 +173,7 @@ const RObjCom = () => {
     }, [dtObjComMod]);
     useEffect(() => {
       //console.log(dtPlantaObj)
+      setExOc(dtPlantaObj);
     }, [dtPlantaObj]);
     useEffect(() => {
       const { fechas, result, av_real } = transposeData(dtObjComVen);
@@ -182,7 +184,6 @@ const RObjCom = () => {
       let xHacer = oDiarioV * DHabiles;
         xHacer = xHacer - av_real;
         xHacer = xHacer / -1;
-      console.log(oDiarioDGP,dtObjComVen)
       let pAvance = av_real / oMensualV;
       let pAvance_ = av_real / oMensualV;
         pAvance = pAvance * 100;
@@ -190,15 +191,23 @@ const RObjCom = () => {
           proyObj = proyObj * -1;
       let proyObjD = uaxP * pAvance_;
           proyObjD = proyObjD * -1;  
-          console.log(uaxP,pAvance_,proyObj,proyObjD)
+      let auxObPro = oDiarioV * DHabiles;
+      let auxObPro_ = auxObPro - proy_;
+        auxObPro_ = auxObPro_ * -1; 
+      let auxPorHacer = oDiarioV * DHabiles;
+      let auxPorHacer_ = auxPorHacer - av_real;
+      let DFalt_ = DFalt == 0 ? -1:DFalt;
+          auxPorHacer_ = auxPorHacer_ * DFalt_;
+      let dPAvance = proy_ / oMensualV;
+        dPAvance = dPAvance * 100;
       // Solo actualizar el estado si av_real ha cambiado
       if (av_real !== TxtAvReal) {
         setAvReal(av_real);
         setProm(promedio_.toFixed(2))
         setProy(proy_.toFixed(2));
-        setProyObj(proyObj.toFixed(2));
+        setProyObj(auxObPro_.toFixed(2));
         setHacer(xHacer.toFixed(2));
-        setPorcAv(pAvance.toFixed(2));
+        setPorcAv(dPAvance.toFixed(2));
       }
     }, [dtObjComVen, TxtAvReal]); 
     //************************************************************************************************************************************************************************** */
@@ -279,7 +288,6 @@ const RObjCom = () => {
         if(objD)
         {
           setShowD(true)
-          console.log(objD)
           setDTObjCom(objD)
           let obj_acs = 0;
           let obj_max_cat = 0;
@@ -300,10 +308,10 @@ const RObjCom = () => {
             obj_men += parseFloat(item.objetivo_dg) || 0;
           })
           const obj_diaP = parseFloat(obj_dg) + parseFloat(obj_ajusteP);
-          let obj_diaP2 = (obj_diaP / 2) + 25;
+          let obj_diaP2 = obj_ajusteP + 25;//(obj_diaP / 2) + 25;
           let objDiaP = obj_diaP2;
-          let objDiario2 = obj_diaP2 / DHabiles;
-          
+          let objDiarioGen = obj_diaP2/objIP[0].DiaHabil;
+          let objDiario2 = objDiarioGen * 1;
           //console.log(obj_acs, obj_max_cat, obj_dg, trP, tbP, obj_op_max, obj_ajusteP, obj_oper_max2, obj_ajusteP2, obj_diaP2, objDiario2.toFixed(2))
           const arrAux = {
             id:objP[0].id,
@@ -339,13 +347,21 @@ const RObjCom = () => {
         Swal.fire("Error", "No se pudo obtener la información", "error");
       }
     }
-    const getHisc = async(vendedor,oM,oD)=>{
+    const getHisc = async(vendedor,oM,oD,oM_, oD_)=>{
       try{
-        setOMV(oM);
-        setODV(oD);
+        setOMV(oM_);
+        setODV(oD_);
         const pla = plantasSel != '' ? plantasSel:'-';
         const ocList = await GetObjComVendedor(fNumberCad(mesSel),periodoSel, pla, vendedor);
-        setDTObjComVen(ocList)
+        if(ocList){
+          setDTObjComVen(ocList)
+        }else{
+          setDTObjComVen([])
+          setHacer(0)
+          setProyObj(0)
+          Swal.fire("Error", "No se pudo obtener la información", "error");
+          setVMHis(false)
+        }
       }catch(error){
         console.log(error)
       }
@@ -356,13 +372,13 @@ const RObjCom = () => {
       const cantidades = [];
       let av_real = 0;
       // Iteramos sobre los datos originales
-      data.forEach((item) => {
-        const fecha = item.FechaPedido.split('T')[0];  // Extraemos solo la fecha (sin hora)
-        fechas.push(fecha);  // Asignamos la cantidad a la fecha correspondiente
-        cantidades.push(item.TotalCantidad);
-        av_real += item.TotalCantidad;
-      });
-      result.push(cantidades);
+        data.forEach((item) => {
+          const fecha = item.FechaPedido.split('T')[0];  // Extraemos solo la fecha (sin hora)
+          fechas.push(fecha);  // Asignamos la cantidad a la fecha correspondiente
+          cantidades.push(item.TotalCantidad);
+          av_real += item.TotalCantidad;
+        });
+        result.push(cantidades);
       // Devuelve los datos transpuestos
       return { fechas, result, av_real };
     };
@@ -708,7 +724,6 @@ const RObjCom = () => {
     ];
     // Obtener los datos transpuestos
     const { fechas, result } = transposeData(dtObjComVen);
-
     // Crear las columnas para DataTable
     const columns = fechas.map(fecha => ({
       name: fecha,
@@ -721,24 +736,6 @@ const RObjCom = () => {
        return acc;
      }, {}),
    }));
-    //************************************************************************************************************************************************************************** */
-    const downloadCSV = (e) => {
-        const auxFcaI = format(vFechaI, 'yyyy/MM/dd');
-        const auxFcaF = format(vFechaF, 'yyyy/MM/dd');
-        const link = document.createElement('a');
-        let csv = convertArrayOfObjectsToCSV(exOC);
-        if (csv == null) return;
-    
-        const filename = 'OC_'+auxFcaI+'-'+auxFcaF+'.csv';
-    
-        if (!csv.match(/^data:text\/csv/i)) {
-            csv = `data:text/csv;charset=utf-8,${csv}`;
-        }
-    
-        link.setAttribute('href', encodeURI(csv));
-        link.setAttribute('download', filename);
-        link.click();
-    };
     //************************************************************************************************************************************************************************** */
     // Función de búsqueda
     const onFindBusqueda = (e) => {
@@ -768,8 +765,7 @@ const RObjCom = () => {
     };
     const vHist = (id,oMen, oDia) =>{
       setVMHis(true);
-      console.log(oMensualP)
-      getHisc(id.trim(),oMensualP,oDiarioP)
+      getHisc(id.trim(),oMensualP,oDiarioP, oMen, oDia)
     };
     const vModObj = (id) =>{
       setVMod(true);
@@ -793,7 +789,6 @@ const RObjCom = () => {
           cate = elemento.categoria;
         }
       })
-      console.log(cate)
     };
     const hObjetivo = (e) => {
       setObjetivo(e.target.value);
@@ -822,7 +817,6 @@ const RObjCom = () => {
     const hBlurDhabiles = (e) =>{
       const objetivo = e.target.value;
       const aux = objetivo - DTrans;
-      console.log(aux)
       setDFalt(aux)
     };
     //************************************************************************************************************************************************************************************* */
@@ -866,6 +860,22 @@ const RObjCom = () => {
         }
     };
     //************************************************************************************************************************************************************************************** */
+    const downloadCSV = (e) => {
+      const link = document.createElement('a');
+      let csv = convertArrayOfObjectsToCSV(exOC);
+      if (csv == null) return;
+  
+      const filename = 'OBJCOM_'+mesSel+'_'+periodoSel+'.csv';
+  
+      if (!csv.match(/^data:text\/csv/i)) {
+          csv = `data:text/csv;charset=utf-8,${csv}`;
+      }
+  
+      link.setAttribute('href', encodeURI(csv));
+      link.setAttribute('download', filename);
+      link.click();
+    };
+    //************************************************************************************************************************************************************************************** */
     return (
     <>
         <CContainer fluid>
@@ -884,7 +894,7 @@ const RObjCom = () => {
                         periodoSel={periodoSel}
                     />
                 </CCol>
-                <CCol xs={12} md={3}>
+                <CCol xs={12} md={2}>
                     <Plantas  
                         mCambio={mCambio}
                         plantasSel={plantasSel}
@@ -902,6 +912,12 @@ const RObjCom = () => {
                             Agregar Objetivo
                     </CButton>
                 </CCol>
+                <CCol xs={6} md={2} className='mt-4'>
+                  <CButton color='danger' onClick={downloadCSV}>
+                      <CIcon icon={cilCloudDownload} className="me-2" />
+                      Exportar
+                  </CButton>
+              </CCol>
             </CRow>
             <CRow className='mt-2 mb-2'>
               <CCol xs={6} md={4}>

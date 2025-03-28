@@ -73,10 +73,10 @@ const ResDiario = forwardRef((props, ref) => {
             const response = await axios.get(baseUrl+'Operaciones/GetResumen/'+planta+','+fcaI+','+fcaF+',R', confi_ax);
             var obj = response.data[0].Rows;
             console.log(obj);
+            Swal.close();
             if(obj.length > 0)
             {
                 setResumen(obj);
-                Swal.close();
             }
             
         } 
@@ -87,16 +87,23 @@ const ResDiario = forwardRef((props, ref) => {
         }
     }
     const getMovInt = (item) =>{
-        setLoading(true);
-        setPercentage(0);
-        setVisible(!visible);
-        const interval = setInterval(() => {
-            setPercentage(prev => {
-            if (prev < 90) return prev + 10;
-            return prev;
-            });
-        }, 1000); // Incrementa cada 500 ms
-        getDataInv(item);
+        // setLoading(true);
+        // setPercentage(0);
+        // setVisible(!visible);
+        // const interval = setInterval(() => {
+        //     setPercentage(prev => {
+        //     if (prev < 90) return prev + 10;
+        //     return prev;
+        //     });
+        // }, 1000); // Incrementa cada 500 ms
+        Swal.fire({
+            title: 'Cargando...',
+            text: 'Estamos obteniendo la información...',
+            didOpen: () => {
+                Swal.showLoading();  // Muestra la animación de carga
+                getDataInv(item);
+            }
+        });
     }
 
     async function getDataInv(material)
@@ -106,20 +113,23 @@ const ResDiario = forwardRef((props, ref) => {
         const fcaI = format(props.fechaI, 'yyyy-MM-dd');
         const fcaF = format(props.fechaF, 'yyyy-MM-dd');
         resulInt = await getResInv(material, fcaI, fcaF, props.planta);
+        console.log(resulInt)
         if(resulInt)
             resulCB = await getResInvCB(material, fcaI, fcaF, props.planta)
         if(resulInt && resulCB)
         {
-            setVisible(visible);
+            //setVisible(visible);
             setInvInt(resulInt);
             setInvCB(resulCB);
             setVisibleM(!visibleM);
+            Swal.close();
             if(RefInvs.current){
                 RefInvs.current.setInvs(resulInt, resulCB)
+                Swal.close();
             }
         }else{
-            setLoading(false);
-            setPercentage(100); 
+            //setLoading(false);
+            //setPercentage(100); 
             setVisible(false);
             setInvInt([]);
             setInvCB([]);
@@ -184,6 +194,7 @@ const ResDiario = forwardRef((props, ref) => {
                                                                     <CTableHeaderCell scope="col">Fecha</CTableHeaderCell>
                                                                     <CTableHeaderCell scope="col">Cantidad</CTableHeaderCell>
                                                                     <CTableHeaderCell scope="col">Movimiento</CTableHeaderCell>
+                                                                    <CTableHeaderCell scope="col">Estatus</CTableHeaderCell>
                                                                 </CTableRow>
                                                             </CTableHead>
                                                             <CTableBody style={{backgroundColor:'#f0f0f0'}}>
@@ -199,6 +210,7 @@ const ResDiario = forwardRef((props, ref) => {
                                                                                 <CTableDataCell>{format(itemd.Fecha, 'yyyy/MM/dd')}</CTableDataCell>
                                                                                 <CTableDataCell>{Fnum(itemd.Cantidad)}</CTableDataCell>
                                                                                 <CTableDataCell>{itemd.Mov}</CTableDataCell>
+                                                                                <CTableDataCell>{itemd.Estatus}</CTableDataCell>
                                                                             </CTableRow>
                                                                         ))
                                                                     )

@@ -31,12 +31,12 @@ const RemiFal = () => {
     const [vFechaF, setFechaFin] = useState(new Date());
     const [loading, setLoading] = useState(false);
     const [percentage, setPercentage] = useState(0);
-    const [visible, setVisible] = useState(false);      // Modal de "Cargando..."
+    const [visible, setVisible] = useState(false);  // Modal de "Cargando..."
 
-    // Nuevo: para modal de confirmación de eliminación con comentario
-    const [visibleDelConf, setVisibleDelConf] = useState(false);  // Controla la visibilidad del nuevo modal
-    const [deleteData, setDeleteData] = useState({});             // Guarda temporalmente Id, Planta
-    const [deleteReason, setDeleteReason] = useState('');         // Motivo de la eliminación
+    // Nuevo: modal de confirmación de eliminación con comentario
+    const [visibleDelConf, setVisibleDelConf] = useState(false); 
+    const [deleteData, setDeleteData] = useState({});    
+    const [deleteReason, setDeleteReason] = useState('');
 
     const userIsOperacion = Rol('Operaciones');
     const userIsJP = Rol('JefePlanta');
@@ -82,10 +82,11 @@ const RemiFal = () => {
                   type="number"
                   value={row.NoRemision}
                   onChange={(e) => handleEdit(e, index)}
-                  style={{ width: '100%', color:'black',background:'#DDF6EB' }}
+                  style={{ width: '100%', color:'black', background:'#DDF6EB' }}
                 />
               ),
-        },{
+        },
+        {
             name: 'Acción',
             selector: row => row.IdOperacion,
             width:"80px",
@@ -103,7 +104,7 @@ const RemiFal = () => {
                                 <CIcon icon={cilSave} />
                             </CButton>
                         </CCol>
-                        {/* Botón de eliminar (ahora llama a delRemisionConf para abrir el modal con comentario) */}
+                        {/* Botón que ahora llama a delRemision para abrir el modal de comentario */}
                         {userIsOperacion && (
                             <CCol>
                                 <CButton
@@ -127,7 +128,8 @@ const RemiFal = () => {
             selector: row => row.IdOperacion,
             sortable:true,
             width:"300px",
-        },{
+        },
+        {
             name: 'Fecha',
             selector: row => {
                 const fecha = row.Fecha;
@@ -177,9 +179,8 @@ const RemiFal = () => {
         },
     ];
 
-    // Efecto inicial si se requiere
     useEffect(() => {
-        // getRemFal() si gustas que cargue al inicio 
+        // getRemFal() 
     }, []);
 
     const getRemFal = async () => {
@@ -221,10 +222,10 @@ const RemiFal = () => {
         try {
             const remF = await setRemFaltante(Id, NRem, Planta, '1','-');
             Swal.fire("Éxito", "Se Modifico correctamente", "success"); 
-            getRemFal();
         } catch (error) {
             Swal.fire("Error", "No se pudo actualizar la información", "error");
         }
+        getRemFal();
     };
 
     /**
@@ -232,35 +233,33 @@ const RemiFal = () => {
      * 2) Guardamos en deleteData el Id y la Planta
      * 3) Mostramos la ventana emergente
      */
-    const delRemisionConf = (Id, Nr, Planta) => {
-        setDeleteData({ Id, Nr, Planta });
+    const delRemisionConf = (Id, Planta) => {
+        setDeleteData({ Id, Planta });
         setDeleteReason('');         // Limpiamos el motivo al abrir
         setVisibleDelConf(true);     // Mostramos el modal
     };
 
-    /**
-     * Llamada final para eliminar (después de que el usuario ingresó el motivo y confirma)
-     */
+
     const confirmDelRemision = async() => {
         try {
-            const { Id, Nr, Planta } = deleteData;
+            const { Id, Planta } = deleteData;
             // Aquí pasamos deleteReason como cuarto parámetro
-            const remF = await setRemFaltante(Id, Nr, Planta, '0', deleteReason);
-            Swal.fire("Éxito", remF, "success"); 
+            const remF = await setRemFaltante(Id, '0', plantasSel,'0', deleteReason);
+            if (remF) {
+                Swal.fire("Éxito", "Se eliminó correctamente", "success"); 
+            } else {
+                Swal.fire("Error", "Se elimino correctamente", "success");
+            }
             getRemFal();
         } catch (error) {
             Swal.fire("Error", "No se pudo eliminar la información", "error");
         } finally {
-            // Cerramos el modal de confirmación
             setVisibleDelConf(false);
         }
     };
 
-    // (Si no deseas el Swal de confirmación adicional, lo puedes quitar)
-    //-----------------------------------------------------------------------------------
-
     // Descargar CSV
-    const downloadCSV = (e) => {
+    const downloadCSV = () => {
         const link = document.createElement('a');
         let csv = convertArrayOfObjectsToCSV(exRemisiones);
         if (csv == null) return;
@@ -276,16 +275,15 @@ const RemiFal = () => {
         link.click();
     };
     
-    // Búsqueda en tabla
+    // Búsqueda
     const onFindBusqueda = (e) => {
         setFText(e.target.value);
     };
     const fBusqueda = () => {
-        // Aquí un ejemplo si tienes un array con "Plantas"
-        // O en tu caso, la búsqueda se aplica en dtRemisiones
+
     };
 
-    // Filtrado rápido por texto
+    // Filtrar por texto en Material o Fecha
     const fDRemision = dtRemisiones.filter(item => {
         return (
             item.Material.toLowerCase().includes(fText.toLowerCase()) ||
@@ -296,7 +294,7 @@ const RemiFal = () => {
     return (
         <>
             <CContainer fluid>
-                {/* Modal de Carga (ya existente) */}
+                {/* Modal de Carga (existente) */}
                 <CModal
                     backdrop="static"
                     visible={visible}

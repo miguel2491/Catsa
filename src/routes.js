@@ -49,6 +49,8 @@ const Permisos = React.lazy(() => import('./views/permisos/Permisos'))
 const Incidencias = React.lazy(() => import('./views/Admin/Usuarios/Usuarios'))
 const CatObjCom = React.lazy(() => import('./views/Admin/ObjCom/Categoria'))
 const PlaObjCom = React.lazy(() => import('./views/Admin/ObjCom/PlantaObjCom'))
+const ECostos = React.lazy(() => import('./views/Admin/Costos/costos'))
+const CTRef = React.lazy(() => import('./views/Admin/Costos/CRef'))
 //==================================================================================================================================
 
 const routes = [
@@ -99,6 +101,8 @@ const routes = [
   { path: '/Admin/Usuarios', name: 'Incidencias', element: Incidencias},
   { path: '/Admin/Catalogos/Categorias', name: 'CategoriaOC', element: CatObjCom},
   { path: '/Admin/Catalogos/PlaObjCom', name: 'PlaOC', element: PlaObjCom},
+  { path: '/Admin/Costos', name: 'ECostos', element: ECostos},
+  { path: '/Admin/Catalogos/REF', name: 'CRef', element: CTRef},
   //--------------------------------------------> REPORTES <-------------------------------
   { path: '/reportes/RProyeccion', name: 'Proyeccion', element:RProyeccion },
   { path: '/reportes/RProductosV', name: 'RProductosV', element:RProductosV },
