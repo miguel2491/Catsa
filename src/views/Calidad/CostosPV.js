@@ -4,15 +4,24 @@ import DataTable from 'react-data-table-component';
 import { convertArrayOfObjectsToCSV, getCostosPV, getPlantas } from '../../Utilidades/Funciones';
 import './CostosPV.css';
 import { CRow } from '@coreui/react';
+import { cilSearch } from '@coreui/icons';
 
-function SearchFilters() {
+const SearchFilters = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedDate, setSelectedDate] = useState('');
   const [selectedPlant, setSelectedPlant] = useState('');
-  const [opPlants, setPlantas_] = useState([]);
+  const [plantasSel , setPlantas] = useState('');
+  // **************************************************************************************************************************************************************
+  const [showP, setShowP] = useState(false);
+  // **************************************************************************************************************************************************************
   // ARRAYS
   const [dtDesigns, setDTDesigns] = useState([]);
   const [exDes, setExDes] = useState([]);
+  // **************************************************************************************************************************************************************
+  const mCambio = (event) => {
+    const pla = event.target.value; 
+    setPlantas(pla);
+  };
   //Buscador
   const [fText, setFText] = useState(''); // Estado para el filtro de búsqueda
   const [vBPlanta, setBPlanta] = useState('');
@@ -58,11 +67,11 @@ function SearchFilters() {
       sortable: true,
     },
   ];
-
+  // **************************************************************************************************************************************************************
   useEffect(() => {
-    getPlantasOp()
+    //getPlantasOp()
   }, []);
-
+  // **************************************************************************************************************************************************************
   const getPlantasOp = async () => {
     try{
         const ocList = await getPlantas();
@@ -77,7 +86,7 @@ function SearchFilters() {
         Swal.fire("Error", "No se pudo obtener la información", "error");
     }
   }
-
+  // **************************************************************************************************************************************************************
   const handleSearch = () => {
     console.log('Búsqueda con:', selectedDate, selectedPlant);
     Swal.fire({
@@ -103,7 +112,8 @@ function SearchFilters() {
         Swal.close();
         Swal.fire("Error", "No se pudo obtener la información", "error");
     }
-  }
+  };
+  // **************************************************************************************************************************************************************
   // Función de búsqueda
   const onFindBusqueda = (e) => {
     setBPlanta(e.target.value);
@@ -123,69 +133,94 @@ function SearchFilters() {
   const fDesign = dtDesigns.filter(item => {
       // Filtrar por planta, interfaz y texto de búsqueda
       return item.Planta.toLowerCase().includes(fText.toLowerCase()) || item.Mezcla.includes(fText) || item.Material.includes(fText);
-});
+  });
+  // **************************************************************************************************************************************************************
   return (
-    <div>
-      
-      <h2>Costos PV</h2>
+    <>
+      <CContainer fluid>
+        <h3>Costos PV </h3>
+        <CRow className='mt-3 mb-3'>
+          <CCol xs={6} md={2}>
+            
+          </CCol>
+          {showP && (
+            <>
+              <CCol xs={6} md={2}>
+                <Plantas  
+                  mCambio={mCambio}
+                  plantasSel={plantasSel}
+                />
+              </CCol>
+            </>
+          )}
+          <CCol xs={6} md={2} lg={2} className='mt-4'>
+            <CButton color='primary' onClick={getPlantasOp} style={{'color':'white'}} > 
+              <CIcon icon={cilSearch} />
+              Buscar
+            </CButton>
+          </CCol>
+        </CRow>
+      </CContainer>
+    </>
+    // <div>  
+    //   <h2>Costos PV</h2>
+    //   {/* Filtros */}
+    //   <div className="filters">
+    //     {/* Autocomplete */}
+    //     <div className="filter-group">
+    //       <label htmlFor="autocomplete">Autocomplete:</label>
+    //       <input
+    //         id="autocomplete"
+    //         type="text"
+    //         list="search-options"
+    //         value={vBPlanta} onChange={onFindBusqueda} onSearch={fBusqueda}
+    //         placeholder="Escribe para autocompletar..."
+    //       />
+    //     </div>
 
-      {/* Filtros */}
-      <div className="filters">
-        {/* Autocomplete */}
-        <div className="filter-group">
-          <label htmlFor="autocomplete">Autocomplete:</label>
-          <input
-            id="autocomplete"
-            type="text"
-            list="search-options"
-            value={vBPlanta} onChange={onFindBusqueda} onSearch={fBusqueda}
-            placeholder="Escribe para autocompletar..."
-          />
-        </div>
+    //     {/* Selección de fecha */}
+    //     <div className="filter-group">
+    //       <label htmlFor="date">Fecha:</label>
+    //       <input
+    //         id="date"
+    //         type="date"
+    //         value={selectedDate}
+    //         onChange={(e) => setSelectedDate(e.target.value)}
+    //       />
+    //     </div>
 
-        {/* Selección de fecha */}
-        <div className="filter-group">
-          <label htmlFor="date">Fecha:</label>
-          <input
-            id="date"
-            type="date"
-            value={selectedDate}
-            onChange={(e) => setSelectedDate(e.target.value)}
-          />
-        </div>
+    //     {/* Selección de planta */}
+    //     <div className="filter-group">
+    //       <label htmlFor="plant">Planta:</label>
+    //       <select
+    //         id="plant"
+    //         value={selectedPlant}
+    //         onChange={(e) => setSelectedPlant(e.target.value)}
+    //       >
+    //         <option value="">Seleccionar planta</option>
+    //         {opPlants.map(planta =>(
+    //             <option value={planta.IdPlanta} key={planta.ID}>{planta.Planta}</option>
+    //         ))}
+    //       </select>
+    //     </div>
 
-        {/* Selección de planta */}
-        <div className="filter-group">
-          <label htmlFor="plant">Planta:</label>
-          <select
-            id="plant"
-            value={selectedPlant}
-            onChange={(e) => setSelectedPlant(e.target.value)}
-          >
-            <option value="">Seleccionar planta</option>
-            {opPlants.map(planta =>(
-                <option value={planta.IdPlanta} key={planta.ID}>{planta.Planta}</option>
-            ))}
-          </select>
-        </div>
+    //     {/* Botón de búsqueda */}
+    //     <button onClick={handleSearch}>Buscar</button>
+    //   </div>
 
-        {/* Botón de búsqueda */}
-        <button onClick={handleSearch}>Buscar</button>
-      </div>
-
-      {/* Data Table */}
-      <div className="table-container">
-        <DataTable
-          columns={columns}
-          data={fDesign}
-          keyField="id"
-          pagination
-          responsive
-          highlightOnHover
-          pointerOnHover
-        />
-      </div>
-    </div>
+    //   {/* Data Table */}
+    //   <div className="table-container">
+    //     <DataTable
+    //       columns={columns}
+    //       data={fDesign}
+    //       keyField="id"
+    //       pagination
+    //       responsive
+    //       highlightOnHover
+    //       pointerOnHover
+    //     />
+    //   </div>
+    // </div>
   );
 }
 
