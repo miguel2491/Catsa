@@ -192,6 +192,11 @@ const _nav = [
         name: 'Costos PV',
         to: '/Calidad/CostosPV',
       },
+      {
+        component: CNavItem,
+        name: 'Crear Lote',
+        to: '/Calidad/CrearLote',
+      },
     ],
   }]:[]),
 ]

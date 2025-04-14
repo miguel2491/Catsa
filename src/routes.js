@@ -39,6 +39,7 @@ const RObjCom = React.lazy(() => import('./views/reportes/ObjCom'))
 //=========================================> Calidad <===================================
 const CostosPV = React.lazy(() => import('./views/Calidad/CostosPV'))
 const Formulaciones = React.lazy(() => import('./views/Calidad/Formulaciones'))
+const CrearLote = React.Lazy(() => import('./views/Calidad/CrearLote'))
 //=========================================> EXTRAS <===================================
 const PreCierre = React.lazy(() => import('./views/utils/PreCierre'))
 const InterfazInt = React.lazy(() => import('./views/utils/InterfazInt'))
@@ -93,10 +94,12 @@ const routes = [
   { path: '/utils/InterfazInt', name: 'InterfazInt', element: InterfazInt },
   { path: '/utils/UpdateProd', name: 'UpdateProd', element: UpdateProd },
   { path: '/utils/UpdateMB', name: 'UpdateMB', element: UpdateMB },  
-  { path: '/utils/QR', name: 'QR', element: QR },
+  { path: '/utils/QR', name: 'QR', element: QR },  
   { path: '/permisos/Permisos', name: 'Permisos', element: Permisos},
+  //--------------------------------------------> CALIDAD <-------------------------------
   { path: '/Calidad/CostosPV', name: 'Calidad', element: CostosPV},
   { path: '/Calidad/Formulaciones', name: 'Calidad', element: Formulaciones},
+  { path: '/Calidad/CrearLote', name: 'Calidad', element: CrearLote},
   //--------------------------------------------> EXTRAS <-------------------------------
   { path: '/Admin/Usuarios', name: 'Incidencias', element: Incidencias},
   { path: '/Admin/Catalogos/Categorias', name: 'CategoriaOC', element: CatObjCom},
