@@ -201,6 +201,12 @@ const NavProvider = ({ children }) => {
                           to: '/ventas/ObjCom',
                           icon: <CIcon icon={cilPlaylistAdd} customClassName="nav-icon" />,
                         },
+                        {
+                          component: CNavItem,
+                          name: 'Reporte Objetivo Comercial',
+                          to: '/reportes/RepObjCom',
+                          icon: <CIcon icon={cilBarChart} customClassName="nav-icon" />,
+                        },
                       ],
                     },
                   ]

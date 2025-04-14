@@ -1,8 +1,7 @@
 import React, {useEffect, useState, useRef} from 'react'
-import Cookies from 'universal-cookie'
-import axios from 'axios'
 import Swal from "sweetalert2";
-
+import DataTable from 'react-data-table-component';
+import { convertArrayOfObjectsToCSV, getPreCierres, setPreCierres, fNumberCad, fNumber } from '../../Utilidades/Funciones';
 import {
   CForm,
   CContainer,
@@ -15,44 +14,23 @@ import {
   CToaster,
 } from '@coreui/react'
 import {CIcon} from '@coreui/icons-react'
-import { cilBell } from '@coreui/icons'
+import { cilBell, cilSearch } from '@coreui/icons'
 import Plantas from '../base/parametros/Plantas'
 import Periodo from '../base/parametros/Periodo'
 import Mes from '../base/parametros/Mes'
 import TabulatorG from '../base/tabs/TabulatorP'
 
-const cookies = new Cookies();
-const baseUrl="http://apicatsa.catsaconcretos.mx:2543/api/";
-const baseUrl2="http://localhost:2548/api/";
-
-const exampleToast = (
-    <CToast title="CoreUI for React.js">
-      <CToastHeader closeButton>
-        <svg
-          className="rounded me-2"
-          width="20"
-          height="20"
-          xmlns="http://www.w3.org/2000/svg"
-          preserveAspectRatio="xMidYMid slice"
-          focusable="false"
-          role="img"
-        >
-          <rect width="100%" height="100%" fill="#007aff"></rect>
-        </svg>
-        <strong className="me-auto">CoreUI for React.js</strong>
-        <small>7 min ago</small>
-      </CToastHeader>
-      <CToastBody>Hello, world! This is a toast message.</CToastBody>
-    </CToast>
-  )
-
 const PreCierre = () => {
-    const [toast, addToast] = useState(0)
-    const toaster = useRef()
+    //*************************************** VARIABLES ************************* */
     const [plantasSel , setPlantas] = useState('');
     const [periodoSel , setPeriodo] = useState('');
     const [mesSel , setMes] = useState('');
-    const [posts, setPosts] = useState([]);
+    const [dtPreCie, setDTPreCie] = useState([]);
+    const [exOC, setExOc] = useState([]);
+    const [fText, setFText] = useState(''); // Estado para el filtro de búsqueda
+    const [vBPlanta, setBPlanta] = useState('');
+    const [bRealizar, setBRealizar] = useState(false);
+    //*************************************** PRINCIPALES ************************* */
     const mCambio = (event) => {
         setPlantas(event.target.value);
     };
@@ -62,118 +40,344 @@ const PreCierre = () => {
     const mMes = (event) => {
         setMes(event.target.value);
     };
-
     const sendPC = () =>{
-        setPreCierre(plantasSel, periodoSel, mesSel)
+        setPreCierre_(plantasSel, periodoSel, mesSel)
     };
-
-    async function setPreCierre(planta, periodo, mes)
+    //*************************************** FUNCIONES ************************* */
+    const setPreCierre_ = async(planta, periodo, mes) =>
     {
+        Swal.fire({
+            title: 'Cargando...',
+            text: 'Estamos obteniendo la información...',
+            didOpen: () => {
+                Swal.showLoading();  // Muestra la animación de carga
+            }
+        });
         if(planta === "" || periodo === "" || mes === "")
         {
             console.error("Debes llenar todos los parametros", planta, periodo, mes)
+            Swal.close();
         }
         else
         {
             try
             {
-                const postData = 
-                {
-                    planta:planta,
-                    periodo:periodo,
-                    mes:mes
-                }
-                let confi_ax = 
-                    {
-                    headers:
-                    {
-                        'Cache-Control': 'no-cache',
-                        'Content-Type': 'application/json',
-                        "Authorization": "Bearer "+cookies.get('token'),
-                    }
-                }
                 //------------------------------------------------------------------------------------------------------------------------------------------------------
-                await axios.get(baseUrl+'Operaciones/SetPreCierreMensual/'+planta+','+mes+','+periodo, confi_ax)
-                .then(response=>{
-                    // console.log(response.data);
-                    // var obj = response.data;
-                    // getInventario(obj);
-                    //setPosts(response)
-                    Swal.fire("CORRECTO", "Se Agrego Correctamente", "success");
-                    return response.data;
-                }).then(response=>{
-                    console.log(response);
-                    var obj = JSON.stringify(response);
-                    if(obj.length>0){
-                        obj = JSON.parse(obj);
-                        setPosts(obj)    
-                    }else{
-                        //setErrorResponse(json.body.error);
-                        //addToast(exampleToast)
-                    }
-                })
-                .catch(err=>{
-                    if (err.response) {
-                        // El servidor respondió con un código de estado fuera del rango de 2xx
-                        console.error('Error de Respuesta:', err.response.data);
-                        //addToast(exampleToast)
-                        //setError(`Error: ${err.response.status} - ${err.response.data.message || err.response.statusText}`);
-                    } else if (err.request) {
-                        // La solicitud fue realizada pero no se recibió respuesta
-                        console.error('Error de Solicitud:', err.request);
-                        //setError('Error: No se recibió respuesta del servidor.');
-                    } else {
-                        // Algo sucedió al configurar la solicitud
-                        console.error('Error:', err.message);
-                        //setError(`Error: ${err.message}`);
-                    }
-                })    
+                const ocList = await setPreCierres(planta, periodo, mes);
+                Swal.close();  // Cerramos el loading
                 //------------------------------------------------------------------------------------------------------------------------------------------------------
             }
             catch(error)
             {
-                console.error(error);
+                Swal.close();
+                Swal.fire("Error", "No se pudo obtener la información", "error");
             }
         }
     }
-
-    
-return (
-    <>
-        <CToaster ref={toaster} push={toast} placement="top-end" />
-        <CContainer fluid>
-            <h1>PreCierre</h1>
-            <CForm>
-              <CRow>
-                <CCol sm="auto">
-                  <Plantas  
-                    mCambio={mCambio}
-                    plantasSel={plantasSel}
+    const getPreCierres_ = async() =>
+        {
+            Swal.fire({
+                title: 'Cargando...',
+                text: 'Estamos obteniendo la información...',
+                didOpen: () => {
+                    Swal.showLoading();  // Muestra la animación de carga
+                }
+            });
+            if(plantasSel === "" || periodoSel === "" || mesSel === "")
+            {
+                console.error("Debes llenar todos los parametros", plantasSel, periodoSel, mesSel)
+                Swal.close();
+            }
+            else
+            {
+                try
+                {
+                    //------------------------------------------------------------------------------------------------------------------------------------------------------
+                    const ocList = await getPreCierres(plantasSel, fNumberCad(mesSel), periodoSel);
+                    setBRealizar(false)
+                    if(ocList)
+                    {
+                        setDTPreCie(ocList)
+                        setBRealizar(false)
+                    }else{
+                        setBRealizar(true)
+                        setDTPreCie([])
+                    }
+                    Swal.close();  // Cerramos el loading
+                    //------------------------------------------------------------------------------------------------------------------------------------------------------
+                }
+                catch(error)
+                {
+                    Swal.close();
+                    Swal.fire("Error", "No se pudo obtener la información", "error");
+                }
+            }
+        }
+    //*************************************** COLUMNAS ************************* */
+    const colPreCie = [
+        {
+            name: 'PLANTA',
+            selector: row => {
+                const aux = row.Planta;
+                if (aux === null || aux === undefined) {
+                    return "No disponible";
+                }
+                if (typeof aux === 'object') {
+                return "Sin Datos"; // O cualquier mensaje que prefieras
+                }
+                return aux;
+            },
+            width:"100px",
+            sortable:true,
+            grow:1,
+        },
+        {
+            name: 'MATERIAL',
+            selector: row => {
+                const aux = row.Material;
+                if (aux === null || aux === undefined) {
+                    return "No disponible";
+                }
+                if (typeof aux === 'object') {
+                return "Sin Datos"; // O cualquier mensaje que prefieras
+                }
+                return aux;
+            },
+            width:"120px",
+            sortable:true,
+            grow:1,
+        },
+        {
+            name: 'FECHA',
+            selector: row => {
+                const aux = row.FechaInv;
+                if (aux === null || aux === undefined) {
+                    return "No disponible";
+                }
+                if (typeof aux === 'object') {
+                return "Sin Datos"; // O cualquier mensaje que prefieras
+                }
+                return aux;
+            },
+            width:"200px",
+            sortable:true,
+            grow:1,
+        },
+        {
+            name: 'USUARIO',
+            selector: row => {
+                const aux = row.Usuario;
+                if (aux === null || aux === undefined) {
+                    return "No disponible";
+                }
+                if (typeof aux === 'object') {
+                return "Sin Datos"; // O cualquier mensaje que prefieras
+                }
+                return aux;
+            },
+            width:"100px",
+            sortable:true,
+            grow:1,
+        },
+        {
+            name: 'COMENTARIO',
+            selector: row => {
+                const aux = row.Comentario;
+                if (aux === null || aux === undefined) {
+                    return "No disponible";
+                }
+                if (typeof aux === 'object') {
+                return "Sin Datos"; // O cualquier mensaje que prefieras
+                }
+                return aux;
+            },
+            width:"130px",
+            sortable:true,
+            grow:1,
+        },
+        {
+            name: 'INV. INICIAL',
+            selector: row => {
+                const aux = fNumber(row.InvInicial);
+                if (aux === null || aux === undefined) {
+                    return "No disponible";
+                }
+                if (typeof aux === 'object') {
+                return "Sin Datos"; // O cualquier mensaje que prefieras
+                }
+                return aux;
+            },
+            width:"150px",
+            sortable:true,
+            grow:1,
+        },
+        {
+            name: 'COMPRAS',
+            selector: row => {
+                const aux = fNumber(row.Compras);
+                if (aux === null || aux === undefined) {
+                    return "No disponible";
+                }
+                if (typeof aux === 'object') {
+                return "Sin Datos"; // O cualquier mensaje que prefieras
+                }
+                return aux;
+            },
+            width:"130px",
+            sortable:true,
+            grow:1,
+        },
+        {
+            name: 'INV. FINAL',
+            selector: row => {
+                const aux = fNumber(row.InvFinal);
+                if (aux === null || aux === undefined) {
+                    return "No disponible";
+                }
+                if (typeof aux === 'object') {
+                return "Sin Datos"; // O cualquier mensaje que prefieras
+                }
+                return aux;
+            },
+            width:"150px",
+            sortable:true,
+            grow:1,
+        },
+        {
+            name: 'CONSUMOS',
+            selector: row => {
+                const aux = fNumber(row.Consumos);
+                if (aux === null || aux === undefined) {
+                    return "No disponible";
+                }
+                if (typeof aux === 'object') {
+                return "Sin Datos"; // O cualquier mensaje que prefieras
+                }
+                return aux;
+            },
+            width:"130px",
+            sortable:true,
+            grow:1,
+        },
+        {
+            name: 'CONSUMOS REAL',
+            selector: row => {
+                const aux = fNumber(row.ConsumosReal);
+                if (aux === null || aux === undefined) {
+                    return "No disponible";
+                }
+                if (typeof aux === 'object') {
+                return "Sin Datos"; // O cualquier mensaje que prefieras
+                }
+                return aux;
+            },
+            width:"170px",
+            sortable:true,
+            grow:1,
+        },
+        {
+            name: 'TOTAL INV.',
+            selector: row => {
+                const aux = fNumber(row.TotalInv);
+                if (aux === null || aux === undefined) {
+                    return "No disponible";
+                }
+                if (typeof aux === 'object') {
+                return "Sin Datos"; // O cualquier mensaje que prefieras
+                }
+                return aux;
+            },
+            width:"150px",
+            sortable:true,
+            grow:1,
+        },
+        {
+            name: 'CANT. MERMA',
+            selector: row => {
+                const aux = row.CantMerma;
+                if (aux === null || aux === undefined) {
+                    return "No disponible";
+                }
+                if (typeof aux === 'object') {
+                return "Sin Datos"; // O cualquier mensaje que prefieras
+                }
+                return aux;
+            },
+            width:"150px",
+            sortable:true,
+            grow:1,
+        },
+    ];
+    //*************************************** BUSCAR ************************* */
+    const onFindBusqueda = (e) => {
+        setBPlanta(e.target.value);
+        setFText(e.target.value);
+    };
+    const fBusqueda = () => {
+        if(vBPlanta.length != 0){
+            const valFiltrados = dtPreCie.filter(dtPreCie => 
+              dtPreCie.Planta.includes(vBPlanta) // Filtra los clientes por el número de cliente
+            );
+        }else{
+          getPreCie_()
+        }
+    };
+    const fPreCie = dtPreCie.filter(item => {
+        // Filtrar por planta, interfaz y texto de búsqueda
+        return item.Planta.toLowerCase().includes(fText.toLowerCase()) || item.mes.includes(fText) || item.periodo.includes(fText);
+    });
+    //*************************************** ***************************************************************** ************************* */
+    return (
+        <>
+            <CContainer fluid>
+                <h1>PreCierre</h1>
+                <CForm>
+                <CRow className='mb-3'>
+                    <CCol sm="auto">
+                        <Plantas  
+                            mCambio={mCambio}
+                            plantasSel={plantasSel}
+                        />
+                    </CCol>
+                    <CCol sm="auto">
+                        <Periodo
+                        mPeriodo={mPeriodo}
+                        periodoSel={periodoSel}
+                        />
+                    </CCol>
+                    <CCol sm="auto">
+                        <Mes
+                        mMes={mMes}
+                        mesSel={mesSel}
+                        />
+                    </CCol>
+                    <CCol sm="auto" className='mt-4'>
+                        <CButton color='primary' onClick={getPreCierres_} style={{'color':'white'}}>
+                        <CIcon icon={cilSearch} className="me-2" />
+                        Buscar
+                        </CButton>
+                    </CCol>
+                    {bRealizar && (
+                    <CCol sm="auto" className='mt-4'>
+                        <CButton color='warning' onClick={sendPC} style={{'color':'white'}}>
+                        <CIcon icon={cilBell} className="me-2" />
+                        Realizar
+                        </CButton>
+                    </CCol>
+                    )}
+                </CRow>
+                <CRow>
+                    <DataTable
+                      columns={colPreCie}
+                      data={fPreCie}
+                      pagination
+                      persistTableHead
+                      subHeader
                   />
-                </CCol>
-                <CCol sm="auto">
-                  <Periodo
-                  mPeriodo={mPeriodo}
-                  periodoSel={periodoSel}
-                  />
-                </CCol>
-                <CCol sm="auto">
-                  <Mes
-                  mMes={mMes}
-                  mesSel={mesSel}
-                  />
-                </CCol>
-                <CCol sm="auto" className='mt-3'>
-                    <CButton color='primary' onClick={sendPC}>
-                      <CIcon icon={cilBell} className="me-2" />
-                       Realizar
-                    </CButton>
-                </CCol>
-              </CRow>
-            </CForm>
-        </CContainer>
-        <TabulatorG titulo={'PreCierre'} posts={posts} />
-    </>
+                </CRow>
+                </CForm>
+            </CContainer>
+        </>
     )
 }
 export default PreCierre

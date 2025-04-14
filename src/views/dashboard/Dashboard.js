@@ -1,55 +1,23 @@
 import React, {useRef, useState, useEffect} from 'react'
 import { CChart, CChartPolarArea } from '@coreui/react-chartjs'
 import {
-  CAvatar,
-  CButton,
-  CButtonGroup,
   CCard,
   CCardBody,
-  CCardFooter,
   CCardHeader,
   CCol,
-  CProgress,
   CRow,
-  CTable,
-  CTableBody,
-  CTableDataCell,
-  CTableHead,
-  CTableHeaderCell,
-  CTableRow,
-  
 } from '@coreui/react'
-import Cookies from 'universal-cookie'
-import axios from 'axios'
 import Swal from "sweetalert2";
 import { format } from 'date-fns';
 import { useNavigate } from "react-router-dom";
 import CIcon from '@coreui/icons-react'
 import {
   cibCcAmex,
-  cibCcApplePay,
-  cibCcMastercard,
-  cibCcPaypal,
-  cibCcStripe,
-  cibCcVisa,
-  cibGoogle,
-  cibFacebook,
-  cibLinkedin,
-  cifBr,
-  cifEs,
-  cifFr,
-  cifIn,
-  cifPl,
-  cifUs,
-  cibTwitter,
-  cilCloudDownload,
-  cilPeople,
-  cilUser,
-  cilUserFemale,
 } from '@coreui/icons'
 import { findLogin, getPedidosD, getPedidosS, getPedidosPS, getPedidosM } from '../../Utilidades/Funciones';
 import { Rol } from '../../Utilidades/Roles'
 import WidgetsDropdown from '../widgets/WidgetsDropdown'
+import Calendario from '../logistica/Pedidos/PedidosC'
 
 const currentDate = new Date();
 
@@ -336,6 +304,7 @@ const Dashboard = () => {
   return (
     <>
       {userIsA && userIsAdminTI && userIsDirector && userIsAdmin && <WidgetsDropdown className="mb-4" />}
+      <Calendario />
       {userIsAdminTI && userIsDirector && userIsAdmin && (
         <CRow>
         <CCol xs={12} md={6}>

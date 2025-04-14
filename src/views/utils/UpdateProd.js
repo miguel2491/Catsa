@@ -3,7 +3,7 @@ import Cookies from 'universal-cookie'
 import axios from 'axios'
 import Swal from "sweetalert2";
 import ProgressBar from "@ramonak/react-progress-bar";
-
+import { format, parse, differenceInMinutes } from 'date-fns';
 import {
   CForm,
   CContainer,
@@ -14,10 +14,10 @@ import {
 
 import {CIcon} from '@coreui/icons-react'
 import { cilLoopCircular, cilSearch } from '@coreui/icons'
-
+import { getUVez } from '../../Utilidades/Funciones';
 const cookies = new Cookies();
 const baseUrl2="http://apicatsa.catsaconcretos.mx:2543/api/";
-const baseUrl="http://localhost:2548/api/";
+const baseUrl="http://localhost:5001/api/";
 
 
 const UpdateProd = () => {
@@ -26,6 +26,38 @@ const UpdateProd = () => {
     const [btn3, setDisabled3] = useState(false);
     const [loading, setLoading] = useState(false);
     const [percentage, setPercentage] = useState(0);
+    const [uHora, setUHora] = useState(format(new Date(),'yyyy/MM/dd HH:mm'));
+    const [btnD, setBtnD] = useState(false);
+    const [uHoraAct, setUHoraAct] = useState('-');
+    const [usuarioAct, setUsuarioAct] = useState('-');
+    useEffect(() => {
+        getUVez_()
+    }, []);
+    const getUVez_ = async()=>{
+        try{
+            const ocList = await getUVez();
+            if(ocList)
+            {
+                console.log(ocList)
+                let uHra = ocList[0].fecha_creacion;
+                let usuario = ocList[0].usuario;
+                const parsedFecha1 = parse(uHora, 'yyyy/MM/dd HH:mm', new Date());
+                const parsedFecha2 = new Date(uHra); // El formato ISO ya es compatible con Date en JavaScript
+                setUHoraAct(format(uHra,'yyyy/MM/dd HH:mm'))
+                setUsuarioAct(usuario)
+                // Calculamos la diferencia en minutos
+                const diferenciaEnMinutos = differenceInMinutes(parsedFecha1, parsedFecha2);
+                console.log(diferenciaEnMinutos)
+                if(diferenciaEnMinutos > 30){
+                    setBtnD(true)
+                }else{
+                    setBtnD(false)
+                }
+            }
+        }catch(error){
+            console.log("Ocurrio un problema cargando Plantas....")
+        }
+    };
 
     const updPrecio = () =>{
         setSPrecios()
@@ -54,12 +86,11 @@ const UpdateProd = () => {
                     },
                 };
                 //------------------------------------------------------------------------------------------------------------------------------------------------------
-                const response = await axios.get(baseUrl+'Administracion/SetSPPRecios', confi_ax);
+                const response = await axios.get(baseUrl2+'Administracion/SetSPPRecios/'+cookies.get('Usuario'), confi_ax);
                 console.log(response.data);
                 //Swal.fire("CORRECTO", "Se Agrego Correctamente", "success");
                 //setPrecios2(true);
-                setSPrecios2();
-                
+                //setSPrecios2();
             } 
             catch(error)
             {
@@ -94,7 +125,7 @@ const UpdateProd = () => {
                 }
             }
             //------------------------------------------------------------------------------------------------------------------------------------------------------
-            await axios.get(baseUrl+'Administracion/SetSPPRecios2', confi_ax)
+            await axios.get(baseUrl2+'Administracion/SetSPPRecios2', confi_ax)
             .then(response=>{
                 console.log(response.data);
                 //Swal.fire("CORRECTO", "Finalizo proceso", "success");
@@ -140,7 +171,7 @@ const UpdateProd = () => {
                 }
             }
             //------------------------------------------------------------------------------------------------------------------------------------------------------
-            await axios.get(baseUrl+'Administracion/SetCMEdo', confi_ax)
+            await axios.get(baseUrl2+'Administracion/SetCMEdo', confi_ax)
             .then(response=>{
                 console.log(response.data);
                 //Swal.fire("CORRECTO", "Primer Parte", "success");
@@ -182,7 +213,7 @@ const UpdateProd = () => {
                 }
             }
             //------------------------------------------------------------------------------------------------------------------------------------------------------
-            await axios.get(baseUrl+'Administracion/SetPEntrada', confi_ax)
+            await axios.get(baseUrl2+'Administracion/SetPEntrada', confi_ax)
             .then(response=>{
                 console.log(response.data);
                 //Swal.fire("CORRECTO", "Proceso Finalizada", "success");
@@ -228,7 +259,7 @@ const UpdateProd = () => {
                 }
             }
             //------------------------------------------------------------------------------------------------------------------------------------------------------
-            await axios.get(baseUrl+'Administracion/SetCISADB', confi_ax)
+            await axios.get(baseUrl2+'Administracion/SetCISADB', confi_ax)
             .then(response=>{
                 console.log(response.data);
                 //Swal.fire("CORRECTO", "PARTE1", "success");
@@ -268,7 +299,7 @@ const UpdateProd = () => {
                 }
             }
             //------------------------------------------------------------------------------------------------------------------------------------------------------
-            await axios.get(baseUrl+'Administracion/SetCISAPROD', confi_ax)
+            await axios.get(baseUrl2+'Administracion/SetCISAPROD', confi_ax)
             .then(response=>{
                 console.log(response.data);
                 //Swal.fire("CORRECTO", "PARTE2", "success");
@@ -311,7 +342,7 @@ const UpdateProd = () => {
                 }
             }
             //------------------------------------------------------------------------------------------------------------------------------------------------------
-            const response = await axios.get(baseUrl+'Administracion/SetAfectarMov', confi_ax);
+            const response = await axios.get(baseUrl2+'Administracion/SetAfectarMov', confi_ax);
             console.log(response.data);
             Swal.fire("CORRECTO", "PROCESO FINALIZADO", "success");
             setPercentage(100); 
@@ -338,14 +369,15 @@ const UpdateProd = () => {
             setPercentage(100); 
         }
     }
-return (
+    
+    return (
     <>
         <CContainer fluid>
             <h1>Actualizar Producción</h1>
             <CForm>
                 <CRow>
                 <CCol sm="auto" className='mt-3'>
-                    <CButton color='primary' onClick={updPrecio} id='btnPaso1' style={{ display:btn1 ? 'none':'block' }}>
+                    <CButton color='primary' onClick={updPrecio} id='btnPaso1' style={{ display:btnD ? 'block':'none' }}>
                         <CIcon icon={cilLoopCircular} className="me-2" />
                         Paso 1
                     </CButton>
@@ -362,6 +394,9 @@ return (
                         Paso 3
                     </CButton>
                 </CCol>
+                </CRow>
+                <CRow>
+                    <label>Última Actualización:<b>{uHoraAct}</b> </label><br /><label>Por el Usuario: <b>{usuarioAct}</b></label>
                 </CRow>
                 {loading && (
                     <CRow className="mt-3">

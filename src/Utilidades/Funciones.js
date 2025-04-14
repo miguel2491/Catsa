@@ -796,7 +796,6 @@ export async function delPlaOC(id) {
         return false
     }
 }
-
 //****************************************************************************************************************************************************************************** */
 //LOGISTICA
     // Pedidos
@@ -2801,7 +2800,59 @@ export async function getMaterialesI(Producto)
     {
         return false;
     }
-}  
+}
+export async function setMBruto(ejercicio, mes)
+{
+    try
+    {
+        let confi_ax = {
+            headers:
+            {
+                'Cache-Control': 'no-cache',
+                'Content-Type': 'application/json',
+                "Authorization": "Bearer "+cookies.get('token'),
+            },
+        };
+        //------------------------------------------------------------------------------------------------------------------------------------------------------
+        const response = await axios.get(baseUrl2+'Administracion/SetMB/'+ejercicio+','+mes, confi_ax);
+        var obj = response.data;
+        if(obj.length > 0)
+        {
+            return obj
+        }else{
+            return false
+        }
+    } 
+    catch(error)
+    {
+        return false;
+    }
+}
+export async function getCalendario(mes, periodo, tipo)
+{
+    try
+    {
+        let confi_ax = {
+            headers:
+            {
+                'Cache-Control': 'no-cache',
+                'Content-Type': 'application/json',
+                "Authorization": "Bearer "+cookies.get('token'),
+            },
+        };
+        //------------------------------------------------------------------------------------------------------------------------------------------------------
+        const response = await axios.get(baseUrl2+'Catalogo/GetCalendario/'+mes+','+periodo+','+tipo, confi_ax);
+        var obj = response.data;
+        if(obj.length > 0)
+        {
+            return obj
+        }else{return false}
+    } 
+    catch(error)
+    {
+        return false;
+    }
+} 
 //****************************************************************************************************************************************************************************** */
 // EXTRAS
 export async function setIncidencia(incidencia, tipo) {
@@ -2898,6 +2949,54 @@ export async function delInci(id) {
         //------------------------------------------------------------------------------------------------------------------------------------------------------
         const response = await axios.get(baseUrl+'ProCatsa/DelIncidencia/'+id, confi_ax);
         var obj = response.data[0].Rows;
+        if(obj.length > 0)
+        {
+            return obj
+        }else{return false}
+    } 
+    catch(error)
+    {
+        return false;
+    }
+}
+export async function getPreCierres(Planta, Periodo, Mes) {
+    try
+    {
+        let confi_ax = {
+            headers:
+            {
+                'Cache-Control': 'no-cache',
+                'Content-Type': 'application/json',
+                "Authorization": "Bearer "+cookies.get('token'),
+            },
+        };
+        //------------------------------------------------------------------------------------------------------------------------------------------------------
+        const response = await axios.get(baseUrl2+'Operaciones/GetPreCierreMensual/'+Planta+','+Periodo+','+Mes, confi_ax);
+        var obj = response.data;
+        if(obj.length > 0)
+        {
+            return obj
+        }else{return false}
+    } 
+    catch(error)
+    {
+        return false;
+    }
+}
+export async function setPreCierres(Planta, Periodo, Mes) {
+    try
+    {
+        let confi_ax = {
+            headers:
+            {
+                'Cache-Control': 'no-cache',
+                'Content-Type': 'application/json',
+                "Authorization": "Bearer "+cookies.get('token'),
+            },
+        };
+        //------------------------------------------------------------------------------------------------------------------------------------------------------
+        const response = await axios.get(baseUrl+'Operaciones/SetPreCierreMensual/'+planta+','+mes+','+periodo, confi_ax)
+        var obj = response.data;
         if(obj.length > 0)
         {
             return obj
@@ -3087,6 +3186,30 @@ export async function setPlantaCB(planta)
         return false;
     }
 }
+export async function getUVez(){
+    try
+    {
+        let confi_ax = {
+            headers:
+            {
+                'Cache-Control': 'no-cache',
+                'Content-Type': 'application/json',
+                "Authorization": "Bearer "+cookies.get('token'),
+            },
+        };
+        //------------------------------------------------------------------------------------------------------------------------------------------------------
+        const response = await axios.get(baseUrl+'Administracion/getBitacoraUpdPro', confi_ax);
+        var obj = response.data;
+        if(obj.length > 0)
+        {
+            return obj
+        }else{return false}
+    } 
+    catch(error)
+    {
+        return false;
+    }
+}
 //--------------------
 export async function getResInvCB(material, FI, FF, planta) {
     try
@@ -3236,6 +3359,39 @@ export async function getCotizacionP(FI, FF, planta) {
     catch(error)
     {
         return false;
+    }
+}
+export async function GetObjComGen(mes, periodo)
+{
+    try
+    {
+        let confi_ax = {
+            headers:
+            {
+                'Cache-Control': 'no-cache',
+                'Content-Type': 'application/json',
+                "Authorization": "Bearer "+cookies.get('token'),
+            },
+        };
+        //------------------------------------------------------------------------------------------------------------------------------------------------------
+        const response = await axios.get(baseUrl+'Comercial/GetObjComGen/'+mes+','+periodo, confi_ax);
+        if (response.data && response.data.length > 0 ) {
+            const obj = response.data;
+            
+            if(obj.length > 0)
+            {
+                return obj;
+            }else{
+                return false
+            }
+        }else{
+            return false
+        }
+    } 
+    catch(error)
+    {
+        console.log(error);
+        return false
     }
 }
 //****************************************************************************************************************************************************************************** */

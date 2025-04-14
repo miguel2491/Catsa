@@ -121,7 +121,6 @@ const RObjCom = () => {
             codigo_vendedor:item.codigo_vendedor,
             cantidad_max:item.cantidad_max,
             categoria:item.categoria,
-            faltante:item.faltante,
             id_categoria:item.id_categoria,
             minimo_mas:item.minimo_mas,
             obj_dg:item.objetivo_dg,
