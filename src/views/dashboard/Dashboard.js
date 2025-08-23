@@ -25,7 +25,9 @@ const Dashboard = () => {
   const navigate = useNavigate();
   const userIsA = true;
   const userIsAdminTI = Rol('AdminTI')
+  console.log(userIsAdminTI)
   const userIsAdmin = Rol('Admin')
+  const userIsCVentas = Rol('CoordinadorVentas')
   const userIsOperacion = Rol('Operaciones')
   const userIsMantenimiento = Rol('Mantenimiento')
   const userIsFinanzas = Rol('Finanzas')
@@ -303,55 +305,55 @@ const Dashboard = () => {
 
   return (
     <>
-      {userIsA && userIsAdminTI && userIsDirector && userIsAdmin && <WidgetsDropdown className="mb-4" />}
+      {(userIsA || userIsAdminTI || userIsDirector || userIsAdmin || userIsCVentas) && <WidgetsDropdown className="mb-4" />}
       <Calendario />
-      {userIsAdminTI && userIsDirector && userIsAdmin && (
+      {(userIsAdminTI || userIsDirector | userIsAdmin || userIsCVentas) &&(
         <CRow>
-        <CCol xs={12} md={6}>
-          <CCard className="mb-4">
-            <CCardHeader>Pedidos Por Día <b>{format(fDiaria, 'yyyy/MM/dd')}</b></CCardHeader>
-            <CCardBody>
-              <CChart
-                type="bar"
-                data={chartDataD}
-              />
-            </CCardBody>
-          </CCard>
-        </CCol>
-        <CCol xs={12} md={6}>
-          <CCard className="mb-4">
-            <CCardHeader>Proyección por Semana <b>{rPSemana}</b></CCardHeader>
-            <CCardBody>
-              <CChart
-                type='bar'
-                data={chartDataS}
-              />
-            </CCardBody>
-          </CCard>
-        </CCol>
-        <CCol xs={12} md={6}>
-          <CCard className="mb-4">
-            <CCardHeader>Proyección por Semana Proxima <b>{rPSemanaP}</b></CCardHeader>
-            <CCardBody>
-              <CChart
-                type="bar"
-                data={chartDataPS}
-              />
-            </CCardBody>
-          </CCard>
-        </CCol>
-        <CCol xs={12} md={6}>
-          <CCard className="mb-4">
-            <CCardHeader>Proyección por Mes <b>{rPMes}</b></CCardHeader>
-            <CCardBody>
-              <CChart
-                type="bar"
-                data={chartDataM}
-              />
-            </CCardBody>
-          </CCard>
-        </CCol>
-      </CRow>
+          <CCol xs={12} md={6}>
+            <CCard className="mb-4">
+              <CCardHeader>Pedidos Por Día <b>{format(fDiaria, 'yyyy/MM/dd')}</b></CCardHeader>
+              <CCardBody>
+                <CChart
+                  type="bar"
+                  data={chartDataD}
+                />
+              </CCardBody>
+            </CCard>
+          </CCol>
+          <CCol xs={12} md={6}>
+            <CCard className="mb-4">
+              <CCardHeader>Proyección por Semana <b>{rPSemana}</b></CCardHeader>
+              <CCardBody>
+                <CChart
+                  type='bar'
+                  data={chartDataS}
+                />
+              </CCardBody>
+            </CCard>
+          </CCol>
+          <CCol xs={12} md={6}>
+            <CCard className="mb-4">
+              <CCardHeader>Proyección por Semana Proxima <b>{rPSemanaP}</b></CCardHeader>
+              <CCardBody>
+                <CChart
+                  type="bar"
+                  data={chartDataPS}
+                />
+              </CCardBody>
+            </CCard>
+          </CCol>
+          <CCol xs={12} md={6}>
+            <CCard className="mb-4">
+              <CCardHeader>Proyección por Mes <b>{rPMes}</b></CCardHeader>
+              <CCardBody>
+                <CChart
+                  type="bar"
+                  data={chartDataM}
+                />
+              </CCardBody>
+            </CCard>
+          </CCol>
+        </CRow>
       )}
       
     </>

@@ -46,8 +46,6 @@ import {
   cilPencil,
   cilPhone,
   cilPin,
-  cilPlus,
-  cilSearch,
   cilShareAlt,
   cilTag,
   cilTrash
@@ -166,50 +164,132 @@ const LCotizacion = () => {
   //--------------------------- COLS -----------------------------------------------
   const colCot = [
     {
-      name: 'Planta',
-      selector: row => row.Planta,
-      sortable:true,
-      width:"120px",
-    },
-    {
-      name: 'No. Cotización',
-      sortable:true,
+      name: 'ACCIONES',
+      selector: row => row.IdCotizacion,
+      width:"250px",
       cell: (row) => (
-        <button
-        className="text-blue-600 underline hover:text-blue-800"
-        onClick={() => handleOpenModal(row)}
-        >
-        {row.IdCotizacion}
-        </button>
-    ),
-      width:"120px",
+        <div>
+          <CRow>
+            {userIsAdmin && (row.Estatus == 'Aceptada') && (
+              <CCol xs={6} md={1} lg={1} className='me1'>
+                <CButton
+                  color="warning"
+                  onClick={() => viewPedidos(row.IdCotizacion)}
+                  size="sm"
+                  className="me1"
+                  title="Autorizar"
+                >
+                  <CIcon icon={cilCheck} />
+                </CButton>
+              </CCol>
+            )}
+            
+            {userIsAdmin && (
+              <CCol xs={6} md={1} lg={1} className='me1'>
+                <CButton
+                  color="info"
+                  onClick={() => vCotizacion(row.IdCotizacion)}
+                  size="sm"
+                  className="me1"
+                  title="Modificar"
+                >
+                  <CIcon icon={cilPencil} style={{'color':'white'}} />
+                </CButton>
+              </CCol>
+            )}
+            
+            {userIsAdmin && (
+              <CCol xs={6} md={1} lg={1} className='me1'>
+                <CButton
+                  color="danger"
+                  onClick={() => setNFactura(row.IdCotizacion)}
+                  size="sm"
+                  className="me1"
+                  title="Eliminar"
+                >
+                  <CIcon icon={cilTrash} style={{'color':'white'}} />
+                </CButton>
+              </CCol>
+            )}
+            
+            {userIsAdmin && (
+              <CCol xs={6} md={1} lg={1} className='me1'>
+                <CButton
+                  color="success"
+                  onClick={() => mEstatus(row.IdCotizacion, row.Estatus)}
+                  size="sm"
+                  className="me1"
+                  title="Estatus"
+                >
+                  <CIcon icon={cilCheck} style={{'color':'white'}} />
+                </CButton>
+              </CCol>
+            )}
+
+            {userIsAdmin && (
+              <CCol xs={6} md={1} lg={1} className='me1'>
+                <CButton
+                  color="warning"
+                  onClick={() => downloadPDF(row.IdCotizacion)}
+                  size="sm"
+                  className="me1"
+                  title="Descargar PDF"
+                >
+                  <CIcon icon={cilCloudDownload} style={{'color':'white'}} />
+                </CButton>
+              </CCol>
+            )}
+            
+            <CCol xs={6} md={1} lg={1} className='me1'>
+              <CButton
+                color="secondary"
+                onClick={() => handleExtraActions(row.IdCotizacion)}
+                size="sm"
+                className="me1"
+                title="Acciones adicionales"
+              >
+                <CIcon icon={cilMenu} />
+              </CButton>
+            </CCol>
+
+            <CCol xs={6} md={1} lg={1} className='me1'>
+              <CButton
+                color="success"
+                onClick={() => hMapasOR(row.IdCotizacion)}
+                size="sm"
+                className="me1"
+                title="Captura Posición"
+              >
+                <CIcon icon={cilMap} style={{'color':'white'}} />
+              </CButton>
+            </CCol>
+          </CRow>
+        </div>
+      ),
     },
+    
     {
-      name: 'Descargar',
+      name: 'ID',
       selector: row => row.IdCotizacion,
       sortable:true,
       width:"120px",
-    },
-    {
-      name: 'Estatus',
-      selector: row => row.Estatus,
-      sortable:true,
-      width:"200px",
     },{
-      name: 'Vendedor',
+      name: 'Fecha',
       selector: row => {
-        const vendedor = row.Vendedor
-        if (vendedor === null || vendedor === undefined) {
+        const fecha = row.Creo;
+        if (fecha === null || fecha === undefined) {
           return "No disponible";
         }
-        if (typeof vendedor === 'object') {
-          return "-"; // O cualquier mensaje que prefieras
+        if (typeof fecha === 'object') {
+          return "Sin Fecha"; // O cualquier mensaje que prefieras
         }
-        return vendedor;
+        const [asesor, fechaA] = fecha.split(" ");
+        return fechaA;
       },
       sortable:true,
-      width:"200px",
-    },{
+      width:"150px",
+    },
+    {
       name: 'Cliente',
       selector: row => {
         var ncliente = row.NoCliente
@@ -230,7 +310,29 @@ const LCotizacion = () => {
       },
       sortable:true,
       width:"200px",
-    },{
+    },
+    {
+      name: 'Estatus',
+      selector: row => row.Estatus,
+      sortable:true,
+      width:"200px",
+    },
+    {
+      name: 'Dirección',
+      selector: row => {
+        var Direccion = row.Direccion
+        if (Direccion === null || Direccion === undefined) {
+          Direccion = "-";
+        }
+        if (typeof Direccion === 'object') {
+          Direccion = "-"; // O cualquier mensaje que prefieras
+        }
+        return Direccion;
+      },
+      sortable:true,
+      width:"200px",
+    },
+    {
       name: 'Obra',
       selector: row => {
         var nobra = row.NoObra
@@ -253,69 +355,16 @@ const LCotizacion = () => {
       width:"200px",
     },
     {
-      name: 'Dirección',
+      name: 'Vendedor',
       selector: row => {
-        var Direccion = row.Direccion
-        if (Direccion === null || Direccion === undefined) {
-          Direccion = "-";
-        }
-        if (typeof Direccion === 'object') {
-          Direccion = "-"; // O cualquier mensaje que prefieras
-        }
-        return Direccion;
-      },
-      sortable:true,
-      width:"200px",
-    },
-    {
-      name: 'Contacto',
-      selector: row => {
-        var ncliente = row.NoCliente
-        if (ncliente === null || ncliente === undefined) {
-          ncliente =  "-";
-        }
-        if (typeof ncliente === 'object') {
-          ncliente = "-"; // O cualquier mensaje que prefieras
-        }
-        var nombreCliente = row.Cliente
-        if (nombreCliente === null || nombreCliente === undefined) {
-          nombreCliente = "-";
-        }
-        if (typeof nombreCliente === 'object') {
-          nombreCliente = "-"; // O cualquier mensaje que prefieras
-        }
-        return ncliente+" "+nombreCliente;
-      },
-      sortable:true,
-      width:"200px",
-    },
-    {
-      name: 'Fin Vigencia',
-      selector: row => {
-        const fecha = row.Creo;
-        if (fecha === null || fecha === undefined) {
+        const vendedor = row.Vendedor
+        if (vendedor === null || vendedor === undefined) {
           return "No disponible";
         }
-        if (typeof fecha === 'object') {
-          return "Sin Fecha"; // O cualquier mensaje que prefieras
-        }
-        const [asesor, fechaA] = fecha.split(" ");
-        return fechaA;
-      },
-      sortable:true,
-      width:"150px",
-    },
-    {
-      name: 'Creo',
-      selector: row => {
-        const actualizo = row.Actualizo
-        if (actualizo === null || actualizo === undefined) {
-          return "No disponible";
-        }
-        if (typeof actualizo === 'object') {
+        if (typeof vendedor === 'object') {
           return "-"; // O cualquier mensaje que prefieras
         }
-        return actualizo;
+        return vendedor;
       },
       sortable:true,
       width:"200px",
@@ -336,22 +385,7 @@ const LCotizacion = () => {
       width:"200px",
     },
     {
-      name: 'Motivo',
-      selector: row => {
-        const autorizo = row.Autorizante
-        if (autorizo === null || autorizo === undefined) {
-          return "No disponible";
-        }
-        if (typeof autorizo === 'object') {
-          return "-"; // O cualquier mensaje que prefieras
-        }
-        return autorizo;
-      },
-      sortable:true,
-      width:"200px",
-    },
-    {
-      name: 'Observaciones',
+      name: 'Autorizo',
       selector: row => {
         const autorizo = row.Autorizante
         if (autorizo === null || autorizo === undefined) {
@@ -1322,21 +1356,6 @@ const LCotizacion = () => {
         console.log(error)
     }
   }
-  // Descargar CSV
-      const downloadCSV = () => {
-          const link = document.createElement('a');
-          let csv = convertArrayOfObjectsToCSV(FileDT);
-          if (csv == null) return;
-          const filename = 'HistoricoCli_'+plantasSelF+'.csv';
-      
-          if (!csv.match(/^data:text\/csv/i)) {
-              csv = `data:text/csv;charset=utf-8,${csv}`;
-          }
-      
-          link.setAttribute('href', encodeURI(csv));
-          link.setAttribute('download', filename);
-          link.click();
-      };
   //********************************************************************************************** */
   // const calculateRoute = useCallback(() => {
   //   if (location.latitude && location.longitude) {
@@ -1365,7 +1384,7 @@ const LCotizacion = () => {
   return (
     <>
     <CContainer fluid>
-      <h1>Lista Cotizaciones</h1>
+      <h1>Cotizaciones</h1>
       <CRow className='mt-3 mb-3'>
         <CCol xs={6} md={4}>
           <FechaI 
@@ -1378,34 +1397,11 @@ const LCotizacion = () => {
             mFcaF={mFcaF}
           />
         </CCol>
-        <CCol xs={4} md={4}>
+        <CCol xs={12} md={4}>
           <Plantas  
             mCambio={mCambio}
             plantasSel={plantasSel}
           />
-        </CCol>
-        <CCol xs={2} md={2} className='mt-4'>
-            <CButton color='primary' > 
-                <CIcon icon={cilPlus} />
-                {' '}Nuevo
-            </CButton>
-        </CCol>
-        <CCol xs={2} md={2} className='mt-4'>
-            <CButton color='info' style={{"color":"white"}}> 
-                <CIcon icon={cilSearch} />
-                {' '}Buscar
-            </CButton>
-        </CCol>
-        <CCol xs={3} md={2} className='mt-4'>
-            <CButton color='danger' style={{"color":"white"}} onClick={downloadCSV}>
-                <CIcon icon={cilCloudDownload} className="me-2" />
-                Exportar
-            </CButton>
-        </CCol>
-      </CRow>
-      <CRow className='mt-4 mb-4'>
-        <CCol xs={12} md={12}>
-            Total M3:
         </CCol>
         <CCol xs={12} md={12}>
           <BuscadorDT value={vBPlanta} onChange={onFindBusqueda} onSearch={fBusqueda} />

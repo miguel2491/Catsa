@@ -22,27 +22,20 @@ import { format } from 'date-fns';
 
 const costos = () => {
     //************************************************************************************************************************************************************************** */
-    const [vMC, setVMC] = useState(false);
-    const [vMM, setVMM] = useState(false);
-    const [vMG, setVMG] = useState(false);
-    const [vMI, setVMI] = useState(false);
-    const [vMD, setVMD] = useState(false);
-    const [btnG, setBtnTxt] = useState('Guardar');
+    const [shBtnB, setShBtnB] = useState(false);
+    const [shCol, setShCol] = useState(false);
     const [periodoSel , setPeriodoB] = useState('');
     const [mesSel , setMesB] = useState('');
+    const [plantasSel , setPlantas] = useState('');
     // FORM OBJ COM INDI
-    const [TxtId , setIdAs] = useState(0);
-    const [TxtAsesor , setAsesor] = useState('');
     const [TxtTIPO , setTipo] = useState('-');
     //Buscador
     const [fText, setFText] = useState(''); // Estado para el filtro de búsqueda
     const [vBPlanta, setBPlanta] = useState('');
     //Arrays
     const [dtCostos, setDTCostos] = useState([]);
+    const [dtCostosF, setDTCostosF] = useState([]);
     const [exOC, setExOc] = useState([]);
-    // FROMS
-    const [oMensualV, setOMV] = useState(0);
-    const [showD, setShowD] = useState(false);
     //************************************************************************************************************************************************************************** */    
     useEffect(() => {
       if (Array.isArray(dtCostos)) {
@@ -116,6 +109,11 @@ const costos = () => {
     const mCambio = (event) => {
         const pla = event.target.value; 
         setPlantas(pla);
+        const fBPP = dtCostosF.filter(item => {
+          // Filtrar por planta C200R2010D00
+          return item.Planta.toLowerCase().includes(pla.toLowerCase());
+        });
+        setDTCostos(fBPP)
     };
     const mMes = (event) => {
         setMesB(event.target.value);
@@ -132,11 +130,13 @@ const costos = () => {
           }
       });
       try{
-        const ocList = await getECostos(fNumberCad(mesSel), periodoSel, TxtTIPO);
+        const ocList = await getECostos(fNumberCad(mesSel), periodoSel, 'REAL');
         Swal.close();
         if(ocList)
         {
+          setShBtnB(true)
           setDTCostos(ocList)
+          setDTCostosF(ocList)
           setExOc(ocList);
         }
       }catch(error){
@@ -163,7 +163,7 @@ const costos = () => {
       {
         name: 'PLANTA',
         selector: row => {
-            const aux = row.Planta;
+            let aux = row.Planta;
             if (aux === null || aux === undefined) {
                 return "No disponible";
             }
@@ -194,7 +194,7 @@ const costos = () => {
       },
       {
         name: 'COSTO',
-        selector: row => {
+        cell: row => {
             const cpc = row.CPC;
             const h2o = row.H2O;
             const gravas = row.GRAVAS;
@@ -204,44 +204,32 @@ const costos = () => {
             let aux = cpc+h2o+gravas+arenas+aditivos+insumos;
             aux = parseFloat(aux).toFixed(2)
             if (aux === null || aux === undefined) {
-                return "No disponible";
+              aux = 0;
             }
             if (typeof aux === 'object') {
-            return "Sin Datos"; // O cualquier mensaje que prefieras
+              aux = 0; // O cualquier mensaje que prefieras
             }
-            return ( <a onClick={()=>bMC(row.id)}>{row.COSTO}</a>);
+            return (
+              <div className='align-left'>
+                <a onClick={() => bMC(row.id)}>{fNumber(row.COSTO)}</a>
+              </div>
+            );
         },
-        width:"130px",
-        sortable:true,
-        grow:1,
-      },
-      {
-        name: 'MRG N PROM',
-        selector: row => {
-            const aux = row.Mrgn;
-            if (aux === null || aux === undefined) {
-                return "No disponible";
-            }
-            if (typeof aux === 'object') {
-            return "Sin Datos"; // O cualquier mensaje que prefieras
-            }
-            return aux;
-        },
-        width:"130px",
+        width:"100px",
         sortable:true,
         grow:1,
       },
       {
         name: 'CP + MRGN',
-        selector: row => {
+        cell: row => {
             let aux = row.COSTO + row.Mrgn;
             if (aux === null || aux === undefined) {
-                return "No disponible";
+                return 0;
             }
             if (typeof aux === 'object') {
-            return "Sin Datos"; // O cualquier mensaje que prefieras
+            return 0; // O cualquier mensaje que prefieras
             }
-            return aux;
+            return (<div className='align-left'>{fNumber(aux.toFixed(2))}</div>);
         },
         width:"130px",
         sortable:true,
@@ -250,15 +238,15 @@ const costos = () => {
       },
       {
         name: '% GDIST',
-        selector: row => {
-            const aux = row.GDist;
+        cell: row => {
+            let aux = row.GDist;
             if (aux === null || aux === undefined) {
-                return "No disponible";
+                aux = 0;
             }
             if (typeof aux === 'object') {
-            return "Sin Datos"; // O cualquier mensaje que prefieras
+              aux = 0; // O cualquier mensaje que prefieras
             }
-            return aux;
+            return (<div className='align-left'>{fNumber(aux.toFixed(2))}</div>);
         },
         width:"130px",
         sortable:true,
@@ -267,18 +255,17 @@ const costos = () => {
       },
       {
         name: 'GDIST',
-        selector: row => {
+        cell: row => {
           let cp_mrgn = row.COSTO + row.Mrgn;
           let aux = cp_mrgn * row.GDist;
           aux = aux / 100;
-          aux = aux.toFixed(2);
           if (aux === null || aux === undefined) {
-              return "No disponible";
+              aux = 0;
           }
           if (typeof aux === 'object') {
-            return "Sin Datos"; // O cualquier mensaje que prefieras
+            aux = 0; // O cualquier mensaje que prefieras
           }
-          return aux;
+          return (<div className='align-left'>{fNumber(aux.toFixed(2))}</div>);
         },
         width:"130px",
         sortable:true,
@@ -287,15 +274,15 @@ const costos = () => {
       },
       {
         name: '% SSF',
-        selector: row => {
-            const aux = row.SSF;
+        cell: row => {
+            let aux = row.SSF;
             if (aux === null || aux === undefined) {
-                return "No disponible";
+                aux = 0;
             }
             if (typeof aux === 'object') {
-            return "Sin Datos"; // O cualquier mensaje que prefieras
+            aux = 0; // O cualquier mensaje que prefieras
             }
-            return aux+"%";
+            return (<div className='align-left'>{fNumber(aux.toFixed(2))+'%'}</div>);
         },
         width:"130px",
         sortable:true,
@@ -304,18 +291,17 @@ const costos = () => {
       },
       {
         name: 'SSF',
-        selector: row => {
+        cell: row => {
           let cp_mrgn = row.COSTO + row.Mrgn;
           let aux = cp_mrgn * row.SSF;
           aux = aux / 100;
-          aux = aux.toFixed(2);
           if (aux === null || aux === undefined) {
-              return "No disponible";
+              aux = 0;
           }
           if (typeof aux === 'object') {
-            return "Sin Datos"; // O cualquier mensaje que prefieras
+            aux = 0; // O cualquier mensaje que prefieras
           }
-          return aux;
+          return (<div className='align-left'>{fNumber(aux.toFixed(2))}</div>);
         },
         width:"130px",
         sortable:true,
@@ -324,15 +310,15 @@ const costos = () => {
       },
       {
         name: '% SSV',
-        selector: row => {
-            const aux = row.SSV;
+        cell: row => {
+            let aux = row.SSV;
             if (aux === null || aux === undefined) {
-                return "No disponible";
+              aux = 0;
             }
             if (typeof aux === 'object') {
-            return "Sin Datos"; // O cualquier mensaje que prefieras
+              aux = 0;
             }
-            return aux+"%";
+            return (<div className='align-left'>{fNumber(aux.toFixed(2))+"%"}</div>);
         },
         width:"130px",
         sortable:true,
@@ -341,18 +327,17 @@ const costos = () => {
       },
       {
         name: 'SSV',
-        selector: row => {
+        cell: row => {
           let cp_mrgn = row.COSTO + row.Mrgn;
           let aux = cp_mrgn * row.SSV;
           aux = aux / 100;
-          aux = aux.toFixed(2);
           if (aux === null || aux === undefined) {
-              return "No disponible";
+              aux = 0;
           }
           if (typeof aux === 'object') {
-            return "Sin Datos"; // O cualquier mensaje que prefieras
+            aux = 0;
           }
-          return aux;
+          return (<div className='align-left'>{fNumber(aux.toFixed(2))}</div>);
         },
         width:"130px",
         sortable:true,
@@ -361,15 +346,15 @@ const costos = () => {
       },
       {
         name: '% GV',
-        selector: row => {
-            const aux = row.GV;
+        cell: row => {
+            let aux = row.GV;
             if (aux === null || aux === undefined) {
-                return "No disponible";
+              aux = 0;
             }
             if (typeof aux === 'object') {
-            return "Sin Datos"; // O cualquier mensaje que prefieras
+              aux = 0;
             }
-            return aux+"%";
+            return (<div className='align-left'>{fNumber(aux.toFixed(2))+"%"}</div>);
         },
         width:"130px",
         sortable:true,
@@ -378,18 +363,17 @@ const costos = () => {
       },
       {
         name: 'GV',
-        selector: row => {
+        cell: row => {
           let cp_mrgn = row.COSTO + row.Mrgn;
           let aux = cp_mrgn * row.GV;
           aux = aux / 100;
-          aux = aux.toFixed(2);
           if (aux === null || aux === undefined) {
-              return "No disponible";
+            aux = 0;
           }
           if (typeof aux === 'object') {
-            return "Sin Datos"; // O cualquier mensaje que prefieras
+            aux = 0;
           }
-          return aux;
+          return (<div className='align-left'>{fNumber(aux.toFixed(2))}</div>);
         },
         width:"130px",
         sortable:true,
@@ -398,16 +382,15 @@ const costos = () => {
       },
       {
         name: 'GF',
-        selector: row => {
+        cell: row => {
           let aux = row.GF;
-          aux = aux.toFixed(2);
           if (aux === null || aux === undefined) {
-              return "No disponible";
+            aux = 0;
           }
           if (typeof aux === 'object') {
-            return "Sin Datos"; // O cualquier mensaje que prefieras
+            aux = 0;
           }
-          return aux;
+          return (<div className='align-left'>{fNumber(aux.toFixed(2))}</div>);
         },
         width:"130px",
         sortable:true,
@@ -416,16 +399,15 @@ const costos = () => {
       },
       {
         name: 'M',
-        selector: row => {
+        cell: row => {
           let aux = row.M;
-          aux = aux.toFixed(2);
           if (aux === null || aux === undefined) {
               return "No disponible";
           }
           if (typeof aux === 'object') {
             return "Sin Datos"; // O cualquier mensaje que prefieras
           }
-          return aux;
+          return (<div className='align-left'>{fNumber(aux.toFixed(2))}</div>);
         },
         width:"130px",
         sortable:true,
@@ -434,7 +416,7 @@ const costos = () => {
       },
       {
         name: (<button onClick={() => toggleColumnVisibility('GOPER_C')}>GOPER</button>),
-        selector: row => {
+        cell: row => {
           let cp_mrgn = row.COSTO + row.Mrgn;
           let auxDist = cp_mrgn * row.GDist;
           auxDist = auxDist / 100;
@@ -451,14 +433,13 @@ const costos = () => {
           let auxGF = row.GF;
           let auxM = row.M;
           let aux = parseFloat(auxDist) + parseFloat(auxSSF) + parseFloat(auxSSV) + parseFloat(auxGV) + parseFloat(auxGF) + parseFloat(auxM);
-          aux = aux.toFixed(2);
           if (aux === null || aux === undefined) {
-            return "No disponible";
+            aux = 0;
           }
           if (typeof aux === 'object') {
-            return "Sin Datos"; // O cualquier mensaje que prefieras
+            aux = 0; // O cualquier mensaje que prefieras
           }
-          return ( <a onClick={()=>bMGO(row.id)}>{aux}</a>);  
+          return (<div className='align-left'><a onClick={()=>bMGO(row.id)}>{fNumber(aux.toFixed(2))}</a></div>);  
         },
         width:"130px",
         sortable:true,
@@ -466,79 +447,109 @@ const costos = () => {
       },
       {
         name: 'GCORP',
-        selector: row => {
+        cell: row => {
             let aux = row.GCorp;
-            aux = aux.toFixed(2);
             if (aux === null || aux === undefined) {
-                return "No disponible";
+              aux = 0;
             }
             if (typeof aux === 'object') {
-            return "Sin Datos"; // O cualquier mensaje que prefieras
+              aux = 0; // O cualquier mensaje que prefieras
             }
-            return aux;
+            return (<div className='align-left'>{fNumber(aux.toFixed(2))}</div>);
         },
-        width:"130px",
+        width:"100px",
         sortable:true,
         grow:1,
         visible:columnVisibility.MB_MINIMO_C,
       },
       {
+        name: 'PRECIO OPER.',
+        cell: row => {
+          let costo = row.COSTO;
+          let cp_mrgn = row.COSTO + row.Mrgn;
+          let auxDist = cp_mrgn * row.GDist;
+          auxDist = auxDist / 100;
+          auxDist = auxDist.toFixed(2);
+          let auxSSF = cp_mrgn * row.SSF;
+          auxSSF = auxSSF / 100;
+          auxSSF = auxSSF.toFixed(2);
+          let auxSSV = cp_mrgn * row.SSV;
+          auxSSV = auxSSV / 100;
+          auxSSV = auxSSV.toFixed(2);
+          let auxGV = cp_mrgn * row.GV;
+          auxGV = auxGV / 100;
+          auxGV = auxGV.toFixed(2);
+          let auxGF = row.GF;
+          let auxM = row.M;
+          let auxGOPER = parseFloat(auxDist) + parseFloat(auxSSF) + parseFloat(auxSSV) + parseFloat(auxGV) + parseFloat(auxGF) + parseFloat(auxM);
+          auxGOPER = auxGOPER.toFixed(2);
+          let aux = parseFloat(costo) + parseFloat(auxGOPER);
+          if (aux === null || aux === undefined) {
+            aux = 0;
+          }
+          if (typeof aux === 'object') {
+            aux = 0;
+          }
+          return (<div className='align-left'>{fNumber(aux.toFixed(2))}</div>);
+        },
+        width:"140px",
+        sortable:true,
+        grow:1,
+      },
+      {
         name: 'ARR P/F',
-        selector: row => {
+        cell: row => {
             let aux = row.Arr_PF;
-            aux = aux.toFixed(2);
             if (aux === null || aux === undefined) {
-                return "No disponible";
+              aux = 0;
             }
             if (typeof aux === 'object') {
-            return "Sin Datos"; // O cualquier mensaje que prefieras
+              aux = 0; // O cualquier mensaje que prefieras
             }
-            return aux;
+            return (<div className='align-left'>{fNumber(aux.toFixed(2))}</div>);
         },
-        width:"130px",
+        width:"100px",
         sortable:true,
         grow:1,
         visible:columnVisibility.MB_MINIMO_C,
       },
       {
         name: 'INT',
-        selector: row => {
+        cell: row => {
             let aux = row.Int_;
-            aux = aux.toFixed(2);
             if (aux === null || aux === undefined) {
-                return "No disponible";
+              aux = 0;
             }
             if (typeof aux === 'object') {
-            return "Sin Datos"; // O cualquier mensaje que prefieras
+              aux = 0; // O cualquier mensaje que prefieras
             }
-            return aux;
+            return (<div className='align-left'>{fNumber(aux.toFixed(2))}</div>);
         },
-        width:"130px",
+        width:"70px",
         sortable:true,
         grow:1,
         visible:columnVisibility.MB_MINIMO_C,
       },
       {
         name: 'MARGEN',
-        selector: row => {
+        cell: row => {
             let aux = row.Mrgn;
-            aux = aux.toFixed(2);
             if (aux === null || aux === undefined) {
-                return "No disponible";
+              aux = 0;
             }
             if (typeof aux === 'object') {
-            return "Sin Datos"; // O cualquier mensaje que prefieras
+              aux = 0; // O cualquier mensaje que prefieras
             }
-            return aux;
+            return (<div className='align-left'>{fNumber(aux.toFixed(2))}</div>);
         },
-        width:"130px",
+        width:"100px",
         sortable:true,
         grow:1,
         visible:columnVisibility.MB_MINIMO_C,
       },
       {
         name: (<button onClick={() => toggleColumnVisibility('MB_MINIMO_C')}>MB MÍNIMO</button>),
-        selector: row => {
+        cell: row => {
           let cp_mrgn = row.COSTO + row.Mrgn;
           let auxDist = cp_mrgn * row.GDist;
           auxDist = auxDist / 100;
@@ -557,22 +568,57 @@ const costos = () => {
           let auxGOPER = parseFloat(auxDist) + parseFloat(auxSSF) + parseFloat(auxSSV) + parseFloat(auxGV) + parseFloat(auxGF) + parseFloat(auxM);
           auxGOPER = auxGOPER.toFixed(2);
           let aux = parseFloat(auxGOPER) + parseFloat(row.GCorp) + parseFloat(row.Arr_PF) + parseFloat(row.Int_) + parseFloat(row.Mrgn); 
-          aux = aux.toFixed(2); 
           if (aux === null || aux === undefined) {
-            return "No disponible";
+            aux = 0;
           }
           if (typeof aux === 'object') {
-            return "Sin Datos"; // O cualquier mensaje que prefieras
+            aux = 0; // O cualquier mensaje que prefieras
           }
-          return ( <a onClick={()=>bMMI(row.id)}>{aux}</a>);
+          return (<div className='align-left'><a onClick={()=>bMMI(row.id)}>{fNumber(aux.toFixed(2))}</a></div>);
         },
         width:"130px",
         sortable:true,
         grow:1,
       },
       {
+        name: 'PRECIO MB MINIMO',
+        cell: row => {
+          let costo = row.COSTO;
+          let cp_mrgn = row.COSTO + row.Mrgn;
+          let auxDist = cp_mrgn * row.GDist;
+          auxDist = auxDist / 100;
+          auxDist = auxDist.toFixed(2);
+          let auxSSF = cp_mrgn * row.SSF;
+          auxSSF = auxSSF / 100;
+          auxSSF = auxSSF.toFixed(2);
+          let auxSSV = cp_mrgn * row.SSV;
+          auxSSV = auxSSV / 100;
+          auxSSV = auxSSV.toFixed(2);
+          let auxGV = cp_mrgn * row.GV;
+          auxGV = auxGV / 100;
+          auxGV = auxGV.toFixed(2);
+          let auxGF = row.GF;
+          let auxM = row.M;
+          let auxGOPER = parseFloat(auxDist) + parseFloat(auxSSF) + parseFloat(auxSSV) + parseFloat(auxGV) + parseFloat(auxGF) + parseFloat(auxM);
+          auxGOPER = auxGOPER.toFixed(2);
+          let auxMin = parseFloat(auxGOPER) + parseFloat(row.GCorp) + parseFloat(row.Arr_PF) + parseFloat(row.Int_) + parseFloat(row.Mrgn); 
+          auxMin = auxMin.toFixed(2); 
+          let aux = parseFloat(costo) + parseFloat(auxMin);
+          if (aux === null || aux === undefined) {
+              aux = 0;
+          }
+          if (typeof aux === 'object') {
+            aux = 0; // O cualquier mensaje que prefieras
+          }
+          return (<div className='align-left'>{fNumber(aux.toFixed(2))}</div>);
+        },
+        width:"160px",
+        sortable:true,
+        grow:1,
+      },
+      {
         name: (<button onClick={() => toggleColumnVisibility('MB_DESEABLE_C')}>MB DESEABLE</button>),
-        selector: row => {
+        cell: row => {
           let infla = row.Inflacion;
           let costo = row.COSTO;
           let cp_mrgn = row.COSTO + row.Mrgn;
@@ -599,14 +645,13 @@ const costos = () => {
           auxInf = auxInf / 100;
           auxInf = auxInf.toFixed(2); 
           let aux = parseFloat(auxMin) + parseFloat(auxInf) + parseFloat(row.Proteccion); 
-          aux = aux.toFixed(2); 
           if (aux === null || aux === undefined) {
-            return "No disponible";
+            aux = 0;
           }
           if (typeof aux === 'object') {
-            return "Sin Datos"; // O cualquier mensaje que prefieras
+            aux = 0; // O cualquier mensaje que prefieras
           }
-          return ( <a onClick={()=>bMDE(row.id)}>{aux}</a>);
+          return (<div className='align-left'><a onClick={()=>bMDE(row.id)}>{fNumber(aux.toFixed(2))}</a></div>);
         },
         width:"130px",
         sortable:true,
@@ -614,7 +659,7 @@ const costos = () => {
       },
       {
         name: 'INFLACIÓN',
-        selector: row => {
+        cell: row => {
           let infla = row.Inflacion;
           let costo = row.COSTO;
           let cp_mrgn = row.COSTO + row.Mrgn;
@@ -637,14 +682,13 @@ const costos = () => {
           let aux = parseFloat(auxGOPER) + parseFloat(costo);
           aux = aux * infla; 
           aux = aux / 100; 
-          aux = aux.toFixed(2); 
           if (aux === null || aux === undefined) {
-              return "No disponible";
+            aux = 0;
           }
           if (typeof aux === 'object') {
-            return "Sin Datos"; // O cualquier mensaje que prefieras
+            aux = 0; // O cualquier mensaje que prefieras
           }
-          return aux;
+          return (<div className='align-left'>{fNumber(aux.toFixed(2))}</div>);
         },
         width:"130px",
         sortable:true,
@@ -653,16 +697,15 @@ const costos = () => {
       },
       {
         name: 'PROTECCIÓN',
-        selector: row => {
+        cell: row => {
             let aux = row.Proteccion;
-            aux = aux.toFixed(2)
             if (aux === null || aux === undefined) {
-                return "No disponible";
+              aux = 0;
             }
             if (typeof aux === 'object') {
-            return "Sin Datos"; // O cualquier mensaje que prefieras
+              aux = 0; // O cualquier mensaje que prefieras
             }
-            return aux;
+            return (<div className='align-left'>{fNumber(aux.toFixed(2))}</div>);
         },
         width:"130px",
         sortable:true,
@@ -670,43 +713,9 @@ const costos = () => {
         visible:columnVisibility.MB_DESEABLE_C,
       },
       {
-        name: 'PRECIO OPER.',
-        selector: row => {
-          let costo = row.COSTO;
-          let cp_mrgn = row.COSTO + row.Mrgn;
-          let auxDist = cp_mrgn * row.GDist;
-          auxDist = auxDist / 100;
-          auxDist = auxDist.toFixed(2);
-          let auxSSF = cp_mrgn * row.SSF;
-          auxSSF = auxSSF / 100;
-          auxSSF = auxSSF.toFixed(2);
-          let auxSSV = cp_mrgn * row.SSV;
-          auxSSV = auxSSV / 100;
-          auxSSV = auxSSV.toFixed(2);
-          let auxGV = cp_mrgn * row.GV;
-          auxGV = auxGV / 100;
-          auxGV = auxGV.toFixed(2);
-          let auxGF = row.GF;
-          let auxM = row.M;
-          let auxGOPER = parseFloat(auxDist) + parseFloat(auxSSF) + parseFloat(auxSSV) + parseFloat(auxGV) + parseFloat(auxGF) + parseFloat(auxM);
-          auxGOPER = auxGOPER.toFixed(2);
-          let aux = parseFloat(costo) + parseFloat(auxGOPER);
-          aux = aux.toFixed(2);
-          if (aux === null || aux === undefined) {
-              return "No disponible";
-          }
-          if (typeof aux === 'object') {
-            return "Sin Datos"; // O cualquier mensaje que prefieras
-          }
-          return aux;
-        },
-        width:"180px",
-        sortable:true,
-        grow:1,
-      },
-      {
         name: 'PRECIO MB DESEABLE',
-        selector: row => {
+        cell: row => {
+          let infla = row.Inflacion;
           let costo = row.COSTO;
           let cp_mrgn = row.COSTO + row.Mrgn;
           let auxDist = cp_mrgn * row.GDist;
@@ -727,17 +736,37 @@ const costos = () => {
           auxGOPER = auxGOPER.toFixed(2);
           let auxMin = parseFloat(auxGOPER) + parseFloat(row.GCorp) + parseFloat(row.Arr_PF) + parseFloat(row.Int_) + parseFloat(row.Mrgn); 
           auxMin = auxMin.toFixed(2); 
-          let aux = parseFloat(costo) + parseFloat(auxMin);
-          aux = aux.toFixed(2)
+          let auxInf = parseFloat(auxGOPER) + parseFloat(costo);
+          auxInf = auxInf * infla; 
+          auxInf = auxInf / 100;
+          auxInf = auxInf.toFixed(2);
+          let mbD = parseFloat(auxMin) + parseFloat(auxInf) + parseFloat(row.Proteccion); 
+          let aux = parseFloat(costo) + parseFloat(mbD);
           if (aux === null || aux === undefined) {
-              return "No disponible";
+            aux = 0;
           }
           if (typeof aux === 'object') {
-          return "Sin Datos"; // O cualquier mensaje que prefieras
+            aux = 0; // O cualquier mensaje que prefieras
           }
-          return aux;
+          return (<div className='align-left'>{fNumber(aux.toFixed(2))}</div>);
         },
         width:"180px",
+        sortable:true,
+        grow:1,
+      },
+      shCol && {
+        name: 'MRG N PROM',
+        selector: row => {
+            const aux = row.Mrgn;
+            if (aux === null || aux === undefined) {
+                return "No disponible";
+            }
+            if (typeof aux === 'object') {
+            return "Sin Datos"; // O cualquier mensaje que prefieras
+            }
+            return aux;
+        },
+        width:"80px",
         sortable:true,
         grow:1,
       },
@@ -816,15 +845,6 @@ const costos = () => {
                         periodoSel={periodoSel}
                     />
                 </CCol>
-                <CCol xs={6} md={2}>
-                  <label>TIPO</label>
-                  <CFormSelect aria-label="Selecciona" value={TxtTIPO} onChange={mCambioTipo} className='mt-1'>
-                      <option value="-">Selecciona...</option>
-                      <option value="REAL" >REAL</option>
-                      <option value="PPTO" >PPTO</option>
-                      <option value="PPTO2" >PPTO2</option>
-                  </CFormSelect> 
-                </CCol>
                 <CCol xs={6} md={2} lg={2} className='mt-4'>
                     <CButton color='primary' onClick={bCostos} style={{'color':'white'}} > 
                         <CIcon icon={cilSearch} />
@@ -838,12 +858,20 @@ const costos = () => {
                   </CButton>
                 </CCol>
             </CRow>
-            <CRow className='mt-2 mb-2'>
+            <CRow className='mt-3 mb-2'>
               <CCol xs={12} md={3}>
                 <CCol xs={12} md={12}>
                   <BuscadorDT value={vBPlanta} onChange={onFindBusqueda} onSearch={fBusqueda} />
                 </CCol>
               </CCol>
+              {shBtnB && (
+                <CCol xs={6} md={2}>
+                  <Plantas  
+                      mCambio={mCambio}
+                      plantasSel={plantasSel}
+                  />
+                </CCol>
+                )}
             </CRow>
             <CRow className='mt-2 mb-2'>
                 <CCol>

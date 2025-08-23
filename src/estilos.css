@@ -150,5 +150,20 @@ h3, label{
 	display: table-cell;
 	transition: all 0.3s ease-in-out;
 }
+.align-left {
+	width: 100%;
+	text-align: left !important;
+	justify-content: center !important;
+	display: flex;
+	align-items: center;
+}
+.mt6{
+	margin-top:2%
+}
+.me1{
+	margin-left:5%
+}
+.dropdown-toggle::after{
+	content: none;
+}
   
-

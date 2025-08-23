@@ -33,6 +33,7 @@ const UpdateProd = () => {
     useEffect(() => {
         getUVez_()
     }, []);
+    
     const getUVez_ = async()=>{
         try{
             const ocList = await getUVez();
@@ -90,7 +91,7 @@ const UpdateProd = () => {
                 console.log(response.data);
                 //Swal.fire("CORRECTO", "Se Agrego Correctamente", "success");
                 //setPrecios2(true);
-                //setSPrecios2();
+                setSPrecios2();
             } 
             catch(error)
             {

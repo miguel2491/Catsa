@@ -10,10 +10,11 @@ import { getPedidos } from '../../../Utilidades/Funciones';
 import Plantas from '../../base/parametros/Plantas';
 import '../../../estilos.css';
 const PedidosC = () => {
+  //----------- CONSTANTES --------------------------------
   const [plantasSel, setPlantas] = useState('');
   const [data, setData] = useState([]);
   const [visibleRange, setVisibleRange] = useState(null);
-
+  //----------- PRINCIPALES --------------------------------
   const mCambio = async (event) => {
     const selectedPlanta = event.target.value;
     setPlantas(selectedPlanta);
@@ -29,9 +30,18 @@ const PedidosC = () => {
       const pedidos = await getPedidos(selectedPlanta);
       console.log(pedidos)
       const transformedEvents = pedidos.map((pedido) => ({
-        title: pedido.NoCliente + "-" + pedido.Cliente+" ("+pedido.M3Viaje+"m3)",
+        title: pedido.Cliente+" ("+pedido.CantidadM3+"m3)"+" "+pedido.Asesor,
         date: pedido.FechaHoraPedido,
         color: pedido.activo === true ? 'blue' : pedido.Archivos === true ? 'grey' : 'red',
+        idPedido:pedido.IdPedido,
+        archivo:pedido.Archivos,
+        asesor:pedido.Asesor,
+        cliente:pedido.Cliente,
+        cantidadM3:pedido.CantidadM3,
+        fecha:pedido.FechaHoraPedido,
+        m3viaje:pedido.M3Viaje,
+        noCliente:pedido.NoCliente,
+        activo:pedido.activo
       }));
       setData(transformedEvents);
     } catch (error) {
@@ -40,7 +50,6 @@ const PedidosC = () => {
       setData([]);
     }
   };
-
   useEffect(() => {
     const today = new Date();
     const startOfWeek = new Date(today.setDate(today.getDate() - today.getDay())); // Lunes de la semana actual
@@ -51,7 +60,36 @@ const PedidosC = () => {
       end: endOfWeek.toISOString().split('T')[0],
     });
   }, [data]);
-
+  //----------- FUNCIONES --------------------------------100501143
+  const infoC = (c)=>{
+    const event = c.event;
+    const { idPedido, asesor, cliente, noCliente, cantidadM3, m3viaje, fecha, archivo, activo } = event._def.extendedProps;
+    let arch = archivo == true ? 'Aprobado y Con Pago':' ';
+    let fca = fecha.split("T");
+    let status = activo == true ? 'Programado':'Sin Programar'; 
+    let estatus = arch + " "+status;
+    console.log(event._def.extendedProps)
+    Swal.fire({
+      title: "<strong>Información</strong>",
+      icon: "info",
+      html: `
+        <p>Pedido <b>`+idPedido+`</b></p>`+
+        `<p>Cliente <b>`+noCliente+` `+cliente+`</b></p>`+
+        `<p>Asesor <b>`+asesor+`</b></p>`+
+        `<p>Cantidad <b>`+cantidadM3+`</b></p>`+
+        `<p>Fecha <b>`+fca[0]+`</b></p>`+
+        `<p>Estatus <b>`+estatus+`</b></p>`
+        ,
+      showCloseButton: true,
+      showCancelButton: false,
+      focusConfirm: false,
+      confirmButtonText: `
+        <i class="fa fa-thumbs-up"></i> Ok
+      `,
+      confirmButtonAriaLabel: "Thumbs up, great!",
+    });
+  };
+  //----------- ---------- --------------------------------
   return (
     <>
       <CContainer>
@@ -71,6 +109,7 @@ const PedidosC = () => {
               events={data}
               eventMinHeight={120}
               eventOverlap={true}
+              eventClick={infoC}
               headerToolbar={{
                 left: 'prev,next today', // Botones para navegar entre las fechas
                 center: 'title', // El título en el centro

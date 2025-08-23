@@ -5,18 +5,22 @@ const Dashboard = React.lazy(() => import('./views/dashboard/Dashboard'))
 const Helper = React.lazy(() => import('./views/dashboard/Help'))
 //=========================================> VENTAS <===================================
 const LCotizaciones = React.lazy(() => import('./views/ventas/LCotizaciones'))
-const LPreCotizaciones = React.lazy(() => import('./views/ventas/LPreCotizaciones'))
+const LPreCotizaciones = React.lazy(() => import('./views/ventas/PreCotizaciones/LPreCotizaciones'))
 const Cotizador = React.lazy(() => import('./views/ventas/Cotizador'))
 const RCartera = React.lazy(() => import('./views/ventas/Cartera'))
 const AddObjCom = React.lazy(() => import('./views/ventas/ObjCom/AddObjCom'))
+const PrecProm = React.lazy(() => import('./views/ventas/PreProm/precioPromedio'))
+const HisClie = React.lazy(() => import('./views/ventas/HisClie/hisClie'))
 //=========================================> OPERACIONES <===============================
 const RCicat = React.lazy(() => import('./views/cicat/Resumen/Resumen'))
 const RemiFal = React.lazy(() => import('./views/cicat/Remisiones/RemiFal'))
+const Excesos = React.lazy(() => import('./views/cicat/Remisiones/Exceso'))
 const OSimulador = React.lazy(() => import('./views/Operaciones/Simulador/Simulador'))
 const OCompraMan = React.lazy(() => import('./views/Operaciones/Mantenimiento/OrdenCompra/OCompra'))
 const ReportesOC = React.lazy(() => import('./views/Operaciones/Mantenimiento/OrdenCompra/ReporteOC'))
 const PCancelados = React.lazy(() => import('./views/Operaciones/Pedidos/Cancelados'))
 const PCanceladosD = React.lazy(() => import('./views/Operaciones/Pedidos/DCancelados'))
+const RPCancelados = React.lazy(() => import('./views/Operaciones/Pedidos/RPCancelados'))
 //=========================================> LOGISTICA <================================
 const LPedidos = React.lazy(() => import('./views/logistica/LPedidos'))
 const PLinea = React.lazy(() => import('./views/logistica/PLinea'))
@@ -36,9 +40,11 @@ const RComision = React.lazy(() => import('./views/reportes/RComision'))
 const RProyeccion = React.lazy(() => import('./views/reportes/RProyeccion'))
 const RProductosV = React.lazy(() => import('./views/reportes/RProductosV'))
 const RObjCom = React.lazy(() => import('./views/reportes/ObjCom'))
+const RBombas = React.lazy(() => import('./views/reportes/RBombas'))
 //=========================================> Calidad <===================================
 const CostosPV = React.lazy(() => import('./views/Calidad/CostosPV'))
 const Formulaciones = React.lazy(() => import('./views/Calidad/Formulaciones'))
+const CLote = React.lazy(() => import('./views/Calidad/CLote'))
 //=========================================> EXTRAS <===================================
 const PreCierre = React.lazy(() => import('./views/utils/PreCierre'))
 const InterfazInt = React.lazy(() => import('./views/utils/InterfazInt'))
@@ -51,6 +57,7 @@ const CatObjCom = React.lazy(() => import('./views/Admin/ObjCom/Categoria'))
 const PlaObjCom = React.lazy(() => import('./views/Admin/ObjCom/PlantaObjCom'))
 const ECostos = React.lazy(() => import('./views/Admin/Costos/costos'))
 const CTRef = React.lazy(() => import('./views/Admin/Costos/CRef'))
+const LibUsuario = React.lazy(() => import('./views/Admin/Usuarios/LibUsuario'))
 //==================================================================================================================================
 
 const routes = [
@@ -65,14 +72,18 @@ const routes = [
   { path: '/reportes/RComision', name: 'Comisiones', element:RComision },
   { path: '/ventas/Cartera', name: 'Cartera', element:RCartera },
   { path: '/ventas/ObjCom', name: 'ObjCom', element:AddObjCom },
+  { path: '/ventas/precioPromedio', name: 'PrecioPromedio', element:PrecProm },
+  { path: '/ventas/hisClie', name: 'HistoricoClientes', element:HisClie },
   { path: '/reportes/RepObjCom', name: 'RObjCom', element:RObjCom },
   //------------------------------> OPERACIONES <------------------------------------------
   { path: '/Cicat/Resumen', name: 'Resumen', element:RCicat },
   { path: '/Cicat/Remisiones', name: 'Remisiones', element:RemiFal },
+  { path: '/Cicat/Exceso', name: 'Exceso', element:Excesos },
   { path: '/Operaciones/Simulador', name: 'Simulador', element:OSimulador },
   { path: '/Operaciones/Pedidos/Cancelados', name: 'Pedidos', element:PCancelados },
   { path: '/Operaciones/Pedidos/DCancelados/:id/:tipo/:idTicket', name: 'PedidosD', element:PCanceladosD },
   { path: '/Operaciones/Mantenimiento/ReporteOC', name: 'ReportesOC', element:ReportesOC },
+  { path: '/Operaciones/Pedidos/RPCancelados', name: 'RPedidosC', element:RPCancelados },
   //------------------------------> MANTENIMIENTO <----------------------------------------
   { path: '/Operaciones/Mantenimiento/OrdenCompra', name: 'OCompra', element:OCompraMan },
   //------------------------------> LOGISTICA <--------------------------------------------
@@ -95,17 +106,22 @@ const routes = [
   { path: '/utils/UpdateMB', name: 'UpdateMB', element: UpdateMB },  
   { path: '/utils/QR', name: 'QR', element: QR },
   { path: '/permisos/Permisos', name: 'Permisos', element: Permisos},
+  //--------------------------------------> CALIDAD <-------------------------------
   { path: '/Calidad/CostosPV', name: 'Calidad', element: CostosPV},
   { path: '/Calidad/Formulaciones', name: 'Calidad', element: Formulaciones},
+  { path: '/Calidad/CLote', name: 'Crear Lote', element: CLote},
   //--------------------------------------------> EXTRAS <-------------------------------
   { path: '/Admin/Usuarios', name: 'Incidencias', element: Incidencias},
   { path: '/Admin/Catalogos/Categorias', name: 'CategoriaOC', element: CatObjCom},
   { path: '/Admin/Catalogos/PlaObjCom', name: 'PlaOC', element: PlaObjCom},
   { path: '/Admin/Costos', name: 'ECostos', element: ECostos},
   { path: '/Admin/Catalogos/REF', name: 'CRef', element: CTRef},
+  { path: '/Admin/LiberarUsuario', name: 'LibUsuario', element: LibUsuario},
   //--------------------------------------------> REPORTES <-------------------------------
   { path: '/reportes/RProyeccion', name: 'Proyeccion', element:RProyeccion },
   { path: '/reportes/RProductosV', name: 'RProductosV', element:RProductosV },
+  { path: '/reportes/RBombas', name: 'RBombas', element:RBombas },
+  
 ]
 
 export default routes

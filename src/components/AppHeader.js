@@ -1,10 +1,11 @@
-import React, { useEffect, useRef } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { NavLink } from 'react-router-dom'
 import { useSelector, useDispatch } from 'react-redux'
 import Cookies from 'universal-cookie'
 import { useNavigate } from 'react-router-dom';
-
+import { getNotificaciones } from '../Utilidades/Funciones';
 import {
+  CBadge,
   CContainer,
   CDropdown,
   CDropdownItem,
@@ -41,6 +42,8 @@ const AppHeader = () => {
   const dispatch = useDispatch()
   const sidebarShow = useSelector((state) => state.sidebarShow)
   const navigate = useNavigate();
+  const [showList, setShowList] = useState(false)
+  const [notifications, setNotificaciones] = useState([])
 
   useEffect(() => {
     document.addEventListener('scroll', () => {
@@ -49,12 +52,25 @@ const AppHeader = () => {
     })
   }, [])
 
+  useEffect(() => {
+    const getNotif = async()=>{
+      const res = await getNotificaciones();
+      if(res)
+      {
+       setNotificaciones(res) 
+      }
+    }
+    getNotif()
+  },[])
+
   const navDash = () => {
     navigate('/dashboard');
   }
   const navHelp = () => {
     navigate('/help');
   }
+
+  const toggleList = () => setShowList(!showList)
 
   return (
     <CHeader position="sticky" className="mb-4 p-0" ref={headerRef}>
@@ -81,9 +97,55 @@ const AppHeader = () => {
           </CNavItem>
         </CHeaderNav>
         <CHeaderNav>
-          <div>
-            <AppBell />
-          </div>
+        <CDropdown className="position-relative">
+        <CDropdownToggle color="link" className="position-relative p-0 border-0">
+          <CIcon icon={cilBell} size="lg" />
+          {notifications.length > 0 && (
+            <CBadge
+              color="info"
+              shape="rounded-pill"
+              style={{
+                position: 'absolute',
+                top: '-5px',
+                right: '-8px',
+                fontSize: '0.6rem',
+              }}
+            >
+              {notifications.length}
+            </CBadge>
+          )}
+        </CDropdownToggle>
+
+        <CDropdownMenu
+          className="pt-0"
+          placement="bottom-end"
+          style={{
+            minWidth: '250px',
+            maxHeight: '300px',
+            overflowY: 'auto',
+            fontSize: '0.9rem',
+          }}
+        >
+          <ul style={{ listStyle: 'none', padding: '10px', margin: 0 }}>
+            {notifications.length > 0 ? (
+              notifications.map((noti, index) => (
+                <li
+                  key={index}
+                  style={{
+                    padding: '5px 0',
+                    borderBottom:
+                      index < notifications.length - 1 ? '1px solid #eee' : 'none',
+                  }}
+                >
+                  {noti.accion}
+                </li>
+              ))
+            ) : (
+              <li style={{ padding: '5px 0' }}>No hay notificaciones</li>
+            )}
+          </ul>
+        </CDropdownMenu>
+      </CDropdown>
         </CHeaderNav>
         <CHeaderNav>
           <li className="nav-item py-1">

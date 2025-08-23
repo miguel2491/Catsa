@@ -175,7 +175,7 @@ export async function getNotificaciones()
             },
         };
         //------------------------------------------------------------------------------------------------------------------------------------------------------
-        const response = await axios.get(baseUrl+'Login/GetNotificaciones/'+cookies.get('Usuario'), confi_ax);
+        const response = await axios.get(baseUrl+'Administracion/getBitacoraNot/'+cookies.get('Usuario'), confi_ax);
         if (response.data && response.data.length > 0) {
             const obj = response.data;
             if(obj.length > 0)
@@ -783,6 +783,32 @@ export async function delPlaOC(id) {
         };
         //------------------------------------------------------------------------------------------------------------------------------------------------------
         const response = await axios.delete(baseUrl+'Comercial/GetDeleteObjComPla/'+id, confi_ax);
+        if (response.data && response.data.length > 0) {
+            const obj = response.data;
+            if(obj.length > 0)
+            {
+                return obj;
+            }else{return false}
+        }else{return false}
+    } 
+    catch(error)
+    {
+        return false
+    }
+}
+export async function getConcretos() {
+    try
+    {
+        let confi_ax = {
+            headers:
+            {
+                'Cache-Control': 'no-cache',
+                'Content-Type': 'application/json',
+                "Authorization": "Bearer "+cookies.get('token'),
+            },
+        };
+        //------------------------------------------------------------------------------------------------------------------------------------------------------
+        const response = await axios.get(baseUrl+'Catalogo/GetConcreto', confi_ax);
         if (response.data && response.data.length > 0) {
             const obj = response.data;
             if(obj.length > 0)
@@ -1545,9 +1571,144 @@ export async function getPV(FI, FF, PL) {
         return false
     }
 }
+export async function getPC(FI, FF) {
+    try
+    {
+        let confi_ax = {
+            headers:
+            {
+                'Cache-Control': 'no-cache',
+                'Content-Type': 'application/json',
+                "Authorization": "Bearer "+cookies.get('token'),
+            },
+        };
+        const fcaI = FormatoFca(FI);
+        const fcaF = FormatoFca(FF);
+        //------------------------------------------------------------------------------------------------------------------------------------------------------
+        const response = await axios.get(baseUrl+'Operaciones/RepCancelados/'+fcaI+','+fcaF, confi_ax);
+        if (response.data && response.data.length > 0) {
+            const obj = response.data;
+            if(obj.length > 0)
+            {
+                return obj;
+            }else{return false}
+        }else{return false}
+    } 
+    catch(error)
+    {
+        return false
+    }
+}
+export async function getCl(planta) {
+    try
+    {
+        let confi_ax = {
+            headers:
+            {
+                'Cache-Control': 'no-cache',
+                'Content-Type': 'application/json',
+                "Authorization": "Bearer "+cookies.get('token'),
+            },
+        };
+        //------------------------------------------------------------------------------------------------------------------------------------------------------
+        const response = await axios.get(baseUrl+'Comercial/GetHistorialClientes/'+planta, confi_ax);
+        if (response.data && response.data.length > 0) {
+            const obj = response.data;
+            if(obj.length > 0)
+            {
+                return obj;
+            }else{return false}
+        }else{return false}
+    } 
+    catch(error)
+    {
+        return false
+    }
+}
+export async function getObra(nc) {
+    try
+    {
+        let confi_ax = {
+            headers:
+            {
+                'Cache-Control': 'no-cache',
+                'Content-Type': 'application/json',
+                "Authorization": "Bearer "+cookies.get('token'),
+            },
+        };
+        //------------------------------------------------------------------------------------------------------------------------------------------------------
+        const response = await axios.get(baseUrl+'Comercial/GetHistorialClientesObra/'+nc, confi_ax);
+        if (response.data && response.data.length > 0) {
+            const obj = response.data;
+            if(obj.length > 0)
+            {
+                return obj;
+            }else{return false}
+        }else{return false}
+    } 
+    catch(error)
+    {
+        return false
+    }
+}
+//==================================================================================== ALMACÉN==================================================================================================
+export async function getAlmacen(FI, FF) {
+    try
+    {
+        let confi_ax = {
+            headers:
+            {
+                'Cache-Control': 'no-cache',
+                'Content-Type': 'application/json',
+                "Authorization": "Bearer "+cookies.get('token'),
+            },
+        };
+        const fcaI = FormatoFca(FI);
+        const fcaF = FormatoFca(FF);
+        //------------------------------------------------------------------------------------------------------------------------------------------------------
+        const response = await axios.get(baseUrl+'Operaciones/GetAlmacen/'+fcaI+','+fcaF, confi_ax);
+        if (response.data && response.data.length > 0) {
+            const obj = response.data;
+            if(obj.length > 0)
+            {
+                return obj;
+            }else{return false}
+        }else{return false}
+    } 
+    catch(error)
+    {
+        return false
+    }
+}
+export async function delAlmacen(id, remision, planta) {
+    try
+    {
+        let confi_ax = {
+            headers:
+            {
+                'Cache-Control': 'no-cache',
+                'Content-Type': 'application/json',
+                "Authorization": "Bearer "+cookies.get('token'),
+            },
+        };
+        //------------------------------------------------------------------------------------------------------------------------------------------------------
+        const response = await axios.get(baseUrl+'Operaciones/DelAlmacen/'+id+','+remision+','+planta, confi_ax);
+        if (response.data && response.data.length > 0) {
+            const obj = response.data;
+            if(obj.length > 0)
+            {
+                return obj;
+            }else{return false}
+        }else{return false}
+    } 
+    catch(error)
+    {
+        return false
+    }
+}
 //****************************************************************************************************************************************************************************** */
 // CALIDAD
-    //---ADMIN COSTOS PV
+//--->ADMIN COSTOS PV
 export async function getCostosPV(planta, FI) {
     try
     {
@@ -1576,6 +1737,301 @@ export async function getCostosPV(planta, FI) {
         return false
     }
 }
+//--->LOTE
+export async function getMuestreo(planta, remision, tipo) {
+    try
+    {
+        let confi_ax = {
+            headers:
+            {
+                'Cache-Control': 'no-cache',
+                'Content-Type': 'application/json',
+                "Authorization": "Bearer "+cookies.get('token'),
+            },
+        };
+        //------------------------------------------------------------------------------------------------------------------------------------------------------
+        const response = await axios.get(baseUrl+'Calidad/GetMuestreo/'+planta+','+remision+','+tipo, confi_ax);
+        if (response.data && response.data.length > 0) {
+            const obj = response.data;
+            if(obj.length > 0)
+            {
+                return obj;
+            }else{return false}
+        }else{return false}
+    } 
+    catch(error)
+    {
+        return false
+    }
+}
+export async function getTipoMuestra(planta, remision, tipo) {
+    try
+    {
+        let confi_ax = {
+            headers:
+            {
+                'Cache-Control': 'no-cache',
+                'Content-Type': 'application/json',
+                "Authorization": "Bearer "+cookies.get('token'),
+            },
+        };
+        //------------------------------------------------------------------------------------------------------------------------------------------------------
+        const response = await axios.get(baseUrl+'Calidad/GetTipoMuestra/'+planta+','+remision+','+tipo, confi_ax);
+        if (response.data && response.data.length > 0) {
+            const obj = response.data;
+            if(obj.length > 0)
+            {
+                return obj;
+            }else{return false}
+        }else{return false}
+    } 
+    catch(error)
+    {
+        return false
+    }
+}
+export async function getRemision(planta, remision, descPlanta, QTYDia, QTYAc, PesoT) {
+    try
+    {
+        let confi_ax = {
+            headers:
+            {
+                'Cache-Control': 'no-cache',
+                'Content-Type': 'application/json',
+                "Authorization": "Bearer "+cookies.get('token'),
+            },
+        };
+        //------------------------------------------------------------------------------------------------------------------------------------------------------
+        const response = await axios.get(baseUrl+'Calidad/GetRemision/'+planta+','+remision+','+descPlanta+','+QTYDia+','+QTYAc+','+PesoT, confi_ax);
+        if (response.data && response.data.length > 0) {
+            const obj = response.data;
+            if(obj.length > 0)
+            {
+                return obj;
+            }else{return false}
+        }else{return false}
+    } 
+    catch(error)
+    {
+        return false
+    }
+}
+export async function getConsumos(planta, remision, QTYDia) {
+    try
+    {
+        let confi_ax = {
+            headers:
+            {
+                'Cache-Control': 'no-cache',
+                'Content-Type': 'application/json',
+                "Authorization": "Bearer "+cookies.get('token'),
+            },
+        };
+        //------------------------------------------------------------------------------------------------------------------------------------------------------
+        const response = await axios.get(baseUrl+'Calidad/GetConsumos/'+planta+','+remision+','+QTYDia, confi_ax);
+        if (response.data && response.data.length > 0) {
+            const obj = response.data;
+            if(obj.length > 0)
+            {
+                return obj;
+            }else{return false}
+        }else{return false}
+    } 
+    catch(error)
+    {
+        return false
+    }
+}
+export async function getMurvyca(planta, remision, descPlanta) {
+    try
+    {
+        let confi_ax = {
+            headers:
+            {
+                'Cache-Control': 'no-cache',
+                'Content-Type': 'application/json',
+                "Authorization": "Bearer "+cookies.get('token'),
+            },
+        };
+        //------------------------------------------------------------------------------------------------------------------------------------------------------
+        const response = await axios.get(baseUrl+'Calidad/GetMurvyca/'+planta+','+remision+','+descPlanta, confi_ax);
+        if (response.data && response.data.length > 0) {
+            const obj = response.data;
+            if(obj.length > 0)
+            {
+                return obj;
+            }else{return false}
+        }else{return false}
+    } 
+    catch(error)
+    {
+        return false
+    }
+}
+export async function GetCalendarMR(remision, planta) {
+    try
+    {
+        let confi_ax = {
+            headers:
+            {
+                'Cache-Control': 'no-cache',
+                'Content-Type': 'application/json',
+                "Authorization": "Bearer "+cookies.get('token'),
+            },
+        };
+        //------------------------------------------------------------------------------------------------------------------------------------------------------
+        const response = await axios.get(baseUrl+'Calidad/GetCalendarioMR/'+planta+','+remision, confi_ax);
+        if (response.data && response.data.length > 0) {
+            const obj = response.data;
+            if(obj.length > 0)
+            {
+                return obj;
+            }else{return false}
+        }else{return false}
+    } 
+    catch(error)
+    {
+        return false
+    }
+}
+export async function GetCalendarCilMR(remision, planta) {
+    try
+    {
+        let confi_ax = {
+            headers:
+            {
+                'Cache-Control': 'no-cache',
+                'Content-Type': 'application/json',
+                "Authorization": "Bearer "+cookies.get('token'),
+            },
+        };
+        //------------------------------------------------------------------------------------------------------------------------------------------------------
+        const response = await axios.get(baseUrl+'Calidad/GetCalendarioCilMR/'+planta+','+remision, confi_ax);
+        if (response.data && response.data.length > 0) {
+            const obj = response.data;
+            if(obj.length > 0)
+            {
+                return obj;
+            }else{return false}
+        }else{return false}
+    } 
+    catch(error)
+    {
+        return false
+    }
+}
+export async function GetCalendarCilindro(remision, planta) {
+    try
+    {
+        let confi_ax = {
+            headers:
+            {
+                'Cache-Control': 'no-cache',
+                'Content-Type': 'application/json',
+                "Authorization": "Bearer "+cookies.get('token'),
+            },
+        };
+        //------------------------------------------------------------------------------------------------------------------------------------------------------
+        const response = await axios.get(baseUrl+'Calidad/GetCalendarioCilindro/'+planta+','+remision, confi_ax);
+        if (response.data && response.data.length > 0) {
+            const obj = response.data;
+            if(obj.length > 0)
+            {
+                return obj;
+            }else{return false}
+        }else{return false}
+    } 
+    catch(error)
+    {
+        return false
+    }
+}
+export async function GetCalendarCubo(remision, planta) {
+    try
+    {
+        let confi_ax = {
+            headers:
+            {
+                'Cache-Control': 'no-cache',
+                'Content-Type': 'application/json',
+                "Authorization": "Bearer "+cookies.get('token'),
+            },
+        };
+        //------------------------------------------------------------------------------------------------------------------------------------------------------
+        const response = await axios.get(baseUrl+'Calidad/GetCalendarioCubo/'+planta+','+remision, confi_ax);
+        if (response.data && response.data.length > 0) {
+            const obj = response.data;
+            if(obj.length > 0)
+            {
+                return obj;
+            }else{return false}
+        }else{return false}
+    } 
+    catch(error)
+    {
+        return false
+    }
+}
+export async function suLote(datos, tipo) {
+    try
+    {
+        let confi_ax = {
+            headers:
+            {
+                'Cache-Control': 'no-cache',
+                'Content-Type': 'application/json',
+                "Authorization": "Bearer "+cookies.get('token'),
+            },
+        };
+        let url = tipo == 'MC' ? baseUrl+'Calidad/suMC':baseUrl+'Calidad/suMYC';
+        const fDMCC = {
+            ...datos,
+            Usuario:cookies.get('Usuario')
+        };
+        console.log(fDMCC)
+        //------------------------------------------------------------------------------------------------------------------------------------------------------
+        const response = await axios.post(url,fDMCC, confi_ax);
+        if (response.data && response.data.length > 0) {
+            const obj = response.data;
+            if(obj.length > 0)
+            {
+                return obj;
+            }else{return false}
+        }else{return false}
+    } 
+    catch(error)
+    {
+        return false
+    }
+}
+export async function suCal(datos, tipo) {
+    try
+    {
+        let confi_ax = {
+            headers:
+            {
+                'Cache-Control': 'no-cache',
+                'Content-Type': 'application/json',
+                "Authorization": "Bearer "+cookies.get('token'),
+            },
+        };
+        let vurl = tipo == 'CU' ? baseUrl+'Calidad/suCalCU':baseUrl+'Calidad/suCalCI';
+        //------------------------------------------------------------------------------------------------------------------------------------------------------
+        const response = await axios.post(vurl,datos, confi_ax);
+        if (response.data && response.data.length > 0) {
+            const obj = response.statusText;
+            if(obj == "OK")
+            {
+                return obj;
+            }else{return false}
+        }else{return false}
+    } 
+    catch(error)
+    {
+        return false
+    }
+}
+//-->
 //****************************************************************************************************************************************************************************** */
 // VENTAS
     //---COTIZADOR
@@ -2002,6 +2458,56 @@ export  async function getVolComision(planta,obra)
         return false;
     }    
 }
+export  async function getPreCotizaciones(FcaI, FcaF, Planta)
+{
+    try
+    {
+        let confi_ax = {
+            headers:
+            {
+                'Cache-Control': 'no-cache',
+                'Content-Type': 'application/json',
+                "Authorization": "Bearer "+cookies.get('token'),
+            },
+        };
+        //------------------------------------------------------------------------------------------------------------------------------------------------------
+        const response = await axios.get(baseUrl+'Comercial/GetPreCotizaciones/'+FcaI+","+FcaF+","+cookies.get('Usuario')+","+Planta,confi_ax);
+        var obj = response.data;
+        if(obj.length > 0)
+        {
+            return obj
+        }else{return false}
+    } 
+    catch(error)
+    {
+        return false;
+    }    
+}
+export  async function getPreCotizacion(id)
+{
+    try
+    {
+        let confi_ax = {
+            headers:
+            {
+                'Cache-Control': 'no-cache',
+                'Content-Type': 'application/json',
+                "Authorization": "Bearer "+cookies.get('token'),
+            },
+        };
+        //------------------------------------------------------------------------------------------------------------------------------------------------------
+        const response = await axios.get(baseUrl+'Comercial/GetPreCotizacion/'+id+","+cookies.get("Usuario")+","+"L",confi_ax);
+        var obj = response.data;
+        if(obj.length > 0)
+        {
+            return obj
+        }else{return false}
+    } 
+    catch(error)
+    {
+        return false;
+    }    
+}
 //--
 export async function getClientesCartera(planta) {
     try
@@ -2396,6 +2902,30 @@ export async function setEntradas(planta, FI, FF){
         return false
     }
 }
+export async function setUpdPreCot(datos){
+    try
+    {
+        let confi_ax = {
+            headers:
+            {
+                'Cache-Control': 'no-cache',
+                'Content-Type': 'application/json',
+                "Authorization": "Bearer "+cookies.get('token'),
+            },
+        };
+        //------------------------------------------------------------------------------------------------------------------------------------------------------
+        const response = await axios.post(baseUrl+'Comercial/setPreCot',datos, confi_ax);
+        var obj = response.data;
+        if(obj)
+        {
+            return obj
+        }else{return false}
+    } 
+    catch(error)
+    {
+        return false
+    }
+}
 //---OBJ COMERCIAL
 export async function saveOCAs(data) {
     try
@@ -2503,6 +3033,40 @@ export async function GetObjComVId(id)
         };
         //------------------------------------------------------------------------------------------------------------------------------------------------------
         const response = await axios.get(baseUrl+'Comercial/GetObjComVId/'+id, confi_ax);
+        if (response.data && response.data.length > 0 ) {
+            const obj = response.data;
+            
+            if(obj.length > 0)
+            {
+                return obj;
+            }else{
+                return false
+            }
+        }else{
+            return false
+        }
+    } 
+    catch(error)
+    {
+        console.log(error);
+        return false
+    }
+}
+//---PreciosPromedio
+export async function GetPrecioProm(fcaI,fcaF)
+{
+    try
+    {
+        let confi_ax = {
+            headers:
+            {
+                'Cache-Control': 'no-cache',
+                'Content-Type': 'application/json',
+                "Authorization": "Bearer "+cookies.get('token'),
+            },
+        };
+        //------------------------------------------------------------------------------------------------------------------------------------------------------
+        const response = await axios.get(baseUrl+'Comercial/GetPrecioPromedio/'+fcaI+','+fcaF+','+cookies.get('Usuario'), confi_ax);
         if (response.data && response.data.length > 0 ) {
             const obj = response.data;
             
@@ -2814,7 +3378,7 @@ export async function setMBruto(ejercicio, mes)
             },
         };
         //------------------------------------------------------------------------------------------------------------------------------------------------------
-        const response = await axios.get(baseUrl2+'Administracion/SetMB/'+ejercicio+','+mes, confi_ax);
+        const response = await axios.get(baseUrl+'Administracion/SetMB/'+ejercicio+','+mes, confi_ax);
         var obj = response.data;
         if(obj.length > 0)
         {
@@ -2841,7 +3405,7 @@ export async function getCalendario(mes, periodo, tipo)
             },
         };
         //------------------------------------------------------------------------------------------------------------------------------------------------------
-        const response = await axios.get(baseUrl2+'Catalogo/GetCalendario/'+mes+','+periodo+','+tipo, confi_ax);
+        const response = await axios.get(baseUrl+'Catalogo/GetCalendario/'+mes+','+periodo+','+tipo, confi_ax);
         var obj = response.data;
         if(obj.length > 0)
         {
@@ -2971,7 +3535,7 @@ export async function getPreCierres(Planta, Periodo, Mes) {
             },
         };
         //------------------------------------------------------------------------------------------------------------------------------------------------------
-        const response = await axios.get(baseUrl2+'Operaciones/GetPreCierreMensual/'+Planta+','+Periodo+','+Mes, confi_ax);
+        const response = await axios.get(baseUrl+'Operaciones/GetPreCierreMensual/'+Planta+','+Periodo+','+Mes, confi_ax);
         var obj = response.data;
         if(obj.length > 0)
         {
@@ -3210,6 +3774,35 @@ export async function getUVez(){
         return false;
     }
 }
+export async function getLiberarUsers(usuario,tipo) {
+    try
+    {
+        let confi_ax = {
+            headers:
+            {
+                'Cache-Control': 'no-cache',
+                'Content-Type': 'application/json',
+                "Authorization": "Bearer "+cookies.get('token'),
+            },
+        };
+        //------------------------------------------------------------------------------------------------------------------------------------------------------
+        const response = await axios.get(baseUrl+'Usuarios/GetUsersLiberar/'+usuario+','+tipo, confi_ax);
+        console.log(response);
+        if (response.data && response.data.length > 0) {
+            const obj = response.data;
+            console.log(obj, usuario, tipo);
+
+            if(obj.length > 0)
+            {
+                return obj;
+            }else{return false}
+        }else{return false}
+    } 
+    catch(error)
+    {
+        return false
+    }
+}
 //--------------------
 export async function getResInvCB(material, FI, FF, planta) {
     try
@@ -3378,6 +3971,141 @@ export async function GetObjComGen(mes, periodo)
         if (response.data && response.data.length > 0 ) {
             const obj = response.data;
             
+            if(obj.length > 0)
+            {
+                return obj;
+            }else{
+                return false
+            }
+        }else{
+            return false
+        }
+    } 
+    catch(error)
+    {
+        console.log(error);
+        return false
+    }
+}
+export async function GetUnidades()
+{
+    try
+    {
+        let confi_ax = {
+            headers:
+            {
+                'Cache-Control': 'no-cache',
+                'Content-Type': 'application/json',
+                "Authorization": "Bearer "+cookies.get('token'),
+            },
+        };
+        //------------------------------------------------------------------------------------------------------------------------------------------------------
+        const response = await axios.get(baseUrl+'Operaciones/GetVehiculos', confi_ax);
+        if (response.data && response.data.length > 0 ) {
+            const obj = response.data;            
+            if(obj.length > 0)
+            {
+                return obj;
+            }else{
+                return false
+            }
+        }else{
+            return false
+        }
+    } 
+    catch(error)
+    {
+        console.log(error);
+        return false
+    }
+}
+export async function GetUnidadBitacora(tipo,IdUnidad, FI, FF, planta)
+{
+    try
+    {
+        let confi_ax = {
+            headers:
+            {
+                'Cache-Control': 'no-cache',
+                'Content-Type': 'application/json',
+                "Authorization": "Bearer "+cookies.get('token'),
+            },
+        };
+        const fcaI = FormatoFca(FI);
+        const fcaF = FormatoFca(FF);
+        //------------------------------------------------------------------------------------------------------------------------------------------------------
+        const response = await axios.get(baseUrl+'Operaciones/GetHistorialUnidad/'+tipo+','+IdUnidad+','+fcaI+','+fcaF+','+planta, confi_ax);
+        if (response.data && response.data.length > 0 ) {
+            const obj = response.data;
+            
+            if(obj.length > 0)
+            {
+                return obj;
+            }else{
+                return false
+            }
+        }else{
+            return false
+        }
+    } 
+    catch(error)
+    {
+        console.log(error);
+        return false
+    }
+}
+export async function GetBombas(FI,FF)
+{
+    const fcaI = FormatoFca(FI);
+    const fcaF = FormatoFca(FF);
+    try
+    {
+        let confi_ax = {
+            headers:
+            {
+                'Cache-Control': 'no-cache',
+                'Content-Type': 'application/json',
+                "Authorization": "Bearer "+cookies.get('token'),
+            },
+        };
+        //------------------------------------------------------------------------------------------------------------------------------------------------------
+        const response = await axios.get(baseUrl+'Operaciones/GetBombas/'+fcaI+','+fcaF, confi_ax);
+        if (response.data && response.data.length > 0 ) {
+            const obj = response.data;            
+            if(obj.length > 0)
+            {
+                return obj;
+            }else{
+                return false
+            }
+        }else{
+            return false
+        }
+    } 
+    catch(error)
+    {
+        console.log(error);
+        return false
+    }
+}
+export async function GetBombasD(FI,FF)
+{
+    const fcaI = FormatoFca(FI);
+    const fcaF = FormatoFca(FF);
+    try
+    {
+        let confi_ax = {
+            headers:
+            {
+                'Cache-Control': 'no-cache',
+                'Content-Type': 'application/json',
+                "Authorization": "Bearer "+cookies.get('token'),
+            },
+        };
+        //------------------------------------------------------------------------------------------------------------------------------------------------------
+        const response = await axios.get(baseUrl+'Operaciones/GetBombasD/'+fcaI+','+fcaF+','+cookies.get('Usuario'), confi_ax);
+        if (response.data && response.data.length > 0 ) {
+            const obj = response.data;            
             if(obj.length > 0)
             {
                 return obj;
