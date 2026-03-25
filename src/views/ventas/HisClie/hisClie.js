@@ -64,7 +64,6 @@ const RPHisCli = () => {
             const ocList = await getCl(plantasSelF);
             if(ocList)
             {
-                console.log(ocList)
                 // Actualiza el estado con los nuevos datos
                 setDTCl(ocList);
                 setFileCl(ocList);
@@ -104,7 +103,6 @@ const RPHisCli = () => {
             const ocList = await getObra(n);
             if(ocList)
             {
-                console.log(ocList)
                 // Actualiza el estado con los nuevos datos
                 setDTObra(ocList);
             }

@@ -11,50 +11,50 @@ const baseUrl2S="https://localhost:5001/api/";
 //****************************************************************************************************************************************************************************** */
 // LOGIN
 // =================================================================
-  //             OBTENER TOKEN GENÉRICO
-  // =================================================================
-  export async function GetToken() {
-    const postData = { UserName: "ProCatsa", Password: "ProCatsa2024$." };
-    const confi_ax = {
-    //   headers: {
-    //     "Content-Type": "application/json;charset=UTF-8",
-    //     "Access-Control-Allow-Origin": "*",
-    //   },
-        headers: {
-        "Cache-Control": "no-cache",
-        "Content-Type": "application/json",
-        Authorization: "Bearer " + cookies.get("token"),
-      },
-    };
-    try {
-      const response = await axios.post(baseUrl + "Login/Login", postData, confi_ax);
-      cookies.set("token", response.data, { path: "/" });
-    } catch (error) {
-      console.error("Error obteniendo token", error);
+//             OBTENER TOKEN GENÉRICO
+// =================================================================
+export async function GetToken() {
+const postData = { UserName: "ProCatsa", Password: "ProCatsa2024$." };
+const confi_ax = {
+//   headers: {
+//     "Content-Type": "application/json;charset=UTF-8",
+//     "Access-Control-Allow-Origin": "*",
+//   },
+    headers: {
+    "Cache-Control": "no-cache",
+    "Content-Type": "application/json",
+    Authorization: "Bearer " + cookies.get("token"),
+    },
+};
+try {
+    const response = await axios.post(baseUrl + "Login/Login", postData, confi_ax);
+    cookies.set("token", response.data, { path: "/" });
+} catch (error) {
+    console.error("Error obteniendo token", error);
+}
+}
+export async function  GetUsuarios() {
+let confi_ax = {
+    headers: {
+        'Cache-Control': 'no-cache',
+        'Content-Type': 'application/json'
     }
-  }
-  export async function  GetUsuarios() {
-    let confi_ax = {
-        headers: {
-          'Cache-Control': 'no-cache',
-          'Content-Type': 'application/json'
+};
+try {
+    const response = await axios.post(baseUrl + "Usuarios/GetUsers", confi_ax);
+    if (response.data && response.data.length > 0) {
+        const obj = response.data;
+        if(obj.length > 0)
+        {
+            return obj;
+        }else{
+            return false
         }
-    };
-    try {
-      const response = await axios.post(baseUrl + "Usuarios/GetUsers", confi_ax);
-        if (response.data && response.data.length > 0) {
-            const obj = response.data;
-            if(obj.length > 0)
-            {
-                return obj;
-            }else{
-                return false
-            }
-        }else{return false}
-    } catch (error) {
-      console.error("Ocurrio un Error", error);
-    }
-  }
+    }else{return false}
+} catch (error) {
+    console.error("Ocurrio un Error", error);
+}
+}
 // =================================================================
 //                      INICIAR SESIÓN
 // =================================================================
@@ -248,6 +248,105 @@ export async function makeNotificacion(userDestino, categoria, titulo, desc, url
             {
                 return obj;
             }else{return false}
+        }else{return false}
+    } 
+    catch(error)
+    {
+        return false
+    }
+}
+//****************************************************************************************************************************************************************************** */
+export async function GetPlantas()
+{
+    try
+    {
+        let confi_ax = {
+            headers:
+            {
+                'Cache-Control': 'no-cache',
+                'Content-Type': 'application/json',
+                "Authorization": "Bearer "+cookies.get('token'),
+            },
+        };
+        //------------------------------------------------------------------------------------------------------------------------------------------------------
+        const response = await axios.get(baseUrl+'TReal/GetPlantas', confi_ax);
+        if (response.data) {
+            const obj = response.data;
+            return obj;
+        }else{return false}
+    } 
+    catch(error)
+    {
+        return false
+    }
+}
+export async function GetPLinea(FI,planta)
+{
+    try
+    {
+        let confi_ax = {
+            headers:
+            {
+                'Cache-Control': 'no-cache',
+                'Content-Type': 'application/json',
+                "Authorization": "Bearer "+cookies.get('token'),
+            },
+        };
+        const fcaI = FormatoFca(FI);
+        //------------------------------------------------------------------------------------------------------------------------------------------------------
+        const response = await axios.get(baseUrl+'TReal/GetPedLinea/'+fcaI+','+planta, confi_ax);
+        if (response.data) {
+            const obj = response.data;
+            return obj;
+        }else{return false}
+    } 
+    catch(error)
+    {
+        return false
+    }
+}
+export async function GetPVivosAnt(fi,planta)
+{
+    try
+    {
+        let confi_ax = {
+            headers:
+            {
+                'Cache-Control': 'no-cache',
+                'Content-Type': 'application/json',
+                "Authorization": "Bearer "+cookies.get('token'),
+            },
+        };
+        const fcaI = FormatoFca(fi);
+        //------------------------------------------------------------------------------------------------------------------------------------------------------
+        const response = await axios.get(baseUrl+'TReal/GetPedRemAnt/'+fcaI+','+planta, confi_ax);
+        if (response.data) {
+            const obj = response.data;
+            return obj;
+        }else{return false}
+    } 
+    catch(error)
+    {
+        return false
+    }
+}
+export async function GetPVivos(fi,planta)
+{
+    try
+    {
+        let confi_ax = {
+            headers:
+            {
+                'Cache-Control': 'no-cache',
+                'Content-Type': 'application/json',
+                "Authorization": "Bearer "+cookies.get('token'),
+            },
+        };
+        //------------------------------------------------------------------------------------------------------------------------------------------------------
+        const response = await axios.get(baseUrl+'TReal/GetPedRem/'+planta, confi_ax);
+        if (response.data) {
+            const obj = response.data;
+            return obj;
         }else{return false}
     } 
     catch(error)
@@ -693,7 +792,6 @@ export async function getPlantasOC(mes,periodo) {
         };
         //------------------------------------------------------------------------------------------------------------------------------------------------------
         const response = await axios.get(baseUrl+'Comercial/GetObjComPlaGn/'+mes+','+periodo, confi_ax);
-        console.log(response)
         if (response.data && response.data.length > 0) {
             const obj = response.data;
             if(obj.length > 0)
@@ -720,7 +818,6 @@ export async function getPlantasOCId(planta,mes,periodo) {
         };
         //------------------------------------------------------------------------------------------------------------------------------------------------------
         const response = await axios.get(baseUrl+'Comercial/GetObjComPlanta/'+planta+','+mes+','+periodo, confi_ax);
-        console.log(response)
         if (response.data && response.data.length > 0) {
             const obj = response.data;
             if(obj.length > 0)
@@ -851,6 +948,473 @@ export async function getPedidos(planta) {
         return false
     }
 }
+export async function getPedidosList(planta, FI, FF) {
+    try
+    {
+        let confi_ax = {
+            headers:
+            {
+                'Cache-Control': 'no-cache',
+                'Content-Type': 'application/json',
+                "Authorization": "Bearer "+cookies.get('token'),
+            },
+        };
+        const fcaI = FormatoFca(FI);
+        const fcaF = FormatoFca(FF);
+        //------------------------------------------------------------------------------------------------------------------------------------------------------
+        const response = await axios.get(baseUrl+'Logistica/GetPedidos/'+planta+","+fcaI+","+fcaF+","+cookies.get('Usuario'), confi_ax);
+        if (response.data && response.data.length > 0) {
+            const obj = response.data;
+            if(obj.length > 0)
+            {
+                return obj;
+            }else{return false}
+        }else{return false}
+    } 
+    catch(error)
+    {
+        return false
+    }
+}
+export async function getPedidosCanList(planta, FI, FF) {
+    try
+    {
+        let confi_ax = {
+            headers:
+            {
+                'Cache-Control': 'no-cache',
+                'Content-Type': 'application/json',
+                "Authorization": "Bearer "+cookies.get('token'),
+            },
+        };
+        const fcaI = FormatoFca(FI);
+        const fcaF = FormatoFca(FF);
+        //------------------------------------------------------------------------------------------------------------------------------------------------------
+        const response = await axios.get(baseUrl+'Logistica/GetPedidosCancelados/'+planta+","+fcaI+","+fcaF+","+cookies.get('Usuario'), confi_ax);
+        if (response.data && response.data.length > 0) {
+            const obj = response.data;
+            if(obj.length > 0)
+            {
+                return obj;
+            }else{return false}
+        }else{return false}
+    } 
+    catch(error)
+    {
+        return false
+    }
+}
+export async function getPedidosIncidencia(id) {
+    try
+    {
+        let confi_ax = {
+            headers:
+            {
+                'Cache-Control': 'no-cache',
+                'Content-Type': 'application/json',
+                "Authorization": "Bearer "+cookies.get('token'),
+            },
+        };
+        //------------------------------------------------------------------------------------------------------------------------------------------------------
+        const response = await axios.get(baseUrl+'Logistica/GetPedidosIncidencias/'+id+","+cookies.get('Usuario'), confi_ax);
+        if (response.data && response.data.length > 0) {
+            const obj = response.data;
+            if(obj.length > 0)
+            {
+                return obj;
+            }else{return false}
+        }else{return false}
+    } 
+    catch(error)
+    {
+        return false
+    }
+}
+export async function getPedidosModificaciones(id) {
+    try
+    {
+        let confi_ax = {
+            headers:
+            {
+                'Cache-Control': 'no-cache',
+                'Content-Type': 'application/json',
+                "Authorization": "Bearer "+cookies.get('token'),
+            },
+        };
+        //------------------------------------------------------------------------------------------------------------------------------------------------------
+        const response = await axios.get(baseUrl+'Logistica/GetPedidosModificaciones/'+id+","+cookies.get('Usuario'), confi_ax);
+        if (response.data && response.data.length > 0) {
+            const obj = response.data;
+            if(obj.length > 0)
+            {
+                return obj;
+            }else{return false}
+        }else{return false}
+    } 
+    catch(error)
+    {
+        return false
+    }
+}
+export  async function setPedidoComentario(idPedido, comentario, planta)
+{
+    let usuario = cookies.get('Usuario');
+    let fechaHra = format(new Date(),'yyyy-MM-dd HH:mm:ss');
+    try
+    {
+        let confi_ax = {
+            headers:
+            {
+                'Cache-Control': 'no-cache',
+                'Content-Type': 'application/json',
+                "Authorization": "Bearer "+cookies.get('token'),
+            },
+        };
+        const data = 
+        {
+            "Pedido":idPedido,
+            "Planta": planta,
+            "Fecha":fechaHra.toString(),
+            "Observaciones":comentario,
+        }
+        //------------------------------------------------------------------------------------------------------------------------------------------------------
+        const response = await axios.post(baseUrl+'Logistica/SetIncidenciaPedido', data+','+usuario, confi_ax);
+        var obj = response.data;
+        if(obj)
+        {
+            return true
+        }else{
+            return false
+        }
+    } 
+    catch(error)
+    {
+        return false;
+    }    
+}
+export async function getPedidosMultimedia(id) {
+    try
+    {
+        let confi_ax = {
+            headers:
+            {
+                'Cache-Control': 'no-cache',
+                'Content-Type': 'application/json',
+                "Authorization": "Bearer "+cookies.get('token'),
+            },
+        };
+        //------------------------------------------------------------------------------------------------------------------------------------------------------
+        const response = await axios.get(baseUrl+'Logistica/ObtenerVistaPrevia/'+id, confi_ax);
+        if (response.data) {
+            const obj = response.data;
+            return obj;
+        }else{return false}
+    } 
+    catch(error)
+    {
+        return false
+    }
+}
+export async function setRecuperarPE(id) {
+    try
+    {
+        let confi_ax = {
+            headers:
+            {
+                'Cache-Control': 'no-cache',
+                'Content-Type': 'application/json',
+                "Authorization": "Bearer "+cookies.get('token'),
+            },
+        };
+        //------------------------------------------------------------------------------------------------------------------------------------------------------
+        const response = await axios.get(baseUrl+'Operaciones/ReactivarPed/'+id, confi_ax);
+        if (response.data) {
+            const obj = response.data;
+            return obj;
+        }else{return false}
+    } 
+    catch(error)
+    {
+        return false
+    }
+}
+export async function getEquiposList() {
+    try
+    {
+        let confi_ax = {
+            headers:
+            {
+                'Cache-Control': 'no-cache',
+                'Content-Type': 'application/json',
+                "Authorization": "Bearer "+cookies.get('token'),
+            },
+        };
+        //------------------------------------------------------------------------------------------------------------------------------------------------------
+        const response = await axios.get(baseUrl+'Administracion/getEquipo', confi_ax);
+        if (response.data) {
+            const obj = response.data;
+            return obj;
+        }else{return false}
+    } 
+    catch(error)
+    {
+        return false
+    }
+}
+export async function getEquiposId(id) {
+    try
+    {
+        let confi_ax = {
+            headers:
+            {
+                'Cache-Control': 'no-cache',
+                'Content-Type': 'application/json',
+                "Authorization": "Bearer "+cookies.get('token'),
+            },
+        };
+        //------------------------------------------------------------------------------------------------------------------------------------------------------
+        const response = await axios.get(baseUrl+'Administracion/getEquipoId/'+id, confi_ax);
+        if (response.data) {
+            const obj = response.data;
+            return obj;
+        }else{return false}
+    } 
+    catch(error)
+    {
+        return false
+    }
+}
+export async function setRgEq(data)
+{
+    try
+    {
+        let confi_ax = {
+            headers:
+            {
+                'Cache-Control': 'no-cache',
+                'Content-Type': 'application/json',
+                "Authorization": "Bearer "+cookies.get('token'),
+            },
+        };
+        //------------------------------------------------------------------------------------------------------------------------------------------------------
+        const response = await axios.post(baseUrl+'Administracion/setEquipo', data, confi_ax);
+        var obj = response.data;
+        if(obj.length > 0)
+        {
+            return obj
+        }else{return false}
+    } 
+    catch(error)
+    {
+        return false;
+    }
+}
+export async function deleteEQ(id)
+{
+    try
+    {
+        let confi_ax = {
+            headers:
+            {
+                'Cache-Control': 'no-cache',
+                'Content-Type': 'application/json',
+                "Authorization": "Bearer "+cookies.get('token'),
+            },
+        };
+        //------------------------------------------------------------------------------------------------------------------------------------------------------
+        const response = await axios.delete(baseUrl+'Administracion/SetDeleteEQ/'+id, confi_ax);
+        var obj = response.data;
+        if(obj.length > 0)
+        {
+            return obj
+        }else{return false}
+    } 
+    catch(error)
+    {
+        return false;
+    }
+}
+export async function getBitacoraEquipos() {
+    try
+    {
+        let confi_ax = {
+            headers:
+            {
+                'Cache-Control': 'no-cache',
+                'Content-Type': 'application/json',
+                "Authorization": "Bearer "+cookies.get('token'),
+            },
+        };
+        //------------------------------------------------------------------------------------------------------------------------------------------------------
+        const response = await axios.get(baseUrl+'Administracion/getBitacoraEquipo', confi_ax);
+        if (response.data) {
+            const obj = response.data;
+            return obj;
+        }else{return false}
+    } 
+    catch(error)
+    {
+        return false
+    }
+}
+export async function getBitacoraId(id) {
+    try
+    {
+        let confi_ax = {
+            headers:
+            {
+                'Cache-Control': 'no-cache',
+                'Content-Type': 'application/json',
+                "Authorization": "Bearer "+cookies.get('token'),
+            },
+        };
+        //------------------------------------------------------------------------------------------------------------------------------------------------------
+        const response = await axios.get(baseUrl+'Administracion/getBitacoraEquipoId/'+id, confi_ax);
+        if (response.data) {
+            const obj = response.data;
+            return obj;
+        }else{return false}
+    } 
+    catch(error)
+    {
+        return false
+    }
+}
+export  async function getVolCliente(planta, FI, FF, cliente)
+{
+    try
+    {
+        let confi_ax = {
+            headers:
+            {
+                'Cache-Control': 'no-cache',
+                'Content-Type': 'application/json',
+                "Authorization": "Bearer "+cookies.get('token'),
+            },
+        };
+        const fcaI = FormatoFca(FI);
+        const fcaF = FormatoFca(FF);
+        //------------------------------------------------------------------------------------------------------------------------------------------------------
+        const response = await axios.get(baseUrl+'Comercial/GetVolCliente/'+fcaI+","+fcaF+","+planta+","+cliente, confi_ax);
+        var obj = response.data;
+        if(obj.length > 0)
+        {
+            return obj
+        }else{return false}
+    } 
+    catch(error)
+    {
+        return false;
+    }    
+}
+export  async function getClientes(planta, cliente)
+{
+    try
+    {
+        let confi_ax = {
+            headers:
+            {
+                'Cache-Control': 'no-cache',
+                'Content-Type': 'application/json',
+                "Authorization": "Bearer "+cookies.get('token'),
+            },
+        };
+        //------------------------------------------------------------------------------------------------------------------------------------------------------
+        const response = await axios.get(baseUrl+'Comercial/GetClientes/'+planta+','+cliente, confi_ax);
+        var obj = response.data;
+        if(obj.length > 0)
+        {
+            return obj
+        }else{return false}
+    } 
+    catch(error)
+    {
+        return false;
+    }    
+}
+export  async function getPedidoMoroso(FI, FF)
+{
+    try
+    {
+        let confi_ax = {
+            headers:
+            {
+                'Cache-Control': 'no-cache',
+                'Content-Type': 'application/json',
+                "Authorization": "Bearer "+cookies.get('token'),
+            },
+        };
+        const fcaI = FormatoFca(FI);
+        const fcaF = FormatoFca(FF);
+        //------------------------------------------------------------------------------------------------------------------------------------------------------
+        const response = await axios.get(baseUrl+'Operaciones/GetPedidosMorosos/'+fcaI+","+fcaF, confi_ax);
+        var obj = response.data;
+        console.log(obj)
+        if(obj.length > 0)
+        {
+            return obj
+        }else{
+            return false
+        }
+    } 
+    catch(error)
+    {
+        return false;
+    }    
+}
+export async function  setRecuperarMoroso(idPedido) {
+    try
+    {
+        let confi_ax = {
+            headers:
+            {
+                'Cache-Control': 'no-cache',
+                'Content-Type': 'application/json',
+                "Authorization": "Bearer "+cookies.get('token'),
+            },
+        };
+        //------------------------------------------------------------------------------------------------------------------------------------------------------
+        const response = await axios.get(baseUrl+'Operaciones/GetResumen/'+idPedido, confi_ax);
+        if (response.data) {
+            const obj = response.data;
+            if(obj.length > 0)
+            {
+                return obj;
+            }else{return false}
+        }else{return false}
+    } 
+    catch(error)
+    {
+        return false
+    }
+}
+export async function sAvisoMoroso(pedidos) {
+    const pedidosAPI = pedidos.map(p => ({
+        idPedido: p.IdPedido,
+        planta: p.Planta,
+        usuario: p.UsuarioCreo,       // o el usuario real
+        motivo: "Pedido fuera de horario, se ira a pedidos sin Adjuntos hasta que esten de acuerdos sin romper la programación establecida." // o lo que quieras mandar
+    }));
+    try
+    {
+        let confi_ax = {
+            headers:
+            {
+                'Cache-Control': 'no-cache',
+                'Content-Type': 'application/json',
+                "Authorization": "Bearer "+cookies.get('token'),
+            },
+        };
+        //------------------------------------------------------------------------------------------------------------------------------------------------------
+        const response = await axios.post(baseUrl+'Administracion/PedidoAvisoMoroso',pedidosAPI, confi_ax)
+        var obj = response.data;
+        return obj
+    } 
+    catch(error)
+    {
+        return false;
+    }
+}
 //****************************************************************************************************************************************************************************** */
 // OPERACIONES
     // CICAT
@@ -882,7 +1446,6 @@ export async function  setEntradasD(planta, FI, FF) {
         return false
     }
 }
-
 export async function getMovs(plantas, FI, FF)
 {
     try
@@ -933,6 +1496,31 @@ export async function getResInv(material, FI, FF, planta) {
             {
                 return obj;
             }else{return false}
+        }else{return false}
+    } 
+    catch(error)
+    {
+        return false
+    }
+}
+export async function getInvRes(planta, FI, FF) {
+    try
+    {
+        let confi_ax = {
+            headers:
+            {
+                'Cache-Control': 'no-cache',
+                'Content-Type': 'application/json',
+                "Authorization": "Bearer "+cookies.get('token'),
+            },
+        };
+        const fcaI = FormatoFca(FI);
+        const fcaF = FormatoFca(FF);
+        //------------------------------------------------------------------------------------------------------------------------------------------------------
+        const response = await axios.get(baseUrl+'Operaciones/GetInvRes/'+planta+','+fcaI+','+fcaF, confi_ax);
+        if (response.data) {
+            const obj = response.data;
+            return obj;
         }else{return false}
     } 
     catch(error)
@@ -1067,7 +1655,6 @@ export async function setRemFaltante(Id,Nr, planta, tipo, razon) {
         };
         //------------------------------------------------------------------------------------------------------------------------------------------------------
         const response = await axios.get(baseUrl+'Operaciones/SetRemFal/'+Id+','+nRe+','+planta+','+tipo+','+cookies.get('Usuario')+','+razon, confi_ax);
-        console.log(nRe,response)
         if (response.data && response.data.length > 0) {
             const obj = response.data;
             if(obj.length > 0)
@@ -1081,7 +1668,65 @@ export async function setRemFaltante(Id,Nr, planta, tipo, razon) {
         return false
     }
 }
-    //PCancelados
+//ALMACÉN
+export async function getAlmacenD(plantas, FI, FF)
+{
+    try
+    {
+        let confi_ax = {
+            headers:
+            {
+                'Cache-Control': 'no-cache',
+                'Content-Type': 'application/json',
+                "Authorization": "Bearer "+cookies.get('token'),
+            },
+        };
+        const fcaI = FormatoFca(FI);
+        const fcaF = FormatoFca(FF);
+        //------------------------------------------------------------------------------------------------------------------------------------------------------
+        const response = await axios.get(baseUrl+'Operaciones/Almacen/'+plantas+','+fcaI+','+fcaF, confi_ax);
+        if (response.data && response.data.length > 0) {
+            const obj = response.data;
+            if(obj.length > 0)
+            {
+                return obj;
+            }else{return false}
+        }else{return false}
+    } 
+    catch(error)
+    {
+        return false
+    }
+}
+export async function getAlmacenCommand(plantas, FI, FF)
+{
+    try
+    {
+        let confi_ax = {
+            headers:
+            {
+                'Cache-Control': 'no-cache',
+                'Content-Type': 'application/json',
+                "Authorization": "Bearer "+cookies.get('token'),
+            },
+        };
+        const fcaI = FormatoFca(FI);
+        const fcaF = FormatoFca(FF);
+        //------------------------------------------------------------------------------------------------------------------------------------------------------
+        const response = await axios.get(baseUrl+'Operaciones/GetInv/'+plantas+','+fcaI+','+fcaF, confi_ax);
+        if (response.data) {
+            const obj = response.data;
+            return obj;
+        }else{
+            return false
+        }
+    } 
+    catch(error)
+    {
+        return false
+    }
+}
+//PCancelados
 export async function getCmbsAreas(tipos,id){
     try
     {
@@ -1250,7 +1895,6 @@ export async function setTicketCancel(data, tipo) {
     }
 }
 export async function answTicketCancel(data, tipo) {
-    console.log(data)
     let usuario_respuesta = cookies.get('Usuario') == undefined ? "-":cookies.get('Usuario');
     const fData = new FormData();
     fData.append("pC", JSON.stringify({
@@ -1299,7 +1943,35 @@ export async function answTicketCancel(data, tipo) {
         return false
     }
 }
-    // MANTENIMIENTO
+export async function getPedidoEl(FI,FF) {
+    const fcaI = FormatoFca(FI);
+    const fcaF = FormatoFca(FF);
+    try
+    {
+        let confi_ax = {
+            headers:
+            {
+                'Cache-Control': 'no-cache',
+                "Authorization": "Bearer "+cookies.get('token'),
+            },
+        };
+
+        //------------------------------------------------------------------------------------------------------------------------------------------------------
+        const response = await axios.get(baseUrl+"Operaciones/pedEli/"+fcaI+","+fcaF, confi_ax);
+        if (response.data && response.data.length > 0) {
+            const obj = response.data;
+            if(obj.length > 0)
+            {
+                return obj;
+            }else{return false}
+        }else{return false}
+    } 
+    catch(error)
+    {
+        return false
+    }
+}
+// MANTENIMIENTO
 export async function getOCompras(planta, FI, FF) {
     try
     {
@@ -1341,7 +2013,6 @@ export async function getVehiculos(planta, grupo) {
         };
         //------------------------------------------------------------------------------------------------------------------------------------------------------
         const response = await axios.get(baseUrl+'Operaciones/GetVehiculo/'+planta+','+grupo+',0', confi_ax);
-        console.log(response)
         if (response.data && response.data.length > 0) {
             const obj = response.data;
             if(obj.length > 0)
@@ -1362,7 +2033,6 @@ export async function setOCompra(data, tipo) {
     if(tipo === '0'){
         delete data.id;
     }
-    console.log(data)
     const fData = new FormData();
     fData.append("oC", JSON.stringify({
         id: data.id,
@@ -1514,7 +2184,93 @@ export async function addNFac(id, nFac) {
         return false
     }
 }
- //REPORTES
+//PRODUCCION
+export async function getProdFDD(planta, FI) {
+    try
+    {
+        let confi_ax = {
+            headers:
+            {
+                'Cache-Control': 'no-cache',
+                'Content-Type': 'application/json',
+                "Authorization": "Bearer "+cookies.get('token'),
+            },
+        };
+        const fcaI = FormatoFca(FI);
+        const fcaIni = fcaI.split('-');
+        let auxFcaI = fcaIni[2]+"-"+fcaIni[0]+"-"+fcaIni[1];
+        //------------------------------------------------------------------------------------------------------------------------------------------------------
+        const response = await axios.get(baseUrl+"Operaciones/dsInventoryTickets/"+planta+",0,"+auxFcaI, confi_ax);
+        if (response.data) {
+            const obj = response.data;
+            return obj;
+        }else{
+            return false
+        }
+    } 
+    catch(error)
+    {
+        return false
+    }
+}
+export async function setRemisiones(planta, remi, FI) {
+    try
+    {
+        let confi_ax = {
+            headers:
+            {
+                'Cache-Control': 'no-cache',
+                'Content-Type': 'application/json',
+                "Authorization": "Bearer "+cookies.get('token'),
+            },
+        };
+        const fcaI = FormatoFca(FI);
+        //------------------------------------------------------------------------------------------------------------------------------------------------------
+        const response = await axios.get(baseUrl+"Operaciones/InsertTodo/"+planta+","+remi+","+fcaI, confi_ax);
+        if (response.data) {
+            const obj = response.data;
+            return obj;
+        }else{
+            return false
+        }
+    } 
+    catch(error)
+    {
+        return false
+    }
+}
+export async function getCierres(planta, FI, FF) {
+    try
+    {
+        let confi_ax = {
+            headers:
+            {
+                'Cache-Control': 'no-cache',
+                'Content-Type': 'application/json',
+                "Authorization": "Bearer "+cookies.get('token'),
+            },
+        };
+        const fcaI = FormatoFca(FI);
+        const fcaIni = fcaI.split('-');
+        const fcaF = FormatoFca(FF);
+        const fcaFin = fcaF.split('-');
+        let auxFcaI = fcaIni[2]+"-"+fcaIni[0]+"-"+fcaIni[1];
+        let auxFcaF = fcaFin[2]+"-"+fcaFin[0]+"-"+fcaFin[1];
+        //------------------------------------------------------------------------------------------------------------------------------------------------------
+        const response = await axios.get(baseUrl+"Operaciones/cierreInv/"+planta+","+auxFcaI+","+auxFcaF, confi_ax);
+        if (response.data) {
+            const obj = response.data;
+            return obj;
+        }else{
+            return false
+        }
+    } 
+    catch(error)
+    {
+        return false
+    }
+}
+//REPORTES
 export async function getOC(FI, FF) {
     try
     {
@@ -1720,10 +2476,8 @@ export async function getCostosPV(planta, FI) {
                 "Authorization": "Bearer "+cookies.get('token'),
             },
         };
-        //const fcaI = FormatoFca(FI);
         //------------------------------------------------------------------------------------------------------------------------------------------------------
         const response = await axios.get(baseUrl+'Calidad/getDesign/'+planta+','+FI, confi_ax);
-        console.log(response)
         if (response.data && response.data.length > 0) {
             const obj = response.data;
             if(obj.length > 0)
@@ -1736,6 +2490,99 @@ export async function getCostosPV(planta, FI) {
     {
         return false
     }
+}
+export async function getPrecioVol(planta) {
+    try
+    {
+        let confi_ax = {
+            headers:
+            {
+                'Cache-Control': 'no-cache',
+                'Content-Type': 'application/json',
+                "Authorization": "Bearer "+cookies.get('token'),
+            },
+        };
+        //------------------------------------------------------------------------------------------------------------------------------------------------------
+        const response = await axios.get(baseUrl+'Calidad/GetPV/'+planta, confi_ax);
+        if (response.data && response.data.length > 0) {
+            const obj = response.data;
+            if(obj.length > 0)
+            {
+                return obj;
+            }else{return false}
+        }else{return false}
+    } 
+    catch(error)
+    {
+        return false
+    }
+}
+export  async function updatePV(planta, grupo, material, precio, precioF, pesoVol, bandera)
+{
+    let usuario = cookies.get('Usuario');
+    let fechaHra = format(new Date(),'yyyy-MM-dd HH:mm:ss');
+    try
+    {
+        let confi_ax = {
+            headers:
+            {
+                'Cache-Control': 'no-cache',
+                'Content-Type': 'application/json',
+                "Authorization": "Bearer "+cookies.get('token'),
+            },
+        };
+        const data = 
+        {
+            "id":0,
+            "Planta": planta,
+            "Material":material,
+            "Fecha":fechaHra.toString(),
+            "Costo":precio,
+            "Flete":precioF,
+            "PesoVol":pesoVol,
+            "band":bandera,
+        } 
+        //------------------------------------------------------------------------------------------------------------------------------------------------------
+        const response = await axios.post(baseUrl+'Calidad/setCostosPV', data, confi_ax);
+        var obj = response.data;
+        if(obj)
+        {
+            return true
+        }else{
+            return false
+        }
+    } 
+    catch(error)
+    {
+        return false;
+    }    
+}
+export  async function updateMasivo(fecha)
+{
+    try
+    {
+        let confi_ax = {
+            headers:
+            {
+                'Cache-Control': 'no-cache',
+                'Content-Type': 'application/json',
+                "Authorization": "Bearer "+cookies.get('token'),
+            },
+        };
+        //------------------------------------------------------------------------------------------------------------------------------------------------------
+        const response = await axios.get(baseUrl+'Calidad/setUpdateMasivo/'+fecha, confi_ax);
+        if (response.data && response.data.length > 0) {
+            const obj = response.data;
+            if(obj.length > 0)
+            {
+                return obj;
+            }else{return false}
+        }else{return false}
+    } 
+    catch(error)
+    {
+        return false
+    }    
 }
 //--->LOTE
 export async function getMuestreo(planta, remision, tipo) {
@@ -1988,7 +2835,6 @@ export async function suLote(datos, tipo) {
             ...datos,
             Usuario:cookies.get('Usuario')
         };
-        console.log(fDMCC)
         //------------------------------------------------------------------------------------------------------------------------------------------------------
         const response = await axios.post(url,fDMCC, confi_ax);
         if (response.data && response.data.length > 0) {
@@ -2035,7 +2881,7 @@ export async function suCal(datos, tipo) {
 //****************************************************************************************************************************************************************************** */
 // VENTAS
     //---COTIZADOR
-export  async function getPrecios(planta)
+export  async function getPrecios(op,planta,cpc)
   {
     try
         {
@@ -2049,34 +2895,18 @@ export  async function getPrecios(planta)
                 }
             }
             //------------------------------------------------------------------------------------------------------------------------------------------------------
-            await axios.get(baseUrl+'Comercial/GetPreciosPla/'+'C,ti,'+planta+',2024-10-31,1932.65', confi_ax)
-            .then(response=>{
-              var obj = response.data;
-              var tOne = obj[0].Rows;
-              var tTwo = obj[1].Rows;
-              var tThree = obj[2].Rows;
-              var tFour = obj[3].Rows;
-              var tFive = obj[4].Rows;
-              var tSix = obj[5].Rows;
-                setDatosPla(tOne)
-                setDatosMop(tTwo);
-                setDFuente(tFour);
-                setTC(tSix);
-                //Swal.fire("CORRECTO", "PARTE1", "success");
-                //return response.data;
-            })
-            .catch(err=>{
-                if (err.response) {
-                    // El servidor respondió con un código de estado fuera del rango de 2xx
-                    console.error('Error de Respuesta:', err.response.data);
-                } else if (err.request) {
-                    // La solicitud fue realizada pero no se recibió respuesta
-                    console.error('Error de Solicitud:', err.request);
-                } else {
-                    // Algo sucedió al configurar la solicitud
-                    console.error('Error:', err.message);
+            const response = await axios.get(baseUrl+'Comercial/GetPreciosPla/'+op+','+cookies.get('Usuario')+','+planta+',2017-01-01,'+cpc, confi_ax);
+            if (response.data && response.data.length > 0 ) {
+                const obj = response.data;
+                if(obj.length > 0)
+                {
+                    return obj;
+                }else{
+                    return false
                 }
-            })    
+            }else{
+                return false
+            }
             //------------------------------------------------------------------------------------------------------------------------------------------------------
         }
         catch(error)
@@ -2135,6 +2965,56 @@ export  async function getCotizacionId(idCotizacion)
     {
         return false;
     }    
+}
+// --- Función API
+export async function setUpdFcaVenc(idCotizacion, fcaV) {
+  try {
+    const confi_ax = {
+      headers: {
+        'Cache-Control': 'no-cache',
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + cookies.get('token'),
+      },
+    };
+
+    const response = await axios.get(`${baseUrl}Comercial/updFcaVenc/${idCotizacion},${fcaV}`, confi_ax);
+    const obj = response.data;
+    return obj; // ya no necesitas el if/else
+  } catch (error) {
+    console.error(error);
+    return { message: 'Error' };
+  }
+}
+export async function getCotizacionById(idCotizacion)
+{
+    try
+    {
+        let confi_ax = {
+            headers:
+            {
+                'Cache-Control': 'no-cache',
+                'Content-Type': 'application/json',
+                "Authorization": "Bearer "+cookies.get('token'),
+            },
+        };
+        //------------------------------------------------------------------------------------------------------------------------------------------------------
+        const response = await axios.get(baseUrl+'Comercial/GetCotizacionById/'+idCotizacion+','+cookies.get('Usuario')+',L', confi_ax);
+        if (response.data && response.data.length > 0 ) {
+            const obj = response.data;
+            if(obj.length > 0)
+            {
+                return obj;
+            }else{
+                return false
+            }
+        }else{
+            return false
+        }
+    } 
+    catch(error)
+    {
+        return false
+    }
 }
 export  async function getCotizacionPedido(idCotizacion)
 {
@@ -2325,7 +3205,6 @@ export  async function getObraCot(idC, idO)
         };
         //------------------------------------------------------------------------------------------------------------------------------------------------------
         const response = await axios.get(baseUrl+'Comercial/GetObraCot/'+idO+'/'+idC, confi_ax);
-        console.log(response)
         var obj = response.data;
         if(obj.length > 0)
         {
@@ -2366,14 +3245,6 @@ export  async function setVisitas(idCot, motivo, lat, lon)
 {
     let usuario = cookies.get('Usuario');
     let fechaHra = format(new Date(),'yyyy-MM-dd HH:mm:ss');
-    console.log("Registrar visita:", {
-        usuario,
-        motivo,
-        idCot,
-        lat,
-        lon,
-        fechaHra
-    });
     try
     {
         let confi_ax = {
@@ -2397,7 +3268,6 @@ export  async function setVisitas(idCot, motivo, lat, lon)
         //------------------------------------------------------------------------------------------------------------------------------------------------------
         const response = await axios.post(baseUrl+'Comercial/setVisitaCot', data, confi_ax);
         var obj = response.data;
-        console.log(obj, obj.message)
         if(obj.message == "Creación exitosa.")
         {
             return true
@@ -2508,7 +3378,62 @@ export  async function getPreCotizacion(id)
         return false;
     }    
 }
-//--
+export  async function getCotizacionDIById(id)
+{
+    try
+    {
+        let confi_ax = {
+            headers:
+            {
+                'Cache-Control': 'no-cache',
+                'Content-Type': 'application/json',
+                "Authorization": "Bearer "+cookies.get('token'),
+            },
+        };
+        //------------------------------------------------------------------------------------------------------------------------------------------------------
+        const response = await axios.get(baseUrl+'Comercial/GetCotizacionExtras/'+id,confi_ax);
+        var obj = response.data;
+        if(obj.length > 0)
+        {
+            return obj
+        }else{return false}
+    } 
+    catch(error)
+    {
+        return false;
+    }    
+}
+export async function getFacturas(FI, FF) {
+    try
+    {
+        let confi_ax = {
+            headers:
+            {
+                'Cache-Control': 'no-cache',
+                'Content-Type': 'application/json',
+                "Authorization": "Bearer "+cookies.get('token'),
+            },
+        };
+        const fcaI = FormatoFca(FI);
+        const fcaF = FormatoFca(FF);
+        //------------------------------------------------------------------------------------------------------------------------------------------------------
+        const response = await axios.get(baseUrl+'Inte/GetFacturas/'+fcaI+','+fcaF, confi_ax);
+        if (response.data && response.data.length > 0) {
+            const obj = response.data;
+            if(obj.length > 0)
+            {
+                return obj;
+            }else{
+                return false
+            }
+        }else{return false}
+    } 
+    catch(error)
+    {
+        return false
+    }
+}
+//------------------------------------------------------------------
 export async function getClientesCartera(planta) {
     try
     {
@@ -2839,7 +3764,6 @@ export  async function setCotizacion(json)
         //------------------------------------------------------------------------------------------------------------------------------------------------------
         const response = await axios.post(baseUrl+'Comercial/RecibirCotizacion', json, confi_ax);
         var obj = response.data;
-        console.log(obj, obj.noCotizacion)
         if(obj.noCotizacion)
         {
             return obj.noCotizacion
@@ -2865,7 +3789,6 @@ export  async function setPedidosCot(json)
         //------------------------------------------------------------------------------------------------------------------------------------------------------
         const response = await axios.post(baseUrl+'Comercial/RecibirPedidos', json, confi_ax);
         var obj = response.data;
-        console.log(obj.length, obj)
         if(obj.length > 0)
         {
             return true
@@ -2915,6 +3838,30 @@ export async function setUpdPreCot(datos){
         };
         //------------------------------------------------------------------------------------------------------------------------------------------------------
         const response = await axios.post(baseUrl+'Comercial/setPreCot',datos, confi_ax);
+        var obj = response.data;
+        if(obj)
+        {
+            return obj
+        }else{return false}
+    } 
+    catch(error)
+    {
+        return false
+    }
+}
+export async function setCotizaCantCot(datos){
+    try
+    {
+        let confi_ax = {
+            headers:
+            {
+                'Cache-Control': 'no-cache',
+                'Content-Type': 'application/json',
+                "Authorization": "Bearer "+cookies.get('token'),
+            },
+        };
+        //------------------------------------------------------------------------------------------------------------------------------------------------------
+        const response = await axios.post(baseUrl+'Comercial/setCanCot',datos, confi_ax);
         var obj = response.data;
         if(obj)
         {
@@ -3417,6 +4364,112 @@ export async function getCalendario(mes, periodo, tipo)
         return false;
     }
 } 
+export async function GetClienteObraI(planta,tipo,subtipo,ncliente,nobra)
+{
+    try
+    {
+        let confi_ax = {
+            headers:
+            {
+                'Cache-Control': 'no-cache',
+                'Content-Type': 'application/json',
+                "Authorization": "Bearer "+cookies.get('token'),
+            },
+        };
+        //------------------------------------------------------------------------------------------------------------------------------------------------------
+        const response = await axios.get(baseUrl+'Administracion/GetObraCliente/'+planta+','+tipo+','+subtipo+','+ncliente+','+nobra, confi_ax);
+        var obj = response.data;
+        if(obj.length > 0)
+        {
+            return obj
+        }else{return false}
+    } 
+    catch(error)
+    {
+        return false;
+    }
+}
+export async function SetRenewObra(nobra)
+{
+    try
+    {
+        let confi_ax = {
+            headers:
+            {
+                'Cache-Control': 'no-cache',
+                'Content-Type': 'application/json',
+                "Authorization": "Bearer "+cookies.get('token'),
+            },
+        };
+        //------------------------------------------------------------------------------------------------------------------------------------------------------
+        const response = await axios.post(baseUrl+'Administracion/SetRenewObra',nobra, confi_ax);
+        var obj = response.data;
+        if(obj.length > 0)
+        {
+            return obj
+        }else{return false}
+    } 
+    catch(error)
+    {
+        return false;
+    }
+}
+export async function GetOPDuplicados(FI, FF)
+{
+    try
+    {
+        let confi_ax = {
+            headers:
+            {
+                'Cache-Control': 'no-cache',
+                'Content-Type': 'application/json',
+                "Authorization": "Bearer "+cookies.get('token'),
+            },
+        };
+        const fcaI = FormatoFca(FI);
+        const fcaF = FormatoFca(FF);
+        //------------------------------------------------------------------------------------------------------------------------------------------------------
+        const response = await axios.get(baseUrl+'Inte/GetDuplicadosOP/'+fcaI+","+fcaF, confi_ax);
+        var obj = response.data;
+        if(obj.length > 0)
+        {
+            return obj
+        }else{return false}
+    } 
+    catch(error)
+    {
+        return false;
+    }
+}
+export async function GetListOPDuplicados(FI, FF)
+{
+    try
+    {
+        let confi_ax = {
+            headers:
+            {
+                'Cache-Control': 'no-cache',
+                'Content-Type': 'application/json',
+                "Authorization": "Bearer "+cookies.get('token'),
+            },
+        };
+        const fcaI = FormatoFca(FI);
+        const fcaF = FormatoFca(FF);
+        //------------------------------------------------------------------------------------------------------------------------------------------------------
+        const response = await axios.get(baseUrl+'Inte/GetDuplicadosListOP/'+fcaI+','+fcaF, confi_ax);
+        var obj = response.data;
+        if(obj.length > 0)
+        {
+            return obj
+        }else{
+            return false
+        }
+    } 
+    catch(error)
+    {
+        return false;
+    }
+}
 //****************************************************************************************************************************************************************************** */
 // EXTRAS
 export async function setIncidencia(incidencia, tipo) {
@@ -3433,7 +4486,6 @@ export async function setIncidencia(incidencia, tipo) {
         //------------------------------------------------------------------------------------------------------------------------------------------------------
         const response = await axios.post(baseUrl+'ProCatsa/setIncidencias', incidencia,confi_ax);
         var obj = response.data;
-        console.log(obj)
         if(obj.length > 0)
         {
             return obj
@@ -3460,7 +4512,6 @@ export async function getIncidencias(FI, FF) {
         //------------------------------------------------------------------------------------------------------------------------------------------------------
         const response = await axios.get(baseUrl+'ProCatsa/GetIncidencias/'+FI+','+FF, confi_ax);
         var obj = response.data;
-        console.log(obj)
         if(obj.length > 0)
         {
             return obj
@@ -3559,7 +4610,207 @@ export async function setPreCierres(Planta, Periodo, Mes) {
             },
         };
         //------------------------------------------------------------------------------------------------------------------------------------------------------
-        const response = await axios.get(baseUrl+'Operaciones/SetPreCierreMensual/'+planta+','+mes+','+periodo, confi_ax)
+        const response = await axios.get(baseUrl+'Operaciones/SetPreCierreMensual/'+Planta+','+Mes+','+Periodo, confi_ax)
+        var obj = response.data;
+        if(obj.length > 0)
+        {
+            return obj
+        }else{return false}
+    } 
+    catch(error)
+    {
+        return false;
+    }
+}
+export async function sAvisoPC(pedidos) {
+    const pedidosAPI = pedidos.map(p => ({
+        idPedido: p.IdPedido,
+        planta: p.Planta,
+        usuario: p.UsuarioCreo,       // o el usuario real
+        motivo: "Pedido eliminado automáticamente" // o lo que quieras mandar
+    }));
+    try
+    {
+        let confi_ax = {
+            headers:
+            {
+                'Cache-Control': 'no-cache',
+                'Content-Type': 'application/json',
+                "Authorization": "Bearer "+cookies.get('token'),
+            },
+        };
+        //------------------------------------------------------------------------------------------------------------------------------------------------------
+        const response = await axios.post(baseUrl+'Administracion/PedidoAviso',pedidosAPI, confi_ax)
+        var obj = response.data;
+        return obj
+    } 
+    catch(error)
+    {
+        return false;
+    }
+}
+export async function getUserMobil() {
+    try
+    {
+        let confi_ax = {
+            headers:
+            {
+                'Cache-Control': 'no-cache',
+                'Content-Type': 'application/json',
+                "Authorization": "Bearer "+cookies.get('token'),
+            },
+        };
+        //------------------------------------------------------------------------------------------------------------------------------------------------------
+        const response = await axios.get(baseUrl+'Usuarios/GetUsersMobil', confi_ax);
+        if (response.data && response.data.length > 0) {
+            const obj = response.data;
+            if(obj.length > 0)
+            {
+                return obj;
+            }else{
+                return false
+            }
+        }else{return false}
+    } 
+    catch(error)
+    {
+        return false
+    }
+}
+export async function delUsuarioMB(id) {
+    try
+    {
+        let confi_ax = {
+            headers:
+            {
+                'Cache-Control': 'no-cache',
+                'Content-Type': 'application/json',
+                "Authorization": "Bearer "+cookies.get('token'),
+            },
+        };
+        //------------------------------------------------------------------------------------------------------------------------------------------------------
+        const response = await 
+        axios({
+            method: "GET",
+            url: baseUrl + "Administracion/SetDeleteUM/" + id,
+            headers: confi_ax.headers
+        });
+
+        var obj = response.data;
+        if(obj.length > 0)
+        {
+            return obj
+        }else{return false}
+    } 
+    catch(error)
+    {
+        return false;
+    }
+}
+export async function GetRecoverys(planta, tipo, estado, id) {
+    try
+    {
+        let confi_ax = {
+            headers:
+            {
+                'Cache-Control': 'no-cache',
+                'Content-Type': 'application/json',
+                "Authorization": "Bearer "+cookies.get('token'),
+            },
+        };
+        const data = {
+            "planta":planta,
+            "tipo":tipo,
+            "estado":estado,
+            "id":id,
+        }
+        //------------------------------------------------------------------------------------------------------------------------------------------------------
+       const response = await axios.post(baseUrl+'App/addRecovery', data, confi_ax);
+       console.log(response)
+        var obj = response.data.data;
+        if(obj.length > 0)
+        {
+            return obj
+        }else{return false}
+    } 
+    catch(error)
+    {
+        return false;
+    }
+}
+export async function setRecovery(planta,fca) {
+    try
+    {
+        let confi_ax = {
+            headers:
+            {
+                'Cache-Control': 'no-cache',
+                'Content-Type': 'application/json',
+                "Authorization": "Bearer "+cookies.get('token'),
+            },
+        };
+        //------------------------------------------------------------------------------------------------------------------------------------------------------
+        const response = await 
+        axios({
+            method: "GET",
+            url: baseUrl + "Administracion/SetRecovery/" + planta+","+fca,
+            headers: confi_ax.headers
+        });
+
+        var obj = response.data;
+        if(obj.length > 0)
+        {
+            return obj
+        }else{return false}
+    } 
+    catch(error)
+    {
+        return false;
+    }
+}
+//NOMINA
+export async function sNomina(tipo,data) {
+    try
+    {
+        let confi_ax = {
+            headers:
+            {
+                'Cache-Control': 'no-cache',
+                'Content-Type': 'application/json',
+                "Authorization": "Bearer "+cookies.get('token'),
+            },
+        };
+        //------------------------------------------------------------------------------------------------------------------------------------------------------
+        console.log("DATA A ENVIAR:", data);
+        const response = await axios.post(baseUrl+'Administracion/setNominas', data, confi_ax);
+        console.log(response)
+        if (response.data && response.data.length > 0) {
+            const obj = response.data;
+            if(obj.length > 0)
+            {
+                return obj;
+            }else{return false}
+        }else{return false}
+    } 
+    catch(error)
+    {
+        return false
+    }
+}
+export async function getNominas(fca) {
+    try
+    {
+        let confi_ax = {
+            headers:
+            {
+                'Cache-Control': 'no-cache',
+                'Content-Type': 'application/json',
+                "Authorization": "Bearer "+cookies.get('token'),
+            },
+        };
+        const fcaI = FormatoFca(fca);
+        //------------------------------------------------------------------------------------------------------------------------------------------------------
+        const response = await axios.get(baseUrl+'Administracion/getNomina/'+fcaI, confi_ax);
         var obj = response.data;
         if(obj.length > 0)
         {
@@ -3787,11 +5038,8 @@ export async function getLiberarUsers(usuario,tipo) {
         };
         //------------------------------------------------------------------------------------------------------------------------------------------------------
         const response = await axios.get(baseUrl+'Usuarios/GetUsersLiberar/'+usuario+','+tipo, confi_ax);
-        console.log(response);
         if (response.data && response.data.length > 0) {
             const obj = response.data;
-            console.log(obj, usuario, tipo);
-
             if(obj.length > 0)
             {
                 return obj;
@@ -4148,6 +5396,15 @@ export async function getPlantasList() {
         return false;
     }
 }
+export function cargando(){
+    Swal.fire({
+        title: 'Cargando...',
+        text: 'Procesando Solicitud...',
+        didOpen: () => {
+            Swal.showLoading();
+        }
+    });
+}
 // Función para formatear el número a formato de dinero
 export const formatCurrency = (value) => {
   return new Intl.NumberFormat('es-MX', {
@@ -4176,6 +5433,41 @@ export const convertArrayOfObjectsToCSV = (array) => {
     const rows = array.map(obj => Object.values(obj).join(',')); // Mapea los valores en cada fila
     return [header, ...rows].join('\n'); // Une todo en una cadena CSV
 };
+//CON COMAS
+const escapeCSV = value => {
+  if (value == null) return '';
+  const str = String(value);
+
+  // Si contiene coma, comillas o salto de línea
+  if (/[",\n]/.test(str)) {
+    return `"${str.replace(/"/g, '""')}"`;
+  }
+  return str;
+};
+export const convertArrayOfObjectsToCSVCC = (data) => {
+    if (!data || !data.length) return null;
+
+    const headers = Object.keys(data[0]);
+
+    const escapeCSV = (value) => {
+        if (value === null || value === undefined) return '';
+        const str = value.toString();
+        // Si tiene coma, salto de línea o comillas → encapsular
+        if (/[",\n]/.test(str)) {
+            return `"${str.replace(/"/g, '""')}"`;
+        }
+        return str;
+    };
+
+    const rows = data.map(row =>
+        headers.map(h => escapeCSV(row[h])).join(',')
+    );
+
+    return [
+        headers.join(','),
+        ...rows
+    ].join('\n');
+};
 export const fNumber = (value) => {
     return new Intl.NumberFormat('en-US', {
         minimumFractionDigits: 2,
@@ -4197,3 +5489,10 @@ export const formatResult = (item) => {
         </>
     )
 }
+export const safeNumber = (v) => 
+    (typeof v === "number" && Number.isFinite(v)) ? v : "N/A";
+
+export const safeString = (v) =>
+    (typeof v === "string" && v.trim() !== "") ? v : "N/A";
+
+

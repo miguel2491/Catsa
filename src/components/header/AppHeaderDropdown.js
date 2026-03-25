@@ -18,7 +18,7 @@ import {
 import CIcon from '@coreui/icons-react'
 import Cookies from 'universal-cookie'
 import { useNavigate } from 'react-router-dom'
-import avatar8 from './../../assets/images/avatars/logo.png'
+import avatar8 from './../../assets/images/logo.png'
 import '../SideBar.css'
 import Swal from 'sweetalert2'
 

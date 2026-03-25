@@ -88,14 +88,12 @@ const RProductosV = () => {
         const auxFcaI = format(vFechaI, 'yyyy-MM-dd');
         const auxFcaF = format(vFechaF, 'yyyy-MM-dd');
         try{
-            console.log(auxFcaI, auxFcaF, plantasSelF)
             const ocList = await getPV(auxFcaI, auxFcaF, plantasSelF);
             if(ocList)
             {
                 const labels = [];
                 const dataSet = [];
                 const dataSetR = [];
-                console.log(ocList)
                 var totalP = 0;
                 var totalPR = 0;
                 ocList.forEach(item => {

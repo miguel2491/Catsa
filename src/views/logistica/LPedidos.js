@@ -1,43 +1,44 @@
 import React,{useEffect, useState, useRef} from 'react'
-import Cookies from 'universal-cookie'
 import axios from 'axios'
 import Swal from "sweetalert2";
+import DataTable from 'react-data-table-component'
+import {getPedidosList} from '../../Utilidades/Funciones'
 
 import {
   CContainer,
   CRow,
   CCol,
+  CBadge,
   CButton
 } from '@coreui/react'
 
-import TabulatorG from '../base/tabs/TabulatorP'
 import Plantas from '../base/parametros/Plantas'
 import FechaI from '../base/parametros/FechaInicio'
 import FechaF from '../base/parametros/FechaFinal'
 import {CIcon} from '@coreui/icons-react'
-import { cilSearch } from '@coreui/icons';
-
-const cookies = new Cookies();
-const baseUrl="http://apicatsa.catsaconcretos.mx:2543/api/";
-const baseUrl2="http://localhost:2548/api/";
+import { cilCheck, cilSearch, cilSync, cilX } from '@coreui/icons';
+import { format } from 'date-fns';
 
 const LPedidos = () => {
   const [plantasSel , setPlantas] = useState('');
   const [vFechaI, setFechaIni] = useState(null);
   const [vFcaF, setFechaFin] = useState(null);
   const [posts, setPosts] = useState([]);
+  const [dtPE, setDTPE] = useState([]);
   const opcionesFca = {
     year: 'numeric', // '2-digit' para el año en dos dígitos
     month: '2-digit',   // 'numeric', '2-digit', 'short', 'long', 'narrow'
     day: '2-digit'   // 'numeric', '2-digit'
   };
+  const [fText, setFText] = useState(''); 
+  const [vBPlanta, setBPlanta] = useState('');
+
   useEffect(()=>{    
     if(vFechaI!=null)
       {
-        //Swal.fire("INFO!", "Buen Trabajo!", "danger");
         if(plantasSel.length >0 && vFechaI.length > 0 && vFcaF.length > 0 && posts.length == 0)
             {
-              GetPedidos();
+              sendGetPedidos();
             }
         }
   });
@@ -51,76 +52,131 @@ const LPedidos = () => {
   const mFcaF = (fcaF) => {
     setFechaFin(fcaF.toLocaleDateString('en-US',opcionesFca));
   };
-  const sendGetPedidos = () =>{
-    console.log(plantasSel, vFechaI, vFcaF)
-    GetPedidos(plantasSel, vFechaI, vFcaF)
-}
-  async function GetPedidos(planta, fechaI, fechaF)
-  {
-    if(vFechaI != "" && vFcaF != "")
-    {
-      try{
-        let confi_ax = 
-        {
-          headers:
-          {
-            'Cache-Control': 'no-cache',
-            'Content-Type': 'application/json',
-            "Authorization": "Bearer "+cookies.get('token'),
+  
+  const sendGetPedidos = async () =>{
+      const auxFcaI = format(vFechaI, 'yyyy/MM/dd');
+      const auxFcaF = format(vFcaF, 'yyyy/MM/dd');
+      try {
+          const data = await getPedidosList(plantasSel, auxFcaI, auxFcaF);
+          console.log(data);
+          if (data) {
+            //setShDiv(true)
+            setDTPE(data);
+          } else {
+              Swal.fire("No se encontraron datos", "El número de cotización no es válido", "error");
           }
-        }
-        const fcaIni = vFechaI.split('/');
-        let auxFcaI = fcaIni[2]+"-"+fcaIni[0]+"-"+fcaIni[1];
-        const fcaFin = vFcaF.split('/');
-        let auxFcaF = fcaFin[2]+"-"+fcaFin[0]+"-"+fcaFin[1];
-        if(plantasSel.length > 0){
-        //--------------------------------------------------
-          axios.get(baseUrl2+'Logistica/GetPedidos/'+plantasSel+','+auxFcaI+","+auxFcaF+","+cookies.get('Usuario'),confi_ax)
-          .then(response=>{
-            setPosts(response)
-            return response.data;
-          }).then(response=>{
-            var obj = JSON.stringify(response);
-            if(obj.length>0){
-              obj = JSON.parse(obj);
-              console.log(obj)
-              setPosts(obj)
-            }else{    
-              //setErrorResponse(json.body.error);
-              //Swal.fire("ERROR", json.body.error, "danger");
-              Swal.fire({
-                icon: "error",
-                title: "Oops...",
-                text: "Something went wrong!",
-                footer: '<a href="#">Why do I have this issue?</a>'
-              });
-            }
-          })
-          .catch(err=>{
-            if (err.response) {
-              // El servidor respondió con un código de estado fuera del rango de 2xx
-              console.error('Error de Respuesta:', err.response.data);
-              addToast(exampleToast)
-              //setError(`Error: ${err.response.status} - ${err.response.data.message || err.response.statusText}`);
-            } else if (err.request) {
-              // La solicitud fue realizada pero no se recibió respuesta
-              console.error('Error de Solicitud:', err.request);
-              //setError('Error: No se recibió respuesta del servidor.');
-            } else {
-              // Algo sucedió al configurar la solicitud
-              console.error('Error:', err.message);
-              //setError(`Error: ${err.message}`);
-            }
-            //cookies.remove('token', {path: '/'});
-          })
-        }
-        //=============================================================================================================================  
-      } catch(error){
-        console.log(error);
-      }
-    }
-    
+      } catch (error) {
+          console.error(error);
+          Swal.fire("Error", "Hubo un problema al obtener los datos", "error");
+      } 
   }
+
+  const colPE = [
+    {
+      name: 'ACCION',
+      width:"100px",
+      sortable:true,
+      cell: (row) => {
+          
+          return (
+          <div>
+              <CRow>
+                  <CCol xs={2} md={2} lg={2}>
+                  <CButton
+                      style={{ color: 'white' }}
+                      color="warning"
+                      onClick={() => Recuperar(row.IdPedido)}
+                      size="sm"
+                      className="me-2"
+                      title="Recuperar"
+                  >
+                      <CIcon icon={cilSync} />
+                  </CButton>
+                  </CCol>
+              </CRow>
+          </div>
+          );
+      },
+    },
+    {
+      name: 'ID',
+      sortable: true,
+      width: '100px',
+      selector: row => {
+          const aux = row.IdPedido;
+              return <CBadge color='primary' textBgColor='primary'>{aux}</CBadge>;
+      },
+    },
+    {
+      name: 'PROGRAMADO',
+      sortable: true,
+      width: '100px',
+      selector: row => {
+          const aux = row.activo;
+          if (aux) {
+              return <CBadge color='primary' textBgColor='primary'><CIcon icon={cilCheck}></CIcon></CBadge>;
+          }else {
+              return <CBadge color='danger' shape='rounded-pill'><CIcon icon={cilX}></CIcon></CBadge>;
+          }
+      },
+    },
+    {
+      name: 'VB',
+      sortable: true,
+      width: '100px',
+      selector: row => {
+          const aux = row.VistoBueno;
+          if (aux) {
+              return <CBadge color='primary' textBgColor='primary'><CIcon icon={cilCheck}></CIcon></CBadge>;
+          }else {
+              return <CBadge color='danger' shape='rounded-pill'><CIcon icon={cilX}></CIcon></CBadge>;
+          }
+          return aux;
+      },
+    },
+    {
+      name: 'PLANTA',
+      selector: (row) => row.PlantaEnvio,
+      sortable: true,
+      width: '120px',
+    },
+    {
+      name: 'CLIENTE',
+      sortable: true,
+      selector: (row) => {
+          const vendedor = row.Cliente
+          if (vendedor === null || vendedor === undefined) {
+              return 'No disponible'
+          }
+          if (typeof vendedor === 'object') {
+              return '-' // O cualquier mensaje que prefieras
+          }
+          return vendedor
+      },
+      width: '200px',
+    },
+    {
+      name: 'OBRA',
+      selector: (row) => {
+          const obra_ = row.NoObra
+          if (obra_ === null || obra_ === undefined) {
+          return 'No disponible'
+          }
+          if (typeof obra_ === 'object') {
+          return '-' // O cualquier mensaje que prefieras
+          }
+          return obra_
+      },
+      sortable: true,
+      width: '200px',
+    },
+  ];
+
+  const fPE = dtPE.filter((item) => {
+    return item.PlantaEnvio.toString().includes(fText.toUpperCase()) || String(item.IdPedido).includes(fText) || String(item.Cliente).includes(fText) 
+    || String(item.NoObra).includes(fText) 
+  })
+  
   return (
     <>
       <CContainer fluid>
@@ -144,15 +200,23 @@ const LPedidos = () => {
               plantasSel={plantasSel}
             />
           </CCol>
-          <CCol sm="auto" className='mt-3'>
+          <CCol sm="auto" className='mt-4'>
             <CButton color='primary' onClick={sendGetPedidos}>
                 <CIcon icon={cilSearch} className="me-2" />
                 Realizar
             </CButton>
             </CCol>
         </CRow>
+        <CRow className='mt-4'>
+          <DataTable
+            columns={colPE}
+            data={fPE}
+            pagination
+            persistTableHead
+            subHeader
+          />
+        </CRow>
       </CContainer>
-      <TabulatorG titulo={'Pedidos'} posts={posts} />
     </>
   )
 }

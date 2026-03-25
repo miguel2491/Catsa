@@ -77,7 +77,6 @@ const Help = () => {
     const gOC = async () => {
         try{
             const ocList = await getTutoriales();
-            console.log(ocList)
             if(ocList)
             {
                 setLVideos(ocList)
@@ -104,7 +103,6 @@ const Help = () => {
                 setVActual('http://apicatsa.catsaconcretos.mx:2543/Uploads/'+tutorial.url_video);
                 setInfoVideo(tutorial.descripcion)
             },1000)            
-            console.log('Tutorial encontrado:', tutorial);
         } else {
             console.log('Tutorial no encontrado');
         }

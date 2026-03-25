@@ -25,7 +25,6 @@ const Dashboard = () => {
   const navigate = useNavigate();
   const userIsA = true;
   const userIsAdminTI = Rol('AdminTI')
-  console.log(userIsAdminTI)
   const userIsAdmin = Rol('Admin')
   const userIsCVentas = Rol('CoordinadorVentas')
   const userIsOperacion = Rol('Operaciones')

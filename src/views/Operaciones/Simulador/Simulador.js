@@ -188,14 +188,11 @@ const Simulador = () => {
             const arrDisenos = [];
             if(producto){
                 setMostrarDataTable(true);
-                console.log(producto, aMateriales);
-                
                 producto.forEach(item => {
                     var valMat = item.Item;
                     const resultado = aMateriales.find(items => items.Material === item.Item);
                     const totalMat = resultado.InicioCB+resultado.EntradasCB-resultado.SalidasCB;
                     const total = totalMat / item.Qty;
-                    console.log(total)
                     arrDisenos.push({
                         "Item":item.Item,
                         "UOM":item.UOM,

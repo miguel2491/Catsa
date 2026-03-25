@@ -31,9 +31,7 @@ import {
     CModalFooter
 } from '@coreui/react'
 import {CIcon} from '@coreui/icons-react'
-import { cilAvTimer, cilCloudDownload, cilEyedropper, cilPen, cilPlus, cilSave, cilSearch, cilTrash } from '@coreui/icons'
-import { format } from 'date-fns';
-import Categoria from '../../Admin/ObjCom/Categoria';
+import { cilAvTimer, cilCloudDownload, cilPen, cilPlus, cilSave, cilSearch, cilTrash } from '@coreui/icons'
 
 const RObjCom = () => {
     //************************************************************************************************************************************************************************** */
@@ -171,7 +169,6 @@ const RObjCom = () => {
       //console.log(dtObjComMod)
     }, [dtObjComMod]);
     useEffect(() => {
-      //console.log(dtPlantaObj)
       setExOc(dtPlantaObj);
     }, [dtPlantaObj]);
     useEffect(() => {
@@ -311,7 +308,6 @@ const RObjCom = () => {
           let objDiaP = obj_diaP2;
           let objDiarioGen = obj_diaP2/objIP[0].DiaHabil;
           let objDiario2 = objDiarioGen * 1;
-          //console.log(obj_acs, obj_max_cat, obj_dg, trP, tbP, obj_op_max, obj_ajusteP, obj_oper_max2, obj_ajusteP2, obj_diaP2, objDiario2.toFixed(2))
           const arrAux = {
             id:objP[0].id,
             mes:objP[0].mes,

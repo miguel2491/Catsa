@@ -64,7 +64,6 @@ const Step3 = ({ previousStep, fData, pData, sucursal, onSave }) => {
       // const updData = pData.map(producto => ({
       //   ...producto
       // }));
-      //console.log(fData)
     },[pData]);
     //***************************************************************** FUNCIONES ***************************************************************************************** */
     async function getElementos_()
@@ -81,8 +80,6 @@ const Step3 = ({ previousStep, fData, pData, sucursal, onSave }) => {
     }
     //***************************************************************************************************************************************************************** */
     const handleSave = () => {
-      // Aquí puedes manejar la lógica para guardar los datos
-      console.log("Guardando datos...", fData);
       const resulSend = {
         cP:{
           "idCotizacion": fData.idCotizacion,
@@ -189,7 +186,6 @@ const Step3 = ({ previousStep, fData, pData, sucursal, onSave }) => {
           });
           savePedidos(rSendPList);
         }
-        //console.log(pData)
       }catch(error){
         Swal.close();
         Swal.fire("Error", "No se pudo obtener la información", "error");
@@ -325,7 +321,6 @@ const Step3 = ({ previousStep, fData, pData, sucursal, onSave }) => {
       const newProductos = [...pData];
       newProductos[index].Hora = value;
       setTime(value);
-      console.log('Hora seleccionada:', value ? value.format('HH:mm') : 'No seleccionada');
     }
     const handleChangeMK = (e) => {
       const value = e.target.value.replace(/[^0-9.,]/g, '');  // Reemplazar cualquier carácter no numérico

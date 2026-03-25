@@ -13,7 +13,7 @@ import {
 import { AppSidebarNav } from './AppSidebarNav'
 import './SideBar.css'
 // sidebar nav config
-import avatar8 from './../../src/assets/images/avatars/logo.png'
+import avatar8 from './../../src/assets/images/logo.png'
 import Cookies from 'universal-cookie';
 import { NavContext } from './NavContext';
 

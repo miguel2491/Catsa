@@ -420,11 +420,9 @@ function CLote() {
     setMEspecimen(id);
     setVOC(true)
     setTipoCal(tipoB)
-    //console.log(dtCal)
     const fCal = dtCal.filter(item => {
       return item.Especimen == id;
     });
-    //console.log(fCal)
     setMCarga(fCal[0].Carga)
     setMLado1(fCal[0].Lado1)
     setMLado2(fCal[0].Lado2)
@@ -441,7 +439,6 @@ function CLote() {
     const fCil = dtCil.filter(item => {
       return item.ESPECIMEN == id;
     });
-    console.log(fCil)
     setMCarga(fCil[0].CARGA)
     setMDiametro1(fCil[0].DIAMETRO1)
     setMDiametro2(fCil[0].DIAMETRO2)
@@ -459,7 +456,6 @@ function CLote() {
           fc = parseFloat(fc).toFixed(2)
       let pfcmr = (fc / parseFloat(TxtRes)) * 100; 
           pfcmr = pfcmr.toFixed(2)
-      //console.log(fc, TxtRes, pfcmr)
       const fDataCubo = {
         CARGA:TxtMCarga,
         LADO1:TxtMLado1,
@@ -475,7 +471,6 @@ function CLote() {
         ESPECIMEN:TxtMEspecimen,
         Tipo:'CU'
       }
-      //console.log(fDataCubo)
       const res = await suCal(fDataCubo,'CU')
       if(res){
         Swal.close();
@@ -516,9 +511,7 @@ function CLote() {
         RESISTENCIA:parseFloat(TxtRes),
         AREA:parseFloat(area),
       }
-      console.log(fDataCilindro)
       const res = await suCal(fDataCilindro,'CI');
-      console.log(res)
       if(res == "OK"){
         Swal.close();
         Swal.fire("Éxito", "Se Agrego Correctamente", "success");
@@ -554,7 +547,6 @@ function CLote() {
         TipoMuestra:TxtTMuestra
       };
       const ocList = await suLote(fDMC,'MC');
-      //console.log(ocList)
       if(ocList){
         Swal.close();
         Swal.fire("Éxito", "Se Agrego Correctamente", "success");
@@ -571,7 +563,6 @@ function CLote() {
         ContenidoAire:parseFloat(TxtCAire),
       };
       const ocList = await suLote(fDMyrca,'MY');
-      //console.log(ocList)
       if(ocList){
         Swal.close();
         Swal.fire("Éxito", "Se Agrego Correctamente", "success");

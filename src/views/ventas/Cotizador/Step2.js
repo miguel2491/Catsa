@@ -332,7 +332,6 @@ const Step2 = ({ nextStep, previousStep, fuente, segmento, canal, productos, ext
           setcExtras(extras)
     },[]);
     useEffect(()=>{
-      console.log(extras)
       setcExtras(extras)
       //filterProductos(selectedConcreto);
     },[extras])
@@ -389,7 +388,6 @@ const Step2 = ({ nextStep, previousStep, fuente, segmento, canal, productos, ext
         // Selección múltiple
         const selectedValues = selected.map(option => option.value);
         getFindPro(selectedValues[selectedValues.length-1]);
-        console.log(selectedValues[selectedValues.length-1])
       } else {
         // Selección única
         console.log('Valor seleccionado:', selected.value);
@@ -399,7 +397,6 @@ const Step2 = ({ nextStep, previousStep, fuente, segmento, canal, productos, ext
     {
       setSelectedProductos(pro)
       const productoBuscado = productos.filter(producto => producto.Producto === pro);
-      console.log(productoBuscado)
       setProductos(prevProductos => [...prevProductos, ...productoBuscado]);
       updPData(productoBuscado);
       const CostoMP = productoBuscado[0].COSTO;
@@ -414,7 +411,6 @@ const Step2 = ({ nextStep, previousStep, fuente, segmento, canal, productos, ext
       const auxMB = fNumber(MB.toFixed(2))
       const MBAux = auxMB
       setMB(MBAux)
-      console.log(MB, tCom)
       if(MB >= tCom.P3MAX)
       {
         const auxCom = tCom2.P3MIN;

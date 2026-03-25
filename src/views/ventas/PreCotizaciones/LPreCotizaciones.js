@@ -78,7 +78,6 @@ const LPreCotizacion = () => {
         try{
           const TabUpd = dtGen.find(table => table.TableName === "Table1");
           let NDatos = [];
-          //console.log(TxtEstatus)
           dtUpdate.forEach(rowp => {
             let idc = rowp.IdCot;
             let cantidad = parseFloat(rowp.CantidadM3)
@@ -176,7 +175,6 @@ const LPreCotizacion = () => {
           const json = JSON.stringify(payload, null, 2)
           const res = await setUpdPreCot(payload)
           const respuesta = res;
-          console.log(respuesta.noCotizacion)
           Swal.close();
           if(respuesta){
             Swal.fire("Éxito", "Se realizó correctamente #"+respuesta.noCotizacion, "success");
@@ -239,9 +237,7 @@ const LPreCotizacion = () => {
       });
       try{
         const auxPreCot = dPreCot.find(table => table.IdCotizacion === id);
-        console.log(auxPreCot)
         const ocList = await getPreCotizacion(id);
-        console.log("PRECOT",ocList)
         if(ocList)
         {
           setDTGen(ocList)
@@ -959,7 +955,6 @@ const LPreCotizacion = () => {
                 }
                 else if(TxtEstatus == 'Cancelada' || TxtEstatus == 'Perdida')
                 {
-                  console.log(TxtMotivo)
                   Swal.fire("Aviso", bandera, "info");
                 }
                 

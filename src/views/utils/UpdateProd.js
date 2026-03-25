@@ -39,7 +39,6 @@ const UpdateProd = () => {
             const ocList = await getUVez();
             if(ocList)
             {
-                console.log(ocList)
                 let uHra = ocList[0].fecha_creacion;
                 let usuario = ocList[0].usuario;
                 const parsedFecha1 = parse(uHora, 'yyyy/MM/dd HH:mm', new Date());
@@ -48,7 +47,6 @@ const UpdateProd = () => {
                 setUsuarioAct(usuario)
                 // Calculamos la diferencia en minutos
                 const diferenciaEnMinutos = differenceInMinutes(parsedFecha1, parsedFecha2);
-                console.log(diferenciaEnMinutos)
                 if(diferenciaEnMinutos > 30){
                     setBtnD(true)
                 }else{
@@ -88,9 +86,6 @@ const UpdateProd = () => {
                 };
                 //------------------------------------------------------------------------------------------------------------------------------------------------------
                 const response = await axios.get(baseUrl2+'Administracion/SetSPPRecios/'+cookies.get('Usuario'), confi_ax);
-                console.log(response.data);
-                //Swal.fire("CORRECTO", "Se Agrego Correctamente", "success");
-                //setPrecios2(true);
                 setSPrecios2();
             } 
             catch(error)
@@ -128,12 +123,8 @@ const UpdateProd = () => {
             //------------------------------------------------------------------------------------------------------------------------------------------------------
             await axios.get(baseUrl2+'Administracion/SetSPPRecios2', confi_ax)
             .then(response=>{
-                console.log(response.data);
-                //Swal.fire("CORRECTO", "Finalizo proceso", "success");
-                //setDisabled2(true);
                 setPercentage(55);
                 setCMEdo();
-                //return response.data;
             })
             .catch(err=>{
                 if (err.response) {
@@ -174,7 +165,6 @@ const UpdateProd = () => {
             //------------------------------------------------------------------------------------------------------------------------------------------------------
             await axios.get(baseUrl2+'Administracion/SetCMEdo', confi_ax)
             .then(response=>{
-                console.log(response.data);
                 //Swal.fire("CORRECTO", "Primer Parte", "success");
                 setDisabled2(true)
                 setEntrada()
@@ -216,7 +206,6 @@ const UpdateProd = () => {
             //------------------------------------------------------------------------------------------------------------------------------------------------------
             await axios.get(baseUrl2+'Administracion/SetPEntrada', confi_ax)
             .then(response=>{
-                console.log(response.data);
                 //Swal.fire("CORRECTO", "Proceso Finalizada", "success");
                 setDisabled2(false)
                 setDisabled3(true)
@@ -262,7 +251,6 @@ const UpdateProd = () => {
             //------------------------------------------------------------------------------------------------------------------------------------------------------
             await axios.get(baseUrl2+'Administracion/SetCISADB', confi_ax)
             .then(response=>{
-                console.log(response.data);
                 //Swal.fire("CORRECTO", "PARTE1", "success");
                 setCisaProd()
                 //return response.data;
@@ -302,8 +290,6 @@ const UpdateProd = () => {
             //------------------------------------------------------------------------------------------------------------------------------------------------------
             await axios.get(baseUrl2+'Administracion/SetCISAPROD', confi_ax)
             .then(response=>{
-                console.log(response.data);
-                //Swal.fire("CORRECTO", "PARTE2", "success");
                 setAfectarMov()
                 setPercentage(80); 
                 //return response.data;
@@ -344,7 +330,6 @@ const UpdateProd = () => {
             }
             //------------------------------------------------------------------------------------------------------------------------------------------------------
             const response = await axios.get(baseUrl2+'Administracion/SetAfectarMov', confi_ax);
-            console.log(response.data);
             Swal.fire("CORRECTO", "PROCESO FINALIZADO", "success");
             setPercentage(100); 
             setDisabled3(true)   
@@ -373,28 +358,28 @@ const UpdateProd = () => {
     
     return (
     <>
-        <CContainer fluid>
-            <h1>Actualizar Producción</h1>
-            <CForm>
+        <CContainer fluid className='text-center'>
+            <h1 className="mt-3 d-flex justify-content-center">Actualizar Producción</h1>
+            <CForm className='text-center'>
                 <CRow>
-                <CCol sm="auto" className='mt-3'>
-                    <CButton color='primary' onClick={updPrecio} id='btnPaso1' style={{ display:btnD ? 'block':'none' }}>
-                        <CIcon icon={cilLoopCircular} className="me-2" />
-                        Paso 1
-                    </CButton>
-                </CCol>
-                <CCol sm="auto" className='mt-3'>
-                    <CButton color='secondary' onClick={updCopyMP} style={{ display:btn2 ? 'block':'none' }}>
-                        <CIcon icon={cilLoopCircular} className="me-2" />
-                        Paso 2
-                    </CButton>
-                </CCol>
-                <CCol sm="auto" className='mt-3'>
-                    <CButton color='light' onClick={updIntCISA}  style={{ display:btn3 ? 'block':'none' }}>
-                        <CIcon icon={cilLoopCircular} className="me-2" />
-                        Paso 3
-                    </CButton>
-                </CCol>
+                    <CCol sm={12} className="mt-3 d-flex justify-content-center">
+                        <CButton color='primary' onClick={updPrecio} id='btnPaso1' style={{ display:btnD ? 'block':'none' }}>
+                            <CIcon icon={cilLoopCircular} className="me-2" />
+                            Paso 1
+                        </CButton>
+                    </CCol>
+                    <CCol sm="auto" className="mt-3 d-flex justify-content-center">
+                        <CButton color='secondary' onClick={updCopyMP} style={{ display:btn2 ? 'block':'none' }}>
+                            <CIcon icon={cilLoopCircular} className="me-2" />
+                            Paso 2
+                        </CButton>
+                    </CCol>
+                    <CCol sm="auto" className="mt-3 d-flex justify-content-center">
+                        <CButton color='light' onClick={updIntCISA}  style={{ display:btn3 ? 'block':'none' }}>
+                            <CIcon icon={cilLoopCircular} className="me-2" />
+                            Paso 3
+                        </CButton>
+                    </CCol>
                 </CRow>
                 <CRow>
                     <label>Última Actualización:<b>{uHoraAct}</b> </label><br /><label>Por el Usuario: <b>{usuarioAct}</b></label>

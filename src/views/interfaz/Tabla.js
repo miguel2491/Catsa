@@ -29,7 +29,6 @@ const Tabla = forwardRef((props, ref) => {
 
     const eAccion = async () => {
         var producto = await getProductoIF(props.planta, props.fechaI);
-        console.log(producto)
         if(producto){
             setResumen(producto);
         }else{

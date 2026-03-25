@@ -52,7 +52,6 @@ const RCartera = () => {
             const clientes = await getClientesAsesor(asesorSel);
             if (clientes) {
                 const objClientes = clientes;
-                console.log(objClientes);
                 setData(objClientes);
             } else {
                 Swal.fire("Error", "Ocurrió un error, vuelve a intentar", "error");

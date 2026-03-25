@@ -38,6 +38,23 @@ import {
   cilClearAll,
   cilMobile,
   cilTruck,
+  cilLaptop,
+  cilPowerStandby,
+  cilRss,
+  cilHistory,
+  cilClock,
+  cilChart,
+  cilChartPie,
+  cilFindInPage,
+  cilLan,
+  cilNotes,
+  cilPhone,
+  cilSignalCellular3,
+  cilBuilding,
+  cilCopy,
+  cilVerticalAlignBottom,
+  cilVerticalAlignCenter,
+  cilClosedCaptioning,
 } from '@coreui/icons'
 import { CNavGroup, CNavItem, CNavTitle } from '@coreui/react'
 import CIcon from '@coreui/icons-react'
@@ -69,10 +86,32 @@ const NavProvider = ({ children }) => {
     const userIsDirector = Rol('Direccion')
     const userIsJP = Rol('JefePlanta')
     const userIsDosif = Rol('Dosificador')
-    const productivo = false;
+    const productivo = false
     nav = [
-      ...(userIsVentas || userIsAdminTI || userIsDirector || userIsFinanzas || userIsAdmin || userIsOperacion || userIsCVentas
+      ...(userIsVentas ||
+      userIsAdminTI ||
+      userIsDirector ||
+      userIsFinanzas ||
+      userIsAdmin ||
+      userIsOperacion ||
+      userIsCVentas
         ? [
+            ...(userIsAdminTI || userIsDirector
+            ? [
+                {
+                  component: CNavItem,
+                  name: 'EN VIVO',
+                  to: '/Operaciones/Pedidos/nVivo',
+                  icon: <CIcon icon={cilRss} customClassName="nav-icon" />,
+                },
+                // {
+                //   component: CNavItem,
+                //   name: 'AL MOMENTO',
+                //   to: '/Operaciones/Pedidos/PTReal',
+                //   icon: <CIcon icon={cilRss} customClassName="nav-icon" />,
+                // },
+              ]
+          : []),
             {
               component: CNavTitle,
               name: 'Ventas',
@@ -111,7 +150,17 @@ const NavProvider = ({ children }) => {
                       to: '/ventas/LPreCotizacion',
                       icon: <CIcon icon={cilCalendar} customClassName="nav-icon" />,
                     },
-                    ],
+                    ...(userIsAdminTI
+                    ?[
+                        {
+                          component: CNavItem,
+                          name: 'Vencimiento',
+                          to: '/ventas/CVencimiento',
+                          icon: <CIcon icon={cilClock} customClassName="nav-icon" />,
+                        },
+                        ]
+                    :[]),
+                  ],
                   },
                 ]
               : []),
@@ -163,7 +212,33 @@ const NavProvider = ({ children }) => {
                             },
                           ]
                         : []),
+                        ...(userIsAdminTI
+                        ? [
+                            {
+                              component: CNavItem,
+                              name: 'Pedidos Eliminados',
+                              to: '/Operaciones/Pedidos/Eliminados',
+                              icon: <CIcon icon={cilTrash} customClassName="nav-icon" />,
+                            },
+                            {
+                              component: CNavItem,
+                              name: 'Pedidos Fuera de Tiempo',
+                              to: '/Operaciones/Pedidos/Morosos',
+                              icon: <CIcon icon={cilClock} customClassName="nav-icon" />,
+                            },
+                          ]
+                        : []),
                     ],
+                  },
+                ]
+              : []),
+            ...(userIsVentas || userIsCVentas || userIsAdmin || userIsDirector  || userIsAdminTI || userIsOperacion
+              ? [
+                  {
+                    component: CNavItem,
+                    name: 'Facturas',
+                    to: '/Pedidos/Facturas',
+                    icon: <CIcon icon={cilNotes} customClassName="nav-icon" />,
                   },
                 ]
               : []),
@@ -240,7 +315,59 @@ const NavProvider = ({ children }) => {
                       icon: <CIcon icon={cilUser} customClassName="nav-icon" />,
                     },
                   ]
-                : []),  
+                : []),
+            ...(userIsAdminTI || userIsDirector || userIsCVentas 
+                ? [
+                    {
+                      component: CNavItem,
+                      name: 'Volumén por Cliente',
+                      to: '/Ventas/volclie',
+                      icon: <CIcon icon={cilChartPie} customClassName="nav-icon" />,
+                    },
+                  ]
+                : []),
+            ...(userIsAdminTI || userIsDirector
+                ? [
+                    {
+                      component: CNavItem,
+                      name: 'Clientes',
+                      to: '/Ventas/clientes',
+                      icon: <CIcon icon={cilUser} customClassName="nav-icon" />,
+                    },
+                  ]
+                : []),
+            ...(userIsAdminTI || userIsDirector 
+                ? [
+                  {
+                    component: CNavGroup,
+                    name: 'Obras',
+                    to: '/theme/admin',
+                    icon: <CIcon icon={cilCalendarCheck} customClassName="nav-icon" />,
+                    items: [
+                      ...(userIsAdminTI
+                        ? [
+                            {
+                              component: CNavItem,
+                              name: 'Obras',
+                              to: '/Ventas/obras',
+                              icon: <CIcon icon={cilUser} customClassName="nav-icon" />,
+                            },
+                          ]
+                        : []),
+                        ...(userIsAdminTI
+                        ? [
+                            {
+                              component: CNavItem,
+                              name: 'Levantar Obras',
+                              to: '/Ventas/LevObras',
+                              icon: <CIcon icon={cilPlus} customClassName="nav-icon" />,
+                            },
+                          ]
+                        : []),
+                    ],
+                  },
+                ]
+              : []),  
           ]
         : []),
       ...(userIsAdmin || userIsOperacion || userIsGerenteP || userIsJP || userIsAdminTI || userIsAuxGer || userIsDosif
@@ -262,6 +389,16 @@ const NavProvider = ({ children }) => {
             ...(userIsAdmin || userIsOperacion || userIsGerenteP || userIsJP || userIsAdminTI || userIsAuxGer || userIsDosif
               ? [
                 {
+                  component: CNavItem,
+                  name: 'Command VS Intelisis',
+                  to: '/logistica/CommandIntelisis',
+                  icon: <CIcon icon={cilVerticalAlignCenter} customClassName="nav-icon" />,
+                },
+              ]
+            :[]),
+            ...(userIsAdmin || userIsOperacion || userIsGerenteP || userIsJP || userIsAdminTI || userIsAuxGer || userIsDosif
+              ? [
+                {
                   component: CNavGroup,
                   name: 'Inventarios',
                   to: '/Inventario',
@@ -271,6 +408,11 @@ const NavProvider = ({ children }) => {
                       component: CNavItem,
                       name: 'CICAT Resumen',
                       to: '/Cicat/Resumen',
+                    },
+                    {
+                      component: CNavItem,
+                      name: 'Inventario CICAT',
+                      to: '/Cicat/Inventario',
                     },
                     ...(userIsOperacion || userIsAdmin || userIsGerenteP || userIsJP || userIsDosif    
                       ? [
@@ -290,6 +432,15 @@ const NavProvider = ({ children }) => {
                           icon: <CIcon icon={cilPlus} customClassName="nav-icon" />
                         },
                       ]:[]),
+                      ...( userIsAdmin || userIsAdminTI || userIsOperacion 
+                        ? [
+                          {
+                            component: CNavItem,
+                            name: 'Almacén',
+                            to: '/Inventario/Almacen',
+                            icon: <CIcon icon={cilBuilding} customClassName="nav-icon" />,
+                          },
+                      ]:[]),
                     ...(userIsAdminTI  
                     ?[
                       {
@@ -297,6 +448,15 @@ const NavProvider = ({ children }) => {
                         name: 'Simulador',
                         to: '/Operaciones/Simulador',
                         icon: <CIcon icon={cilGraph} customClassName="nav-icon" />
+                      },
+                    ]:[]),
+                    ...(userIsAdminTI  
+                    ?[
+                      {
+                        component: CNavItem,
+                        name: 'Cierres',
+                        to: '/Operaciones/Cierres',
+                        icon: <CIcon icon={cilClosedCaptioning} customClassName="nav-icon" />
                       },
                     ]:[])
                   ],
@@ -345,6 +505,24 @@ const NavProvider = ({ children }) => {
                       ? [
                         {
                           component: CNavItem,
+                          name: 'Levantar Pedido',
+                          to: '/Operaciones/Pedidos/Pedidos',
+                          icon: <CIcon icon={cilPlus} customClassName="nav-icon" />
+                        },
+                      ]:[]),
+                    ...(userIsOperacion || userIsAdmin || userIsGerenteP || userIsJP || userIsAuxGer
+                      ? [
+                        {
+                          component: CNavItem,
+                          name: 'Pedidos Eliminados',
+                          to: '/Operaciones/Pedidos/Eliminados',
+                          icon: <CIcon icon={cilTrash} customClassName="nav-icon" />
+                        },
+                      ]:[]),  
+                    ...(userIsOperacion || userIsAdmin || userIsGerenteP || userIsJP || userIsAuxGer
+                      ? [
+                        {
+                          component: CNavItem,
                           name: 'Pedidos Cancelados',
                           to: '/Operaciones/Pedidos/Cancelados',
                           icon: <CIcon icon={cilBan} customClassName="nav-icon" />
@@ -359,6 +537,36 @@ const NavProvider = ({ children }) => {
                           icon: <CIcon icon={cilFile} customClassName="nav-icon" />
                         },
                       ]:[]),
+                  ],
+                },
+              ]
+            :[]),
+            ...(userIsOperacion || userIsAdmin || userIsAdminTI || userIsAuxGer || userIsJP
+              ? [
+                {
+                  component: CNavGroup,
+                  name: 'Producción',
+                  to: '/Produccion',
+                  icon: <CIcon icon={cilTruck} customClassName="nav-icon" />,
+                  items: [
+                    ...(userIsOperacion || userIsAdmin || userIsGerenteP || userIsJP || userIsAuxGer
+                      ? [
+                        {
+                          component: CNavItem,
+                          name: 'Fin de Día',
+                          to: '/Operaciones/Produccion/FDD',
+                          icon: <CIcon icon={cilLan} customClassName="nav-icon" />
+                        },
+                      ]:[]),
+                    ...(userIsOperacion || userIsAdmin || userIsGerenteP || userIsJP || userIsAuxGer
+                      ? [
+                        {
+                          component: CNavItem,
+                          name: 'Reporte Fin de Día',
+                          to: '/Operaciones/Pedidos/Eliminados',
+                          icon: <CIcon icon={cilNotes} customClassName="nav-icon" />
+                        },
+                      ]:[]),  
                   ],
                 },
               ]
@@ -438,6 +646,12 @@ const NavProvider = ({ children }) => {
                         to: '/Admin/LiberarUsuario',
                         icon: <CIcon icon={cilClearAll} customClassName="nav-icon" />,
                       },
+                      {
+                        component: CNavItem,
+                        name: 'Usuarios Móviles',
+                        to: '/Admin/Movil',
+                        icon: <CIcon icon={cilMobile} customClassName="nav-icon" />,
+                      },
                     ],
                   },
                 ]
@@ -478,7 +692,7 @@ const NavProvider = ({ children }) => {
                             },
                           ]
                         : []),
-                      ...(userIsAdmin || userIsOperacion || userIsGerenteP || userIsAdminTI || userIsAuxGer
+                      ...(userIsAdminTI 
                         ? [
                             {
                               component: CNavItem,
@@ -554,6 +768,16 @@ const NavProvider = ({ children }) => {
                       },
                     ]
                   : []),
+                ...(userIsAdminTI
+                  ? [
+                      {
+                        component: CNavItem,
+                        name: 'Duplicados',
+                        icon: <CIcon icon={cilCopy} customClassName="nav-icon" />,
+                        to: '/interfaz/OPDuplicados',
+                      },
+                    ]
+                  : []),
               ],
             },
             {
@@ -579,6 +803,35 @@ const NavProvider = ({ children }) => {
                         name: 'REF Costos',
                         icon: <CIcon icon={cilSpreadsheet} customClassName="nav-icon" />,
                         to: '/Admin/Catalogos/REF',
+                      },
+                    ]
+                  : []),
+              ],
+            },
+            {
+              component: CNavGroup,
+              name: 'Equipos',
+              to: '/equipos',
+              icon: <CIcon icon={cilLaptop} customClassName="nav-icon" />,
+              items: [
+                ...(userIsAdminTI
+                  ? [
+                      {
+                        component: CNavItem,
+                        name: 'Equipos',
+                        icon: <CIcon icon={cilLaptop} customClassName="nav-icon" />,
+                        to: '/Admin/Equipos',
+                      },{
+                        component: CNavItem,
+                        name: 'Movimientos Equipo',
+                        icon: <CIcon icon={cilPowerStandby} customClassName="nav-icon" />,
+                        to: '/Admin/BitacoraEquipos',
+                      },
+                      {
+                        component: CNavItem,
+                        name: 'Nóminas',
+                        icon: <CIcon icon={cilWallet} customClassName="nav-icon" />,
+                        to: '/Admin/Nominas',
                       },
                     ]
                   : []),

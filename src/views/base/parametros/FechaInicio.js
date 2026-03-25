@@ -16,7 +16,7 @@ const FechaInicio = ({vFechaI, cFechaI}) => {
                 id='fecha' 
                 selected={vFechaI} 
                 onChange={cFechaI} 
-                placeholderText='Seleccione Fecha Inicial'  
+                placeholderText='Fecha Inicial'  
                 locale="es"
                 dateFormat="yyyy/MM/dd" 
                 className='form-control' 

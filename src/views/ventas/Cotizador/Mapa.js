@@ -22,11 +22,9 @@ const Mapa = ({coords, cordsPlanta, markerPositionO, markerPositionR, onMarkerPo
     useEffect(() => {
         //handleReset();
         if(cordsPlanta.Lat !== null && cordsPlanta.Lon !== null){
-            //console.log('Coords en Step1:', cordsPlanta);
             const ld = parseFloat(cordsPlanta.Lat);
             const lg = parseFloat(cordsPlanta.Lon);
             if(mpPlanta[0] !== 0 && mpPlanta[1] !== 0){
-                console.log("Ya contiene Planta")
                 handleReset();
                 getMpositionActual()
             }
@@ -39,15 +37,12 @@ const Mapa = ({coords, cordsPlanta, markerPositionO, markerPositionR, onMarkerPo
             } else {
                 console.error("Coordenadas inválidas:", cordsPlanta.Lat, cordsPlanta.Lon);
             }
-            //console.log("SMAPA:",markerCotizacion)
         }
     },[cordsPlanta]);
     useEffect(() => {
-        //console.log('Centro de planta actualizado:', mpPlanta, mapCenter);
         if(mpPlanta[0] !==  0 && mapCenter[0] !== 0){
             const distancia = calcularDistanciaLeaflet(mpPlanta[0], mpPlanta[1],mapCenter[0], mapCenter[1]);
             const distanciaKm = distancia/1000;
-            //console.log(distanciaKm)
             if(distanciaKm > 30){
                 Swal.fire("Advertencia", "Supera los 30Km, revisa los costos extras que se puedan aplicar", "warning")
             }

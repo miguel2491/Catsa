@@ -131,7 +131,6 @@ const LCotizacion = () => {
     if(vFechaI!=null){
       if(plantasSel.length >0 && vFechaI.length > 0 && vFcaF.length > 0)
         {
-          console.log(plantasSel, vFechaI, vFcaF);
           GetCotizaciones_();
         }
     }
@@ -142,7 +141,6 @@ const LCotizacion = () => {
     {
       setPlantas(pla);
       if(posts.length>0){
-        console.log(posts)
         const filteredCotizaciones = posts.filter(item => item.IdPlanta === pla);
         setDTCotizacion(filteredCotizaciones);
       }else{
@@ -753,9 +751,7 @@ const LCotizacion = () => {
       // Llamada a la API
         const cotI = await GetCotizaciones(vFechaI, vFcaF, planta);
         Swal.close();  // Cerramos el loading
-        console.log(cotI)
         if (cotI) {
-          console.log(cotI)
           const filteredCotizaciones = cotI.filter(item => item.IdPlanta === planta);
           setPosts(cotI);
           setDTCotizacion(filteredCotizaciones);  // Procesar la respuesta
@@ -789,7 +785,6 @@ const LCotizacion = () => {
       if(ocList){
         setDTPedidos(ocList)
       }
-      console.log(ocList)
     }catch(error){
         Swal.close();
         Swal.fire("Error", "No se pudo obtener la información", "error");
@@ -839,7 +834,6 @@ const LCotizacion = () => {
       try{
         const extFile = await getArchivo(id);
         Swal.close();
-        console.log(extFile)
         if(extFile){
           Swal.fire({
             title: "Peido #"+id,
@@ -977,7 +971,6 @@ const LCotizacion = () => {
       if(ocList){
         //Buscar en ArrayCotizador NoCliente y NoObra
         const ArrayC = ocList.sort((a,b) => a.Estado - b.Estado);
-        console.log(ArrayC)
         setDirO((ArrayC[0] && ArrayC[0] && ArrayC[0].Direccion !== "") ? ArrayC[0].Direccion:'-');
         setColoniaO((ArrayC[0] && ArrayC[0] && ArrayC[0].Colonia !== "") ? ArrayC[0].Colonia:'-');
         setMunicO((ArrayC[0] && ArrayC[0] && ArrayC[0].Municipio !== "") ? ArrayC[0].Municipio:'-');
@@ -994,7 +987,6 @@ const LCotizacion = () => {
     try
     {
       const ocList = await getSeguimientos(id);
-      console.log(ocList)
       if(ocList)
       {
         setDTSeg(ocList)
@@ -1147,7 +1139,6 @@ const LCotizacion = () => {
   const mMapa = async(idc) =>{
     try{
       const ocList = await getVisitas(idc, "Visita");
-      console.log(ocList)
       if(ocList)
       {
         Swal.close();
@@ -1210,12 +1201,10 @@ const LCotizacion = () => {
   const mMapaOR = async(idc) =>{
     try{
       const ocList = await getCotizacionId(idc);
-      console.log(ocList)
       if(ocList)
       {
         Swal.close();
         setMapeoModal(true)
-        console.log(ocList[0].coordenada.length, ocList[0].coordenadaR.length)
         if(ocList[0].coordenada.length > 0 && ocList[0].coordenadaR.length > 10)
         {
           const rutas = {

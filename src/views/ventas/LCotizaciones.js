@@ -4,7 +4,6 @@ import Swal from "sweetalert2";
 import { MapContainer, TileLayer, Marker, Popup, Circle } from 'react-leaflet'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
- 
 import "sweetalert2/dist/sweetalert2.min.css";
 import DataTable from 'react-data-table-component';
 import DatePicker from 'react-datepicker';
@@ -12,8 +11,8 @@ import "react-datepicker/dist/react-datepicker.css";
 import TimePicker from 'rc-time-picker';
 import 'rc-time-picker/assets/index.css';
 import { useNavigate } from "react-router-dom";
-import { GetCotizaciones,convertArrayOfObjectsToCSV, getPedidosCot, getArchivo, setStatus, getCotizacionExtra, getCotizacionLog, getSegmentos,
-  getSeguimientos, getObraCot, getClienteCot, setVisitas, getVisitas, getCotizacionId
+import { GetCotizaciones,convertArrayOfObjectsToCSV, setVisitas, getCotizacionById, getPrecios, getCotizacionDIById,
+  setCotizaCantCot
  } from '../../Utilidades/Funciones';
 import {
   CButton,
@@ -33,13 +32,18 @@ import {
   CFormSelect,
   CFormCheck,
   CFormInput,
+  CFormTextarea,
+  CFormLabel,
 } from '@coreui/react'
 import CIcon from '@coreui/icons-react'
 import {
   cilCheck,
   cilClearAll,
   cilCloudDownload,
+  cilDataTransferDown,
+  cilEyedropper,
   cilFile,
+  cilGraph,
   cilImage,
   cilMap,
   cilMenu,
@@ -50,8 +54,10 @@ import {
   cilSearch,
   cilShareAlt,
   cilTag,
+  cilTransfer,
   cilTrash
 } from '@coreui/icons'
+import { generarPDF } from "./../utils/CotizacionPDF";
 
 import BuscadorDT from '../base/parametros/BuscadorDT'
 //import TabulatorTest from '../base/tables/Tabulator'
@@ -67,24 +73,53 @@ const LCotizacion = () => {
   const [vFechaI, setFechaIni] = useState(null);
   const [vFcaF, setFechaFin] = useState(null);
   const [posts, setPosts] = useState([]);
-  const [mPedidos, setMPedidos] = useState(false);
-  const [mOpciones, setMOpciones] = useState(false);
-  const [sEstatusC, setSEstatusC] = useState(null);
-  const [dSeg, setDSeg] = useState('');
-  const [time, setTime] = useState(null);
-  const [chkFT, setChkFT] = useState('Cliente');
-  //------------------Shows----------------------------
-  const [shCO, setShCO] = useState('Cliente');
+  //--------------- MODALS ---------------------------------
+  const [mCotizaciones, setMCotizaciones] = useState(false);
+  const [mDetalleItem, setMDetalleItem] = useState(false);
+  //------------------Shows---------------------------------
+  const [shDiv, setShDiv] = useState(false);
+  //Checkeds
+  const[sTF, setTF] = useState("C");
+  //Cotizacion
+  const[noCotSel, setNoCotSel] = useState(0);
+  const[codClie, setCodClie] = useState("-");
+  const[cliente, setCliente] = useState("-");
+  const[codObra, setCodObra] = useState("-");
+  const[Obra, setObra] = useState("-");
+  const[vendedor, setVendedor] = useState("-");
+  const[asesor, setAsesor] = useState([]);
+  const[codVendedor, setCodVendedor] = useState("-");
+  const[observaciones, setObservaciones] = useState("-");
+  const[concom, setConCom] = useState(false);
+  const[total, setTotal] = useState(false);
+  const[IVA, setIVA] = useState(false);
+  const[chkObs, setChkObs] = useState(false);
+  const[estatus, setEstatus] = useState(['Aceptada','Cancelada','Negociando','Pendiente','Perdida','Prospecto']);
+  const[sEstatus, setsEstatus] = useState("");
+  //--DT DETALLE
+  const [dtCotizacionD, setDTCotizacionD] = useState([]);
+  //EXTRAS
+  const [dtExtras, setDTExtras] = useState([]);
+  const [txtIdExtra, setIdExtra] = useState(0);
+  const [txtExtra, setExtra] = useState('');
+  const [txtCant, setCant] = useState(0.0);
+  const [txtCantCot, setCantCot] = useState(0.0);
+  const [txtPrecio, setPrecio] = useState(0.0);
+  const [txtPrecioUser, setPrecioUser] = useState(0.0);
+  const [txtPrecioTot, setPrecioTotal] = useState(0.0);
+  //SEGUIMIENTO
+  const [dtListSeg, setDTListSeg] = useState([]);
+  const [hora, setHora] = useState(new Date());
 
+  //CLIENTE
+  const[direccion, setDireccion] = useState("-");
+  //OBRA
+
+  //LOG MOD
+  const [dtMod, setDTMod] = useState([]);
   //Arrays
   const [dtCotizacion, setDTCotizacion] = useState([]);
-  const [dtPedidos, setDTPedidos] = useState([]);
-  const [dtExtras, setDTExtras] = useState([]);
-  const [dtLog, setDTLog] = useState([]);
-  const [dtSeg, setDTSeg] = useState([]);
-  const [dtRuta, setDTRuta] = useState([]);
-  const [cmbSeg, setCmbSeg] = useState([]);
-
+  
   const opcionesFca = {
     year: 'numeric', // '2-digit' para el año en dos dígitos
     month: '2-digit',   // 'numeric', '2-digit', 'short', 'long', 'narrow'
@@ -92,14 +127,7 @@ const LCotizacion = () => {
   };
 
   // Almacena los puntos de las visitas
-  const [visitPoints, setVisitPoints] = useState([])
-  // Modal para acciones (Registrar visita, Registrar llamada, Mapeo)
-  const [mAcciones, setMAcciones] = useState(false)
-  const [selectedCotizacion, setSelectedCotizacion] = useState(null)
   // Modal para mostrar el mapa
-  const [mapeoModal, setMapeoModal] = useState(false)
-  const [mapCenter, setMapCenter] = useState([19.023968543290614,-98.2954168461941])
-  const [zoom, setZoom] = useState(10);
   const handleExtraActions = (idCotizacion) => {
     setSelectedCotizacion(idCotizacion)
     setMAcciones(true)
@@ -107,23 +135,6 @@ const LCotizacion = () => {
   //------------ FROMS CLIENTE/OBRAS ------------------------------------------
   const [RazonTxtC, setRazonC] = useState('');
   const [RFCTxtC, setRFCC] = useState('');
-  const [PagoTxtC, setPagoC] = useState('');
-  const [DigitosTxtC, setDigitosC] = useState('');
-  const [DFiscalTxtC, setDFiscalC] = useState('');
-  const [CalleTxtC, setCalleC] = useState('');
-  const [nExtTxtC, setNExtC] = useState('');
-  const [ColTxtC, setColoniaC] = useState('');
-  const [MunTxtC, setMunC] = useState('');
-  const [EdoTxtC, setEdoC] = useState('');
-  const [TelTxtC, setTelC] = useState('');
-  const [PContactoTxtC, setPContactoC] = useState('');
-  const [CFDITxtC, setCFDIC] = useState('');
-  const [nClienteTxt, setNCliente] = useState('');
-  const [nObraTxt, setNObra] = useState('');
-  const [DirTxtO, setDirO] = useState('');
-  const [ColTxtO, setColoniaO] = useState('');
-  const [MunTxtO, setMunicO] = useState('');
-  const [EstadoTxtO, setEstadoO] = useState('');
   //--------------------------- Buscador --------------------------------------
   const [fText, setFText] = useState(''); // Estado para el filtro de búsqueda
   const [vBPlanta, setBPlanta] = useState('');
@@ -133,29 +144,14 @@ const LCotizacion = () => {
     if(vFechaI!=null){
       if(plantasSel.length >0 && vFechaI.length > 0 && vFcaF.length > 0)
         {
-          console.log(plantasSel, vFechaI, vFcaF);
           GetCotizaciones_();
         }
     }
   },[]);
+  //-----------------------------------------------------------------------------------
   const mCambio = (event) => {
     const pla = event.target.value; 
-    if(pla.length > 0)
-    {
-      setPlantas(pla);
-      if(posts.length>0){
-        console.log(posts)
-        const filteredCotizaciones = posts.filter(item => item.IdPlanta === pla);
-        setDTCotizacion(filteredCotizaciones);
-      }else{
-        GetCotizaciones_(pla);
-      }
-    }else{
-      setPlantas(pla);
-      if(posts.length>0){
-        setDTCotizacion(posts);
-      }
-    }
+    setPlantas(pla);
   };
   const cFechaI = (fecha) => {
     setFechaIni(fecha.toLocaleDateString('en-US',opcionesFca));
@@ -163,9 +159,240 @@ const LCotizacion = () => {
   const mFcaF = (fcaF) => {
     setFechaFin(fcaF.toLocaleDateString('en-US',opcionesFca));
   };
+  const irNuevo = ()=>{
+    navigate('/ventas/Cotizador/0')
+  }
+  //---------------------------- BOTONS --------------------------------------------
+  const btnBuscar = () =>{
+    setShDiv(true);
+    if(plantasSel.length > 0)
+    {
+      if(posts.length>0){
+        const filteredCotizaciones = posts.filter(item => item.IdPlanta === plantasSel);
+        setDTCotizacion(filteredCotizaciones);
+      }else{
+        GetCotizaciones_(plantasSel);
+      }
+    }else{
+      if(posts.length>0){
+        setDTCotizacion(posts);
+      }
+    }
+  }
+  const seguimiento = async(id) =>{
+    setMCotizaciones(true);
+    setNoCotSel(id);
+    try{
+      const ocList = await getCotizacionById(id);
+      if(ocList){
+        const objC = ocList[0][0];
+        const objD = ocList[1];
+        const objS = ocList[3];
+        const objM = ocList[4];
+        const objE = ocList[5];
+        const objV = ocList[6];
+        if(objV){
+          setAsesor(objV);
+        }
+        if(objC){
+          setDireccion(
+            objC.Direccion && Object.keys(objC.Direccion).length > 0
+              ? objC.Direccion
+              : "-"
+          );
+          setCodClie(
+            objC.NoCliente && Object.keys(objC.NoCliente).length > 0
+              ? objC.NoCliente
+              : "SIN CÓDIGO"
+          );
+          setCliente(
+            objC.Cliente && Object.keys(objC.Cliente).length > 0
+              ? objC.Cliente
+              : "SIN CLIENTE"
+          );
+          setCodObra(
+            objC.NoObra && Object.keys(objC.NoObra).length > 0
+              ? objC.NoObra
+              : "SIN CÓDIGO"
+          );
+          setObra(
+            objC.Obra && Object.keys(objC.Obra).length > 0
+              ? objC.Obra
+              : "SIN OBRA"
+          );
+          setVendedor(
+            objC.IdVendedor && Object.keys(objC.IdVendedor).length > 0
+              ? objC.IdVendedor
+              : "-"
+          );
+          setConCom(
+            objC.FlagCondiciones
+              ? true
+              : false
+          );
+          setTotal(
+            objC.FlagTotal
+              ? true
+              : false
+          );
+          setIVA(
+            objC.FlagIVA
+              ? true
+              : false
+          );
+          setChkObs(
+            objC.FlagObservaciones
+              ? true
+              : false
+          );
+          setsEstatus(
+            objC.Estatus
+            ? objC.Estatus
+            :""
+          );
+          setCodVendedor(objC.IdVendedor ? objC.IdVendedor:"");
+        }
+        if(objD){
+          setDTCotizacionD(objD);
+        }
+        if(objM){
+          setDTMod(objM);
+        }
+        if(objE){
+          setDTExtras(objE)
+        }
+      }
+    }catch(error){
+      Swal.close();
+      Swal.fire("Error", "No se pudo obtener la información", "error");
+    }
+  }
+  const download_file = (id) =>{
+    console.log('⚓'+id)
+  }
+  const eliminar = (id) =>{
+    console.log('🔥'+id)
+  }
+  const detalleItem = async(id) => {
+    setMDetalleItem(true);
+    setNoCotSel(id);
+    try{
+      const ocList = await getCotizacionDIById(id);
+      if(ocList){
+        ocList.forEach((item, index) => {
+            if(item.IdExtra == 156)
+            {
+              setIdExtra(item.IdExtra);
+              setExtra(item.Extra);
+              setCant(item.CantUsr);
+              setCantCot(item.Cantidad);
+              setPrecio(item.Precio);
+              setPrecioUser(item.Precio);
+              const ptotal = item.Cantidad * item.Precio;
+              setPrecioTotal(ptotal);
+            }
+        })
+      }
+    }catch(error){
+      Swal.close();
+      Swal.fire("Error", "No se pudo obtener la información", "error");
+    }
+  }
+  const setUpdPreCot = async() =>{
+    Swal.fire({
+        title: 'Actualizando...',
+        text: 'Estamos guardando la información...',
+        didOpen: () => {
+            Swal.showLoading();  // Muestra la animación de carga
+        }
+    });
+    try{
+      const formData = {
+        cE:{
+          IdCotizacion: noCotSel,
+          IdExtra:txtIdExtra,
+          Cantidad: txtCant
+        }
+      };
+      const ocList = await setCotizaCantCot(formData);
+      console.log('☠️',ocList)
+      Swal.close();  // Cerramos el loading
+      Swal.fire("Éxito", "Se Modifico Correctamente", "success");
+      setMDetalleItem(false);
+    }catch(error){
+      console.log(error)
+    }
+  }
   //--------------------------- COLS -----------------------------------------------
   const colCot = [
     {
+          name: 'Acciones',
+          selector: row => row.id,
+          width:"200px",
+          cell: (row) => (
+              <div>
+                  <CRow>
+                    <CCol xs={3} md={3} lg={3}>
+                        <CButton
+                            color="warning"
+                            onClick={() => seguimiento(row.IdCotizacion)}
+                            size="sm"
+                            className="me-2"
+                            title="Seguimiento"
+                        >
+                        <CIcon icon={cilGraph} style={{'color':'white'}} />
+                        </CButton>
+                    </CCol>
+                    <CCol xs={3} md={3} lg={3}>
+                        <CButton
+                            color="primary"
+                            onClick={() => generarPDF(row.IdCotizacion)}
+                            size="sm"
+                            className="me-2"
+                            title="Descargar"
+                        >
+                            <CIcon icon={cilDataTransferDown} style={{'color':'white'}} />
+                        </CButton>
+                    </CCol>
+                    <CCol xs={3} md={3} lg={3}>
+                        <CButton
+                            color="danger"
+                            onClick={() => eliminar(row.IdCotizacion)}
+                            size="sm"
+                            className="me-2"
+                            title="Eliminar"
+                        >
+                            <CIcon icon={cilTrash} style={{'color':'white'}} />
+                        </CButton>
+                    </CCol>
+                    <CCol xs={3} md={3} lg={3}>
+                        <CButton
+                            color="primary"
+                            onClick={() => transfPedido(row.IdCotizacion)}
+                            size="sm"
+                            className="me-2"
+                            title="Convertir Pedido"
+                        >
+                            <CIcon icon={cilTransfer} style={{'color':'white'}} />
+                        </CButton>
+                    </CCol>
+                    {userIsAdmin &&(
+                      <CCol xs={3} md={3} lg={3}>
+                        <CButton
+                            color="info"
+                            onClick={() => detalleItem(row.IdCotizacion)}
+                            size="sm"
+                            className="me-2"
+                            title="Detalle ITEM"
+                        >
+                            <CIcon icon={cilFile} style={{'color':'white'}} />
+                        </CButton>
+                    </CCol>
+                    )}
+                  </CRow>
+              </div>
+          ),
+    },{
       name: 'Planta',
       selector: row => row.Planta,
       sortable:true,
@@ -182,12 +409,6 @@ const LCotizacion = () => {
         {row.IdCotizacion}
         </button>
     ),
-      width:"120px",
-    },
-    {
-      name: 'Descargar',
-      selector: row => row.IdCotizacion,
-      sortable:true,
       width:"120px",
     },
     {
@@ -292,23 +513,23 @@ const LCotizacion = () => {
     {
       name: 'Fin Vigencia',
       selector: row => {
-        const fecha = row.Creo;
+        const fecha = row.FinVigencia;
         if (fecha === null || fecha === undefined) {
           return "No disponible";
         }
         if (typeof fecha === 'object') {
           return "Sin Fecha"; // O cualquier mensaje que prefieras
         }
-        const [asesor, fechaA] = fecha.split(" ");
-        return fechaA;
+        const [fechaR, hora] = fecha.split("T");
+        return fechaR;
       },
       sortable:true,
       width:"150px",
-    },
+    },    
     {
       name: 'Creo',
       selector: row => {
-        const actualizo = row.Actualizo
+        const actualizo = row.Creo
         if (actualizo === null || actualizo === undefined) {
           return "No disponible";
         }
@@ -338,7 +559,7 @@ const LCotizacion = () => {
     {
       name: 'Motivo',
       selector: row => {
-        const autorizo = row.Autorizante
+        const autorizo = row.Motivo
         if (autorizo === null || autorizo === undefined) {
           return "No disponible";
         }
@@ -353,7 +574,7 @@ const LCotizacion = () => {
     {
       name: 'Observaciones',
       selector: row => {
-        const autorizo = row.Autorizante
+        const autorizo = row.Observaciones
         if (autorizo === null || autorizo === undefined) {
           return "No disponible";
         }
@@ -366,345 +587,362 @@ const LCotizacion = () => {
       width:"200px",
     },
   ];
-  const colPed = [
+  const colCotMod = [
     {
-      name: 'ACCIONES',
-      selector: row => row.IdPedido,
-      width:"200px",
+      name: 'Acciones',
+      selector: row => row.id,
+      width:"220px",
       cell: (row) => (
-        <div>
-          <CRow>
-            {userIsAdmin && (
-              <CCol xs={6} md={4} lg={4}>
-                <CButton
-                  color="warning"
-                  onClick={() => autorizarPedido(row.IdPedido)}
-                  size="sm"
-                  className="me-2"
-                  title="Autorizar"
-                >
-                  <CIcon icon={cilCheck} />
-                </CButton>
-              </CCol>
-            )}
-            {userIsAdmin && (row.Archivos) && (
-              <CCol xs={6} md={6} lg={6}>
-                <CButton
-                  color="primary"
-                  onClick={() => viewPago(row.IdPedido)}
-                  size="sm"
-                  className="me-2"
-                  title="Ver Pago"
-                >
-                  <CIcon icon={cilImage} style={{'color':'white'}} />
-                </CButton>
+          <div>
+              <CRow>
+                <CCol xs={6} md={6} lg={6}>
+                  <CFormCheck inline id="chkVoBo" label="VoBo" checked={row.FlagVoBo === true} onChange={(e)=>{console.log(e.target)}} />
                 </CCol>
-            )}
-          </CRow>
-      </div>
+                <CCol xs={6} md={6} lg={6}>
+                    <CFormCheck inline id="chkPrint" label="Print" checked={row.FlagImprimir === true} onChange={(e)=>{console.log(e.target)}} />
+                </CCol>
+              </CRow>
+          </div>
       ),
     },{
-      name: 'ID',
-      selector: row => row.IdPedido,
+      name: 'M3',
+      selector: row => row.Cantidad,
       sortable:true,
-      width:"80px",
-    },{
-      name: 'Fecha Pedido',
+      width:"100px",
+    },
+    {
+      name: 'Producto',
+      sortable:true,
       selector: row => {
-        const fecha = row.FechaHoraPedido;
+        const producto = row.Producto
+        if (producto === null || producto === undefined) {
+          return "No disponible";
+        }
+        if (typeof producto === 'object') {
+          return "-"; // O cualquier mensaje que prefieras
+        }
+        return producto;
+      },
+      width:"130px",
+    },
+    {
+      name: '%',
+      selector: row => {
+        const porcentaje = row.MOP
+        if (porcentaje === null || porcentaje === undefined) {
+          return "No disponible";
+        }
+        if (typeof porcentaje === 'object') {
+          return "-"; // O cualquier mensaje que prefieras
+        }
+        return porcentaje;
+      },
+      sortable:true,
+      width:"100px",
+    },{
+      name: 'MB',
+      selector: row => {
+        const MB = row.MB
+        if (MB === null || MB === undefined) {
+          return "No disponible";
+        }
+        if (typeof MB === 'object') {
+          return "-"; // O cualquier mensaje que prefieras
+        }
+        return MB;
+      },
+      sortable:true,
+      width:"100px",
+    },{
+      name: 'Precio Unitario',
+      selector: row => {
+        var punitario = row.Precio
+        if (punitario === null || punitario === undefined) {
+          punitario =  "-";
+        }
+        if (typeof punitario === 'object') {
+          punitario = "-"; // O cualquier mensaje que prefieras
+        }
+        
+        return punitario;
+      },
+      sortable:true,
+      width:"180px",
+    },{
+      name: 'Precio Total',
+      selector: row => {
+        var pTotal = row.Total
+        if (pTotal === null || pTotal === undefined) {
+          pTotal = "No disponible";
+        }
+        if (typeof pTotal === 'object') {
+          pTotal = "Sin Datos"; // O cualquier mensaje que prefieras
+        }
+        return pTotal;
+      },
+      sortable:true,
+      width:"180px",
+    },
+    {
+      name: 'M3Bomba',
+      selector: row => {
+        var M3Bomba = row.M3Bomba
+        if (M3Bomba === null || M3Bomba === undefined) {
+          M3Bomba = "-";
+        }
+        if (typeof M3Bomba === 'object') {
+          M3Bomba = "-"; // O cualquier mensaje que prefieras
+        }
+        return M3Bomba;
+      },
+      sortable:true,
+      width:"140px",
+    },
+    {
+      name: 'Precio Bomba',
+      selector: row => {
+        var Bomba = row.Bomba
+        if (Bomba === null || Bomba === undefined) {
+          Bomba =  "-";
+        }
+        if (typeof Bomba === 'object') {
+          Bomba = "-"; // O cualquier mensaje que prefieras
+        }
+        return Bomba;
+      },
+      sortable:true,
+      width:"180px",
+    },
+    {
+      name: 'Extras',
+      selector: row => {
+        const fecha = row.FinVigencia;
         if (fecha === null || fecha === undefined) {
           return "No disponible";
         }
         if (typeof fecha === 'object') {
           return "Sin Fecha"; // O cualquier mensaje que prefieras
         }
-        const [fecha_, hora] = fecha.split("T");
-        return fecha_+" "+hora;
-      },
-      sortable:true,
-      width:"250px",
-    },
-    {
-      name: 'Obra',
-      selector: row => {
-        var nobra = row.NoObra
-        if (nobra === null || nobra === undefined) {
-          nobra =  "-";
-        }
-        if (typeof nobra === 'object') {
-          nobra = "-"; // O cualquier mensaje que prefieras
-        }
-        return nobra;
-      },
-      sortable:true,
-      width:"200px",
-    },
-    {
-      name: 'Metros',
-      selector: row => row.CantidadM3,
-      sortable:true,
-      width:"100px",
-    },
-    {
-      name: 'Elemento',
-      selector: row => {
-        var elemento = row.Elemento
-        if (elemento === null || elemento === undefined) {
-          elemento = "No disponible";
-        }
-        if (typeof elemento === 'object') {
-          elemento = "Sin Datos"; // O cualquier mensaje que prefieras
-        }
-        return elemento;
-      },
-      sortable:true,
-      width:"200px",
-    },
-    {
-      name: 'Producto',
-      selector: row => {
-        var elemento = row.Producto
-        if (elemento === null || elemento === undefined) {
-          elemento = "No disponible";
-        }
-        if (typeof elemento === 'object') {
-          elemento = "Sin Datos"; // O cualquier mensaje que prefieras
-        }
-        return elemento;
-      },
-      sortable:true,
-      width:"200px",
-    },
-  ];
-  const colExtras = [
-  {
-      name: 'Extra',
-      selector: row => row.Extra,
-      sortable:true,
-      width:"250px",
-    },{
-      name: 'Cantidad',
-      selector: row => {
-        const cantidad = row.Cantidad;
-        if (cantidad === null || cantidad === undefined) {
-          return "0";
-        }
-        if (typeof cantidad === 'object') {
-          return "0"; // O cualquier mensaje que prefieras
-        }
-        return cantidad;
+        const [fechaR, hora] = fecha.split("T");
+        return fechaR;
       },
       sortable:true,
       width:"150px",
+    },    
+    {
+      name: 'Comentario',
+      selector: row => {
+        const comentario = row.Comentario
+        if (comentario === null || comentario === undefined) {
+          return "No disponible";
+        }
+        if (typeof comentario === 'object') {
+          return "-"; // O cualquier mensaje que prefieras
+        }
+        return comentario;
+      },
+      sortable:true,
+      width:"200px",
+    },
+    {
+      name: 'Autoriza',
+      selector: row => {
+        const autoriza = row.Autoriza
+        if (autoriza === null || autoriza === undefined) {
+          return "No disponible";
+        }
+        if (typeof autoriza === 'object') {
+          return "-"; // O cualquier mensaje que prefieras
+        }
+        return autoriza;
+      },
+      sortable:true,
+      width:"250px",
+    },
+    {
+      name: 'Actualizo',
+      selector: row => {
+        const actualizo = row.Actualizo
+        if (actualizo === null || actualizo === undefined) {
+          return "No disponible";
+        }
+        if (typeof actualizo === 'object') {
+          return "-"; // O cualquier mensaje que prefieras
+        }
+        return actualizo;
+      },
+      sortable:true,
+      width:"250px",
+    },
+  ];
+  const colExtras = [
+    {
+      name: 'Extra',
+      selector: row => {
+        const extra = row.Extra
+        if (extra === null || extra === undefined) {
+          return "No disponible";
+        }
+        if (typeof extra === 'object') {
+          return "-"; // O cualquier mensaje que prefieras
+        }
+        return extra;
+      },
+      sortable:true,
+      width:"320px",
+    },
+    {
+      name: 'Cantidad',
+      sortable:true,
+      selector: row => {
+        const cantidad = row.Cantidad
+        if (cantidad === null || cantidad === undefined) {
+          return "No disponible";
+        }
+        if (typeof cantidad === 'object') {
+          return "-"; // O cualquier mensaje que prefieras
+        }
+        return cantidad;
+      },
+      width:"120px",
     },
     {
       name: 'Unidad',
       selector: row => {
-        var unidad = row.Unidad
+        const unidad = row.Unidad
         if (unidad === null || unidad === undefined) {
-          unidad =  "-";
+          return "No disponible";
         }
         if (typeof unidad === 'object') {
-          unidad = "-"; // O cualquier mensaje que prefieras
+          return "-"; // O cualquier mensaje que prefieras
         }
         return unidad;
       },
       sortable:true,
-      width:"80px",
-    },
-    {
+      width:"100px",
+    },{
       name: 'Precio',
-      selector: row => row.Precio,
+      selector: row => {
+        const precio = row.Precio
+        if (precio === null || precio === undefined) {
+          return "No disponible";
+        }
+        if (typeof precio === 'object') {
+          return "-"; // O cualquier mensaje que prefieras
+        }
+        return precio;
+      },
       sortable:true,
       width:"100px",
-    },
-    {
+    },{
       name: 'Total',
       selector: row => {
-        var elemento = row.Total
-        if (elemento === null || elemento === undefined) {
-          elemento = "0";
+        var total = row.Total
+        if (total === null || total === undefined) {
+          total =  "0.00";
         }
-        if (typeof elemento === 'object') {
-          elemento = "0"; // O cualquier mensaje que prefieras
+        if (typeof total === 'object') {
+          total = "0.00";
         }
-        return elemento;
+        return total;
       },
       sortable:true,
       width:"100px",
-    },
+    }
   ];
-  const colLog = [
+  const colMod = [
     {
-        name: 'ID',
-        selector: row => row.Cotizacion,
-        sortable:true,
-        width:"80px",
-      },{
-        name: 'FechaCambio',
-        selector: row => {
-          const fecha = row.FechaCambio;
-          if (fecha === null || fecha === undefined) {
-            return "No disponible";
-          }
-          if (typeof fecha === 'object') {
-            return "Sin Fecha"; // O cualquier mensaje que prefieras
-          }
-          const [fecha_, hora] = fecha.split("T");
-          return fecha_+" "+hora;
-        },
-        sortable:true,
-        width:"200px",
-      },
-      {
-        name: 'UsuarioActualizo',
-        selector: row => {
-          var usuarioAct = row.UsuarioActualizo
-          if (usuarioAct === null || usuarioAct === undefined) {
-            usuarioAct =  "-";
-          }
-          if (typeof usuarioAct === 'object') {
-            usuarioAct = "-"; // O cualquier mensaje que prefieras
-          }
-          return usuarioAct;
-        },
-        sortable:true,
-        width:"150px",
-      },
-      {
-        name: 'Campo',
-        selector: row => {
-          var Campo = row.Campo
-          if (Campo === null || Campo === undefined) {
-            Campo =  "-";
-          }
-          if (typeof Campo === 'object') {
-            Campo = "-"; // O cualquier mensaje que prefieras
-          }
-          return Campo;
-        },
-        sortable:true,
-        width:"200px",
-      },
-      {
-        name: 'Valor Anterior',
-        selector: row => {
-          var elemento = row.ValorAnterior
-          if (elemento === null || elemento === undefined) {
-            elemento = "No disponible";
-          }
-          if (typeof elemento === 'object') {
-            elemento = "Sin Datos"; // O cualquier mensaje que prefieras
-          }
-          return elemento;
-        },
-        sortable:true,
-        width:"200px",
-      },
-      {
-        name: 'Valor Nuevo',
-        selector: row => {
-          var elemento = row.ValorNuevo
-          if (elemento === null || elemento === undefined) {
-            elemento = "No disponible";
-          }
-          if (typeof elemento === 'object') {
-            elemento = "Sin Datos"; // O cualquier mensaje que prefieras
-          }
-          return elemento;
-        },
-        sortable:true,
-        width:"200px",
-      },
-      {
-        name: 'Comentario',
-        selector: row => {
-          var elemento = row.Comentario
-          if (elemento === null || elemento === undefined) {
-            elemento = "No disponible";
-          }
-          if (typeof elemento === 'object') {
-            elemento = "Sin Datos"; // O cualquier mensaje que prefieras
-          }
-          return elemento;
-        },
-        sortable:true,
-        width:"200px",
-      },
-    ];
-  const colSeg = [
-  {
-      name: 'ID',
-      selector: row => row.IdSeguimiento,
+      name: 'Cotización',
+      selector: row => row.Cotizacion,
+      width:"100px",
+    },{
+      name: 'Fecha Cambio',
       sortable:true,
-      width:"80px",
-  },{
-    name: 'COTIZACION',
-    selector: row => row.IdCotizacion,
-    sortable:true,
-    width:"80px",
-  },{
-    name: 'DESCRIPCIÓN',
-    selector: row => {
-      const desc = row.Descripcion;
-      if (desc === null || desc === undefined) {
-        return "No disponible";
-      }
-      if (typeof desc === 'object') {
-        return "-"; // O cualquier mensaje que prefieras
-      }
-      return desc;
+      selector: row => {
+        const fecha = row.FechaCambio;
+        if (fecha === null || fecha === undefined) {
+          return "No disponible";
+        }
+        if (typeof fecha === 'object') {
+          return "Sin Fecha";
+        }
+        const [fecha_, hora] = fecha.split("T");
+        return fecha_+" "+hora;
+      },
+      width:"180px",
     },
-    sortable:true,
-    width:"250px",
-  },
-  {
-    name: 'Fecha',
-    selector: row => {
-      var Fca = row.Fecha
-      if (Fca === null || Fca === undefined) {
-        Fca =  "-";
-      }
-      if (typeof Fca === 'object') {
-        Fca = "-"; // O cualquier mensaje que prefieras
-      }
-      const[fecha, hora] = Fca.split("T"); 
-      return fecha;
+    {
+      name: 'Usuario Actualizo',
+      sortable:true,
+      selector: row => {
+        const userUpdate = row.UsuarioActualizo
+        if (userUpdate === null || userUpdate === undefined) {
+          return "No disponible";
+        }
+        if (typeof userUpdate === 'object') {
+          return "-"; // O cualquier mensaje que prefieras
+        }
+        return userUpdate;
+      },
+      width:"180px",
     },
-    sortable:true,
-    width:"150px",
-  },
-  {
-    name: 'Hora',
-    selector: row => {
-      var Fca = row.Fecha
-      if (Fca === null || Fca === undefined) {
-        Fca =  "-";
-      }
-      if (typeof Fca === 'object') {
-        Fca = "-"; // O cualquier mensaje que prefieras
-      }
-      const[fecha, hora] = Fca.split("T"); 
-      return hora;
+    {
+      name: 'Campo',
+      sortable:true,
+      selector: row => {
+        const campo = row.Campo
+        if (campo === null || campo === undefined) {
+          return "No disponible";
+        }
+        if (typeof campo === 'object') {
+          return "-"; // O cualquier mensaje que prefieras
+        }
+        return campo;
+      },
+      width:"150px",
+    },{
+      name: 'Valor Ant.',
+      sortable:true,
+      selector: row => {
+        const valAnt = row.ValorAnterior
+        if (valAnt === null || valAnt === undefined) {
+          return "No disponible";
+        }
+        if (typeof valAnt === 'object') {
+          return "-"; // O cualquier mensaje que prefieras
+        }
+        return valAnt;
+      },
+      width:"150px",
+    },{
+      name: 'Valor Nuevo',
+      sortable:true,
+      selector: row => {
+        const valNue = row.ValorNuevo
+        if (valNue === null || valNue === undefined) {
+          return "No disponible";
+        }
+        if (typeof valNue === 'object') {
+          return "-"; // O cualquier mensaje que prefieras
+        }
+        return valNue;
+      },
+      width:"180px",
+    },{
+      name: 'Comentario',
+      sortable:true,
+      selector: row => {
+        const comentario = row.Comentario
+        if (comentario === null || comentario === undefined) {
+          return "No disponible";
+        }
+        if (typeof comentario === 'object') {
+          return "-"; // O cualquier mensaje que prefieras
+        }
+        return comentario;
+      },
+      width:"180px",
     },
-    sortable:true,
-    width:"150px",
-  },
-  {
-    name: 'Usuario Cambio',
-    selector: row => {
-      var Campo = row.UsuarioCambio
-      if (Campo === null || Campo === undefined) {
-        Campo =  "-";
-      }
-      if (typeof Campo === 'object') {
-        Campo = "-"; // O cualquier mensaje que prefieras
-      }
-      return Campo;
-    },
-    sortable:true,
-    width:"150px",
-  },
   ];
   //--------------------------------------------------------------------------------
   const GetCotizaciones_ = async (planta) =>{
@@ -719,9 +957,7 @@ const LCotizacion = () => {
       // Llamada a la API
         const cotI = await GetCotizaciones(vFechaI, vFcaF, planta);
         Swal.close();  // Cerramos el loading
-        console.log(cotI)
         if (cotI) {
-          console.log(cotI)
           const filteredCotizaciones = cotI.filter(item => item.IdPlanta === planta);
           setPosts(cotI);
           setDTCotizacion(filteredCotizaciones);  // Procesar la respuesta
@@ -729,247 +965,16 @@ const LCotizacion = () => {
             Swal.close();
             Swal.fire("Error", "Ocurrió un error, vuelve a intentar", "error");
         }
+        const infoPla = await getPrecios('S',planta,'0');
+        setDTListSeg(infoPla[0])
     } catch (error) {
         // Cerrar el loading y mostrar el error
         Swal.close();
         Swal.fire("Error", "No se pudo obtener la información", "error");
     }
   }
-  // PEDIDOS
-  const viewPedidos = async(id) =>{
-    setMPedidos(true)
-    //LOGICA CARGA TABLA PEDIDO
-    Swal.fire({
-      title: 'Cargando...',
-      text: 'Estamos obteniendo la información...',
-      didOpen: () => {
-        Swal.showLoading();  // Muestra la animación de carga
-        getPedidos_(id)
-      }
-    });
-  }
-  const getPedidos_ = async (id) => {
-    try{
-      Swal.close();
-      const ocList = await getPedidosCot(id);
-      if(ocList){
-        setDTPedidos(ocList)
-      }
-      console.log(ocList)
-    }catch(error){
-        Swal.close();
-        Swal.fire("Error", "No se pudo obtener la información", "error");
-    }
-
-  }
-  const autorizarPedido = async(id) =>{
-    Swal.fire({
-              title: "¿Autorizar Pedido?",
-              icon: "warning",
-              showCancelButton: true,
-              confirmButtonColor: "#3085d6",
-              cancelButtonColor: "#d33",
-              confirmButtonText: "Autorizar"
-            }).then((result) => {
-              if (result.isConfirmed) {
-                cPedido(id)
-              }
-            });
-  }
-  const cPedido = async(id) =>{
-    Swal.fire({
-      title: 'Cargando...',
-      text: 'Autorizando...',
-      didOpen: () => {
-          Swal.showLoading();  // Muestra la animación de carga
-      }
-    });    
-    setTimeout(function(){
-      Swal.close();
-      Swal.fire({
-        title: "Autorizado Correctamente",
-        icon: "success",
-        draggable: true
-      });
-    },3000);
-  }
-  const viewPago = async(id) =>{
-    Swal.fire({
-      title: 'Cargando...',
-      text: 'Buscando...',
-      didOpen: () => {
-          Swal.showLoading();  // Muestra la animación de carga
-      }
-    });
-      Swal.close();
-      try{
-        const extFile = await getArchivo(id);
-        Swal.close();
-        console.log(extFile)
-        if(extFile){
-          Swal.fire({
-            title: "Peido #"+id,
-            text: "Pedido",
-            imageUrl: "http://apicatsa.catsaconcretos.mx:2543/Uploads/DocPedidos/"+id+"/"+extFile,
-            imageWidth: 600,
-            imageHeight: 400,
-            imageAlt: "Pedido"
-          });
-        }
-      }catch(error){
-            Swal.close();
-            Swal.fire("Error", "No se pudo obtener la información", "error");
-      } 
-  }
-  const vCotizacion = async(id) =>{
-    Swal.fire({
-      title: 'Cargando...',
-      text: 'Buscando...',
-      didOpen: () => {
-          Swal.showLoading();  // Muestra la animación de carga
-      }
-    });
-    navigate('/ventas/Cotizador/'+id);
-  }
-  // Opciones
-  const openMOpciones = (id) =>{
-    setMOpciones(true);
-    getExtras(id);
-    getSeg();
-    gtSeguimientos_(id);
-    getObraCot_(id);
-    getClienteCot_(id);
-  }
-  const getExtras = async(id)=>{
-    Swal.fire({
-      title: 'Cargando...',
-      text: 'Estamos obteniendo la información...',
-      didOpen: () => {
-          Swal.showLoading();  // Muestra la animación de carga
-      }
-    });
-    try {
-      Swal.close();
-      const ocList = await getCotizacionExtra(id);
-      if(ocList){
-        setDTExtras(ocList)
-      }
-      getLogs(id);
-    }catch(error){
-      Swal.close()
-      console.error(error)
-    }
-  }
-  const getLogs = async(id)=>{
-    Swal.fire({
-      title: 'Cargando...',
-      text: 'Estamos obteniendo la información...',
-      didOpen: () => {
-          Swal.showLoading();  // Muestra la animación de carga
-      }
-    });
-    try {
-      Swal.close();
-      const ocList = await getCotizacionLog(id);
-      if(ocList){
-        setDTLog(ocList)
-      }
-    }catch(error){
-      Swal.close()
-      console.error(error)
-    }
-  }
-  const getSeg = async()=>{
-    try {
-      const ocList = await getSegmentos();
-      if(ocList){
-        setCmbSeg(ocList)
-      }
-    }catch(error){
-      console.error(error)
-    }
-  }
-  const getClienteCot_ = async(id)=>{
-    //Buscar en ArrayCotizador NoCliente y NoObra
-    const ArrayCO = dtCotizacion.filter(item => item.IdCotizacion === id);
-    let idC = (ArrayCO && ArrayCO[0] && ArrayCO[0].NoCliente !== "") ? ArrayCO[0].NoCliente:'0';
-    Swal.fire({
-      title: 'Cargando...',
-      text: 'Estamos obteniendo la información...',
-      didOpen: () => {
-          Swal.showLoading();  // Muestra la animación de carga
-      }
-    });
-    try {
-      Swal.close();
-      const ocList = await getClienteCot(idC);
-      if(ocList){
-        const ArrayC = ocList.sort((a,b) => a.RFC - b.RFC);
-        setRazonC(ArrayC[0]?.Nombre && (typeof ArrayC[0].Nombre === 'object' ? Object.keys(ArrayC[0].Nombre) > 0: true)?ArrayC[0].Nombre:'-');
-        setRFCC(ArrayC[0]?.RFC && (typeof ArrayC[0].RFC === 'object' ? Object.keys(ArrayC[0].RFC) > 0: true)?ArrayC[0].RFC:'-');
-        setPagoC(ArrayC[0]?.MetodoPago && (typeof ArrayC[0].MetodoPago === 'object' ? Object.keys(ArrayC[0].MetodoPago) > 0: true)?ArrayC[0].MetodoPago:'-');
-        setDigitosC('****');
-        setCalleC(ArrayC[0]?.Calle && (typeof ArrayC[0].Calle === 'object' ? Object.keys(ArrayC[0].Calle) > 0: true)?ArrayC[0].Calle:'-');
-        setNExtC(ArrayC[0]?.Numero && (typeof ArrayC[0].Numero === 'object' ? Object.keys(ArrayC[0].Numero) > 0: true)?ArrayC[0].Numero:'-');
-        setColoniaC(ArrayC[0]?.Colonia && (typeof ArrayC[0].Colonia === 'object' ? Object.keys(ArrayC[0].Colonia) > 0: true)?ArrayC[0].Colonia:'-');
-        setMunC(ArrayC[0]?.Municipio && (typeof ArrayC[0].Municipio === 'object' ? Object.keys(ArrayC[0].Municipio) > 0: true)?ArrayC[0].Municipio:'-');
-        setEdoC(ArrayC[0]?.Estado && (typeof ArrayC[0].Estado === 'object' ? Object.keys(ArrayC[0].Estado) > 0: true)?ArrayC[0].Estado:'-');
-        setTelC(ArrayC[0]?.Telefono && (typeof ArrayC[0].Telefono === 'object' ? Object.keys(ArrayC[0].Telefono) > 0: true)?ArrayC[0].Telefono:'-');
-        setPContactoC('-');
-        setCFDIC(ArrayC[0]?.ClaveCFDI && (typeof ArrayC[0].ClaveCFDI === 'object' ? Object.keys(ArrayC[0].ClaveCFDI) > 0: true)?ArrayC[0].ClaveCFDI:'-');
-      }
-      //getLogs(id);
-    }catch(error){
-      Swal.close()
-      console.error(error)
-    }
-  }
-  const getObraCot_ = async(id)=>{
-    const ArrayCO = dtCotizacion.filter(item => item.IdCotizacion === id);
-    let idC = (ArrayCO && ArrayCO[0] && ArrayCO[0].NoCliente !== "") ? ArrayCO[0].NoCliente:'0';
-    let idO = (ArrayCO && ArrayCO[0] && ArrayCO[0].NoObra !== "") ? ArrayCO[0].NoObra : '0';
-    setNCliente(idC);
-    setNObra(idO)
-    Swal.fire({
-      title: 'Cargando...',
-      text: 'Estamos obteniendo la información...',
-      didOpen: () => {
-          Swal.showLoading();  // Muestra la animación de carga
-      }
-    });
-    try {
-      Swal.close();
-      const ocList = await getObraCot(idC, idO);
-      if(ocList){
-        //Buscar en ArrayCotizador NoCliente y NoObra
-        const ArrayC = ocList.sort((a,b) => a.Estado - b.Estado);
-        console.log(ArrayC)
-        setDirO((ArrayC[0] && ArrayC[0] && ArrayC[0].Direccion !== "") ? ArrayC[0].Direccion:'-');
-        setColoniaO((ArrayC[0] && ArrayC[0] && ArrayC[0].Colonia !== "") ? ArrayC[0].Colonia:'-');
-        setMunicO((ArrayC[0] && ArrayC[0] && ArrayC[0].Municipio !== "") ? ArrayC[0].Municipio:'-');
-        setEstadoO((ArrayC[0] && ArrayC[0] && ArrayC[0].Estado !== "") ? ArrayC[0].Estado:'-')        
-      }
-      //getLogs(id);
-    }catch(error){
-      Swal.close()
-      console.error(error)
-    }
-  }
-
-  const gtSeguimientos_ = async(id)=>{
-    try
-    {
-      const ocList = await getSeguimientos(id);
-      console.log(ocList)
-      if(ocList)
-      {
-        setDTSeg(ocList)
-      }
-    }
-    catch(error)
-    {
-      console.error(error)
-    }
+  const transfPedido = async(idCo)=>{
+    
   }
   // Buscador
   //************************************************************************************************************************************************************************** */
@@ -994,81 +999,6 @@ const LCotizacion = () => {
       item.Vendedor.toString().includes(fText);
   });
   //**********************************MODALES**************************************************** */
-  const mEstatus = async(id, estatus) =>{
-    try{
-      const {value:selectedOption} = await Swal.fire({
-        title: "Elige una opción",
-        input: "select",
-        inputValue:estatus,
-        inputOptions: {
-          Cancelada: "Cancelada",
-          Aceptada: "Aceptada",
-          Negociando: "Negociando",
-          Perdida: "Perdida",
-          Prospecto: "Prospecto",
-        },
-        inputPlaceholder: "Selecciona una opción",
-        showCancelButton: true,
-        inputValidator: (value) => {
-          if (!value) {
-            return "¡Debes elegir una opción!";
-          }
-        },
-      });
-      if(selectedOption){
-        chStatus(id, selectedOption)
-      }
-    } catch(error){
-      console.error("Error al mostrar SweetAlert2:", error)
-    }
-  }
-  const chStatus = async (id, estatus) =>{
-    Swal.fire({
-      title: 'Cargando...',
-      text: 'Actualizando...',
-      didOpen: () => {
-          Swal.showLoading();  // Muestra la animación de carga
-      }
-    });
-    try {
-        // Llamada a la API
-        const cotI = await setStatus(id, estatus);
-        if (cotI) {
-          Swal.close();
-          Swal.fire("Correcto", "Se actualizo Correctamente", "success");
-          GetCotizaciones_(plantasSel)
-        } else {
-            Swal.close();
-            Swal.fire("Error", "Ocurrió un error, vuelve a intentar", "error");
-        }
-    } catch (error) {
-        // Cerrar el loading y mostrar el error
-        Swal.close();
-        Swal.fire("Error", "No se pudo obtener la información", "error");
-    }
-  }
-  const handleRegistrarVisita = (idCotizacion) => {
-    if (!navigator.geolocation) {
-      Swal.fire("Error", "Tu navegador no soporta Geolocalización", "error")
-      return
-    }
-        // Guarda localmente en el estado. (Podrías hacer una petición POST a tu backend)
-        // setVisitPoints((prevPoints) => [
-        //   ...prevPoints,
-        //   { lat, lng, idUsuario, idCotizacion }
-        // ])
-    // Obtenemos la posición actual
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        const latitud = position.coords.latitude;
-        const longitud = position.coords.longitude;
-        regVisita_(idCotizacion,"Visita",latitud, longitud)
-      },
-      (error) => {
-        Swal.fire("Error al obtener ubicación", error.message, "error")
-      }
-    )
-  };
   const regVisita_ = async(idCot,motivo,lat,lon) => {
     Swal.fire({
       title: 'Cargando...',
@@ -1093,43 +1023,9 @@ const LCotizacion = () => {
       Swal.fire("Error al guardar", error.message, "error");
     }
   };
-  const handleRegistrarLlamada = (idCotizacion) => {
-    regVisita_(idCotizacion,"Llamada",0.0, 0.0)
-  }
   // -----------------------------------------------------------------
   // Mapeo: Mostrar el modal con el mapa de todas las visitas
   // -----------------------------------------------------------------
-  const handleMapeo = (idCotizacion) => {
-    // 1. Obtenemos ubicación actual (similar a Registrar Visita)
-    Swal.fire({
-        title: 'Cargando...',
-        text: 'Estamos obteniendo la información...',
-        didOpen: () => {
-            Swal.showLoading();  // Muestra la animación de carga
-            mMapa(idCotizacion)
-        }
-    });
-  };
-  const mMapa = async(idc) =>{
-    try{
-      const ocList = await getVisitas(idc, "Visita");
-      console.log(ocList)
-      if(ocList)
-      {
-        Swal.close();
-        setMAcciones(false)
-        setMapeoModal(true)
-        setDTRuta(ocList)
-        //setTimeout(function(){trazarRuta(ocList)},8000);
-      }else{
-        Swal.close();
-        Swal.fire("AVISO", "No se cuentan con visitas registradas", "error");  
-      }
-    }catch(error){
-      Swal.close();
-      Swal.fire("Error al guardar", error.message, "error");
-    }
-  }
   const trazarRuta = (map,ocList) =>{
     const waypoints = ocList
     .map((point) => {
@@ -1163,113 +1059,17 @@ const LCotizacion = () => {
     }
   
   }
-  const hMapasOR = (idCotizacion) =>{
-    Swal.fire({
-      title: 'Cargando...',
-      text: 'Estamos obteniendo la información...',
-      didOpen: () => {
-          Swal.showLoading();  // Muestra la animación de carga
-          mMapaOR(idCotizacion)
-      }
-    });
-  }
-  const mMapaOR = async(idc) =>{
-    try{
-      const ocList = await getCotizacionId(idc);
-      console.log(ocList)
-      if(ocList)
-      {
-        Swal.close();
-        setMapeoModal(true)
-        console.log(ocList[0].coordenada.length, ocList[0].coordenadaR.length)
-        if(ocList[0].coordenada.length > 0 && ocList[0].coordenadaR.length > 10)
-        {
-          const rutas = {
-            latitud:ocList[0].coordenada,
-            longitud:ocList[0].coordenadaR,
-          }
-          setDTRuta(rutas)
-        }else{
-          Swal.fire("AVISO", "Sin Coordenadas", "error");  
-        }
-        //setTimeout(function(){trazarRuta(ocList)},8000);
-      }else{
-        Swal.close();
-        Swal.fire("AVISO", "Sin Coordenadas", "error");  
-      }
-    }catch(error){
-      Swal.close();
-      Swal.fire("Ocurrio un problema", "Vuelva a intentar", "error");
-    }
-  }
   //************************* HANDLE*************************************************************** */
-  const hDSeg = (e) =>{
-    setDSeg(e.target.value)
+  const hTF = (e) =>{
+    setTF(e.target.value)
   };
   const handleClockCh = (value) => {
     setTime(value);
   };
-  const hRadioCh = (e) => {
-    setChkFT(e.target.value);
-    if(e.target.value == "Cliente"){
-      setShCO(true)
-    }else{
-      setShCO(false)
-    }
-  };
-  const hNCliente = (e) => {
-    setNCliente(e.target.value);
-  };
-  const hNObra = (e) => {
-    setNObra(e.target.value);
-  };
-  const hRazon = (e) => {
-    setRazonC(e.target.value);
-  };
-  const hRFC = (e) => {
-    setRFCC(e.target.value);
-  };
-  const hMPago = (e) => {
-    setPagoC(e.target.value);
-  };
-  const hDigCue = (e) => {
-    setDigitosC(e.target.value);
-  };
-  const hDirF = (e) => {
-    setDFiscalC(e.target.value);
-  };
-  const hCalleC = (e) => {
-    setCalleC(e.target.value);
-  };
-  const hNExtC = (e) => {
-    setNExtC(e.target.value);
-  };
-  const hColC = (e) => {
-    setColoniaC(e.target.value);
-  };
-  const hMunC = (e) => {
-    setMunC(e.target.value);
-  };
-  const hEdoC = (e) => {
-    setEdoC(e.target.value);
-  };
-  const hTelC = (e) => {
-    setTelC(e.target.value);
-  };
-  const hCFDI = (e) => {
-    setCFDIC(e.target.value);
-  };
-  const hDirO = (e) => {
-    setDir(e.target.value);
-  };
-  const hColO = (e) => {
-    setColonia(e.target.value);
-  };
-  const hMunO = (e) => {
-    setMunic(e.target.value);
-  };
-  const hEdoO = (e) => {
-    setEstado(e.target.value);
+  const hPT = (e) =>{
+    const pt = e.target.value * txtPrecio;
+    setCant(e.target.value);
+    setPrecioTotal(pt)
   };
   //******************************************************** */
   const downloadPDF = async(id) => {
@@ -1367,454 +1167,674 @@ const LCotizacion = () => {
     <CContainer fluid>
       <h1>Lista Cotizaciones</h1>
       <CRow className='mt-3 mb-3'>
-        <CCol xs={6} md={4}>
-          <FechaI 
-            vFechaI={vFechaI} 
-            cFechaI={cFechaI} 
-          /></CCol>
-        <CCol xs={6} md={4}>
-          <FechaF 
-            vFcaF={vFcaF} 
-            mFcaF={mFcaF}
-          />
-        </CCol>
-        <CCol xs={4} md={4}>
+        <CCol xs={3} md={3}>
           <Plantas  
             mCambio={mCambio}
             plantasSel={plantasSel}
           />
         </CCol>
-        <CCol xs={2} md={2} className='mt-4'>
-            <CButton color='primary' > 
-                <CIcon icon={cilPlus} />
-                {' '}Nuevo
-            </CButton>
+        <CCol xs={3} md={2}>
+          <FechaI 
+            vFechaI={vFechaI} 
+            cFechaI={cFechaI} 
+          />
         </CCol>
+        <CCol xs={3} md={2}>
+          <FechaF 
+            vFcaF={vFcaF} 
+            mFcaF={mFcaF}
+          />
+        </CCol>
+      </CRow>
+      <CRow>  
         <CCol xs={2} md={2} className='mt-4'>
-            <CButton color='info' style={{"color":"white"}}> 
+            <CButton color='info' style={{"color":"white"}} onClick={btnBuscar} > 
                 <CIcon icon={cilSearch} />
                 {' '}Buscar
             </CButton>
-        </CCol>
+            <CButton color='danger' style={{"color":"white"}} onClick={()=>{generarPDF(108589,dtCotizacionD)}} > 
+                <CIcon icon={cilSearch} />
+                {' '}PDF
+            </CButton>
+        </CCol>        
         <CCol xs={3} md={2} className='mt-4'>
-            <CButton color='danger' style={{"color":"white"}} onClick={downloadCSV}>
+            <CButton color='warning' style={{"color":"white"}} onClick={downloadCSV}>
                 <CIcon icon={cilCloudDownload} className="me-2" />
                 Exportar
             </CButton>
         </CCol>
-      </CRow>
-      <CRow className='mt-4 mb-4'>
-        <CCol xs={12} md={12}>
-            Total M3:
-        </CCol>
-        <CCol xs={12} md={12}>
-          <BuscadorDT value={vBPlanta} onChange={onFindBusqueda} onSearch={fBusqueda} />
+        <CCol xs={2} md={2} className='mt-4'>
+            <CButton color='primary' onClick={irNuevo} > 
+                <CIcon icon={cilPlus} />
+                {' '}Nuevo
+            </CButton>
         </CCol>
       </CRow>
-      <CRow className='mt-4 mb-4'>
-        <DataTable
-          columns={colCot}
-          data={fCotizacion}
-          pagination
-          persistTableHead
-          subHeader
-        />
-        <CModal 
-          backdrop="static"
-          visible={mPedidos}
-          onClose={() => setMPedidos(false)}
-          className='c-modal-80'
-        >
-          <CModalHeader>
-            <CModalTitle>PEDIDOS</CModalTitle>
-          </CModalHeader>
-            <CModalBody>
-                <CRow className='mt-2 mb-2'>
-                  <DataTable
-                    columns={colPed}
-                    data={dtPedidos}
-                    pagination
-                    persistTableHead
-                    subHeader
-                  />
-                </CRow>
-            </CModalBody>
-            <CModalFooter>
-                <CCol xs={4} md={2}>
-                    <CButton color='danger' onClick={() => setMPedidos(false)} style={{'color':'white'}} > 
-                        <CIcon icon={cilTrash} /> Cerrar
-                    </CButton>
-                </CCol>
-            </CModalFooter>
-        </CModal>
+      {shDiv && (
+        <>
+        <CRow className='mt-4 mb-4' id="divInfo">
+          <CCol xs={2} md={2} className='mt-4'>
+              <div style={{ textAlign: "left", marginTop: "10px", fontWeight: "bold" }}>
+                  Total M3: {dtCotizacion.reduce((acc, item) => acc + (item.M3), 0)}
+                </div>
+          </CCol>
+          <CCol xs={3} md={3}>
+            <BuscadorDT value={vBPlanta} onChange={onFindBusqueda} onSearch={fBusqueda} />
+          </CCol>
+        </CRow>
+        <CRow className='mt-4 mb-4' id="divTb">
+          <DataTable
+            columns={colCot}
+            data={fCotizacion}
+            pagination
+            persistTableHead
+            subHeader
+          />
+          
+        {/* Modal para mostrar el MAPA con TODOS los puntos */}
         <CModal
           backdrop="static"
-          visible={mAcciones}
-          onClose={() => setMAcciones(false)}
+          visible={mCotizaciones}
+          onClose={() => setMCotizaciones(false)}
+          fullscreen
         >
-        <CModalHeader>
-          <CModalTitle>Acciones adicionales</CModalTitle>
-        </CModalHeader>
-        <CModalBody>
-          <CRow>
-            <CCol xs={12} className="mb-3">
-              <CButton
-                color="primary"
-                className="w-100"
-                onClick={() => handleRegistrarVisita(selectedCotizacion)}
-              >
-                Registrar visita
-              </CButton>
-            </CCol>
-
-            <CCol xs={12} className="mb-3">
-              <CButton
-                color="success"
-                className="w-100"
-                onClick={() => handleRegistrarLlamada(selectedCotizacion)}
-              >
-                Registrar llamada
-              </CButton>
-            </CCol>
-
-            <CCol xs={12}>
-              <CButton
-                color="info"
-                className="w-100"
-                onClick={handleMapeo}
-              >
-                Mapeo
-              </CButton>
-            </CCol>
-          </CRow>
-        </CModalBody>
-        <CModalFooter>
-          <CButton
-            color="secondary"
-            onClick={() => setMAcciones(false)}
-          >
-            Cerrar
-          </CButton>
-        </CModalFooter>
-      </CModal>
-
-      {/* Modal para mostrar el MAPA con TODOS los puntos */}
-      <CModal
-        backdrop="static"
-        visible={mapeoModal}
-        onClose={() => setMapeoModal(false)}
-        size="lg"
-      >
-        <CModalHeader>
-          <CModalTitle>Mapa de Visitas</CModalTitle>
-        </CModalHeader>
-        <CModalBody>
-          <MapContainer
-            center={mapCenter} // Centro de México como ejemplo
-            zoom={zoom}
-            style={{ height: '400px', width: '100%' }}
-            id="map"
-            whenCreated={(map) =>{
-              map.on('moveend', () =>{
-                setMapCenter(map.getCenter());
-              });
-              if (dtRuta && dtRuta.length > 0) {
-                trazarRuta(map, dtRuta); // Llamamos a la función para trazar la ruta
-              }
-            }}
-          >
-            <TileLayer
-              attribution='&copy; <a href="https://www.openstreetmap.org/copyright">
-              OpenStreetMap</a> contributors'
-              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-            />
-            <Circle
-              center={mapCenter} // Usamos el centro actualizado
-              radius={30000} // Radio de 1000 metros (ajustar según lo necesites)
-              color="blue"   // Color del borde
-              fillColor="blue" // Color de relleno
-              fillOpacity={0.1} // Opacidad del relleno
-            />
-            {dtRuta.map((point, index) => (
-            <>
-            <Marker key={index} position={[point.latitud, point.longitud]}>
-              <Popup>
-                <b>Visita {index + 1}</b><br />
-                Usuario: {point.usuario}<br />
-                Cotización: {point.id_cotizacion}<br />
-                Fecha: {point.fecha_visita}
-              </Popup>
-            </Marker>
-            
-            </>          
-            ))}
-          </MapContainer>
-        </CModalBody>
-        <CModalFooter>
-          <CButton color="secondary" onClick={() => setMapeoModal(false)}>
-            Cerrar
-          </CButton>
-        </CModalFooter>
-      </CModal>
-      <CModal
-        backdrop="static"
-        visible={mAcciones}
-        onClose={() => setMAcciones(false)}
-      >
-        <CModalHeader>
-          <CModalTitle>Acciones adicionales</CModalTitle>
-        </CModalHeader>
-        <CModalBody>
-          <CRow>
-            <CCol xs={12} className="mb-3">
-              <CButton
-                color="primary"
-                className="w-100"
-                onClick={() => handleRegistrarVisita(selectedCotizacion)}
-              >
-              <CIcon icon={cilPin} />  Registrar visita
-              </CButton>
-            </CCol>
-
-            <CCol xs={12} className="mb-3">
-              <CButton
-                color="success"
-                style={{'color':'white'}}
-                className="w-100"
-                onClick={() => handleRegistrarLlamada(selectedCotizacion)}
-              >
-              <CIcon icon={cilPhone} />  Registrar llamada
-              </CButton>
-            </CCol>
-
-            <CCol xs={12}>
-              <CButton
-                color="info"
-                style={{'color':'white'}}
-                className="w-100"
-                onClick={() => handleMapeo(selectedCotizacion)}
-              >
-              <CIcon icon={cilMap} />  Mapeo
-              </CButton>
-            </CCol>
-          </CRow>
-        </CModalBody>
-        <CModalFooter>
-          <CButton color="secondary" onClick={() => setMAcciones(false)}>
-            Cerrar
-          </CButton>
-        </CModalFooter>
-      </CModal>
-      <CModal 
-        backdrop="static"
-        visible={mOpciones}
-        onClose={() => setMOpciones(false)}
-        className='c-modal-80'
-      >
-        <CModalHeader>
-          <CModalTitle>Opciones</CModalTitle>
-        </CModalHeader>
+          <CModalHeader>
+            <CModalTitle>Cotización No. {noCotSel}</CModalTitle>
+          </CModalHeader>
           <CModalBody>
-            <CTabs activeItemKey={1}>
-              <CTabList variant="tabs" layout="fill">
-                  <CTab aria-controls="Extras" itemKey={1}>Extras</CTab>
-                  <CTab aria-controls="Seguimiento" itemKey={2}>Seguimiento</CTab>
-                  <CTab aria-controls="ClienteObra" itemKey={3}>Cliente</CTab>
-                  <CTab aria-controls="Log" itemKey={4}>Log de Modificaciones</CTab>
+            <CTabs activeItemKey="cot">
+              <CTabList variant='tabs' layout='justified'>
+                  <CTab itemKey='cot'>COTIZACIÓN</CTab>
+                  <CTab itemKey='ext'>EXTRAS</CTab>
+                  <CTab itemKey='seg'>SEGUIMIENTO</CTab>
+                  <CTab itemKey='cli'>CLIENTES/OBRA</CTab>
+                  <CTab itemKey='mod'>LOG MODIFICACIONES</CTab>
               </CTabList>
               <CTabContent>
-                  <CTabPanel className="py-3" aria-labelledby="Extras" itemKey={1}>
-                    <DataTable
-                      columns={colExtras}
-                      data={dtExtras}
-                      pagination
-                      persistTableHead
-                      subHeader
-                    />
-                  </CTabPanel>
-                  <CTabPanel className="py-3" aria-labelledby="Seguimiento" itemKey={2}>
-                      <CRow className='mt-2 mb-2'>
-                        <CCol xs={4} md={3}>
-                          <label className='mb-2'>Descripción del Seguimiento</label>
-                          <CFormSelect size="sm" className="mb-3" value={dSeg} onChange={(e) => hDSeg(e)}>
-                            <option value="-">-</option>
-                            {cmbSeg.map((m) => (
-                              <option key={m.IdAccion} value={m.IdAccion}>
-                                {m.Descripcion}
+                  <CTabPanel itemKey="cot">
+                      <CRow className='mt-2'>
+                        <CFormLabel htmlFor="staticEmail" className="col-sm-2 col-form-label">
+                        Cliente
+                        </CFormLabel>
+                        <CCol xs={4} md={4}>
+                          <CFormInput
+                            type="text"
+                            id="txtNoCliente"
+                            floatingClassName="mb-3"
+                            floatingLabel="Cliente"
+                            placeholder="0000 CLIENTE"
+                            value={codClie+'/'+cliente}
+                            disabled
+                          />
+                        </CCol>
+                        <CFormLabel htmlFor="staticEmail" className="col-sm-2 col-form-label">
+                        Vendedor
+                        <span style={{ marginLeft: "8px" }}>{vendedor}</span>
+                        </CFormLabel>
+                        <CCol xs={4} md={4} className='mt-2'>
+                          <CFormSelect size="md" className="mb-3" aria-label="Vendedor" value={codVendedor} onChange={(e) => setCodVendedor(e.target.value)}>
+                            <option>-</option>
+                            {asesor.map((a, index) => (
+                              <option key={index} value={a.IdUsuario}>
+                                {a.Nombre}
                               </option>
                             ))}
                           </CFormSelect>
                         </CCol>
-                        <CCol xs={4} md={3}>
-                          <FechaI 
-                            vFechaI={vFechaI} 
-                            cFechaI={cFechaI} 
+                      </CRow>
+                      <CRow className='mt-2'>
+                        <CFormLabel htmlFor="staticEmail" className="col-sm-2 col-form-label">
+                          Obra
+                        </CFormLabel>
+                        <CCol xs={3} md={3}>
+                          <CFormInput
+                            type="text"
+                            id="txtNoObra"
+                            floatingClassName="mb-3"
+                            floatingLabel="NoObra"
+                            placeholder="0000"
+                            value={codObra}
                           />
                         </CCol>
-                        <CCol xs={4} md={3}>
-                          <label>Hora</label><br/>
-                          <TimePicker
-                            className='clockSel'
-                            showSecond={false}  // Deshabilitar la selección de segundos
-                            value={time}
-                            onChange={handleClockCh}
-                            format="HH:mm"
-                            minuteStep={5}  // Configura los minutos a intervalos de 5 minutos
+                        <CCol xs={1} md={1} className='mt-2'>
+                          <CButton color='primary' style={{"color":"white"}} onClick={btnBuscar} >
+                            <CIcon icon={cilSearch} />
+                          </CButton>
+                        </CCol>
+                        <CCol xs={6} md={6}>
+                          <CFormInput
+                            type="text"
+                            id="txtObra"
+                            floatingClassName="mb-3"
+                            floatingLabel="Obra"
+                            placeholder="----"
+                            value={Obra}
+                            disabled
                           />
                         </CCol>
-                        <CCol xs={4} md={3}>
-                          <CButton color='primary' className='mt-2' style={{'margin-top':'3px'}}> Agregar</CButton>
+                      </CRow>
+                      <CRow className='mt-2'>
+                        <CFormLabel htmlFor="staticEmail" className="col-sm-2 col-form-label">
+                        Observaciones
+                        </CFormLabel>
+                        <CCol xs={10} md={10}>
+                          <CFormTextarea
+                            className="mb-3"
+                            placeholder="Observaciones"
+                          ></CFormTextarea>
+                        </CCol>
+                      </CRow>
+                      <CRow className='mt-2'>
+                        <CCol xs={2} md={2}>
+                          <CFormCheck inline id="chkCc" value="cc" label="Condiciones comerciales" checked={concom} onChange={(e) => setConCom(e.target.checked)} />
+                        </CCol>
+                        <CCol xs={2} md={2}>
+                          <CFormCheck inline id="chkTl" value="Tl" label="Total" checked={total} onChange={(e) => setTotal(e.target.checked)} />
+                        </CCol>
+                        <CCol xs={1} md={1}>
+                          <CFormCheck inline id="chkIv" value="IVA" label="IVA" checked={IVA} onChange={(e) => setIVA(e.target.checked)} />
+                        </CCol>
+                        <CCol xs={3} md={3}>
+                          <CFormCheck inline id="chkObs" value="Observaciones" label="Observaciones" checked={chkObs} onChange={(e) => setChkObs(e.target.checked)} />
+                        </CCol>
+                        <CCol xs={3} md={3}>
+                          <CFormLabel htmlFor="staticEmail" className="me-2">
+                            Estatus
+                          </CFormLabel>
+                          <CFormSelect size="md" aria-label="Estatus" value={sEstatus} onChange={(e) => setsEstatus(e.target.value)}>
+                            <option value="">-</option>
+                              {estatus.map((e, index) => (
+                                <option key={index} value={e}>
+                                  {e}
+                                </option>
+                              ))}
+                          </CFormSelect>
                         </CCol>
                       </CRow>
                       <CRow className='mt-2 mb-2'>
+                          <CCol xs={6} md={4}>
+                              <br />
+                              <BuscadorDT value={vBPlanta} onChange={onFindBusqueda} onSearch={fBusqueda} />
+                          </CCol>
+                          <DataTable
+                              columns={colCotMod}
+                              data={dtCotizacionD}
+                              pagination
+                              persistTableHead
+                              subHeader
+                          />
+                      </CRow>
+                  </CTabPanel>
+                  <CTabPanel itemKey="ext">
+                      <CRow className='mt-2'>
+
+                      </CRow>
+                      <CRow className='mt-2'>
                         <DataTable
-                          columns={colSeg}
-                          data={dtSeg}
+                          columns={colExtras}
+                          data={dtExtras}
                           pagination
                           persistTableHead
                           subHeader
-                        />        
+                        />
                       </CRow>
                   </CTabPanel>
-                  <CTabPanel className="py-3" aria-labelledby="Log" itemKey={3}>
-                    <CRow className='mt-4 mb-4'>
-                      <CCol xs={2} md={2}>
-                        <CFormCheck
-                          type="radio"
-                          name="fRT"
-                          id="fR"
-                          label="Cliente"
-                          value="Cliente"
-                          checked={chkFT === 'Cliente'}
-                          onChange={hRadioCh}
-                        />
+                  <CTabPanel itemKey="seg">
+                    <CRow className='mt-2'>
+                      <CFormLabel htmlFor="staticEmail" className="col-sm-2 col-form-label">
+                      Descripción del Seguimiento
+                      </CFormLabel>
+                      <CCol xs={6} md={4}>
+                        <CFormSelect size="md" value={sEstatus} onChange={(e) => setsEstatus(e.target.value)}>
+                          <option value="">-</option>
+                            {dtListSeg.map((e, index) => (
+                              <option key={index} value={e.IdAccion}>
+                                {e.Descripcion}
+                              </option>
+                            ))}
+                        </CFormSelect>
                       </CCol>
-                      <CCol xs={6} md={2}>
-                        <CFormCheck
-                          type="radio"
-                          name="fRT"
-                          id="fR1"
-                          label="Obra"
-                          value="Obra"
-                          checked={chkFT === 'Obra'}
-                          onChange={hRadioCh}
-                          defaultChecked
+                    </CRow>
+                    <CRow className='mt-2'>
+                      <CFormLabel htmlFor="staticEmail" className="col-sm-2 col-form-label">
+                      Fecha
+                      </CFormLabel>
+                      <CCol xs={3} md={3}>
+                        <div>
+                          <div className='mt-2'>
+                              <DatePicker 
+                                id='fcaF'
+                                selected={vFcaF} 
+                                onChange={mFcaF} 
+                                placeholderText='Fecha' 
+                                dateFormat="yyyy/MM/dd"
+                                className='form-control' />
+                          </div>
+                        </div>
+                      </CCol>
+                      <CFormLabel htmlFor="staticEmail" className="col-sm-2 col-form-label">
+                      Hora
+                      </CFormLabel>
+                      <CCol xs={3} md={3}>
+                        <DatePicker
+                          selected={hora}
+                          onChange={(date) => setHora(date)}
+                          showTimeSelect
+                          showTimeSelectOnly   // 👈 solo muestra horas/minutos
+                          timeIntervals={15}   // 👈 intervalos de minutos (ej: cada 15)
+                          timeCaption="Hora"
+                          dateFormat="HH:mm"   // 👈 formato de salida
+                          className="form-control"
                         />
                       </CCol>
                     </CRow>
-                      {shCO && (
-                      <CRow>
-                        <CCol xs={6} md={4}>
-                          <label>Nombre de Razón Social</label>
-                          <CFormInput type="text" placeholder="Nombre de Cliente" aria-label="Nombre" value={RazonTxtC} onChange={hRazon} />
+                    <CRow className='mt-2'>
+                      <CCol xs={3} md={3}>
+                        <CButton color='primary' style={{"color":"white"}} onClick={btnBuscar} > 
+                          <CIcon icon={cilPlus} />
+                          {' '}Agregar
+                        </CButton>
+                      </CCol>
+                    </CRow>
+                    <CRow className='mt-2'>
+                      <DataTable
+                        columns={colExtras}
+                        data={[]}
+                        pagination
+                        persistTableHead
+                        subHeader
+                      />
+                    </CRow>
+                  </CTabPanel>
+                  <CTabPanel itemKey="cli">
+                      <CRow className='mt-2'>
+                        <CCol xs={3} md={3}>
+                          <CFormCheck
+                            type="radio"
+                            name="exampleRadios"
+                            id="rCliente"
+                            value="C"
+                            label="Cliente"
+                            checked={sTF === "C"}
+                            onChange={() => setTF("C")}
+                          />
                         </CCol>
-                        <CCol xs={6} md={4}>
-                          <label>RFC</label>
-                          <CFormInput type="text" placeholder="RFC" value={RFCTxtC} onChange={hRFC} />
+                        <CCol xs={3} md={3}>                          
+                          <CFormCheck
+                            type="radio"
+                            name="exampleRadios"
+                            id="rObra"
+                            value="O"
+                            label="Obra"
+                            checked={sTF === "O"}
+                            onChange={() => setTF("O")}
+                          />
                         </CCol>
-                        <CCol xs={6} md={4}>
-                          <label>Metodo de Pago</label>
-                          <CFormInput type="text" placeholder="Metodo de Pago" value={PagoTxtC} onChange={hMPago} />
+                      </CRow>
+                      {sTF === "C" && (
+                      <CRow className='mt-3'>
+                        <CCol>
+                          <h6>Datos de Cliente</h6>
+                          {/* aquí tus inputs de cliente */}
                         </CCol>
-                        <CCol xs={6} md={4}>
-                          <label>4 Últimos Dígitos Cuenta</label>
-                          <CFormInput type="text" placeholder="****" value={DigitosTxtC} onChange={hDigCue} />
-                        </CCol>
-                        <CCol xs={6} md={4}>
-                          <label>Dirección Fiscal</label>
-                          <CFormInput type="text" placeholder="Dirección Fiscal" value={DFiscalTxtC} onChange={hDirF} />
-                        </CCol>
-                        <hr/>
-                        <h4>DIRECCIÓN FISCAL</h4>
-                        <br />
-                        <CCol xs={6} md={4}>
-                          <label>Calle</label>
-                          <CFormInput type="text" placeholder="Calle" value={CalleTxtC} onChange={hCalleC} />
-                        </CCol>
-                        <CCol xs={6} md={4}>
-                          <label>No. Exterior</label>
-                          <CFormInput type="text" placeholder="No. Exterior" value={nExtTxtC} onChange={hNExtC} />
-                        </CCol>
-                        <CCol xs={6} md={4}>
-                          <label>COLONIA</label>
-                          <CFormInput type="text" placeholder="Colonia" value={ColTxtC} onChange={hColC}/>
-                        </CCol>
-                        <CCol xs={6} md={4}>
-                          <label>MUNICIPIO</label>
-                          <CFormInput type="text" placeholder="Municipio" value={MunTxtC} onChange={hMunC}/>
-                        </CCol>
-                        <CCol xs={6} md={4}>
-                          <label>ESTADO</label>
-                          <CFormInput type="text" placeholder="Estado" value={EdoTxtC} onChange={hEdoC} />
-                        </CCol>
-                        <CCol xs={6} md={4}>
-                          <label>TELÉFONO</label>
-                          <CFormInput type="text" placeholder="Telefono" value={TelTxtC} onChange={hTelC} />
-                        </CCol>
-                        <CCol xs={6} md={4}>
-                          <label>PERSONA CONTACTO</label>
-                          <CFormInput type="text" placeholder="Persona Contacto" />
-                        </CCol>
-                        <CCol xs={6} md={4}>
-                          <label>CLAVE CFDI</label>
-                          <CFormInput type="text" placeholder="Clave CFDI" value={CFDITxtC} onChange={hCFDI}/>
-                        </CCol>
+                        <CRow>
+                          <CFormLabel htmlFor="staticEmail" className="col-sm-2 col-form-label">
+                          Razón Social
+                          </CFormLabel>
+                          <CCol xs={10} md={10}>
+                            <CFormTextarea
+                              className="mb-3"
+                              placeholder="Nombre Razon Social"
+                              value={cliente}
+                              onChange={(e) => setCliente(e.target.value)}
+                            ></CFormTextarea>
+                          </CCol>
+                        </CRow>
+                        <CRow>
+                          <CFormLabel htmlFor="staticEmail" className="col-sm-2 col-form-label">
+                          RFC
+                          </CFormLabel>
+                          <CCol xs={10} md={10}>
+                            <CFormTextarea
+                              className="mb-3"
+                              placeholder="---"
+                            ></CFormTextarea>
+                          </CCol>
+                        </CRow>
+                        <CRow>
+                          <CFormLabel htmlFor="staticEmail" className="col-sm-2 col-form-label">
+                          MÉTODO DE PAGO
+                          </CFormLabel>
+                          <CCol xs={10} md={10}>
+                            <CFormTextarea
+                              className="mb-3"
+                              placeholder="---"
+                            ></CFormTextarea>
+                          </CCol>
+                        </CRow>
+                        <CRow>
+                          <CFormLabel htmlFor="staticEmail" className="col-sm-2 col-form-label">
+                          4 ÚLTIMOS DÍGITOS CUENTA
+                          </CFormLabel>
+                          <CCol xs={10} md={10}>
+                            <CFormTextarea
+                              className="mb-3"
+                              placeholder="---"
+                            ></CFormTextarea>
+                          </CCol>
+                        </CRow>
+                        <br/>
+                        <CRow>
+                          <CFormLabel htmlFor="staticEmail" className="col-sm-2 col-form-label">
+                          CALLE
+                          </CFormLabel>
+                          <CCol xs={10} md={10}>
+                            <CFormTextarea
+                              className="mb-3"
+                              placeholder="---"
+                            ></CFormTextarea>
+                          </CCol>
+                        </CRow>
+                        <CRow>
+                          <CFormLabel htmlFor="staticEmail" className="col-sm-2 col-form-label">
+                          No. EXTERIOR
+                          </CFormLabel>
+                          <CCol xs={10} md={10}>
+                            <CFormTextarea
+                              className="mb-3"
+                              placeholder="---"
+                            ></CFormTextarea>
+                          </CCol>
+                        </CRow>
+                        <CRow>
+                          <CFormLabel htmlFor="staticEmail" className="col-sm-2 col-form-label">
+                          COLONIA
+                          </CFormLabel>
+                          <CCol xs={10} md={10}>
+                            <CFormTextarea
+                              className="mb-3"
+                              placeholder="---"
+                            ></CFormTextarea>
+                          </CCol>
+                        </CRow>
+                        <CRow>
+                          <CFormLabel htmlFor="staticEmail" className="col-sm-2 col-form-label">
+                          MUNICIPIO
+                          </CFormLabel>
+                          <CCol xs={10} md={10}>
+                            <CFormTextarea
+                              className="mb-3"
+                              placeholder="---"
+                            ></CFormTextarea>
+                          </CCol>
+                        </CRow>
+                        <CRow>
+                          <CFormLabel htmlFor="staticEmail" className="col-sm-2 col-form-label">
+                          ESTADO
+                          </CFormLabel>
+                          <CCol xs={10} md={10}>
+                            <CFormTextarea
+                              className="mb-3"
+                              placeholder="---"
+                            ></CFormTextarea>
+                          </CCol>
+                        </CRow>
+                        <CRow>
+                          <CFormLabel htmlFor="staticEmail" className="col-sm-2 col-form-label">
+                          TELEFONO
+                          </CFormLabel>
+                          <CCol xs={10} md={10}>
+                            <CFormTextarea
+                              className="mb-3"
+                              placeholder="---"
+                            ></CFormTextarea>
+                          </CCol>
+                        </CRow>
+                        <CRow>
+                          <CFormLabel htmlFor="staticEmail" className="col-sm-2 col-form-label">
+                          PERSONA DE CONTACTO
+                          </CFormLabel>
+                          <CCol xs={10} md={10}>
+                            <CFormTextarea
+                              className="mb-3"
+                              placeholder="---"
+                            ></CFormTextarea>
+                          </CCol>
+                        </CRow>
+                        <CRow>
+                          <CFormLabel htmlFor="staticEmail" className="col-sm-2 col-form-label">
+                          CLAVE CFDI
+                          </CFormLabel>
+                          <CCol xs={10} md={10}>
+                            <CFormTextarea
+                              className="mb-3"
+                              placeholder="---"
+                            ></CFormTextarea>
+                          </CCol>
+                        </CRow>
                       </CRow>
                       )}
-                    {!shCO && (
-                      <CRow>
-                        <CCol xs={6} md={4}>
-                          <label>Nombre de Obra</label>
-                          <CFormInput type="text" value={nObraTxt} onChange={hNObra} placeholder="Nombre de Obra" aria-label="Nombre" />
+                      {sTF === "O" && (
+                      <CRow className='mt-3'>
+                        <CCol>
+                          <h6>Datos de Obra</h6>
+                          {/* aquí tus inputs de cliente */}
                         </CCol>
-                        <CCol xs={6} md={4}>
-                          <label>NÚMERO CLIENTE</label>
-                          <CFormInput type="text" value={nClienteTxt} onChange={hNCliente} placeholder="NÚMERO CLIENTE" />
-                        </CCol>
-                        <h4>UBICACIÓN</h4>
-                        <CCol xs={6} md={4}>
-                          <label>DIRECCIÓN</label>
-                          <CFormInput type="text" value={DirTxtO} onChange={hDirO} placeholder="DIRECCIÓN" />
-                        </CCol>
-                        <CCol xs={6} md={4}>
-                          <label>COLONIA</label>
-                          <CFormInput type="text" value={ColTxtO} onChange={hColO} placeholder="COLONIA" />
-                        </CCol>
-                        <CCol xs={6} md={4}>
-                          <label>MUNICIPIO</label>
-                          <CFormInput type="text" value={MunTxtO} onChange={hMunO} placeholder="MUNICIPIO" />
-                        </CCol>
-                        <CCol xs={6} md={4}>
-                          <label>ESTADO</label>
-                          <CFormInput type="text" value={EstadoTxtO} onChange={hEdoO} placeholder="ESTADO" />
-                        </CCol>
-                        <CCol xs={6} md={4}>
-
-                        </CCol>
+                         <CRow>
+                          <CFormLabel htmlFor="staticEmail" className="col-sm-2 col-form-label">
+                          NOMBRE DE OBRA
+                          </CFormLabel>
+                          <CCol xs={10} md={10}>
+                            <CFormTextarea
+                              className="mb-3"
+                              placeholder="---"
+                              value={Obra}
+                            ></CFormTextarea>
+                          </CCol>
+                        </CRow>
+                         <CRow>
+                          <CFormLabel htmlFor="staticEmail" className="col-sm-2 col-form-label">
+                          NÚMERO DE CLLIENTE
+                          </CFormLabel>
+                          <CCol xs={10} md={10}>
+                            <CFormTextarea
+                              className="mb-3"
+                              placeholder="---"
+                            ></CFormTextarea>
+                          </CCol>
+                        </CRow>
+                        <hr/>
+                         <CRow>
+                          <CFormLabel htmlFor="staticEmail" className="col-sm-2 col-form-label">
+                          DIRECCIÓN
+                          </CFormLabel>
+                          <CCol xs={10} md={10}>
+                            <CFormTextarea
+                              className="mb-3"
+                              placeholder="---"
+                              value={direccion}
+                            ></CFormTextarea>
+                          </CCol>
+                        </CRow>
+                         <CRow>
+                          <CFormLabel htmlFor="staticEmail" className="col-sm-2 col-form-label">
+                          COLONIA
+                          </CFormLabel>
+                          <CCol xs={10} md={10}>
+                            <CFormTextarea
+                              className="mb-3"
+                              placeholder="---"
+                            ></CFormTextarea>
+                          </CCol>
+                        </CRow>
+                         <CRow>
+                          <CFormLabel htmlFor="staticEmail" className="col-sm-2 col-form-label">
+                          MUNICIPIO
+                          </CFormLabel>
+                          <CCol xs={10} md={10}>
+                            <CFormTextarea
+                              className="mb-3"
+                              placeholder="---"
+                            ></CFormTextarea>
+                          </CCol>
+                        </CRow>
+                         <CRow>
+                          <CFormLabel htmlFor="staticEmail" className="col-sm-2 col-form-label">
+                          ESTADO
+                          </CFormLabel>
+                          <CCol xs={10} md={10}>
+                            <CFormTextarea
+                              className="mb-3"
+                              placeholder="---"
+                            ></CFormTextarea>
+                          </CCol>
+                        </CRow>
+                         <CRow>
+                          <CFormLabel htmlFor="staticEmail" className="col-sm-2 col-form-label">
+                          COORDENADAS
+                          </CFormLabel>
+                          <CCol xs={5} md={5}>
+                            <CFormTextarea
+                              className="mb-3"
+                              placeholder="---"
+                            ></CFormTextarea>
+                          </CCol>
+                          <CCol xs={5} md={5}>
+                            <CFormTextarea
+                              className="mb-3"
+                              placeholder="---"
+                            ></CFormTextarea>
+                          </CCol>
+                        </CRow>
                       </CRow>
-                    )}
+                      )}
                   </CTabPanel>
-                  <CTabPanel className="py-3" aria-labelledby="Log" itemKey={4}>
-                    <DataTable
-                      columns={colLog}
-                      data={dtLog}
-                      pagination
-                      persistTableHead
-                      subHeader
-                    />
+                  <CTabPanel itemKey="mod">
+                      <CRow className='mt-2'>
+                        <DataTable
+                          columns={colMod}
+                          data={dtMod}
+                          pagination
+                          persistTableHead
+                          subHeader
+                        />
+                    </CRow>
                   </CTabPanel>
               </CTabContent>
             </CTabs>
           </CModalBody>
           <CModalFooter>
-              <CCol xs={4} md={2}>
-                  <CButton color='danger' onClick={() => setMOpciones(false)} style={{'color':'white'}} > 
-                      <CIcon icon={cilClearAll} /> Cerrar
-                  </CButton>
-              </CCol>
+            <CButton color="secondary" onClick={() => setMCotizaciones(false)}>
+              Cerrar
+            </CButton>
           </CModalFooter>
-      </CModal>
-      </CRow>
+        </CModal>
+        {/* Modal Modificar Cotizacion detalle item */}
+          <CModal
+            backdrop="static"
+            visible={mDetalleItem}
+            onClose={() => setMDetalleItem(false)}
+          >
+          <CModalHeader>
+            <CModalTitle>Cotización Detalle Item {noCotSel}</CModalTitle>
+          </CModalHeader>
+          <CModalBody>
+            <CRow className='mt-2 mb-2'>
+              <CCol xs={12} md={4}>
+                <CFormInput
+                  type="text"
+                  id="txtIdCot"
+                  floatingClassName="mb-3"
+                  floatingLabel="Cotización"
+                  placeholder="0"
+                  value={noCotSel}
+                  disabled
+                />
+              </CCol>
+              <CCol xs={12} md={8}>
+                <CFormInput
+                  type="text"
+                  id="txtExtra"
+                  floatingClassName="mb-3"
+                  floatingLabel="Extra"
+                  placeholder="---"
+                  value={txtExtra}
+                  disabled
+                />
+              </CCol>
+              <CCol xs={12} md={4}>
+                <CFormInput
+                  type="text"
+                  id="txtCantidad"
+                  floatingClassName="mb-3"
+                  floatingLabel="Cantidad"
+                  placeholder="0"
+                  value={txtCant}
+                  onChange={hPT}
+                />
+              </CCol>
+            </CRow>
+            <CRow className='mt-2 mb-2'>
+              <CCol xs={12} md={4}>
+                <CFormInput
+                  type="text"
+                  id="txtCantidadCot"
+                  floatingClassName="mb-3"
+                  floatingLabel="Cantidad Cotizado"
+                  placeholder="0"
+                  value={txtCantCot}
+                  disabled
+                />
+              </CCol>
+              <CCol xs={12} md={4}>
+                <CFormInput
+                  type="text"
+                  id="txtPrecio"
+                  floatingClassName="mb-3"
+                  floatingLabel="Precio"
+                  placeholder="0"
+                  value={txtPrecio}
+                  disabled
+                />
+              </CCol>
+              <CCol xs={12} md={4}>
+                <CFormInput
+                  type="text"
+                  id="txtPrecioUs"
+                  floatingClassName="mb-3"
+                  floatingLabel="Precio Usuario"
+                  placeholder="0"
+                  value={txtPrecioUser}
+                  disabled
+                />
+              </CCol>
+            </CRow>
+            <CRow>
+              <CCol xs={12} md={4}>
+                <CFormInput
+                  type="text"
+                  id="txtFinal"
+                  floatingClassName="mb-3"
+                  floatingLabel="Precio Total"
+                  placeholder="0"
+                  value={txtPrecioTot}
+                  disabled
+                />
+              </CCol>
+            </CRow>
+          </CModalBody>
+          <CModalFooter>
+            <CButton color="primary" onClick={() => setUpdPreCot()}>
+              Actualizar
+            </CButton>
+            <CButton color="secondary" onClick={() => setMDetalleItem(false)}>
+              Cerrar
+            </CButton>
+          </CModalFooter>
+          </CModal>
+        </CRow>
+        </>
+      )}
     </CContainer>
     </>
   )

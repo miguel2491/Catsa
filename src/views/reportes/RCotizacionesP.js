@@ -661,7 +661,6 @@ const RCotizacionesP = () => {
         const cotI = await getCotizacionP(auxFcaI, auxFcaF, plantasSel);
         Swal.close();
         if (cotI) {
-          console.log(cotI)
           setDTCotizacion(cotI);  // Procesar la respuesta
         } else {
             Swal.close();
@@ -687,7 +686,6 @@ const RCotizacionesP = () => {
       if(ocList){
         setDTPedidos(ocList)
       }
-      console.log(ocList)
     }catch(error){
         Swal.close();
         Swal.fire("Error", "No se pudo obtener la información", "error");
@@ -737,7 +735,6 @@ const RCotizacionesP = () => {
       try{
         const extFile = await getArchivo(id);
         Swal.close();
-        console.log(extFile)
         if(extFile){
           Swal.fire({
             title: "Peido #"+id,
@@ -883,7 +880,6 @@ const RCotizacionesP = () => {
       if(ocList){
         //Buscar en ArrayCotizador NoCliente y NoObra
         const ArrayC = ocList.sort((a,b) => a.Estado - b.Estado);
-        console.log(ArrayC)
         setDirO((ArrayC[0] && ArrayC[0] && ArrayC[0].Direccion !== "") ? ArrayC[0].Direccion:'-');
         setColoniaO((ArrayC[0] && ArrayC[0] && ArrayC[0].Colonia !== "") ? ArrayC[0].Colonia:'-');
         setMunicO((ArrayC[0] && ArrayC[0] && ArrayC[0].Municipio !== "") ? ArrayC[0].Municipio:'-');
@@ -899,7 +895,6 @@ const RCotizacionesP = () => {
     try
     {
       const ocList = await getSeguimientos(id);
-      console.log(ocList)
       if(ocList)
       {
         setDTSeg(ocList)

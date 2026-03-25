@@ -28,7 +28,6 @@ const PedidosC = () => {
     try {
       Swal.close();
       const pedidos = await getPedidos(selectedPlanta);
-      console.log(pedidos)
       const transformedEvents = pedidos.map((pedido) => ({
         title: pedido.Cliente+" ("+pedido.CantidadM3+"m3)"+" "+pedido.Asesor,
         date: pedido.FechaHoraPedido,
@@ -68,7 +67,6 @@ const PedidosC = () => {
     let fca = fecha.split("T");
     let status = activo == true ? 'Programado':'Sin Programar'; 
     let estatus = arch + " "+status;
-    console.log(event._def.extendedProps)
     Swal.fire({
       title: "<strong>Información</strong>",
       icon: "info",

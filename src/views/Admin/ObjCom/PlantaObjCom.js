@@ -166,7 +166,6 @@ const PlaOC = () => {
                 if (typeof aux === 'object') {
                     return "Sin Datos"; // O cualquier mensaje que prefieras
                 }
-                console.log(aux)
                 let aux_ = aux == 1 ? 'ENERO':aux == 2 ? 'FEBRERO':aux == 3 ? 'MARZO':aux == 4 ?'ABRIL':aux == 5 ?'MAYO':aux == 6 ?'JUNIO':aux == 7 ?'JULIO':aux == 8 ?'AGOSTO':aux == 9 ?'SEPTIEMBRE':aux == 10 ?'OCTUBRE':aux == 11 ?'NOVIEMBRE':'DICIEMBRE';
                 return aux_;
             },
@@ -254,7 +253,6 @@ const PlaOC = () => {
     const gUpdPlaOC = async (id) => {
         try{
             const ocList = await getPlantasOCId(id);
-            console.log(ocList)
             // Cerrar el loading al recibir la respuesta
             Swal.close();  // Cerramos el loading
             setId(ocList[0].id)

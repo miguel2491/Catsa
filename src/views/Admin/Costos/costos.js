@@ -151,7 +151,6 @@ const costos = () => {
       MB_DESEABLE_C:false,
     });
     const toggleColumnVisibility = (columnName) => {
-      console.log(columnName)
       setColumnVisibility((prevVisibility) => ({
         ...prevVisibility,
         [columnName]: !prevVisibility[columnName],

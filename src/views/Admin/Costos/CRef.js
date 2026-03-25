@@ -95,7 +95,6 @@ const CRef = () => {
         });
       try{
         const ocList = await getRFs(periodoSel);
-        console.log(ocList)
         Swal.close();
         if(ocList)
         {
@@ -407,7 +406,6 @@ const CRef = () => {
             const ocList = await getRFId(id);
             if(ocList)
             {
-                console.log(ocList)
                 var obj = ocList[0];
                 setBtnTxt("Actualizar")
                 setIdREF(id)

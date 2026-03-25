@@ -46,7 +46,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
     accessToken: string,
     refreshToken: string
   ) {
-    console.log("setAccessTokenAndRefreshToken", accessToken, refreshToken);
     setAccessToken(accessToken);
     setRefreshToken(refreshToken);
 
@@ -155,7 +154,6 @@ async function retrieveUserInfo(accessToken: string) {
 
     if (response.ok) {
       const json = await response.json();
-      console.log(json);
       return json.body;
     }
   } catch (error) {}

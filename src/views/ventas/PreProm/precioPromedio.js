@@ -79,7 +79,6 @@ const PProm = () => {
       getPlantas_();
     },[])
     useEffect(() => {
-      console.log(dtPP)
       const dtCliente = [...new Set(
         dtPrecioProm.map(item => item.Cliente)
       )];
@@ -114,7 +113,6 @@ const PProm = () => {
     useEffect(() => {
       if (datosFiltrados.length === 0) return;
       // Lógica aquí
-      console.log("🔎 Nuevos datos filtrados:", datosFiltrados);
       let cantidad_ = 0;
       let importe_ = 0;
       let pp_ = 0;

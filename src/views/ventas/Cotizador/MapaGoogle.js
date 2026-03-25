@@ -84,8 +84,6 @@ const Mapa = ({coords}) => {
         longitude: lng,
         error: null
       });
-      console.log("Nuevo marcador en:", lat, lng);
-      //console.log(locationO);
     };
     
     if (location.error) {

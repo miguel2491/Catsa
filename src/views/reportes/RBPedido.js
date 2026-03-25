@@ -105,7 +105,6 @@ const RBPedido = () => {
     setLoading(true);
     try {
       const data = await getPedidoInd(nPedido);
-      console.log(data[0]);
       if (data) {
         setDataPedido(data[0]);
         var planta = data[0].Planta;
@@ -125,7 +124,6 @@ const RBPedido = () => {
   const getDObra = async (nObra, planta) => {
     try {
       const dataObra = await getObraInd(nObra, planta);
-      console.log(dataObra[0]);
       if (dataObra) {
         setDataObra(dataObra[0]); // Aquí se asigna el primer objeto del array (suponiendo que es el único)
       } else {

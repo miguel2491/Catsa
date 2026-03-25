@@ -291,7 +291,6 @@ const OCompra = () => {
     const gOCI = async (id) => {
         try{
             const ocList = await getOComprasInd(id);
-            console.log(ocList)
             // Cerrar el loading al recibir la respuesta
             Swal.close();  // Cerramos el loading
             setIdOC(ocList[0].id)

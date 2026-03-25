@@ -50,11 +50,7 @@ const Configuracion = () => {
     const [fText, setFText] = useState(''); // Estado para el filtro de búsqueda
 
     const getPlantaI = (p) =>{
-        console.log(p)
-        console.log(dtPlanta)
-        //Buscar Arreglo por Index Planta
         const resultado = dtPlanta.find(item => item.Planta === p);
-        console.log(resultado)
         setPlantaId(resultado.Planta)
         setPlantaTxt(resultado.Planta)
         setCompany(resultado.Compañia)
@@ -182,7 +178,6 @@ const Configuracion = () => {
     };
       // Función de búsqueda
     const fBusqueda = () => {
-        console.log(vBPlanta.length);
         if(vBPlanta.length != 0){
             const valFiltrados = dtPlanta.filter(dtPlanta => 
             dtPlanta.Planta.includes(vBPlanta) // Filtra los clientes por el número de cliente

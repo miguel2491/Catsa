@@ -261,7 +261,6 @@ const RBombas = () => {
         const aUnidad = await GetUnidades();//await getCotizacionP(auxFcaI, auxFcaF, plantasSel);
         Swal.close();
         if (aUnidad) {
-          console.log(aUnidad);
           setAUnidad(aUnidad);
         } else {
             Swal.close();
@@ -282,7 +281,6 @@ const RBombas = () => {
       
       const aBombas = await GetBombas(auxFcaI, auxFcaF, pla);
       const aBombasD = await GetBombasD(auxFcaI, auxFcaF);
-      console.log(aBombasD[1]);
       const plantasExcluir = ["BMD1"];
       if(aBombasD[1]){
         const exclude = ["PLAYACARMEN"]; 
@@ -342,7 +340,6 @@ const RBombas = () => {
   // Detalle
   const viewPedidos = async(t,id) =>{
     setMDetalle(true);
-    console.log(plantasSel);
     const auxFcaI = format(vFechaI, 'yyyy/MM/dd');
     const auxFcaF = format(vFechaF, 'yyyy/MM/dd');
     try {
@@ -350,7 +347,6 @@ const RBombas = () => {
         const aDetalle = await GetUnidadBitacora(t,id,auxFcaI, auxFcaF, plantasSel);
         Swal.close();
         if (aDetalle) {
-          console.log(aDetalle);
           setDTDetalle(aDetalle);
         } else {
             Swal.close();

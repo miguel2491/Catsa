@@ -84,7 +84,6 @@ const RProyeccion = () => {
 
         try {
             const proyecciones = await getProyeccion(vFechaI,vFcaF,plantasSel,'0');
-            console.log(proyecciones);
             if (proyecciones) {
                 const objAsesores = proyecciones.asesores.data;
                 putHeaders(Object.keys(objAsesores[0]));
@@ -167,7 +166,6 @@ const RProyeccion = () => {
         // Ejecutar la extracción de datos cuando cambie el valor seleccionado
         if (value) {
             const result = extractDatesData(vAsesores, value);
-            console.log(result);
             const labels = [];
             const dataSet = [];
             const dataSetR = [];
@@ -182,7 +180,6 @@ const RProyeccion = () => {
                 if (typeof value === 'number') {
                     labels.push(date);
                     dataSet.push(value);
-                    console.log(cOD);
                     dataSetR.push(cOD);
                 }
                 });

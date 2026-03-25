@@ -230,7 +230,6 @@ const Categoria = () => {
     const gUpdCat = async (id) => {
         try{
             const ocList = await getCatId(id);
-            console.log(ocList)
             // Cerrar el loading al recibir la respuesta
             Swal.close();  // Cerramos el loading
             setId(ocList[0].id)

@@ -203,12 +203,10 @@ const PLinea = () => {
         }
     }
     const getRPedido = (param, Tr, Dkm) =>{
-        console.log(dPRemisiones)
         const resultado_ = dPRemisiones.filter(item => item.IdPedido === param);
         setTr(Tr)
         setKm(Dkm)
         setPRSol(resultado_)
-        console.log(resultado_)
     }
     const formatDate = (dateString) => {
         const date = new Date(dateString);

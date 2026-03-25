@@ -141,7 +141,6 @@ function RObjCom() {
       ...item,
       ProductosUnicos: item.ProductosVendidos.size
     }));
-    console.log(resultado)
     const labels = [];
     const dataSet = [];
     const dataSetI = [];

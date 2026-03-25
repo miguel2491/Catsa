@@ -1,17 +1,13 @@
-import React, {useEffect, useState, useRef} from 'react'
+import {useState} from 'react'
 import Swal from "sweetalert2";
 import DataTable from 'react-data-table-component';
-import { convertArrayOfObjectsToCSV, getPreCierres, setPreCierres, fNumberCad, fNumber } from '../../Utilidades/Funciones';
+import { getPreCierres, setPreCierres, fNumberCad, fNumber } from '../../Utilidades/Funciones';
 import {
   CForm,
   CContainer,
   CButton,
   CRow,
   CCol,
-  CToast,
-  CToastBody,
-  CToastHeader,
-  CToaster,
 } from '@coreui/react'
 import {CIcon} from '@coreui/icons-react'
 import { cilBell, cilSearch } from '@coreui/icons'

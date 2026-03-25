@@ -78,10 +78,6 @@ const InterfazInt = () => {
                 //------------------------------------------------------------------------------------------------------------------------------------------------------
                 await axios.get(baseUrl+'Operaciones/SetPreCierreMensual/'+planta+','+mes+','+periodo, confi_ax)
                 .then(response=>{
-                    // console.log(response.data);
-                    // var obj = response.data;
-                    // getInventario(obj);
-                    //setPosts(response)
                     Swal.fire("CORRECTO", "Se Agrego Correctamente", "success");
                     return response.data;
                 }).then(response=>{

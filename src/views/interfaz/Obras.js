@@ -76,7 +76,6 @@ const Obras = () => {
         console.log(noCliente)
     }
     const fProducto = async() =>{
-        console.log(productoF)
         try {
             const producto = await getProducto(productoF);
             if (producto) {
@@ -127,13 +126,10 @@ const Obras = () => {
         }
     };
     const hsCSend = (index, value) => {
-        console.log(index, value)
         const updatedData = [...dProductoDT];
         updatedData[index].Enviado = value; // Actualiza el valor de "Enviado" en el índice correspondiente
         setDProductoDT(updatedData);
         const producto = updatedData[index];
-        console.log('Código Producto:', producto.Item_Code);
-        console.log('Planta:', producto.Planta);
         resetProducto(producto.Planta, producto.Item_Code, value, producto.Eliminar);
     };
     const hsCDel = (index, value) => {
